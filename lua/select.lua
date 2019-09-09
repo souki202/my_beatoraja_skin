@@ -70,6 +70,8 @@ local RANK_Y = 400
 local EXSCORE_NUMBER_W = 22
 local EXSCORE_NUMBER_H = 30
 
+local OPTION_HEADER_H = 42
+local OPTION_HEADER_TEXT_W = 269
 local OPTION_WND_EDGE_SIZE = 32
 local OPTION_WND_W = 1600
 local OPTION_WND_H = 900
@@ -138,7 +140,7 @@ local function loadOptionImgs(skin, optionTexts, optionIdPrefix, ref, x, y)
 end
 
 --- baseX: 右端X, baseY: 下へボタンの最下部(影含む), activeKeys: オプション変更に使用するキー(配列)
-local function destinationPlayOption(skin, baseX, baseY, titleTextId, optionIdPrefix, isLarge, activeKeys, numOfTypes)
+local function destinationPlayOption(skin, baseX, baseY, titleTextId, optionIdPrefix, isLarge, activeKeys)
     local width = 640
     local headerOffset = 258
     local keyOffset = 16
@@ -318,6 +320,12 @@ local function main()
         {id = "activeOptionFrame", src = 2, x = 0, y = PARTS_TEXTURE_SIZE - ACTIVE_OPTION_FRAME_H, w = ACTIVE_OPTION_FRAME_W, h = ACTIVE_OPTION_FRAME_H},
         -- オプション画面の端
         {id = "optionWndEdge", src = 2, x = 360, y = PARTS_TEXTURE_SIZE - OPTION_WND_EDGE_SIZE, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE},
+        -- オプションのヘッダ
+        {id = "optionHeaderLeft", src = 2, x = 392, y = PARTS_TEXTURE_SIZE - OPTION_HEADER_H, w = 16, h = OPTION_HEADER_H},
+        -- オプションのヘッダテキスト
+        {id = "optionHeaderPlayOption", src = 2, x = 1441, y = 0, w = OPTION_HEADER_TEXT_W, h = OPTION_HEADER_H},
+        {id = "optionHeaderAssistOption", src = 2, x = 1441, y = OPTION_HEADER_H, w = OPTION_HEADER_TEXT_W, h = OPTION_HEADER_H},
+        {id = "optionHeaderOtherOption", src = 2, x = 1441, y = OPTION_HEADER_H * 2, w = OPTION_HEADER_TEXT_W, h = OPTION_HEADER_H},
         -- オプション用キー
         {id = "optionSmallKeyActive", src = 2, x = 668, y = PARTS_TEXTURE_SIZE - SMALL_KEY_H, w = SMALL_KEY_W, h = SMALL_KEY_H},
         {id = "optionSmallKeyNonActive", src = 2, x = 668 + SMALL_KEY_W, y = PARTS_TEXTURE_SIZE - SMALL_KEY_H, w = SMALL_KEY_W, h = SMALL_KEY_H},
@@ -327,11 +335,11 @@ local function main()
         {id = "optionHeader2LeftBg", src = 2, x = 0, y = 1966, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H},
         {id = "optionHeader2RightBg", src = 2, x = OPTION_HEADER2_EDGE_BG_W, y = 1966, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H},
         -- 各オプションヘッダテキスト
-        {id = "optionheader2NotesOrder1", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = 0, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionheader2NotesOrder2", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 1, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionheader2GaugeType", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 2, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionheader2DpOption", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 3, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionheader2FixedHiSpeed", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 4, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
+        {id = "optionHeader2NotesOrder1", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = 0, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
+        {id = "optionHeader2NotesOrder2", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 1, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
+        {id = "optionHeader2GaugeType", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 2, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
+        {id = "optionHeader2DpOption", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 3, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
+        {id = "optionHeader2FixedHiSpeed", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 4, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
         -- オプション用ボタン
         {id = "notesOrder1UpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 42, click = 1},
         {id = "notesOrder1DownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 42},
@@ -339,12 +347,16 @@ local function main()
         {id = "notesOrder2DownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 43},
         {id = "gaugeTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 40, click = 1},
         {id = "gaugeTypeDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 40},
+        {id = "dpTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 54, click = 1},
+        {id = "dpTypeDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 54},
+        {id = "hiSpeedTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 55, click = 1},
+        {id = "hiSpeedTypeDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 55},
 
         -- 汎用カラー
         {id = "blank", src = 999, x = 0, y = 0, w = 1, h = 1},
         {id = "black", src = 999, x = 1, y = 0, w = 1, h = 1},
         {id = "white", src = 999, x = 2, y = 0, w = 1, h = 1},
-        {id = "darkRed", src = 999, x = 3, y = 0, w = 1, h = 1},
+        {id = "purpleRed", src = 999, x = 3, y = 0, w = 1, h = 1},
         {id = "gray", src = 999, x = 4, y = 0, w = 1, h = 1},
     }
 
@@ -385,7 +397,16 @@ local function main()
         "assistedEasy", "easy", "normal", "hard", "exHard", "hazard",
     }
     loadOptionImgs(skin, optionTexts, "gaugeType", 40, OPTION_ITEM_W * 2, 0)
-
+    -- DPオプション
+    optionTexts = {
+        "off", "flip", "battle", "battleAs"
+    }
+    loadOptionImgs(skin, optionTexts, "dpType", 54, OPTION_ITEM_W * 2, OPTION_ITEM_H * 12)
+    -- ハイスピード固定
+    optionTexts = {
+        "off", "startBpm", "maxBpm", "mainBpm", "minBpm"
+    }
+    loadOptionImgs(skin, optionTexts, "hiSpeedType", 55, 0, OPTION_ITEM_H * 12)
 
     skin.value = {
         -- 選曲バー難易度数値
@@ -944,49 +965,73 @@ local function main()
     -- プレイオプション
     -- 背景部分
     for i = 1, 3 do
+        local op = 21 + (i - 1)
         -- 背景
         table.insert(skin.destination, {
-            id = "black", op = {21 + (i - 1)}, dst = {
+            id = "black", op = {op}, dst = {
                 {x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 64}
             }
         })
         -- 横長
         table.insert(skin.destination, {
-            id = "white", op = {21 + (i - 1)}, dst = {
+            id = "white", op = {op}, dst = {
                 {x = 160, y = 90 + OPTION_WND_EDGE_SIZE, w = OPTION_WND_W, h = OPTION_WND_H - OPTION_WND_EDGE_SIZE * 2}
             }
         })
         -- 縦長
         table.insert(skin.destination, {
-            id = "white", op = {21 + (i - 1)}, dst = {
+            id = "white", op = {op}, dst = {
                 {x = 160 + OPTION_WND_EDGE_SIZE, y = 90, w = OPTION_WND_W - OPTION_WND_EDGE_SIZE * 2, h = OPTION_WND_H}
             }
         })
         -- 四隅
         table.insert(skin.destination, {
-            id = "optionWndEdge", op = {21 + (i - 1)}, dst = {
+            id = "optionWndEdge", op = {op}, dst = {
                 {x = 160, y = 90, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 90},
             }
         })
         table.insert(skin.destination, {
-            id = "optionWndEdge", op = {21 + (i - 1)}, dst = {
+            id = "optionWndEdge", op = {op}, dst = {
                 {x = 160 + OPTION_WND_W - OPTION_WND_EDGE_SIZE, y = 90, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 180},
             }
         })
         table.insert(skin.destination, {
-            id = "optionWndEdge", op = {21 + (i - 1)}, dst = {
+            id = "optionWndEdge", op = {op}, dst = {
                 {x = 160 + OPTION_WND_W - OPTION_WND_EDGE_SIZE, y = 90 + OPTION_WND_H - OPTION_WND_EDGE_SIZE, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 270},
             }
         })
         table.insert(skin.destination, {
-            id = "optionWndEdge", op = {21 + (i - 1)}, dst = {
+            id = "optionWndEdge", op = {op}, dst = {
                 {x = 160, y = 90 + OPTION_WND_H - OPTION_WND_EDGE_SIZE, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 0}
             }
         })
+        -- オプションのヘッダ部分
+        table.insert(skin.destination, {
+            id = "optionHeaderLeft", op = {op}, dst = {
+                {x = 192, y = 932, w = 16, h = OPTION_HEADER_H}
+            }
+        })
+        table.insert(skin.destination, {
+            id = "purpleRed", op = {op}, dst = {
+                {x = 212, y = 932, w = 1516, h = 2}
+            }
+        })
     end
-    destinationPlayOption(skin, 192, 607, "optionheader2NotesOrder1", "notesOrder1", true, {1, 2}, 9)
-    destinationPlayOption(skin, 1088, 607, "optionheader2NotesOrder2", "notesOrder2", true, {6, 7}, 9)
-    destinationPlayOption(skin, 192, 205, "optionheader2GaugeType", "gaugeType", false, {3}, 6)
+    -- オプションのヘッダテキスト
+    local optionTypes = {"optionHeaderPlayOption", "optionHeaderAssistOption", "optionHeaderOtherOption"}
+    for i, v in ipairs(optionTypes) do
+        table.insert(skin.destination, {
+            id = v, op = {21 + (i - 1)}, dst = {
+                {x = 220, y = 932, w = OPTION_HEADER_TEXT_W, h = OPTION_HEADER_H}
+            }
+        })
+    end
+
+    destinationPlayOption(skin, 192, 607, "optionHeader2NotesOrder1", "notesOrder1", true, {1, 2})
+    destinationPlayOption(skin, 1088, 607, "optionHeader2NotesOrder2", "notesOrder2", true, {6, 7})
+    destinationPlayOption(skin, 192, 205, "optionHeader2GaugeType", "gaugeType", false, {3})
+    destinationPlayOption(skin, 720, 205, "optionHeader2DpOption", "dpType", false, {4})
+    destinationPlayOption(skin, 1248, 205, "optionHeader2FixedHiSpeed", "hiSpeedType", false, {5})
     return skin
 end
 
