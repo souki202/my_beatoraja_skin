@@ -81,6 +81,7 @@ local OPTION_ITEM_W = ACTIVE_OPTION_FRAME_W
 local OPTION_ITEM_H = 44
 local OPTION_BUTTON_W = 130
 local OPTION_BUTTON_H = 52
+local OPTION_NUMBER_BUTTON_SIZE = 56
 local OPTION_SWITCH_BUTTON_W = 302
 local OPTION_SWITCH_BUTTON_H = 56
 local OPTION_HEADER2_EDGE_BG_W = 16
@@ -89,9 +90,20 @@ local OPTION_HEADER2_TEXT_SRC_X = 1709
 local OPTION_HEADER2_TEXT_W = 300
 local OPTION_HEADER2_TEXT_H = 42
 local OPTION_BG_H = 132
+local OPTION_NUMBER_BG_W = 240
+local OPTION_NUMBER_BG_H = 46
+local OPTION_NUMBER_W = 16
+local OPTION_NUMBER_H = 22
 local SMALL_KEY_W = 20
 local SMALL_KEY_H = 24
-
+local HELP_WND_W = 672
+local HELP_WND_H = 474
+local HELP_ICON_SIZE = 56
+local HELP_TEXT_H = 368
+local HELP_TEXT1_W = 380
+local HELP_TEXT2_W = 530
+local OPTION_WND_OFFSET_X = (WIDTH - OPTION_WND_W) / 2
+local OPTION_WND_OFFSET_Y = (HEIGHT - OPTION_WND_H) / 2
 
 local header = {
     type = 5,
@@ -141,51 +153,42 @@ local function loadOptionImgs(skin, optionTexts, optionIdPrefix, ref, x, y)
 
 end
 
---- baseX: 右端X, baseY: 下へボタンの最下部(影含む), activeKeys: オプション変更に使用するキー(配列)
-local function destinationPlayOption(skin, baseX, baseY, titleTextId, optionIdPrefix, isLarge, activeKeys)
-    local width = 640
-    local headerOffset = 258
+local function destinationOptionHeader2(skin, baseX, baseY, width, titleTextId, activeKeys, op)
     local keyOffset = 16
-    if isLarge == false then
-        width = 480
-    end
-    local optionBoxOffsetX = (width - OPTION_ITEM_W) / 2
-    local optionButtonOffsetX = (width - OPTION_BUTTON_W) / 2
-    local optionItemOffsetY = 100
 
     -- 各オプションヘッダBG出力
     table.insert(skin.destination, {
-        id = "optionHeader2LeftBg", op = {21}, dst = {
-            {x = baseX, y = baseY + headerOffset, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H}
+        id = "optionHeader2LeftBg", op = {op}, dst = {
+            {x = baseX, y = baseY, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H}
         }
     })
     table.insert(skin.destination, {
-        id = "optionHeader2RightBg", op = {21}, dst = {
-            {x = baseX + width - OPTION_HEADER2_EDGE_BG_W, y = baseY + headerOffset, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H}
+        id = "optionHeader2RightBg", op = {op}, dst = {
+            {x = baseX + width - OPTION_HEADER2_EDGE_BG_W, y = baseY, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H}
         }
     })
     table.insert(skin.destination, {
-        id = "gray", op = {21}, dst = {
-            {x = baseX + OPTION_HEADER2_EDGE_BG_W, y = baseY + headerOffset, w = width - OPTION_HEADER2_EDGE_BG_W * 2, h = OPTION_HEADER2_EDGE_BG_H}
+        id = "gray", op = {op}, dst = {
+            {x = baseX + OPTION_HEADER2_EDGE_BG_W, y = baseY, w = width - OPTION_HEADER2_EDGE_BG_W * 2, h = OPTION_HEADER2_EDGE_BG_H}
         }
     })
 
     -- オプションヘッダテキスト出力
     table.insert(skin.destination, {
-        id = titleTextId, op = {21}, dst = {
-            {x = baseX + 20, y = baseY + headerOffset, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H}
+        id = titleTextId, op = {op}, dst = {
+            {x = baseX + 20, y = baseY, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H}
         }
     })
 
     -- オプションの使用キー出力
     for i = 1, 7 do
         if not has_value(activeKeys, i) then
-            local y = baseY + headerOffset + 3
+            local y = baseY + 3
             if i % 2 == 0 then -- 上のキーは座標足す
                 y = y + SMALL_KEY_H - 6 * 2
             end
             table.insert(skin.destination, {
-                id = "optionSmallKeyNonActive", op = {21}, dst = {
+                id = "optionSmallKeyNonActive", op = {op}, dst = {
                     {x = baseX + width - keyOffset - (8 - i) * (SMALL_KEY_W - 12) + 6 - 20, y = y, w = SMALL_KEY_W, h = SMALL_KEY_H}
                 }
             })
@@ -193,54 +196,175 @@ local function destinationPlayOption(skin, baseX, baseY, titleTextId, optionIdPr
     end
     for i = 1, 7 do
         if has_value(activeKeys, i) then
-            local y = baseY + headerOffset + 3
+            local y = baseY + 3
             if i % 2 == 0 then -- 上のキーは座標足す
                 y = y + SMALL_KEY_H - 6 * 2
             end
             table.insert(skin.destination, {
-                id = "optionSmallKeyActive", op = {21}, dst = {
+                id = "optionSmallKeyActive", op = {op}, dst = {
                     {x = baseX + width - keyOffset - (8 - i) * (SMALL_KEY_W - 12) + 6 - 20, y = y, w = SMALL_KEY_W, h = SMALL_KEY_H}
                 }
             })
         end
     end
+end
+
+--- baseX: 右端X, baseY: 下へボタンの最下部(影含む), activeKeys: オプション変更に使用するキー(配列)
+local function destinationPlayOption(skin, baseX, baseY, titleTextId, optionIdPrefix, isLarge, activeKeys, op)
+    local width = 640
+    local headerOffset = 258
+    if isLarge == false then
+        width = 480
+    end
+    local optionBoxOffsetX = (width - OPTION_ITEM_W) / 2
+    local optionButtonOffsetX = (width - OPTION_BUTTON_W) / 2
+    local optionItemOffsetY = 100
+
+    -- ヘッダ出力
+    destinationOptionHeader2(skin, baseX, baseY + headerOffset, width, titleTextId, activeKeys, op)
 
     -- オプション一覧背景
     table.insert(skin.destination, {
-        id = "optionSelectBg", op = {21}, dst = {
+        id = "optionSelectBg", op = {op}, dst = {
             {x = baseX + optionBoxOffsetX, y = baseY + optionItemOffsetY - OPTION_ITEM_H, w = OPTION_ITEM_W, h = OPTION_BG_H}
         }
     })
 
     -- オプション出力
     table.insert(skin.destination, {
-        id = optionIdPrefix .. "Nonactive", op = {21}, dst = {
+        id = optionIdPrefix .. "Nonactive", op = {op}, dst = {
             {x = baseX + optionBoxOffsetX, y = baseY + optionItemOffsetY - 2 - OPTION_ITEM_H, w = OPTION_ITEM_W, h = OPTION_ITEM_H * 3}
         }
     })
     table.insert(skin.destination, {
-        id = "activeOptionFrame", op = {21}, dst = {
+        id = "activeOptionFrame", op = {op}, dst = {
             {x = baseX + optionBoxOffsetX, y = baseY + optionItemOffsetY, w = ACTIVE_OPTION_FRAME_W, h = ACTIVE_OPTION_FRAME_H}
         }
     })
     table.insert(skin.destination, {
-        id = optionIdPrefix .. "Active", op = {21}, dst = {
+        id = optionIdPrefix .. "Active", op = {op}, dst = {
             {x = baseX + optionBoxOffsetX, y = baseY + optionItemOffsetY - 2, w = OPTION_ITEM_W, h = OPTION_ITEM_H}
         }
     })
 
     -- ボタン出力
     table.insert(skin.destination, {
-        id = optionIdPrefix .. "UpButton", op = {21}, dst = {
+        id = optionIdPrefix .. "UpButton", op = {op}, dst = {
             {x = baseX + optionButtonOffsetX, y = baseY + 192, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H}
         }
     })
     -- 下
     table.insert(skin.destination, {
-        id = optionIdPrefix .. "DownButton", op = {21}, dst = {
+        id = optionIdPrefix .. "DownButton", op = {op}, dst = {
             {x = baseX + optionButtonOffsetX, y = baseY, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H}
         }
     })
+end
+
+local function destinationNumberOption(skin, baseX, baseY, titleTextId, optionIdPrefix, isLarge, activeKeys, op)
+    local width = 640
+    local height = 113
+    local digit = 4
+    if isLarge == false then
+        width = 480
+    end
+    local optionBoxOffsetX = (width - OPTION_NUMBER_BG_W) / 2
+    local optionButtonOffsetX = (width - OPTION_BUTTON_W) / 2
+    local optionOffsetY = 5
+
+    -- ヘッダ出力
+    destinationOptionHeader2(skin, baseX, baseY + height - OPTION_HEADER_H, width, titleTextId, activeKeys, op)
+
+    -- オプション背景
+    table.insert(skin.destination, {
+        id = "optionNumberBg", op = {op}, dst = {
+            {x = baseX + optionBoxOffsetX, y = baseY + optionOffsetY, w = OPTION_NUMBER_BG_W, h = OPTION_NUMBER_BG_H}
+        }
+    })
+
+    -- 数値出力
+    table.insert(skin.destination, {
+        id = optionIdPrefix, op = {op}, dst = {
+            {
+                x = baseX + width / 2 - OPTION_NUMBER_W * (digit - 0.5) - 4,
+                y = baseY + optionOffsetY + 12,
+                w = OPTION_NUMBER_W, h = OPTION_NUMBER_H
+            }
+        }
+    })
+
+    -- ms出力
+    table.insert(skin.destination, {
+        id = "millisecondTextImg", op = {op}, dst = {
+            {
+                x = baseX + width / 2 + 6,
+                y = baseY + optionOffsetY + 12,
+                w = 39, h = OPTION_NUMBER_H
+            }
+        }
+    })
+
+    -- ボタン出力
+    -- beatorajaの現バージョンは未実装
+    table.insert(skin.destination, {
+        id = optionIdPrefix .. "DownButton", op = {op}, dst = {
+            {
+                x = baseX + width / 2 - 186,
+                y = baseY,
+                w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE
+            }
+        }
+    })
+    table.insert(skin.destination, {
+        id = optionIdPrefix .. "UpButton", op = {op}, dst = {
+            {
+                x = baseX + width / 2 + 186 - OPTION_NUMBER_BUTTON_SIZE,
+                y = baseY,
+                w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE
+            }
+        }
+    })
+end
+
+--- appearTime >= fadeTime
+local function destinationSmallKeysInHelp(skin, baseX, baseY, activeKeys, appearTime, viewTime, fadeTime, loopTime)
+    -- 小さいキー
+    for i = 1, 7 do
+        if not has_value(activeKeys, i) then
+            local y = baseY - 6
+            if i % 2 == 0 then -- 上のキーは座標足す
+                y = y + SMALL_KEY_H - 6 * 2
+            end
+            table.insert(skin.destination, {
+                id = "optionSmallKeyNonActive", op = {23}, timer = 23, dst = {
+                    {time = 0, a = 0},
+                    {time = appearTime - fadeTime, a = 0, x = baseX + (i - 1) * (SMALL_KEY_W - 12) - 6, y = y, w = SMALL_KEY_W, h = SMALL_KEY_H},
+                    {time = appearTime, a = 255, x = baseX + (i - 1) * (SMALL_KEY_W - 12) - 6, y = y, w = SMALL_KEY_W, h = SMALL_KEY_H},
+                    {time = appearTime + viewTime, a = 255},
+                    {time = appearTime + viewTime + fadeTime, a = 0},
+                    {time = loopTime, a = 0},
+                }
+            })
+        end
+    end
+    for i = 1, 7 do
+        if has_value(activeKeys, i) then
+            local y = baseY - 6
+            if i % 2 == 0 then -- 上のキーは座標足す
+                y = y + SMALL_KEY_H - 6 * 2
+            end
+            table.insert(skin.destination, {
+                id = "optionSmallKeyActive", op = {23}, timer = 23, dst = {
+                    {time = 0, a = 0},
+                    {time = appearTime - fadeTime, a = 0, x = baseX + (i - 1) * (SMALL_KEY_W - 12) - 6, y = y, w = SMALL_KEY_W, h = SMALL_KEY_H},
+                    {time = appearTime, a = 255, x = baseX + (i - 1) * (SMALL_KEY_W - 12) - 6, y = y, w = SMALL_KEY_W, h = SMALL_KEY_H},
+                    {time = appearTime + viewTime, a = 255},
+                    {time = appearTime + viewTime + fadeTime, a = 0},
+                    {time = loopTime, a = 0},
+                }
+            })
+        end
+    end
 end
 
 local function main()
@@ -254,6 +378,7 @@ local function main()
         {id = 0, path = "../select/parts/parts.png"},
         {id = 1, path = "../select/background/*.png"},
         {id = 2, path = "../select/parts/option.png"},
+        {id = 3, path = "../select/parts/help.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
 
@@ -333,6 +458,7 @@ local function main()
         {id = "optionSmallKeyNonActive", src = 2, x = 673, y = PARTS_TEXTURE_SIZE - SMALL_KEY_H, w = SMALL_KEY_W, h = SMALL_KEY_H},
         -- 各オプション選択部分背景
         {id = "optionSelectBg", src = 2, x = 0, y = 1834, w = OPTION_ITEM_W, h = OPTION_BG_H},
+        {id = "optionNumberBg", src = 2, x = 0, y = 1788, w = OPTION_NUMBER_BG_W, h = OPTION_NUMBER_BG_H},
         -- 各オプションヘッダBG
         {id = "optionHeader2LeftBg", src = 2, x = 0, y = 1966, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H},
         {id = "optionHeader2RightBg", src = 2, x = OPTION_HEADER2_EDGE_BG_W, y = 1966, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H},
@@ -342,6 +468,10 @@ local function main()
         {id = "optionHeader2GaugeType", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 2, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
         {id = "optionHeader2DpOption", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 3, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
         {id = "optionHeader2FixedHiSpeed", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 4, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
+        {id = "optionHeader2GaugeAutoShift", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 5, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
+        {id = "optionHeader2BgaShow", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 6, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
+        {id = "optionHeader2NotesDisplayTime", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 7, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
+        {id = "optionHeader2JudgeTiming", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 8, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
         -- オプション用ボタン
         {id = "notesOrder1UpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 42, click = 1},
         {id = "notesOrder1DownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 42},
@@ -353,7 +483,48 @@ local function main()
         {id = "dpTypeDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 54},
         {id = "hiSpeedTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 55, click = 1},
         {id = "hiSpeedTypeDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 55},
+        {id = "gaugeAutoShiftUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 78, click = 1},
+        {id = "gaugeAutoShiftDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 78},
+        {id = "bgaShowUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 72, click = 1},
+        {id = "bgaShowDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 72},
+        {
+            id = "notesDisplayTimeUpButton", src = 2,
+            x = 998 + OPTION_NUMBER_BUTTON_SIZE,
+            y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_BUTTON_SIZE * 2,
+            w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE * 2,
+            divy = 2, act = 0},
+        {
+            id = "notesDisplayTimeDownButton", src = 2,
+            x = 998,
+            y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_BUTTON_SIZE * 2,
+            w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE * 2,
+            divy = 2, act = 0, click = 1},
+        {
+            id = "judgeTimingUpButton", src = 2,
+            x = 998 + OPTION_NUMBER_BUTTON_SIZE,
+            y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_BUTTON_SIZE * 2,
+            w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE * 2,
+            divy = 2, act = 0
+        },
+        {
+            id = "judgeTimingDownButton", src = 2,
+            x = 998,
+            y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_BUTTON_SIZE * 2,
+            w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE * 2,
+            divy = 2, act = 0, click = 1
+        },
+        -- その他オプション用
+        {id = "millisecondTextImg", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_H * 3, w = 39, h = OPTION_NUMBER_H},
         -- ON/OFFオプション用ボタン(アシストは後のforで処理)
+
+        -- ヘルプヘッダ
+        {id = "helpIcon", src = 3, x = 0, y = PARTS_TEXTURE_SIZE / 2 - HELP_ICON_SIZE, w = HELP_ICON_SIZE, h = HELP_ICON_SIZE},
+        {id = "helpHeaderText", src = 3, x = 0, y = 0, w = 122, h = 30},
+        -- ヘルプ内容
+        {id = "helpNumberKeys", src = 3, x = 0, y = 30, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+        {id = "helpFunctionKeys", src = 3, x = 0, y = 398, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+        {id = "helpPlayKey", src = 3, x = 397, y = 30, w = HELP_TEXT2_W, h = HELP_TEXT_H},
+        {id = "helpDetailReplayKey", src = 3, x = 397, y = 398, w = HELP_TEXT2_W, h = 248},
 
         -- 汎用カラー
         {id = "blank", src = 999, x = 0, y = 0, w = 1, h = 1, act = 0},
@@ -411,6 +582,17 @@ local function main()
     }
     loadOptionImgs(skin, optionTexts, "hiSpeedType", 55, 0, OPTION_ITEM_H * 12)
 
+    -- GAS
+    optionTexts = {
+        "none", "continue", "hardToGroove", "bestClear", "selectToUnder"
+    }
+    loadOptionImgs(skin, optionTexts, "gaugeAutoShift", 78, 0, OPTION_ITEM_H * 12 * 2)
+    -- BGA
+    optionTexts = {
+        "on", "auto", "off"
+    }
+    loadOptionImgs(skin, optionTexts, "bgaShow", 72, OPTION_ITEM_W * 2, OPTION_ITEM_H * 12 * 2)
+
     -- アシストオプション
     local assistTexts = {
         "expandJudge", "constant", "judgeArea", "legacyNote", "markNote", "bpmGuide", "noMine"
@@ -467,6 +649,9 @@ local function main()
         {id = "numOfDia", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 8, ref = 30, align = 0},
         {id = "rankValue", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H + STATUS_NUMBER_H, w = RANK_NUMBER_W * 10, h = RANK_NUMBER_H, divx = 10, digit = 4, ref = 17, align = 0},
         {id = "expGauge", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET, w = 10, h = 10, divy = 10, digit = 1,  ref = 31, align = 1},
+        -- オプション
+        {id = "notesDisplayTime", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_H, w = OPTION_NUMBER_W * 10, h = OPTION_NUMBER_H, divx = 10, digit = 4, ref = 312},
+        {id = "judgeTiming", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_H * 2, w = OPTION_NUMBER_W * 12, h = OPTION_NUMBER_H * 2, divx = 12, divy = 2, digit = 4, ref = 12},
     }
 
     -- 各種ステータス用数値(パーツ共通)
@@ -1012,34 +1197,34 @@ local function main()
         -- 横長
         table.insert(skin.destination, {
             id = "white", op = {op}, dst = {
-                {x = 160, y = 90 + OPTION_WND_EDGE_SIZE, w = OPTION_WND_W, h = OPTION_WND_H - OPTION_WND_EDGE_SIZE * 2}
+                {x = OPTION_WND_OFFSET_X, y = OPTION_WND_OFFSET_Y + OPTION_WND_EDGE_SIZE, w = OPTION_WND_W, h = OPTION_WND_H - OPTION_WND_EDGE_SIZE * 2}
             }
         })
         -- 縦長
         table.insert(skin.destination, {
             id = "white", op = {op}, dst = {
-                {x = 160 + OPTION_WND_EDGE_SIZE, y = 90, w = OPTION_WND_W - OPTION_WND_EDGE_SIZE * 2, h = OPTION_WND_H}
+                {x = OPTION_WND_OFFSET_X + OPTION_WND_EDGE_SIZE, y = OPTION_WND_OFFSET_Y, w = OPTION_WND_W - OPTION_WND_EDGE_SIZE * 2, h = OPTION_WND_H}
             }
         })
         -- 四隅
         table.insert(skin.destination, {
             id = "optionWndEdge", op = {op}, dst = {
-                {x = 160, y = 90, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 90},
+                {x = OPTION_WND_OFFSET_X, y = OPTION_WND_OFFSET_Y, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 90},
             }
         })
         table.insert(skin.destination, {
             id = "optionWndEdge", op = {op}, dst = {
-                {x = 160 + OPTION_WND_W - OPTION_WND_EDGE_SIZE, y = 90, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 180},
+                {x = OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, y = OPTION_WND_OFFSET_Y, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 180},
             }
         })
         table.insert(skin.destination, {
             id = "optionWndEdge", op = {op}, dst = {
-                {x = 160 + OPTION_WND_W - OPTION_WND_EDGE_SIZE, y = 90 + OPTION_WND_H - OPTION_WND_EDGE_SIZE, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 270},
+                {x = OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, y = OPTION_WND_OFFSET_Y + OPTION_WND_H - OPTION_WND_EDGE_SIZE, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 270},
             }
         })
         table.insert(skin.destination, {
             id = "optionWndEdge", op = {op}, dst = {
-                {x = 160, y = 90 + OPTION_WND_H - OPTION_WND_EDGE_SIZE, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 0}
+                {x = OPTION_WND_OFFSET_X, y = OPTION_WND_OFFSET_Y + OPTION_WND_H - OPTION_WND_EDGE_SIZE, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 0}
             }
         })
         -- オプションのヘッダ部分
@@ -1065,11 +1250,11 @@ local function main()
     end
 
     -- プレイプション
-    destinationPlayOption(skin, 192, 607, "optionHeader2NotesOrder1", "notesOrder1", true, {1, 2})
-    destinationPlayOption(skin, 1088, 607, "optionHeader2NotesOrder2", "notesOrder2", true, {6, 7})
-    destinationPlayOption(skin, 192, 205, "optionHeader2GaugeType", "gaugeType", false, {3})
-    destinationPlayOption(skin, 720, 205, "optionHeader2DpOption", "dpType", false, {4})
-    destinationPlayOption(skin, 1248, 205, "optionHeader2FixedHiSpeed", "hiSpeedType", false, {5})
+    destinationPlayOption(skin, 192, 607, "optionHeader2NotesOrder1", "notesOrder1", true, {1, 2}, 21)
+    destinationPlayOption(skin, 1088, 607, "optionHeader2NotesOrder2", "notesOrder2", true, {6, 7}, 21)
+    destinationPlayOption(skin, 192, 205, "optionHeader2GaugeType", "gaugeType", false, {3}, 21)
+    destinationPlayOption(skin, 720, 205, "optionHeader2DpOption", "dpType", false, {4}, 21)
+    destinationPlayOption(skin, 1248, 205, "optionHeader2FixedHiSpeed", "hiSpeedType", false, {5}, 21)
 
     -- アシスト
     for i, assistText in ipairs(assistTexts) do
@@ -1138,6 +1323,119 @@ local function main()
             }
         })
     end
+
+    -- その他オプション
+    -- ヘルプ背景
+    table.insert(skin.destination, {
+        id = "gray", op = {23}, dst = {
+            {x = OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W, y = OPTION_WND_OFFSET_Y, w = HELP_WND_W - OPTION_WND_EDGE_SIZE, h = HELP_WND_H - OPTION_WND_EDGE_SIZE}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "gray", op = {23}, dst = {
+            {x = OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W + OPTION_WND_EDGE_SIZE, y = OPTION_WND_OFFSET_Y + OPTION_WND_EDGE_SIZE, w = HELP_WND_W - OPTION_WND_EDGE_SIZE, h = HELP_WND_H - OPTION_WND_EDGE_SIZE}
+        }
+    })
+    -- 隅
+    table.insert(skin.destination, {
+        id = "optionWndEdge", op = {23}, dst = {
+            {x = OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, y = OPTION_WND_OFFSET_Y, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 180, r = 64, g = 64, b = 64},
+        }
+    })
+    table.insert(skin.destination, {
+        id = "optionWndEdge", op = {23}, dst = {
+            {
+                x = OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W,
+                y = OPTION_WND_OFFSET_Y + HELP_WND_H - OPTION_WND_EDGE_SIZE,
+                w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE,
+                angle = 0, r = 64, g = 64, b = 64
+            }
+        }
+    })
+    destinationPlayOption(skin, 192, 205, "optionHeader2GaugeAutoShift", "gaugeAutoShift", true, {2}, 23)
+    destinationPlayOption(skin, 192, 607, "optionHeader2BgaShow", "bgaShow", true, {1}, 23)
+    destinationNumberOption(skin, 1088, 799, "optionHeader2NotesDisplayTime", "notesDisplayTime", true, {4, 6}, 23)
+    destinationNumberOption(skin, 1088, 614, "optionHeader2JudgeTiming", "judgeTiming", true, {5, 7}, 23)
+
+    -- ヘルプヘッダ
+    local helpHeaderOffsetX = OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W + 3
+    local helpHeaderOffsetY = OPTION_WND_OFFSET_Y + HELP_WND_H - HELP_ICON_SIZE - 3
+    table.insert(skin.destination, {
+        id = "helpIcon", op = {23}, dst = {
+            {
+                x = helpHeaderOffsetX, y = helpHeaderOffsetY,
+                w = HELP_ICON_SIZE, h = HELP_ICON_SIZE
+            }
+        }
+    })
+    table.insert(skin.destination, {
+        id = "helpHeaderText", op = {23}, dst = {
+            {
+                x = helpHeaderOffsetX + HELP_ICON_SIZE + 1, y = helpHeaderOffsetY + 13,
+                w = 122, h = 30
+            }
+        }
+    })
+    table.insert(skin.destination, {
+        id = "white", op = {23}, dst = {
+            {
+                x = helpHeaderOffsetX + 6, y = helpHeaderOffsetY,
+                w = 652, h = 2
+            }
+        }
+    })
+    -- ヘルプ内容
+    table.insert(skin.destination, {
+        id = "helpNumberKeys", op = {23}, loop = 0, timer = 23, dst = {
+            {time = 0, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+            {time = 3500, a = 255},
+            {time = 4000, a = 0},
+            {time = 15500, a = 0},
+            {time = 16000, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+        }
+    })
+    table.insert(skin.destination, {
+        id = "helpFunctionKeys", op = {23}, loop = 0, timer = 23, dst = {
+            {time = 0, a = 0},
+            {time = 3500, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+            {time = 4000, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+            {time = 7500, a = 255},
+            {time = 8000, a = 0},
+            {time = 16000, a = 0},
+        }
+    })
+    table.insert(skin.destination, {
+        id = "helpPlayKey", op = {23}, loop = 0, timer = 23, dst = {
+            {time = 0, a = 0},
+            {time = 7500, a = 0, x = helpHeaderOffsetX + 9 + 64, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT2_W, h = HELP_TEXT_H},
+            {time = 8000, a = 255, x = helpHeaderOffsetX + 9 + 64, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT2_W, h = HELP_TEXT_H},
+            {time = 11500, a = 255},
+            {time = 12000, a = 0},
+            {time = 16000, a = 0},
+        }
+    })
+    destinationSmallKeysInHelp(skin, 1100, 469, {1}, 8000, 3500, 500, 16000);
+    destinationSmallKeysInHelp(skin, 1100, 428, {2}, 8000, 3500, 500, 16000);
+    destinationSmallKeysInHelp(skin, 1100, 399, {4}, 8000, 3500, 500, 16000);
+    destinationSmallKeysInHelp(skin, 1100, 358, {3}, 8000, 3500, 500, 16000);
+    destinationSmallKeysInHelp(skin, 1100, 318, {5}, 8000, 3500, 500, 16000);
+    destinationSmallKeysInHelp(skin, 1100, 277, {7}, 8000, 3500, 500, 16000);
+    destinationSmallKeysInHelp(skin, 1100, 236, {7}, 8000, 3500, 500, 16000);
+    table.insert(skin.destination, {
+        id = "helpDetailReplayKey", op = {23}, loop = 0, timer = 23, dst = {
+            {time = 0, a = 0},
+            {time = 11500, a = 0, x = helpHeaderOffsetX + 9 + 64, y = helpHeaderOffsetY - 248, w = HELP_TEXT2_W, h = 248},
+            {time = 12000, a = 255, x = helpHeaderOffsetX + 9 + 64, y = helpHeaderOffsetY - 248, w = HELP_TEXT2_W, h = 248},
+            {time = 15500, a = 255},
+            {time = 16000, a = 0},
+        }
+    })
+    local replayActiveKeys = {{6}, {4}, {4, 6}, {2}, {3}, {5}}
+    for i = 1, 6 do
+        destinationSmallKeysInHelp(skin, 1100, 469 - (i - 1) * 41, {7}, 12000, 3500, 500, 16000);
+        destinationSmallKeysInHelp(skin, 1100 + 95, 469 - (i - 1) * 41, replayActiveKeys[i], 12000, 3500, 500, 16000);
+    end
+
     return skin
 end
 
