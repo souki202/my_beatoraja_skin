@@ -34,6 +34,10 @@ local COIN_H = 46
 local DIA_W = 54
 local DIA_H = 47
 
+local MUSIC_SLIDER_H = 768
+local MUSIC_SLIDER_BUTTON_W = 22
+local MUSIC_SLIDER_BUTTON_H = 48
+
 local LARGE_LEVEL_HEIGHT = 40
 local LARGE_LEVEL_X = 140
 local LARGE_LEVEL_Y = 275
@@ -532,6 +536,11 @@ local function main()
         {id = "white", src = 999, x = 2, y = 0, w = 1, h = 1},
         {id = "purpleRed", src = 999, x = 3, y = 0, w = 1, h = 1},
         {id = "gray", src = 999, x = 4, y = 0, w = 1, h = 1},
+    }
+
+    skin.slider = {
+        -- 選曲スライダー
+        {id = "musicSelectSlider", src = 0, x = 1541, y = PARTS_OFFSET + 263, w = MUSIC_SLIDER_BUTTON_W, h = MUSIC_SLIDER_BUTTON_H, type = 1, range = 768 - MUSIC_SLIDER_BUTTON_H / 2 - 3, angle = 2, align = 0},
     }
 
     skin.imageset = {
@@ -1034,6 +1043,13 @@ local function main()
             }
         },
     }
+
+    -- 選曲スライダー
+    table.insert(skin.destination, {
+        id = "musicSelectSlider", dst = {
+            {x = 1892, y = 153 + 768 + 6 - MUSIC_SLIDER_BUTTON_H, w = MUSIC_SLIDER_BUTTON_W, h = MUSIC_SLIDER_BUTTON_H}
+        }
+    })
 
     -- レベルアイコン周り
     for i = 1, 5 do
