@@ -10,7 +10,7 @@ local SUBARTIST_FONT_SIZE = 18
 local BAR_FONT_SIZE = 32
 local LAMP_HEIGHT = 28
 local MUSIC_BAR_IMG_HEIGHT = 78
-local MUSIC_BAR_IMG_WIDTH = 608
+local MUSIC_BAR_IMG_WIDTH = 607
 local STAGEFILE_BG_WIDTH = 640
 local STAGEFILE_BG_HEIGHT = 480
 
@@ -400,21 +400,23 @@ local function main()
         {id = 1, path = "../select/background/*.png"},
         {id = 2, path = "../select/parts/option.png"},
         {id = 3, path = "../select/parts/help.png"},
+        {id = 4, path = "../select/parts/stagefile_frame.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
 
     skin.image = {
         {id = "background", src = 1, x = 0, y = 0, w = WIDTH, h = HEIGHT},
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
+        {id = "stagefileFrame", src = 4, x = 0, y = 0, w = 702, h = 542},
         -- 選曲バー種類
-        {id = "barSong", src = 0, x = 0, y = PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barNosong", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*1, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barGrade", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*2, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barSong"   , src = 0, x = 0, y = PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barNosong" , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*1, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barGrade"  , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*2, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         {id = "barNograde", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*2, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barFolder", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*3, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barTable", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*4, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barFolder" , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*3, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barTable"  , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*4, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         {id = "barCommand", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*5, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barSearch", src = 0, x = 0, y = PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barSearch" , src = 0, x = 0, y = PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         -- 選曲バークリアランプ
         {id = "barLampMax", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*0, w = 110, h = LAMP_HEIGHT},
         {id = "barLampPerfect", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*1, w = 110, h = LAMP_HEIGHT},
@@ -429,6 +431,8 @@ local function main()
         {id = "barLampNoplay", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*10, w = 110, h = LAMP_HEIGHT},
         -- 選曲バー中央
         {id = "barCenterFrame", src = 0, x = 0, y = PARTS_OFFSET + 782, w = 714, h = 154},
+        -- 選曲バーLN表示
+        {id = "barLn", src = 0, x = 607, y = PARTS_OFFSET, w = 30, h = 22},
         -- プレイ
         {id = "playButton", src = 0, x = 773, y = PARTS_OFFSET + 377, w = DECIDE_BUTTON_W, h = DECIDE_BUTTON_H},
         {id = "playButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 15}, -- ボタン起動用ダミー
@@ -758,7 +762,7 @@ local function main()
     end
 
     skin.font = {
-		{id = 0, path = "../common/fonts/SourceHanSansJP-Regular.otf"},
+		{id = 0, path = "../common/fonts/SourceHanSans.fnt"},
 	}
 
     skin.text = {
@@ -805,6 +809,15 @@ local function main()
             }
         })
     end
+
+    skin.songlist.label = {
+        {
+            id = "barLn", dst = {
+                {x = 78, y = 11, w = 30, h = 22}
+            }
+        }
+    }
+
     -- 曲名等
     skin.songlist.text = {
         {
@@ -812,8 +825,15 @@ local function main()
             dst = {
                 {x = 570, y = 30 - 9, w = 397, h = BAR_FONT_SIZE, r = 0, g = 0, b = 0, filter = 1}
             }
-        }
+        },
+        {
+            id = "bartext", filter = 1,
+            dst = {
+                {x = 570, y = 30 - 9, w = 397, h = BAR_FONT_SIZE, r = 200, g = 0, b = 0, filter = 1}
+            }
+        },
     }
+    
     local levelPosX = 19
     local levelPosY = 12
     skin.songlist.level = {
@@ -957,6 +977,12 @@ local function main()
             id = "baseFrame",
             dst = {
                 {x = 0, y = 0, w = WIDTH, h = HEIGHT}
+            }
+        },
+        -- Stage fileフレーム
+        {
+            id = "stagefileFrame", dst = {
+                {x = 74, y = 415, w = 702, h = 542}
             }
         },
 
@@ -1204,7 +1230,7 @@ local function main()
             }
         })
         table.insert(skin.destination, { -- 右下の1,2,3,4の数字
-            id = "replay" .. i .. "Text", dst = {
+            id = "replay" .. i .. "Text", op = {replayOps[i]}, dst = {
                 {x = buttonX + 34, y = 513 + 2, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H}
             }
         })
