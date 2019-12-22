@@ -23,6 +23,20 @@ local STATUS_NUMBER_H = 23
 local RANK_NUMBER_W = 18
 local RANK_NUMBER_H = 24
 
+-- 決定ボタン周り
+local DECIDE_BUTTON_W = 354
+local DECIDE_BUTTON_H = 78
+local AUTO_BUTTON_W = 110
+local AUTO_BUTTON_H = 62
+local REPLAY_BUTTON_SIZE = 62
+local REPLAY_TEXT_W = 17
+local REPLAY_TEXT_H = 22
+
+-- 上部のLNモードとkeysのボタンサイズ
+local UPPER_OPTION_W = 270
+local UPPER_OPTION_H = 56
+
+-- 上部のユーザ情報的な部分の各種
 local RANK_IMG_W = 106
 local RANK_IMG_H = 46
 local EXP_GAUGE_FRAME_W = 222
@@ -34,10 +48,12 @@ local COIN_H = 46
 local DIA_W = 54
 local DIA_H = 47
 
+-- スクロールバー
 local MUSIC_SLIDER_H = 768
 local MUSIC_SLIDER_BUTTON_W = 22
 local MUSIC_SLIDER_BUTTON_H = 48
 
+-- 左下のレベルが並んでいる部分
 local LARGE_LEVEL_HEIGHT = 40
 local LARGE_LEVEL_X = 140
 local LARGE_LEVEL_Y = 275
@@ -53,6 +69,7 @@ local LEVEL_ICON_Y = 318
 local LEVEL_NAME_TABLE = {"Beginner", "Normal", "Hyper", "Another", "Insane"}
 local JUDGE_NAME_TABLE = {"Perfect", "Great", "Good", "Bad", "Poor"}
 
+-- スコア詳細
 local PLAY_STATUS_TEXT_SRC_X = 1127
 local PLAY_STATUS_TEXT_SRC_Y = PARTS_OFFSET + 263
 local PLAY_STATUS_TEXT_W = 168
@@ -412,27 +429,58 @@ local function main()
         {id = "barLampNoplay", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*10, w = 110, h = LAMP_HEIGHT},
         -- 選曲バー中央
         {id = "barCenterFrame", src = 0, x = 0, y = PARTS_OFFSET + 782, w = 714, h = 154},
+        -- プレイ
+        {id = "playButton", src = 0, x = 773, y = PARTS_OFFSET + 377, w = DECIDE_BUTTON_W, h = DECIDE_BUTTON_H},
+        {id = "playButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 15}, -- ボタン起動用ダミー
+        {id = "autoButton", src = 0, x = 773, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = AUTO_BUTTON_W, h = AUTO_BUTTON_H},
+        {id = "autoButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 16}, -- ボタン起動用ダミー
+        {id = "replayButtonBg", src = 0, x = 773 + AUTO_BUTTON_W, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_BUTTON_SIZE, h = REPLAY_BUTTON_SIZE},
+        {id = "replay1Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*0, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
+        {id = "replay2Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*1, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
+        {id = "replay3Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*2, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
+        {id = "replay4Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*3, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
+        {id = "replay1ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 19}, -- ボタン起動用ダミー
+        {id = "replay2ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 316}, -- ボタン起動用ダミー
+        {id = "replay3ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 317}, -- ボタン起動用ダミー
+        {id = "replay4ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 318}, -- ボタン起動用ダミー
+
         -- レベルアイコン
         {id = "nonActiveBeginnerIcon", src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
-        {id = "nonActiveNormalIcon", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
-        {id = "nonActiveHyperIcon", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
-        {id = "nonActiveAnotherIcon", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
-        {id = "nonActiveInsaneIcon", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
-        {id = "activeBeginnerIcon", src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeNormalIcon", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeHyperIcon", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeAnotherIcon", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeInsaneIcon", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeBeginnerText", src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
-        {id = "activeNormalText", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
-        {id = "activeHyperText", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
-        {id = "activeAnotherText", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
-        {id = "activeInsaneText", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
-        {id = "activeBeginnerNote", src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeNormalNote", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeHyperNote", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeAnotherNote", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeInsaneNote", src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "nonActiveNormalIcon"  , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
+        {id = "nonActiveHyperIcon"   , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
+        {id = "nonActiveAnotherIcon" , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
+        {id = "nonActiveInsaneIcon"  , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
+        {id = "activeBeginnerIcon"   , src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "activeNormalIcon"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "activeHyperIcon"      , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "activeAnotherIcon"    , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "activeInsaneIcon"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "activeBeginnerText"   , src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
+        {id = "activeNormalText"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
+        {id = "activeHyperText"      , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
+        {id = "activeAnotherText"    , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
+        {id = "activeInsaneText"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
+        {id = "activeBeginnerNote"   , src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "activeNormalNote"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "activeHyperNote"      , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "activeAnotherNote"    , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "activeInsaneNote"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        -- 楽曲のkeys
+        {id = "music7keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*0, y = PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music5keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*2, y = PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music14keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*4, y = PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music10keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*6, y = PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music9keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*0, y = PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music24keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*2, y = PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music48keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*4, y = PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        -- オプションのkeys
+        {id = "upperOptionButtonBg" , src = 2, x = 1321, y = PARTS_TEXTURE_SIZE - UPPER_OPTION_H, w = UPPER_OPTION_W, h = UPPER_OPTION_H},
+        {id = "keysSet", src = 2, x = 1441, y = 836, w = 129, h = OPTION_ITEM_H * 8, divy = 8, len = 8, ref = 11, act = 11},
+        -- オプションのLNモード
+        {id = "lnModeSet" , src = 2, x = 1570, y = 836, w = 129, h = OPTION_ITEM_H * 3, divy = 3, len = 3, ref = 308, act = 308},
+        -- ソート
+        {id = "sortModeSet" , src = 2, x = 1699, y = 836, w = 258, h = OPTION_ITEM_H * 8, divy = 8, len = 8, ref = 12, act = 12},
+
         -- 空プア表記用スラッシュ
         {id = "slashForEmptyPoor", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W * 11, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
         -- 上部プレイヤー情報 expゲージの背景とゲージ本体は汎用カラー
@@ -555,7 +603,7 @@ local function main()
                 "barCommand",
                 "barSearch",
             }
-        }
+        },
     }
 
     -- ランク
@@ -740,7 +788,7 @@ local function main()
     for i = 1, 17 do
         local idx = i
         if i > skin.songlist.center + 1 then
-            idx = idx + 0.77
+            idx = idx + 0.77 -- BPM等を入れる部分の高さだけ下にずらす
         end
         local posX = math.floor(1184 + (skin.songlist.center - idx + 2) * 12)
         local posY = math.floor(492 + (skin.songlist.center - idx + 2) * 80)
@@ -757,6 +805,7 @@ local function main()
             }
         })
     end
+    -- 曲名等
     skin.songlist.text = {
         {
             id = "bartext", filter = 1,
@@ -965,6 +1014,66 @@ local function main()
                 {x = 608 - STATUS_NUMBER_W * 8, y = 994, w = STATUS_NUMBER_W, h = STATUS_NUMBER_H}
             }
         },
+        
+        -- 上部オプション
+        {
+            id = "upperOptionButtonBg", dst = {
+                {x = 674, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H - 1, w = 270, h = OPTION_SWITCH_BUTTON_H}
+            }
+        },
+        -- 上部オプションの上のやつの区切り
+        {
+            id = "white", dst = {
+                {x = 680 + 129, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H + 6 - 1, w = 1, h = OPTION_ITEM_H, r = 102, g = 102, b = 102}
+            }
+        },
+        {
+            id = "upperOptionButtonBg", dst = {
+                {x = 674, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H - 54, w = 270, h = OPTION_SWITCH_BUTTON_H}
+            }
+        },
+        -- keys
+        {
+            id = "keysSet", dst = {
+                {x = 680, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H + 6 - 1, w = 129, h = OPTION_ITEM_H}
+            }
+        },
+        -- LN
+        {
+            id = "lnModeSet", dst = {
+                {x = 809, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H + 6 - 1, w = 129, h = OPTION_ITEM_H}
+            }
+        },
+        -- ソート
+        {
+            id = "sortModeSet", dst = {
+                {x = 680, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H - 54 + 6, w = 258, h = OPTION_ITEM_H}
+            }
+        },
+
+        -- プレイボタン
+        {
+            id = "playButton", dst = {
+                {x = 780, y = 571, w = DECIDE_BUTTON_W, h = DECIDE_BUTTON_H}
+            }
+        },
+        { -- ボタン起動用にサイズを調整したやつ
+            id = "playButtonDummy", dst = {
+                {x = 786, y = 577, w = DECIDE_BUTTON_W - 12, h = DECIDE_BUTTON_H - 12}
+            }
+        },
+        -- AUTO
+        {
+            id = "autoButton", dst = {
+                {x = 780, y = 513, w = AUTO_BUTTON_W, h = AUTO_BUTTON_H}
+            }
+        },
+        {
+            id = "autoButtonDummy", dst = {
+                {x = 786, y = 519, w = AUTO_BUTTON_W - 12, h = AUTO_BUTTON_H - 12}
+            }
+        },
+        -- replayは下のリプレイボタンfor文で挿入
 
         -- 選曲バー
         {id = "songlist"},
@@ -1020,6 +1129,42 @@ local function main()
                 {x = 1207, y = 517, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
             }
         },
+        -- 楽曲keys ゴリ押し
+        {
+            id = "music7keys", op = {160}, dst = {
+                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
+            }
+        },
+        {
+            id = "music5keys", op = {161}, dst = {
+                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
+            }
+        },
+        {
+            id = "music14keys", op = {162}, dst = {
+                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
+            }
+        },
+        {
+            id = "music10keys", op = {163}, dst = {
+                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
+            }
+        },
+        {
+            id = "music9keys", op = {164}, dst = {
+                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
+            }
+        },
+        {
+            id = "music24keys", op = {1160}, dst = {
+                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
+            }
+        },
+        {
+            id = "music48keys", op = {1161}, dst = {
+                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
+            }
+        },
 
         -- 判定難易度
         {
@@ -1043,6 +1188,33 @@ local function main()
             }
         },
     }
+
+    -- リプレイボタン
+    local replayOps = {197, 1197, 1200, 1203}
+    for i = 1, 4 do
+        local buttonX = 892 + 60 * (i - 1)
+        table.insert(skin.destination, { -- リプレイあり
+            id = "replayButtonBg", op = {replayOps[i]}, dst = {
+                {x = buttonX, y = 513, w = REPLAY_BUTTON_SIZE, h = REPLAY_BUTTON_SIZE}
+            }
+        })
+        table.insert(skin.destination, { -- リプレイ無し
+            id = "replayButtonBg", op = {replayOps[i] - 1}, dst = {
+                {x = buttonX, y = 513, w = REPLAY_BUTTON_SIZE, h = REPLAY_BUTTON_SIZE, a = 128}
+            }
+        })
+        table.insert(skin.destination, { -- 右下の1,2,3,4の数字
+            id = "replay" .. i .. "Text", dst = {
+                {x = buttonX + 34, y = 513 + 2, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H}
+            }
+        })
+        table.insert(skin.destination, { -- 起動用ボタン
+            id = "replay" .. i .. "ButtonDummy", op = {replayOps[i]}, dst = {
+                {x = buttonX + 6, y = 513 + 6, w = REPLAY_BUTTON_SIZE - 12, h = REPLAY_BUTTON_SIZE - 12}
+            }
+        })
+    end
+
 
     -- 選曲スライダー
     table.insert(skin.destination, {
