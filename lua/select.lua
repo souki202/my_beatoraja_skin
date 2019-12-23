@@ -32,6 +32,10 @@ local REPLAY_BUTTON_SIZE = 62
 local REPLAY_TEXT_W = 17
 local REPLAY_TEXT_H = 22
 
+-- コース表示
+local COURSE_LABEL_W = 192
+local COURSE_LABEL_H = 64
+
 -- 上部のLNモードとkeysのボタンサイズ
 local UPPER_OPTION_W = 270
 local UPPER_OPTION_H = 56
@@ -447,6 +451,13 @@ local function main()
         {id = "replay2ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 316}, -- ボタン起動用ダミー
         {id = "replay3ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 317}, -- ボタン起動用ダミー
         {id = "replay4ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 318}, -- ボタン起動用ダミー
+        -- 段位, コースの曲一覧部分
+        {id = "courseBarBg", src = 0, x = 0, y = PARTS_OFFSET + 468, w = 772, h = COURSE_LABEL_H + 14},
+        {id = "courseMusic1Label", src = 0, x = 773, y = PARTS_OFFSET + 517 + COURSE_LABEL_H*0, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
+        {id = "courseMusic2Label", src = 0, x = 773, y = PARTS_OFFSET + 517 + COURSE_LABEL_H*1, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
+        {id = "courseMusic3Label", src = 0, x = 773, y = PARTS_OFFSET + 517 + COURSE_LABEL_H*2, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
+        {id = "courseMusic4Label", src = 0, x = 773, y = PARTS_OFFSET + 517 + COURSE_LABEL_H*3, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
+        {id = "courseMusic5Label", src = 0, x = 773, y = PARTS_OFFSET + 517 + COURSE_LABEL_H*4, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
 
         -- レベルアイコン
         {id = "nonActiveBeginnerIcon", src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
@@ -762,7 +773,7 @@ local function main()
     end
 
     skin.font = {
-		{id = 0, path = "../common/fonts/SourceHanSans.fnt"},
+		{id = 0, path = "../common/fonts/SourceHanSans-Regular.ttf"},
 	}
 
     skin.text = {
@@ -771,10 +782,11 @@ local function main()
         {id = "title", font = 0, size = 24, ref = 12},
 		{id = "artist", font = 0, size = ARTIST_FONT_SIZE, ref = 14, align = 2, overflow = 1},
         {id = "subArtist", font = 0, size = SUBARTIST_FONT_SIZE, ref = 15, align = 2, overflow = 1},
-		{id = "course1", font = 0, size = 24, ref = 150},
-		{id = "course2", font = 0, size = 24, ref = 151},
-		{id = "course3", font = 0, size = 24, ref = 152},
-		{id = "course4", font = 0, size = 24, ref = 153},
+		{id = "course1Text", font = 0, size = BAR_FONT_SIZE, ref = 150, align = 2, overflow = 1},
+		{id = "course2Text", font = 0, size = BAR_FONT_SIZE, ref = 151, align = 2, overflow = 1},
+		{id = "course3Text", font = 0, size = BAR_FONT_SIZE, ref = 152, align = 2, overflow = 1},
+		{id = "course4Text", font = 0, size = BAR_FONT_SIZE, ref = 153, align = 2, overflow = 1},
+		{id = "course5Text", font = 0, size = BAR_FONT_SIZE, ref = 154, align = 2, overflow = 1},
 
 		{id = "bartext", font = 0, size = BAR_FONT_SIZE, align = 2, overflow = 1},
         {id = "search", font = 0, size = 24, ref = 30},
@@ -833,7 +845,7 @@ local function main()
             }
         },
     }
-    
+
     local levelPosX = 19
     local levelPosY = 12
     skin.songlist.level = {
@@ -948,24 +960,6 @@ local function main()
                 {x = 0, y = 0, w = WIDTH, h = HEIGHT}
             }
         },
-        -- ステージファイル背景
-        {
-            id = "black", op = {191}, dst = {
-                {x = 105, y = 446, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT, a = 255}
-            }
-        },
-        -- noステージファイル背景
-        {
-            id = "black", op = {190}, dst = {
-                {x = 105, y = 446, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT, a = 64}
-            }
-        },
-        -- ステージファイル
-        {
-            id = -100, dst = {
-                {x = 105, y = 446, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT}
-            }
-        },
         -- バナー
         {
             id = -102, dst = {
@@ -979,12 +973,31 @@ local function main()
                 {x = 0, y = 0, w = WIDTH, h = HEIGHT}
             }
         },
+        -- noステージファイル背景
+        {
+            id = "black", op = {190, 2}, dst = {
+                {x = 105, y = 446, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT, a = 64}
+            }
+        },
+        -- ステージファイル背景
+        {
+            id = "black", op = {191, 2}, dst = {
+                {x = 105, y = 446, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT, a = 255}
+            }
+        },
+        -- ステージファイル
+        {
+            id = -100, op = {2}, dst = {
+                {x = 105, y = 446, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT}
+            }
+        },
         -- Stage fileフレーム
         {
-            id = "stagefileFrame", dst = {
+            id = "stagefileFrame", op = {2}, dst = {
                 {x = 74, y = 415, w = 702, h = 542}
             }
         },
+        -- コース曲一覧表示は下のforで
 
         -- 上部プレイヤー情報
         -- RANK
@@ -1040,7 +1053,7 @@ local function main()
                 {x = 608 - STATUS_NUMBER_W * 8, y = 994, w = STATUS_NUMBER_W, h = STATUS_NUMBER_H}
             }
         },
-        
+
         -- 上部オプション
         {
             id = "upperOptionButtonBg", dst = {
@@ -1079,23 +1092,23 @@ local function main()
 
         -- プレイボタン
         {
-            id = "playButton", dst = {
+            id = "playButton", op = {-1}, dst = {
                 {x = 780, y = 571, w = DECIDE_BUTTON_W, h = DECIDE_BUTTON_H}
             }
         },
         { -- ボタン起動用にサイズを調整したやつ
-            id = "playButtonDummy", dst = {
+            id = "playButtonDummy", op = {-1}, dst = {
                 {x = 786, y = 577, w = DECIDE_BUTTON_W - 12, h = DECIDE_BUTTON_H - 12}
             }
         },
         -- AUTO
         {
-            id = "autoButton", dst = {
+            id = "autoButton", op = {-1}, dst = {
                 {x = 780, y = 513, w = AUTO_BUTTON_W, h = AUTO_BUTTON_H}
             }
         },
         {
-            id = "autoButtonDummy", dst = {
+            id = "autoButtonDummy", op = {-1}, dst = {
                 {x = 786, y = 519, w = AUTO_BUTTON_W - 12, h = AUTO_BUTTON_H - 12}
             }
         },
@@ -1214,6 +1227,29 @@ local function main()
             }
         },
     }
+
+    -- コースの曲一覧
+    for i = 1, 5 do
+        local y = 818 - (COURSE_LABEL_H + 14) * (i - 1) -- 14は上下の影
+        -- 背景
+        table.insert(skin.destination, {
+            id = "courseBarBg", op = {3}, dst = {
+                {x = 0, y = y, w = 772, h = COURSE_LABEL_H + 14}
+            }
+        })
+        -- 1st等のラベル
+        table.insert(skin.destination, {
+            id = "courseMusic" .. i .. "Label", op = {3}, dst = {
+                {x = -2, y = y + 7, w = COURSE_LABEL_W, h = COURSE_LABEL_H}
+            }
+        })
+        -- 曲名
+        table.insert(skin.destination, {
+            id = "course" .. i .. "Text", op = {3}, filter = 1, dst = {
+                {x = 750, y = y + 20, w = 538, h = BAR_FONT_SIZE, r = 0, g = 0, b = 0}
+            }
+        })
+    end
 
     -- リプレイボタン
     local replayOps = {197, 1197, 1200, 1203}
