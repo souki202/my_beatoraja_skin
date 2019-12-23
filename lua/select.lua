@@ -132,7 +132,7 @@ local OPTION_WND_OFFSET_Y = (HEIGHT - OPTION_WND_H) / 2
 
 local header = {
     type = 5,
-    name = "Flat skin",
+    name = "Social Skin dev",
     w = WIDTH,
     h = HEIGHT,
     fadeout = 500,
@@ -589,9 +589,13 @@ local function main()
         {id = "helpHeaderText", src = 3, x = 0, y = 0, w = 122, h = 30},
         -- ヘルプ内容
         {id = "helpNumberKeys", src = 3, x = 0, y = 30, w = HELP_TEXT1_W, h = HELP_TEXT_H},
-        {id = "helpFunctionKeys", src = 3, x = 0, y = 398, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+        {id = "helpFunctionKeys1", src = 3, x = 0, y = 398, w = HELP_TEXT1_W, h = 246}, -- F7まで
+        {id = "helpFunctionKeys2", src = 3, x = 0, y = 398 + 246, w = 470, h = 163}, -- F8~F12
         {id = "helpPlayKey", src = 3, x = 397, y = 30, w = HELP_TEXT2_W, h = HELP_TEXT_H},
         {id = "helpDetailReplayKey", src = 3, x = 397, y = 398, w = HELP_TEXT2_W, h = 248},
+
+        -- 検索ボックス
+        {id = "searchBox", src = 0, x = 773, y = PARTS_TEXTURE_SIZE - 62, w = 1038, h = 62},
 
         -- 汎用カラー
         {id = "blank", src = 999, x = 0, y = 0, w = 1, h = 1, act = 0},
@@ -715,12 +719,12 @@ local function main()
         {id = "largeLevelAnother", src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_HEIGHT * 3, w = 30*10, h = LARGE_LEVEL_HEIGHT, divx = 10, digit = 2, ref = 48, align = 2},
         {id = "largeLevelInsane", src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_HEIGHT * 4, w = 30*10, h = LARGE_LEVEL_HEIGHT, divx = 10, digit = 2, ref = 49, align = 2},
         -- exscore用
-        {id = "richExScore", src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_NUMBER_W * 10, h = EXSCORE_NUMBER_H, divx = 10, digit = 4, ref = 71, align = 0},
+        {id = "richExScore", src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_NUMBER_W * 10, h = EXSCORE_NUMBER_H, divx = 10, digit = 5, ref = 71, align = 0},
         -- 上部プレイヤー情報
         {id = "numOfCoin", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 8, ref = 33, align = 0},
         {id = "numOfDia", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 8, ref = 30, align = 0},
         {id = "rankValue", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H + STATUS_NUMBER_H, w = RANK_NUMBER_W * 10, h = RANK_NUMBER_H, divx = 10, digit = 4, ref = 17, align = 0},
-        {id = "expGauge", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET, w = 10, h = 10, divy = 10, digit = 1,  ref = 31, align = 1},
+        {id = "expGauge", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET, w = 10, h = 10, divy = 10, digit = 1, ref = 31, align = 1},
         -- オプション
         {id = "notesDisplayTime", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_H, w = OPTION_NUMBER_W * 10, h = OPTION_NUMBER_H, divx = 10, digit = 4, ref = 312},
         {id = "judgeTiming", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_H * 2, w = OPTION_NUMBER_W * 12, h = OPTION_NUMBER_H * 2, divx = 12, divy = 2, digit = 4, ref = 12},
@@ -789,7 +793,7 @@ local function main()
 		{id = "course5Text", font = 0, size = BAR_FONT_SIZE, ref = 154, align = 2, overflow = 1},
 
 		{id = "bartext", font = 0, size = BAR_FONT_SIZE, align = 2, overflow = 1},
-        {id = "search", font = 0, size = 24, ref = 30},
+        {id = "searchText", font = 0, size = 24, ref = 30},
     }
 
     -- 選曲バー設定
@@ -1226,6 +1230,19 @@ local function main()
                 {x = 1335, y = 517, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
             }
         },
+
+        -- 検索ボックス
+        {
+            id = "searchBox", dst = {
+                {x = -7, y = -7, w = 1038, h = 62}
+            }
+        },
+        -- テキスト入力欄
+        {
+            id = "searchText", filter = 1, dst = {
+                {x = 48, y = 12, w = 970, h = 24}
+            }
+        },
     }
 
     -- コースの曲一覧
@@ -1355,7 +1372,7 @@ local function main()
     })
     table.insert(skin.destination, {
         id = "richExScore", dst = {
-            {x = 1070 - EXSCORE_NUMBER_W * 4, y = 337, w = EXSCORE_NUMBER_W, h = EXSCORE_NUMBER_H}
+            {x = 1070 - EXSCORE_NUMBER_W * 5, y = 337, w = EXSCORE_NUMBER_W, h = EXSCORE_NUMBER_H}
         }
     })
     table.insert(skin.destination, {
@@ -1645,10 +1662,20 @@ local function main()
         }
     })
     table.insert(skin.destination, {
-        id = "helpFunctionKeys", op = {23}, loop = 0, timer = 23, dst = {
+        id = "helpFunctionKeys1", op = {23}, loop = 0, timer = 23, dst = {
             {time = 0, a = 0},
-            {time = 3500, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
-            {time = 4000, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+            {time = 3500, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246, w = HELP_TEXT1_W, h = 246},
+            {time = 4000, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246, w = HELP_TEXT1_W, h = 246},
+            {time = 7500, a = 255},
+            {time = 8000, a = 0},
+            {time = 16000, a = 0},
+        }
+    })
+    table.insert(skin.destination, {
+        id = "helpFunctionKeys2", op = {23}, loop = 0, timer = 23, dst = {
+            {time = 0, a = 0},
+            {time = 3500, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246 - 163, w = 470, h = 163},
+            {time = 4000, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246 - 163, w = 470, h = 163},
             {time = 7500, a = 255},
             {time = 8000, a = 0},
             {time = 16000, a = 0},
