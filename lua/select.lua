@@ -36,6 +36,10 @@ local REPLAY_TEXT_H = 22
 local COURSE_LABEL_W = 192
 local COURSE_LABEL_H = 64
 
+-- stage fileまわり
+local STAGE_FILE_DST_X = 105
+local STAGE_FILE_DST_Y = 446
+
 -- 上部のLNモードとkeysのボタンサイズ
 local UPPER_OPTION_W = 270
 local UPPER_OPTION_H = 56
@@ -603,10 +607,17 @@ local function main()
         {id = "white", src = 999, x = 2, y = 0, w = 1, h = 1},
         {id = "purpleRed", src = 999, x = 3, y = 0, w = 1, h = 1},
         {id = "gray", src = 999, x = 4, y = 0, w = 1, h = 1},
+        {id = "pink", src = 999, x = 5, y = 0, w = 1, h = 1},
     }
 
+    -- 密度グラフ
+    skin.judgegraph = {
+		{id = "notesGraph", type = 0, noGap = 1, delay = 0},
+		{id = "notesGraph2", type = 0, noGap = 1, backTexOff = 1, delay = 0}
+    }
+
+    -- 選曲スライダー
     skin.slider = {
-        -- 選曲スライダー
         {id = "musicSelectSlider", src = 0, x = 1541, y = PARTS_OFFSET + 263, w = MUSIC_SLIDER_BUTTON_W, h = MUSIC_SLIDER_BUTTON_H, type = 1, range = 768 - MUSIC_SLIDER_BUTTON_H / 2 - 3, angle = 2, align = 0},
     }
 
@@ -812,16 +823,26 @@ local function main()
         end
         local posX = math.floor(1184 + (skin.songlist.center - idx + 2) * 12)
         local posY = math.floor(492 + (skin.songlist.center - idx + 2) * 80)
+        local INTERVAL = 20
+        -- ぽわんと1回跳ねる感じ
         table.insert(skin.songlist.listoff, {
-            id = "bar",
+            id = "bar", loop = 250 + i * INTERVAL,
             dst = {
-                {x = posX, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT}
+                {time = 0                 , x = posX + 800, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
+                {time = i * INTERVAL      , x = posX + 800, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
+                {time = 200 + i * INTERVAL, x = posX -  50, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 1},
+                {time = 225 + i * INTERVAL, x = posX -  25, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
+                {time = 250 + i * INTERVAL, x = posX      , y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2}
             }
         })
         table.insert(skin.songlist.liston, {
-            id = "bar",
+            id = "bar", loop = 250 + i * INTERVAL,
             dst = {
-                {x = posX, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT}
+                {time = 0                 , x = posX + 800, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
+                {time = i * INTERVAL      , x = posX + 800, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
+                {time = 200 + i * INTERVAL, x = posX -  50, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 1},
+                {time = 225 + i * INTERVAL, x = posX -  25, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
+                {time = 250 + i * INTERVAL, x = posX      , y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2}
             }
         })
     end
@@ -980,19 +1001,27 @@ local function main()
         -- noステージファイル背景
         {
             id = "black", op = {190, 2}, dst = {
-                {x = 105, y = 446, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT, a = 64}
+                {x = STAGE_FILE_DST_X, y = STAGE_FILE_DST_Y, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT, a = 64}
             }
         },
-        -- ステージファイル背景
+        -- ステージファイル背景(アス比固定機能がないため見えない)
         {
             id = "black", op = {191, 2}, dst = {
-                {x = 105, y = 446, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT, a = 255}
+                {x = STAGE_FILE_DST_X, y = STAGE_FILE_DST_Y, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT, a = 255}
             }
         },
         -- ステージファイル
         {
             id = -100, op = {2}, dst = {
-                {x = 105, y = 446, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT}
+                {x = STAGE_FILE_DST_X, y = STAGE_FILE_DST_Y, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT}
+            }
+        },
+        -- ステージファイルマスク
+        {
+            id = "black", op = {191, 2}, timer = 11, loop = 300, dst = {
+                {time = 0  , a = 128, x = STAGE_FILE_DST_X, y = STAGE_FILE_DST_Y, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT},
+                {time = 200, a = 128},
+                {time = 300, a = 0}
             }
         },
         -- Stage fileフレーム
@@ -1128,12 +1157,12 @@ local function main()
         },
         -- アーティスト
         {
-            id = "artist", dst = {
+            id = "artist", filter = 1, dst = {
                 {x = 1800, y = 543, w = 370, h = ARTIST_FONT_SIZE, r = 0, g = 0, b = 0, filter = 1}
             }
         },
         {
-            id = "subArtist", dst = {
+            id = "subArtist", filter = 1, dst = {
                 {x = 1800, y = 516, w = 310, h = SUBARTIST_FONT_SIZE, r = 0, g = 0, b = 0, filter = 1}
             }
         },
@@ -1243,6 +1272,33 @@ local function main()
                 {x = 48, y = 12, w = 970, h = 24}
             }
         },
+        -- 密度グラフ
+        {
+            id = "notesGraph2", dst = {
+                {x = BASE_WIDTH - 700, y = 100, w = 600, h = 200}
+            }
+        },
+        -- 自分好みの色にしようとした努力の痕跡
+        -- {
+        --     id = "black", dst = {
+        --         {x = BASE_WIDTH - 700, y = 100, w = 600, h = 200}
+        --     }
+        -- },
+        -- {
+        --     id = "notesGraph", dst = {
+        --         {x = BASE_WIDTH - 700, y = 100, w = 600, h = 200}
+        --     }
+        -- },
+        -- {
+        --     id = "white", blend = 9, dst = {
+        --         {x = BASE_WIDTH - 700, y = 100, w = 600, h = 200}
+        --     }
+        -- },
+        -- {
+        --     id = "pink", blend = 2, dst = {
+        --         {x = BASE_WIDTH - 700, y = 100, w = 600, h = 200}
+        --     }
+        -- },
     }
 
     -- コースの曲一覧
