@@ -99,6 +99,9 @@ local RANK_Y = 400
 local EXSCORE_NUMBER_W = 22
 local EXSCORE_NUMBER_H = 30
 
+-- 密度グラフ
+local NOTES_ICON_SIZE = 42
+
 local OPTION_HEADER_H = 42
 local OPTION_HEADER_TEXT_W = 269
 local OPTION_WND_EDGE_SIZE = 32
@@ -142,6 +145,11 @@ local header = {
     fadeout = 500,
     scene = 3000,
     input = 500,
+    property = {
+        {
+            name = "密度グラフ表示", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}
+        },
+    },
     filepath = {
         {name = "Background", path = "../select/background/*.png"}
     },
@@ -598,6 +606,13 @@ local function main()
         {id = "helpPlayKey", src = 3, x = 397, y = 30, w = HELP_TEXT2_W, h = HELP_TEXT_H},
         {id = "helpDetailReplayKey", src = 3, x = 397, y = 398, w = HELP_TEXT2_W, h = 248},
 
+        -- 密度グラフ用
+        {id = "notesGraphFrame", src = 0, x = 965, y = PARTS_OFFSET + 593, w = 638, h = 178},
+        {id = "numOfNormalNotesIcon" , src = 0, x = 945 + NOTES_ICON_SIZE*0, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
+        {id = "numOfScratchNotesIcon", src = 0, x = 945 + NOTES_ICON_SIZE*1, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
+        {id = "numOfLnNotesIcon"     , src = 0, x = 945 + NOTES_ICON_SIZE*2, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
+        {id = "numOfBssNotesIcon"    , src = 0, x = 945 + NOTES_ICON_SIZE*3, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
+
         -- 検索ボックス
         {id = "searchBox", src = 0, x = 773, y = PARTS_TEXTURE_SIZE - 62, w = 1038, h = 62},
 
@@ -613,7 +628,12 @@ local function main()
     -- 密度グラフ
     skin.judgegraph = {
 		{id = "notesGraph", type = 0, noGap = 1, delay = 0},
-		{id = "notesGraph2", type = 0, noGap = 1, backTexOff = 1, delay = 0}
+		{id = "notesGraph2", type = 0, noGap = 1, backTexOff = 1, delay = 0},
+		{id = "bpmGraph2", type = 0, noGap = 1, backTexOff = 1, delay = 0}
+    }
+
+    skin.bpmgraph = {
+        {id = "bpmGraph", delay = 0},
     }
 
     -- 選曲スライダー
@@ -736,6 +756,11 @@ local function main()
         {id = "numOfDia", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 8, ref = 30, align = 0},
         {id = "rankValue", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H + STATUS_NUMBER_H, w = RANK_NUMBER_W * 10, h = RANK_NUMBER_H, divx = 10, digit = 4, ref = 17, align = 0},
         {id = "expGauge", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET, w = 10, h = 10, divy = 10, digit = 1, ref = 31, align = 1},
+        -- ノーツ数
+        {id = "numOfNormalNotes" , src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 350, align = 0},
+        {id = "numOfScratchNotes", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 352, align = 0},
+        {id = "numOfLnNotes"     , src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 351, align = 0},
+        {id = "numOfBssNotes"    , src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 353, align = 0},
         -- オプション
         {id = "notesDisplayTime", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_H, w = OPTION_NUMBER_W * 10, h = OPTION_NUMBER_H, divx = 10, digit = 4, ref = 312},
         {id = "judgeTiming", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_H * 2, w = OPTION_NUMBER_W * 12, h = OPTION_NUMBER_H * 2, divx = 12, divy = 2, digit = 4, ref = 12},
@@ -1274,10 +1299,27 @@ local function main()
         },
         -- 密度グラフ
         {
-            id = "notesGraph2", dst = {
-                {x = BASE_WIDTH - 700, y = 100, w = 600, h = 200}
+            id = "black", op = {910}, dst = {
+                {x = 1138, y = 124, w = 600, h = 100, a = 192}
             }
         },
+        {
+            id = "notesGraph2", op = {2, 910}, dst = {
+                {x = 1138, y = 124, w = 600, h = 100}
+            }
+        },
+        {
+            id = "bpmGraph", op = {2, 910}, dst = {
+                {x = 1138, y = 124, w = 600, h = 100}
+            }
+        },
+        {
+            id = "notesGraphFrame", op = {910}, dst = {
+                {x = 1119, y = 65, w = 638, h = 178}
+            }
+        },
+        -- 各ノーツ数は下のfor
+
         -- 自分好みの色にしようとした努力の痕跡
         -- {
         --     id = "black", dst = {
@@ -1346,6 +1388,21 @@ local function main()
         table.insert(skin.destination, { -- 起動用ボタン
             id = "replay" .. i .. "ButtonDummy", op = {replayOps[i]}, dst = {
                 {x = buttonX + 6, y = 513 + 6, w = REPLAY_BUTTON_SIZE - 12, h = REPLAY_BUTTON_SIZE - 12}
+            }
+        })
+    end
+
+    -- 密度グラフ
+    local noteTypes = {"Normal", "Scratch", "Ln", "Bss"}
+    for i = 1, 4 do
+        table.insert(skin.destination, {
+            id = "numOf" .. noteTypes[i] .. "NotesIcon", op = {910}, dst = {
+                {x = 1152 + 150 * (i - 1), y = 77, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE}
+            }
+        })
+        table.insert(skin.destination, {
+            id = "numOf" .. noteTypes[i] .. "Notes", op = {910}, dst = {
+                {x = 1152 + 58 + 150 * (i - 1), y = 77 + 10, w = STATUS_NUMBER_W, h = STATUS_NUMBER_H}
             }
         })
     end
