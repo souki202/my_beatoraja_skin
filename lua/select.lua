@@ -844,10 +844,10 @@ local function main()
     for i = 1, 17 do
         local idx = i
         if i > skin.songlist.center + 1 then
-            idx = idx + 0.77 -- BPM等を入れる部分の高さだけ下にずらす
+            idx = idx + 0.75 -- BPM等を入れる部分の高さだけ下にずらす
         end
         local posX = math.floor(1184 + (skin.songlist.center - idx + 2) * 12)
-        local posY = math.floor(492 + (skin.songlist.center - idx + 2) * 80)
+        local posY = math.floor(491 + (skin.songlist.center - idx + 2) * 80)
         local INTERVAL = 20
         -- ぽわんと1回跳ねる感じ
         table.insert(skin.songlist.listoff, {
@@ -1037,7 +1037,7 @@ local function main()
         },
         -- ステージファイル
         {
-            id = -100, op = {2}, dst = {
+            id = -100, op = {2}, filter = 1, dst = {
                 {x = STAGE_FILE_DST_X, y = STAGE_FILE_DST_Y, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT}
             }
         },
@@ -1467,7 +1467,7 @@ local function main()
     -- ランク出力
     for i, rank in ipairs(ranks) do
         table.insert(skin.destination, {
-            id = "rank" .. rank, op = {2, 200 + (i - 1)}, dst = {
+            id = "rank" .. rank, op = {{2, 3}, 200 + (i - 1)}, dst = {
                 {x = RANK_X, y = RANK_Y, w = RANK_W, h = RANK_H}
             }
         })
@@ -1521,6 +1521,15 @@ local function main()
             -- 曲
             table.insert(skin.destination, {
                 id = val, op = {2}, dst = {
+                    {
+                        x = numberX,
+                        y = PLAY_STATUS_NUMBER_BASE_Y - (j - 1) * PLAY_STATUS_INTERVAL_Y,
+                        w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H
+                    }
+                }
+            })
+            table.insert(skin.destination, {
+                id = val, op = {3}, dst = {
                     {
                         x = numberX,
                         y = PLAY_STATUS_NUMBER_BASE_Y - (j - 1) * PLAY_STATUS_INTERVAL_Y,
