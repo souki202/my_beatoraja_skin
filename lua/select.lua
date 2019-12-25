@@ -465,11 +465,11 @@ local function main()
         {id = "replay4ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 318}, -- ボタン起動用ダミー
         -- 段位, コースの曲一覧部分
         {id = "courseBarBg", src = 0, x = 0, y = PARTS_OFFSET + 468, w = 772, h = COURSE_LABEL_H + 14},
-        {id = "courseMusic1Label", src = 0, x = 773, y = PARTS_OFFSET + 517 + COURSE_LABEL_H*0, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
-        {id = "courseMusic2Label", src = 0, x = 773, y = PARTS_OFFSET + 517 + COURSE_LABEL_H*1, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
-        {id = "courseMusic3Label", src = 0, x = 773, y = PARTS_OFFSET + 517 + COURSE_LABEL_H*2, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
-        {id = "courseMusic4Label", src = 0, x = 773, y = PARTS_OFFSET + 517 + COURSE_LABEL_H*3, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
-        {id = "courseMusic5Label", src = 0, x = 773, y = PARTS_OFFSET + 517 + COURSE_LABEL_H*4, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
+        {id = "courseMusic1Label", src = 0, x = 773, y = PARTS_OFFSET + 519 + COURSE_LABEL_H*0, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
+        {id = "courseMusic2Label", src = 0, x = 773, y = PARTS_OFFSET + 519 + COURSE_LABEL_H*1, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
+        {id = "courseMusic3Label", src = 0, x = 773, y = PARTS_OFFSET + 519 + COURSE_LABEL_H*2, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
+        {id = "courseMusic4Label", src = 0, x = 773, y = PARTS_OFFSET + 519 + COURSE_LABEL_H*3, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
+        {id = "courseMusic5Label", src = 0, x = 773, y = PARTS_OFFSET + 519 + COURSE_LABEL_H*4, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
 
         -- レベルアイコン
         {id = "nonActiveBeginnerIcon", src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
@@ -943,7 +943,7 @@ local function main()
         },
     }
     local lampPosX = 17
-    local lampPosY = 40;
+    local lampPosY = 41;
     skin.songlist.lamp = {
         {
             id = "barLampNoplay", dst = {
@@ -1050,9 +1050,34 @@ local function main()
             }
         },
         -- Stage fileフレーム
-        {
-            id = "stagefileFrame", op = {2}, dst = {
+        { -- 設定無し
+            id = "stagefileFrame", op = {2, 150}, dst = {
                 {x = 74, y = 415, w = 702, h = 542}
+            }
+        },
+        { -- beginner
+            id = "stagefileFrame", op = {2, 151}, dst = {
+                {x = 74, y = 415, w = 702, h = 542, r = 153, g = 255, b = 153}
+            }
+        },
+        { -- normal
+            id = "stagefileFrame", op = {2, 152}, dst = {
+                {x = 74, y = 415, w = 702, h = 542, r = 153, g = 255, b = 255}
+            }
+        },
+        { -- hyper
+            id = "stagefileFrame", op = {2, 153}, dst = {
+                {x = 74, y = 415, w = 702, h = 542, r = 255, g = 204, b = 102}
+            }
+        },
+        { -- another
+            id = "stagefileFrame", op = {2, 154}, dst = {
+                {x = 74, y = 415, w = 702, h = 542, r = 255, g = 102, b = 102}
+            }
+        },
+        { -- insane
+            id = "stagefileFrame", op = {2, 155}, dst = {
+                {x = 74, y = 415, w = 702, h = 542, r = 204, g = 0, b = 102}
             }
         },
         -- コース曲一覧表示は下のforで
