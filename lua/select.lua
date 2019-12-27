@@ -102,6 +102,7 @@ local EXSCORE_NUMBER_H = 30
 -- 密度グラフ
 local NOTES_ICON_SIZE = 42
 
+-- オプションウィンドウ
 local OPTION_HEADER_H = 42
 local OPTION_HEADER_TEXT_W = 269
 local OPTION_WND_EDGE_SIZE = 32
@@ -136,6 +137,7 @@ local HELP_TEXT1_W = 380
 local HELP_TEXT2_W = 530
 local OPTION_WND_OFFSET_X = (WIDTH - OPTION_WND_W) / 2
 local OPTION_WND_OFFSET_Y = (HEIGHT - OPTION_WND_H) / 2
+local OPTION_ANIMATION_TIME = 150
 
 local header = {
     type = 5,
@@ -162,6 +164,46 @@ local function has_value (tab, val)
         end
     end
     return false
+end
+
+local function insertOptionAnimationTable(skin, id, op, x, y, width, height, angle, r, g, b)
+    if r == nil then
+        r = 255
+    end
+    if g == nil then
+        g = 255
+    end
+    if b == nil then
+        b = 255
+    end
+
+    -- 消えるとき 上の出現中が消えると同時に表示され, 消失までアニメーション
+    table.insert(skin.destination, {
+        id = id, op = {-op}, timer = op + 10, loop = OPTION_ANIMATION_TIME,
+        dst = {
+            {time = 0, x = x, y = y, w = width, h = height, angle = angle, r = r, g = g, b = b},
+            {time = OPTION_ANIMATION_TIME - 1, x = BASE_WIDTH / 2, y = BASE_HEIGHT / 2, w = 0, h = 0, a = 255},
+            {time = OPTION_ANIMATION_TIME}
+        }
+    })
+    -- 出現時
+    table.insert(skin.destination, {
+        id = id, op = {op}, timer = op, loop = OPTION_ANIMATION_TIME,
+        dst = {
+            {time = 0, x = BASE_WIDTH / 2, y = BASE_HEIGHT / 2, w = 0, h = 0, angle = angle, r = r, g = g, b = b},
+            {time = OPTION_ANIMATION_TIME - 1, x = x, y = y, w = width, h = height},
+            {time = OPTION_ANIMATION_TIME, x = 0, y = 0, w = 0, h = 0},
+        }
+    })
+    -- 出現中
+    table.insert(skin.destination, {
+        id = id, op = {op}, timer = op, loop = OPTION_ANIMATION_TIME,
+        dst = {
+            {time = 0, x = x, y = y, w = width, h = height, angle = angle, a = 0, r = r, g = g, b = b},
+            {time = OPTION_ANIMATION_TIME - 1, a = 0},
+            {time = OPTION_ANIMATION_TIME, a = 255},
+        }
+    })
 end
 
 local function loadOptionImgs(skin, optionTexts, optionIdPrefix, ref, x, y)
@@ -194,28 +236,12 @@ local function destinationOptionHeader2(skin, baseX, baseY, width, titleTextId, 
     local keyOffset = 16
 
     -- 各オプションヘッダBG出力
-    table.insert(skin.destination, {
-        id = "optionHeader2LeftBg", op = {op}, dst = {
-            {x = baseX, y = baseY, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H}
-        }
-    })
-    table.insert(skin.destination, {
-        id = "optionHeader2RightBg", op = {op}, dst = {
-            {x = baseX + width - OPTION_HEADER2_EDGE_BG_W, y = baseY, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H}
-        }
-    })
-    table.insert(skin.destination, {
-        id = "gray", op = {op}, dst = {
-            {x = baseX + OPTION_HEADER2_EDGE_BG_W, y = baseY, w = width - OPTION_HEADER2_EDGE_BG_W * 2, h = OPTION_HEADER2_EDGE_BG_H}
-        }
-    })
+    insertOptionAnimationTable(skin, "optionHeader2LeftBg", op, baseX, baseY, OPTION_HEADER2_EDGE_BG_W, OPTION_HEADER2_EDGE_BG_H, 0)
+    insertOptionAnimationTable(skin, "optionHeader2RightBg", op, baseX + width - OPTION_HEADER2_EDGE_BG_W, baseY, OPTION_HEADER2_EDGE_BG_W, OPTION_HEADER2_EDGE_BG_H, 0)
+    insertOptionAnimationTable(skin, "gray2", op, baseX + OPTION_HEADER2_EDGE_BG_W, baseY, width - OPTION_HEADER2_EDGE_BG_W * 2, OPTION_HEADER2_EDGE_BG_H, 0)
 
     -- オプションヘッダテキスト出力
-    table.insert(skin.destination, {
-        id = titleTextId, op = {op}, dst = {
-            {x = baseX + 20, y = baseY, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H}
-        }
-    })
+    insertOptionAnimationTable(skin, titleTextId, op, baseX + 20, baseY, OPTION_HEADER2_TEXT_W, OPTION_HEADER2_TEXT_H, 0)
 
     -- オプションの使用キー出力
     for i = 1, 7 do
@@ -224,11 +250,7 @@ local function destinationOptionHeader2(skin, baseX, baseY, width, titleTextId, 
             if i % 2 == 0 then -- 上のキーは座標足す
                 y = y + SMALL_KEY_H - 6 * 2
             end
-            table.insert(skin.destination, {
-                id = "optionSmallKeyNonActive", op = {op}, dst = {
-                    {x = baseX + width - keyOffset - (8 - i) * (SMALL_KEY_W - 12) + 6 - 20, y = y, w = SMALL_KEY_W, h = SMALL_KEY_H}
-                }
-            })
+            insertOptionAnimationTable(skin, "optionSmallKeyNonActive", op, baseX + width - keyOffset - (8 - i) * (SMALL_KEY_W - 12) + 6 - 20, y, SMALL_KEY_W, SMALL_KEY_H, 0)
         end
     end
     for i = 1, 7 do
@@ -237,11 +259,7 @@ local function destinationOptionHeader2(skin, baseX, baseY, width, titleTextId, 
             if i % 2 == 0 then -- 上のキーは座標足す
                 y = y + SMALL_KEY_H - 6 * 2
             end
-            table.insert(skin.destination, {
-                id = "optionSmallKeyActive", op = {op}, dst = {
-                    {x = baseX + width - keyOffset - (8 - i) * (SMALL_KEY_W - 12) + 6 - 20, y = y, w = SMALL_KEY_W, h = SMALL_KEY_H}
-                }
-            })
+            insertOptionAnimationTable(skin, "optionSmallKeyActive", op, baseX + width - keyOffset - (8 - i) * (SMALL_KEY_W - 12) + 6 - 20, y, SMALL_KEY_W, SMALL_KEY_H, 0)
         end
     end
 end
@@ -261,41 +279,19 @@ local function destinationPlayOption(skin, baseX, baseY, titleTextId, optionIdPr
     destinationOptionHeader2(skin, baseX, baseY + headerOffset, width, titleTextId, activeKeys, op)
 
     -- オプション一覧背景
-    table.insert(skin.destination, {
-        id = "optionSelectBg", op = {op}, dst = {
-            {x = baseX + optionBoxOffsetX, y = baseY + optionItemOffsetY - OPTION_ITEM_H, w = OPTION_ITEM_W, h = OPTION_BG_H}
-        }
-    })
+    insertOptionAnimationTable(skin, "optionSelectBg", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - OPTION_ITEM_H, OPTION_ITEM_W, OPTION_BG_H, 0)
 
     -- オプション出力
-    table.insert(skin.destination, {
-        id = optionIdPrefix .. "Nonactive", op = {op}, dst = {
-            {x = baseX + optionBoxOffsetX, y = baseY + optionItemOffsetY - 2 - OPTION_ITEM_H, w = OPTION_ITEM_W, h = OPTION_ITEM_H * 3}
-        }
-    })
-    table.insert(skin.destination, {
-        id = "activeOptionFrame", op = {op}, dst = {
-            {x = baseX + optionBoxOffsetX, y = baseY + optionItemOffsetY, w = ACTIVE_OPTION_FRAME_W, h = ACTIVE_OPTION_FRAME_H}
-        }
-    })
-    table.insert(skin.destination, {
-        id = optionIdPrefix .. "Active", op = {op}, dst = {
-            {x = baseX + optionBoxOffsetX, y = baseY + optionItemOffsetY - 2, w = OPTION_ITEM_W, h = OPTION_ITEM_H}
-        }
-    })
+    insertOptionAnimationTable(skin, optionIdPrefix .. "Nonactive", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - 2 - OPTION_ITEM_H, OPTION_ITEM_W, OPTION_ITEM_H * 3, 0)
+    insertOptionAnimationTable(skin, "activeOptionFrame", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY, ACTIVE_OPTION_FRAME_W, ACTIVE_OPTION_FRAME_H, 0)
+    insertOptionAnimationTable(skin, optionIdPrefix .. "Active", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - 2, OPTION_ITEM_W, OPTION_ITEM_H, 0)
+
 
     -- ボタン出力
-    table.insert(skin.destination, {
-        id = optionIdPrefix .. "UpButton", op = {op}, dst = {
-            {x = baseX + optionButtonOffsetX, y = baseY + 192, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H}
-        }
-    })
+    insertOptionAnimationTable(skin, optionIdPrefix .. "UpButton", op, baseX + optionButtonOffsetX, baseY + 192, OPTION_BUTTON_W, OPTION_BUTTON_H, 0)
+
     -- 下
-    table.insert(skin.destination, {
-        id = optionIdPrefix .. "DownButton", op = {op}, dst = {
-            {x = baseX + optionButtonOffsetX, y = baseY, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H}
-        }
-    })
+    insertOptionAnimationTable(skin, optionIdPrefix .. "DownButton", op, baseX + optionButtonOffsetX, baseY, OPTION_BUTTON_W, OPTION_BUTTON_H, 0)
 end
 
 local function destinationNumberOption(skin, baseX, baseY, titleTextId, optionIdPrefix, isLarge, activeKeys, op)
@@ -313,54 +309,32 @@ local function destinationNumberOption(skin, baseX, baseY, titleTextId, optionId
     destinationOptionHeader2(skin, baseX, baseY + height - OPTION_HEADER_H, width, titleTextId, activeKeys, op)
 
     -- オプション背景
-    table.insert(skin.destination, {
-        id = "optionNumberBg", op = {op}, dst = {
-            {x = baseX + optionBoxOffsetX, y = baseY + optionOffsetY, w = OPTION_NUMBER_BG_W, h = OPTION_NUMBER_BG_H}
-        }
-    })
+    insertOptionAnimationTable(skin, "optionNumberBg", op, baseX + optionBoxOffsetX, baseY + optionOffsetY, OPTION_NUMBER_BG_W, OPTION_NUMBER_BG_H, 0)
 
     -- 数値出力
-    table.insert(skin.destination, {
-        id = optionIdPrefix, op = {op}, dst = {
-            {
-                x = baseX + width / 2 - OPTION_NUMBER_W * (digit - 0.5) - 4,
-                y = baseY + optionOffsetY + 12,
-                w = OPTION_NUMBER_W, h = OPTION_NUMBER_H
-            }
-        }
-    })
+    insertOptionAnimationTable(skin, optionIdPrefix, op,
+        baseX + width / 2 - OPTION_NUMBER_W * (digit - 0.5) - 4,
+        baseY + optionOffsetY + 12,
+        OPTION_NUMBER_W, OPTION_NUMBER_H, 0)
 
     -- ms出力
-    table.insert(skin.destination, {
-        id = "millisecondTextImg", op = {op}, dst = {
-            {
-                x = baseX + width / 2 + 6,
-                y = baseY + optionOffsetY + 12,
-                w = 39, h = OPTION_NUMBER_H
-            }
-        }
-    })
+    insertOptionAnimationTable(skin, "millisecondTextImg", op,
+        baseX + width / 2 + 6,
+        baseY + optionOffsetY + 12,
+        39, OPTION_NUMBER_H, 0)
 
     -- ボタン出力
     -- beatorajaの現バージョンは未実装
-    table.insert(skin.destination, {
-        id = optionIdPrefix .. "DownButton", op = {op}, dst = {
-            {
-                x = baseX + width / 2 - 186,
-                y = baseY,
-                w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE
-            }
-        }
-    })
-    table.insert(skin.destination, {
-        id = optionIdPrefix .. "UpButton", op = {op}, dst = {
-            {
-                x = baseX + width / 2 + 186 - OPTION_NUMBER_BUTTON_SIZE,
-                y = baseY,
-                w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE
-            }
-        }
-    })
+    insertOptionAnimationTable(skin, optionIdPrefix .. "DownButton", op,
+        baseX + width / 2 - 186,
+        baseY,
+        OPTION_NUMBER_BUTTON_SIZE, OPTION_NUMBER_BUTTON_SIZE, 0)
+
+    insertOptionAnimationTable(skin, optionIdPrefix .. "UpButton", op,
+        baseX + width / 2 + 186 - OPTION_NUMBER_BUTTON_SIZE,
+        baseY,
+        OPTION_NUMBER_BUTTON_SIZE, OPTION_NUMBER_BUTTON_SIZE, 0)
+
 end
 
 --- appearTime >= fadeTime
@@ -622,6 +596,7 @@ local function main()
         {id = "white", src = 999, x = 2, y = 0, w = 1, h = 1},
         {id = "purpleRed", src = 999, x = 3, y = 0, w = 1, h = 1},
         {id = "gray", src = 999, x = 4, y = 0, w = 1, h = 1},
+        {id = "gray2", src = 999, x = 4, y = 1, w = 1, h = 1},
         {id = "pink", src = 999, x = 5, y = 0, w = 1, h = 1},
     }
 
@@ -1605,62 +1580,27 @@ local function main()
         -- 背景
         table.insert(skin.destination, {
             id = "black", op = {op}, dst = {
-                {x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 64}
+                {x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 64},
             }
         })
         -- 横長
-        table.insert(skin.destination, {
-            id = "white", op = {op}, dst = {
-                {x = OPTION_WND_OFFSET_X, y = OPTION_WND_OFFSET_Y + OPTION_WND_EDGE_SIZE, w = OPTION_WND_W, h = OPTION_WND_H - OPTION_WND_EDGE_SIZE * 2}
-            }
-        })
+        insertOptionAnimationTable(skin, "white", op, OPTION_WND_OFFSET_X, OPTION_WND_OFFSET_Y + OPTION_WND_EDGE_SIZE, OPTION_WND_W, OPTION_WND_H - OPTION_WND_EDGE_SIZE * 2, 0)
         -- 縦長
-        table.insert(skin.destination, {
-            id = "white", op = {op}, dst = {
-                {x = OPTION_WND_OFFSET_X + OPTION_WND_EDGE_SIZE, y = OPTION_WND_OFFSET_Y, w = OPTION_WND_W - OPTION_WND_EDGE_SIZE * 2, h = OPTION_WND_H}
-            }
-        })
+        insertOptionAnimationTable(skin, "white", op, OPTION_WND_OFFSET_X + OPTION_WND_EDGE_SIZE, OPTION_WND_OFFSET_Y, OPTION_WND_W - OPTION_WND_EDGE_SIZE * 2, OPTION_WND_H, 0)
         -- 四隅
-        table.insert(skin.destination, {
-            id = "optionWndEdge", op = {op}, dst = {
-                {x = OPTION_WND_OFFSET_X, y = OPTION_WND_OFFSET_Y, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 90},
-            }
-        })
-        table.insert(skin.destination, {
-            id = "optionWndEdge", op = {op}, dst = {
-                {x = OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, y = OPTION_WND_OFFSET_Y, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 180},
-            }
-        })
-        table.insert(skin.destination, {
-            id = "optionWndEdge", op = {op}, dst = {
-                {x = OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, y = OPTION_WND_OFFSET_Y + OPTION_WND_H - OPTION_WND_EDGE_SIZE, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 270},
-            }
-        })
-        table.insert(skin.destination, {
-            id = "optionWndEdge", op = {op}, dst = {
-                {x = OPTION_WND_OFFSET_X, y = OPTION_WND_OFFSET_Y + OPTION_WND_H - OPTION_WND_EDGE_SIZE, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 0}
-            }
-        })
+        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_WND_OFFSET_X, OPTION_WND_OFFSET_Y, OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 90)
+        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, OPTION_WND_OFFSET_Y, OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 180)
+        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, OPTION_WND_OFFSET_Y + OPTION_WND_H - OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 270)
+        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_WND_OFFSET_X, OPTION_WND_OFFSET_Y + OPTION_WND_H - OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 0)
+
         -- オプションのヘッダ部分
-        table.insert(skin.destination, {
-            id = "optionHeaderLeft", op = {op}, dst = {
-                {x = 192, y = 932, w = 16, h = OPTION_HEADER_H}
-            }
-        })
-        table.insert(skin.destination, {
-            id = "purpleRed", op = {op}, dst = {
-                {x = 212, y = 932, w = 1516, h = 2}
-            }
-        })
+        insertOptionAnimationTable(skin, "optionHeaderLeft", op, 192, 932, 16, OPTION_HEADER_H, 0)
+        insertOptionAnimationTable(skin, "purpleRed", op, 212, 932, 1516, 2, 0)
     end
     -- オプションのヘッダテキスト
     local optionTypes = {"optionHeaderPlayOption", "optionHeaderAssistOption", "optionHeaderOtherOption"}
     for i, v in ipairs(optionTypes) do
-        table.insert(skin.destination, {
-            id = v, op = {21 + (i - 1)}, dst = {
-                {x = 220, y = 932, w = OPTION_HEADER_TEXT_W, h = OPTION_HEADER_H}
-            }
-        })
+        insertOptionAnimationTable(skin, v, 21 + (i - 1), 220, 932, OPTION_HEADER_TEXT_W, OPTION_HEADER_H, 0)
     end
 
     -- プレイプション
@@ -1674,21 +1614,9 @@ local function main()
     for i, assistText in ipairs(assistTexts) do
         local baseY = 865 - 109 * (i - 1)
         -- 小さいキーの背景
-        table.insert(skin.destination, {
-            id = "optionHeader2LeftBg", op = {22}, dst = {
-                {x = 192, y = baseY, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H}
-            }
-        })
-        table.insert(skin.destination, {
-            id = "optionHeader2RightBg", op = {22}, dst = {
-                {x = 192 + 96 - OPTION_HEADER2_EDGE_BG_W, y = baseY, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H}
-            }
-        })
-        table.insert(skin.destination, {
-            id = "gray", op = {22}, dst = {
-                {x = 192 + OPTION_HEADER2_EDGE_BG_W, y = baseY, w = 96 - OPTION_HEADER2_EDGE_BG_W * 2, h = OPTION_HEADER2_EDGE_BG_H}
-            }
-        })
+        insertOptionAnimationTable(skin, "optionHeader2LeftBg", 22, 192, baseY, OPTION_HEADER2_EDGE_BG_W, OPTION_HEADER2_EDGE_BG_H, 0)
+        insertOptionAnimationTable(skin, "optionHeader2RightBg", 22, 192 + 96 - OPTION_HEADER2_EDGE_BG_W, baseY, OPTION_HEADER2_EDGE_BG_W, OPTION_HEADER2_EDGE_BG_H, 0)
+        insertOptionAnimationTable(skin, "gray2", 22, 192 + OPTION_HEADER2_EDGE_BG_W, baseY, 96 - OPTION_HEADER2_EDGE_BG_W * 2, OPTION_HEADER2_EDGE_BG_H, 0)
 
         -- 小さいキー
         for j = 1, 7 do
@@ -1697,11 +1625,9 @@ local function main()
                 if j % 2 == 0 then -- 上のキーは座標足す
                     y = y + SMALL_KEY_H - 6 * 2
                 end
-                table.insert(skin.destination, {
-                    id = "optionSmallKeyNonActive", op = {22}, dst = {
-                        {x = 192 + 20 + (j - 1) * (SMALL_KEY_W - 12) - 6, y = y, w = SMALL_KEY_W, h = SMALL_KEY_H}
-                    }
-                })
+                insertOptionAnimationTable(skin, "optionSmallKeyNonActive", 22, 
+                    192 + 20 + (j - 1) * (SMALL_KEY_W - 12) - 6, y,
+                    SMALL_KEY_W, SMALL_KEY_H, 0)
             end
         end
         for j = 1, 7 do
@@ -1710,126 +1636,78 @@ local function main()
                 if j % 2 == 0 then -- 上のキーは座標足す
                     y = y + SMALL_KEY_H - 6 * 2
                 end
-                table.insert(skin.destination, {
-                    id = "optionSmallKeyActive", op = {22}, dst = {
-                        {x = 192 + 20 + (j - 1) * (SMALL_KEY_W - 12) - 6, y = y, w = SMALL_KEY_W, h = SMALL_KEY_H}
-                    }
-                })
+                insertOptionAnimationTable(skin, "optionSmallKeyActive", 22, 
+                    192 + 20 + (j - 1) * (SMALL_KEY_W - 12) - 6, y,
+                    SMALL_KEY_W, SMALL_KEY_H, 0)
             end
         end
 
         -- 文字
-        table.insert(skin.destination, {
-            id = assistText .. "TextImg", op = {22}, dst = {
-                {x = 314, y = baseY, w = OPTION_HEADER_TEXT_W, h = OPTION_HEADER_H}
-            }
-        })
-        table.insert(skin.destination, {
-            id = assistText .. "DescriptionTextImg", op = {22}, dst = {
-                {x = 672, y = baseY, w = OPTION_HEADER_TEXT_W * 2, h = OPTION_HEADER_H}
-            }
-        })
+        insertOptionAnimationTable(skin, assistText .. "TextImg", 22, 314, baseY, OPTION_HEADER_TEXT_W, OPTION_HEADER_H, 0)
+        insertOptionAnimationTable(skin, assistText .. "DescriptionTextImg", 22, 672, baseY, OPTION_HEADER_TEXT_W * 2, OPTION_HEADER_H, 0)
 
         -- ボタン
-        table.insert(skin.destination, {
-            id = assistText .. "ButtonImgset", op = {22}, dst = {
-                {x = 1426, y = baseY - (OPTION_SWITCH_BUTTON_H - OPTION_HEADER_H) / 2, w = OPTION_SWITCH_BUTTON_W, h = OPTION_SWITCH_BUTTON_H},
-            }
-        })
+        insertOptionAnimationTable(skin, assistText .. "ButtonImgset", 22, 1426, baseY - (OPTION_SWITCH_BUTTON_H - OPTION_HEADER_H) / 2, OPTION_SWITCH_BUTTON_W, OPTION_SWITCH_BUTTON_H, 0)
     end
 
     -- その他オプション
     -- ヘルプ背景
-    table.insert(skin.destination, {
-        id = "gray", op = {23}, dst = {
-            {x = OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W, y = OPTION_WND_OFFSET_Y, w = HELP_WND_W - OPTION_WND_EDGE_SIZE, h = HELP_WND_H - OPTION_WND_EDGE_SIZE}
-        }
-    })
-    table.insert(skin.destination, {
-        id = "gray", op = {23}, dst = {
-            {x = OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W + OPTION_WND_EDGE_SIZE, y = OPTION_WND_OFFSET_Y + OPTION_WND_EDGE_SIZE, w = HELP_WND_W - OPTION_WND_EDGE_SIZE, h = HELP_WND_H - OPTION_WND_EDGE_SIZE}
-        }
-    })
+    insertOptionAnimationTable(skin, "gray2", 23, OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W, OPTION_WND_OFFSET_Y, HELP_WND_W - OPTION_WND_EDGE_SIZE, HELP_WND_H - OPTION_WND_EDGE_SIZE, 0)
+    insertOptionAnimationTable(skin, "gray2", 23, OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W + OPTION_WND_EDGE_SIZE, OPTION_WND_OFFSET_Y + OPTION_WND_EDGE_SIZE, HELP_WND_W - OPTION_WND_EDGE_SIZE, HELP_WND_H - OPTION_WND_EDGE_SIZE, 0)
+
     -- 隅
-    table.insert(skin.destination, {
-        id = "optionWndEdge", op = {23}, dst = {
-            {x = OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, y = OPTION_WND_OFFSET_Y, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE, angle = 180, r = 64, g = 64, b = 64},
-        }
-    })
-    table.insert(skin.destination, {
-        id = "optionWndEdge", op = {23}, dst = {
-            {
-                x = OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W,
-                y = OPTION_WND_OFFSET_Y + HELP_WND_H - OPTION_WND_EDGE_SIZE,
-                w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE,
-                angle = 0, r = 64, g = 64, b = 64
-            }
-        }
-    })
+    insertOptionAnimationTable(skin, "optionWndEdge", 23, OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, OPTION_WND_OFFSET_Y, OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 180, 64, 64, 64)
+    insertOptionAnimationTable(skin, "optionWndEdge", 23,
+        OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W,
+        OPTION_WND_OFFSET_Y + HELP_WND_H - OPTION_WND_EDGE_SIZE,
+        OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 0, 64, 64, 64)
+
+
     destinationPlayOption(skin, 192, 205, "optionHeader2GaugeAutoShift", "gaugeAutoShift", true, {2}, 23)
     destinationPlayOption(skin, 192, 607, "optionHeader2BgaShow", "bgaShow", true, {1}, 23)
-    destinationNumberOption(skin, 1088, 799, "optionHeader2NotesDisplayTime", "notesDisplayTime", true, {4, 6}, 23)
+    destinationNumberOption(skin, 1088, 794, "optionHeader2NotesDisplayTime", "notesDisplayTime", true, {4, 6}, 23)
     destinationNumberOption(skin, 1088, 614, "optionHeader2JudgeTiming", "judgeTiming", true, {5, 7}, 23)
 
     -- ヘルプヘッダ
     local helpHeaderOffsetX = OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W + 3
     local helpHeaderOffsetY = OPTION_WND_OFFSET_Y + HELP_WND_H - HELP_ICON_SIZE - 3
-    table.insert(skin.destination, {
-        id = "helpIcon", op = {23}, dst = {
-            {
-                x = helpHeaderOffsetX, y = helpHeaderOffsetY,
-                w = HELP_ICON_SIZE, h = HELP_ICON_SIZE
-            }
-        }
-    })
-    table.insert(skin.destination, {
-        id = "helpHeaderText", op = {23}, dst = {
-            {
-                x = helpHeaderOffsetX + HELP_ICON_SIZE + 1, y = helpHeaderOffsetY + 13,
-                w = 122, h = 30
-            }
-        }
-    })
-    table.insert(skin.destination, {
-        id = "white", op = {23}, dst = {
-            {
-                x = helpHeaderOffsetX + 6, y = helpHeaderOffsetY,
-                w = 652, h = 2
-            }
-        }
-    })
+    insertOptionAnimationTable(skin, "helpIcon", 23, helpHeaderOffsetX, helpHeaderOffsetY, HELP_ICON_SIZE, HELP_ICON_SIZE, 0)
+    insertOptionAnimationTable(skin, "helpHeaderText", 23, helpHeaderOffsetX + HELP_ICON_SIZE + 1, helpHeaderOffsetY + 13, 122, 30, 0)
+    insertOptionAnimationTable(skin, "white", 23, helpHeaderOffsetX + 6, helpHeaderOffsetY, 652, 2, 0)
+
     -- ヘルプ内容
     table.insert(skin.destination, {
-        id = "helpNumberKeys", op = {23}, loop = 0, timer = 23, dst = {
-            {time = 0, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
-            {time = 3500, a = 255},
-            {time = 4000, a = 0},
-            {time = 15500, a = 0},
-            {time = 16000, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+        id = "helpNumberKeys", op = {23}, loop = OPTION_ANIMATION_TIME, timer = 23, dst = {
+            {time = 0, x = BASE_WIDTH / 2, y = BASE_HEIGHT / 2, w = 0, h = 0},
+            {time = OPTION_ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+            {time = 3500 + OPTION_ANIMATION_TIME, a = 255},
+            {time = 4000 + OPTION_ANIMATION_TIME, a = 0},
+            {time = 15500 + OPTION_ANIMATION_TIME, a = 0},
+            {time = 16000 + OPTION_ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
         }
     })
     table.insert(skin.destination, {
-        id = "helpFunctionKeys1", op = {23}, loop = 0, timer = 23, dst = {
+        id = "helpFunctionKeys1", op = {23}, loop = OPTION_ANIMATION_TIME, timer = 23, dst = {
             {time = 0, a = 0},
-            {time = 3500, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246, w = HELP_TEXT1_W, h = 246},
-            {time = 4000, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246, w = HELP_TEXT1_W, h = 246},
-            {time = 7500, a = 255},
-            {time = 8000, a = 0},
-            {time = 16000, a = 0},
+            {time = 3500 + OPTION_ANIMATION_TIME, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246, w = HELP_TEXT1_W, h = 246},
+            {time = 4000 + OPTION_ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246, w = HELP_TEXT1_W, h = 246},
+            {time = 7500 + OPTION_ANIMATION_TIME, a = 255},
+            {time = 8000 + OPTION_ANIMATION_TIME, a = 0},
+            {time = 16000 + OPTION_ANIMATION_TIME, a = 0},
         }
     })
     table.insert(skin.destination, {
-        id = "helpFunctionKeys2", op = {23}, loop = 0, timer = 23, dst = {
+        id = "helpFunctionKeys2", op = {23}, loop = OPTION_ANIMATION_TIME, timer = 23, dst = {
             {time = 0, a = 0},
-            {time = 3500, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246 - 163, w = 470, h = 163},
-            {time = 4000, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246 - 163, w = 470, h = 163},
-            {time = 7500, a = 255},
-            {time = 8000, a = 0},
-            {time = 16000, a = 0},
+            {time = 3500 + OPTION_ANIMATION_TIME, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246 - 163, w = 470, h = 163},
+            {time = 4000 + OPTION_ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246 - 163, w = 470, h = 163},
+            {time = 7500 + OPTION_ANIMATION_TIME, a = 255},
+            {time = 8000 + OPTION_ANIMATION_TIME, a = 0},
+            {time = 16000 + OPTION_ANIMATION_TIME, a = 0},
         }
     })
     table.insert(skin.destination, {
-        id = "helpPlayKey", op = {23}, loop = 0, timer = 23, dst = {
+        id = "helpPlayKey", op = {23}, loop = OPTION_ANIMATION_TIME, timer = 23, dst = {
             {time = 0, a = 0},
             {time = 7500, a = 0, x = helpHeaderOffsetX + 9 + 64, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT2_W, h = HELP_TEXT_H},
             {time = 8000, a = 255, x = helpHeaderOffsetX + 9 + 64, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT2_W, h = HELP_TEXT_H},
