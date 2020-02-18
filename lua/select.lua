@@ -55,6 +55,9 @@ local COIN_W = 46
 local COIN_H = 46
 local DIA_W = 54
 local DIA_H = 47
+local GAUGE_REFLECTION_W = 37
+local GAUGE_REFLECTION_H = 24
+
 
 -- スクロールバー
 local MUSIC_SLIDER_H = 768
@@ -141,7 +144,7 @@ local OPTION_ANIMATION_TIME = 150
 
 local header = {
     type = 5,
-    name = "Social Skin dev",
+    name = "Social Skin",
     w = WIDTH,
     h = HEIGHT,
     fadeout = 500,
@@ -489,6 +492,7 @@ local function main()
         {id = "coin", src = 0, x = 1298 + 108, y = PARTS_OFFSET + 266, w = COIN_W, h = COIN_H},
         {id = "dia", src = 0, x = 1298 + 108 + 47, y = PARTS_OFFSET + 264, w = DIA_W, h = DIA_H},
         {id = "expGaugeFrame", src = 0, x = 1298, y = PARTS_OFFSET + 313, w = EXP_GAUGE_FRAME_W, h = EXP_GAUGE_FRAME_H},
+        {id = "gaugeReflection", src = 0, x = 1520, y = PARTS_OFFSET + 313, w = GAUGE_REFLECTION_W, h = GAUGE_REFLECTION_H},
         -- BPM用チルダ
         {id = "bpmTilda", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + 68, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
         -- 判定難易度
@@ -711,12 +715,12 @@ local function main()
 
     skin.value = {
         -- 選曲バー難易度数値
-        {id = "barPlayLevelUnknown", src = 0, x = 771, y = PARTS_OFFSET, w = 16*10, h = 32, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelUnknown",  src = 0, x = 771, y = PARTS_OFFSET,        w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
         {id = "barPlayLevelBeginner", src = 0, x = 771, y = PARTS_OFFSET + 21*1, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelNormal", src = 0, x = 771, y = PARTS_OFFSET + 21*2, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelHyper", src = 0, x = 771, y = PARTS_OFFSET + 21*3, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelAnother", src = 0, x = 771, y = PARTS_OFFSET + 21*4, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelInsane", src = 0, x = 771, y = PARTS_OFFSET + 21*5, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelNormal",   src = 0, x = 771, y = PARTS_OFFSET + 21*2, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelHyper",    src = 0, x = 771, y = PARTS_OFFSET + 21*3, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelAnother",  src = 0, x = 771, y = PARTS_OFFSET + 21*4, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelInsane",   src = 0, x = 771, y = PARTS_OFFSET + 21*5, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
         {id = "barPlayLevelUnknown2", src = 0, x = 771, y = PARTS_OFFSET + 21*6, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
         -- 左側の難易度表記数字
         {id = "largeLevelBeginner", src = 0, x = 771, y = PARTS_OFFSET + 147, w = 30*10, h = LARGE_LEVEL_HEIGHT, divx = 10, digit = 2, ref = 45, align = 2},
@@ -731,6 +735,7 @@ local function main()
         {id = "numOfDia", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 8, ref = 30, align = 0},
         {id = "rankValue", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H + STATUS_NUMBER_H, w = RANK_NUMBER_W * 10, h = RANK_NUMBER_H, divx = 10, digit = 4, ref = 17, align = 0},
         {id = "expGauge", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET, w = 10, h = 10, divy = 10, digit = 1, ref = 31, align = 1},
+        {id = "expGaugeRemnant", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET + 10, w = 10, h = 10, divy = 10, digit = 1, ref = 31, align = 1},
         -- ノーツ数
         {id = "numOfNormalNotes" , src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 350, align = 0},
         {id = "numOfScratchNotes", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 352, align = 0},
@@ -1072,6 +1077,20 @@ local function main()
         -- 経験値ゲージ
         {
             id = "expGauge", dst = {
+                {x = 163, y = 990, w = EXP_GAUGE_W, h = EXP_GAUGE_H}
+            }
+        },
+        {
+            id = "gaugeReflection", loop = 0, dst = {
+                {time = 0, x = 155, y = 990, w = 8, h = GAUGE_REFLECTION_H, a = 196},
+                {time = 6000},
+                {time = 6070, w = GAUGE_REFLECTION_W * 1.5},
+                {time = 6680, x = 330},
+                {time = 6750, x = 359, w = 8},
+            }
+        },
+        {
+            id = "expGaugeRemnant", dst = {
                 {x = 163, y = 990, w = EXP_GAUGE_W, h = EXP_GAUGE_H}
             }
         },
