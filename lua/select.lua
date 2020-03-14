@@ -144,7 +144,7 @@ local OPTION_ANIMATION_TIME = 150
 
 local header = {
     type = 5,
-    name = "Social Skin",
+    name = "Social Skin dev",
     w = WIDTH,
     h = HEIGHT,
     fadeout = 500,
@@ -793,7 +793,7 @@ local function main()
     end
 
     skin.font = {
-		{id = 0, path = "../common/fonts/SourceHanSans-Regular.ttf"},
+		{id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
 	}
 
     skin.text = {
