@@ -106,30 +106,36 @@ local EXSCORE_NUMBER_H = 30
 local NOTES_ICON_SIZE = 42
 
 -- オプションウィンドウ
-local OPTION_HEADER_H = 42
-local OPTION_HEADER_TEXT_W = 269
-local OPTION_WND_EDGE_SIZE = 32
-local OPTION_WND_W = 1600
-local OPTION_WND_H = 900
-local ACTIVE_OPTION_FRAME_W = 360
-local ACTIVE_OPTION_FRAME_H = 40
-local OPTION_ITEM_W = ACTIVE_OPTION_FRAME_W
-local OPTION_ITEM_H = 44
-local OPTION_BUTTON_W = 130
-local OPTION_BUTTON_H = 52
-local OPTION_NUMBER_BUTTON_SIZE = 56
-local OPTION_SWITCH_BUTTON_W = 302
-local OPTION_SWITCH_BUTTON_H = 56
-local OPTION_HEADER2_EDGE_BG_W = 16
-local OPTION_HEADER2_EDGE_BG_H = 42
-local OPTION_HEADER2_TEXT_SRC_X = 1709
-local OPTION_HEADER2_TEXT_W = 300
-local OPTION_HEADER2_TEXT_H = 42
-local OPTION_BG_H = 132
-local OPTION_NUMBER_BG_W = 240
-local OPTION_NUMBER_BG_H = 46
-local OPTION_NUMBER_W = 16
-local OPTION_NUMBER_H = 22
+local OPTION_INFO = {
+    HEADER_H = 42,
+    HEADER_TEXT_W = 269,
+    WND_EDGE_SIZE = 32,
+    WND_W = 1600,
+    WND_H = 900,
+    ACTIVE_FRAME_W = 360,
+    ACTIVE_FRAME_H = 40,
+    ITEM_W = 360,
+    ITEM_H = 44,
+    BUTTON_W = 130,
+    BUTTON_H = 52,
+    NUMBER_BUTTON_SIZE = 56,
+    SWITCH_BUTTON_W = 302,
+    SWITCH_BUTTON_H = 56,
+    HEADER2_EDGE_BG_W = 16,
+    HEADER2_EDGE_BG_H = 42,
+    HEADER2_TEXT_SRC_X = 1709,
+    HEADER2_TEXT_W = 300,
+    HEADER2_TEXT_H = 42,
+    BG_H = 132,
+    NUMBER_BG_W = 240,
+    NUMBER_BG_H = 46,
+    NUMBER_W = 16,
+    NUMBER_H = 22,
+    WND_OFFSET_X = (WIDTH - 1600) / 2,
+    WND_OFFSET_Y = (HEIGHT - 900) / 2,
+    ANIMATION_TIME = 150,
+}
+
 local SMALL_KEY_W = 20
 local SMALL_KEY_H = 24
 local HELP_WND_W = 672
@@ -138,23 +144,31 @@ local HELP_ICON_SIZE = 56
 local HELP_TEXT_H = 368
 local HELP_TEXT1_W = 380
 local HELP_TEXT2_W = 530
-local OPTION_WND_OFFSET_X = (WIDTH - OPTION_WND_W) / 2
-local OPTION_WND_OFFSET_Y = (HEIGHT - OPTION_WND_H) / 2
-local OPTION_ANIMATION_TIME = 150
 
-local INPUT_WAIT = 500 -- シーン開始からインプット受付までの時間
-local OPENING_ANIM_TIME = 6000 -- シーン開始時のアニメーション時間
-local OPENING_ANIM_TIME_OFFSET = 0 -- アニメーション開始時刻のずれ
-local METEOR_INTERVAL_Y = 100 -- 各流星のy座標ズレ
-local NUM_OF_METEOR = 12
-local METEOR_WIDTH = 100
-local METEOR_ANGLE = 20
-local METEOR_SATURATION = 0.13
-local METEOR_BRIGHTNESS = 1.0
-local METEOR_RADIAN = math.rad(METEOR_ANGLE)
-local METEOR_HEIGHT = BASE_WIDTH / math.cos(math.atan2(BASE_HEIGHT, BASE_WIDTH))
-local METEOR_ROTATION_VALUE = 3600
-local METEOR_BODY_SIZE = 256
+local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
+
+local OPENING_ANIM_TIME = 5000 -- シーン開始時のアニメーション時間
+local OPENING_ANIM_TIME_OFFSET = 300 -- アニメーション開始時刻のずれ
+local METEOR_INFO = {
+    QUANTITY = 10,
+    INTERVAL_Y = 1000,
+    WIDTH = 200,
+    ANGLE = -20,
+    RADIAN = math.rad(-20),
+    SATURATION = 0.13,
+    BRIGHTNESS = 1.0,
+    HEIGHT = BASE_WIDTH / math.cos(math.atan2(BASE_HEIGHT, BASE_WIDTH)),
+    ROTATION_VALUE = 1800,
+    BODY_SIZE = 256,
+    STARDUST_QUANTITY = 60,
+    STARDUST_SIZE_MAX = 64,
+    STARDUST_SIZE_MIN = 28,
+    STARDUST_ROTATION = 480,
+    STARDUST_ANIM_TIME = 1500,
+    STARDUST_DIRECTION_VARIATION = 40,
+    METEOR_BODY_SATURATION = 0.4,
+    METEOR_BODY_BRIGHTNESS = 1.0
+}
 
 local header = {
     type = 5,
@@ -173,11 +187,15 @@ local header = {
         },
     },
     filepath = {
-        {name = "背景選択----------------", path="../select/dummy/*"},
+        {name = "背景選択----------------", path="../dummy/*"},
         {name = "背景(png)", path = "../select/background/*.png"},
         -- {name = "背景(mp4)", path = "../select/background/*.mp4"}
     },
 }
+
+local function calcComplementValueByTime(startValue, endValue, nowTime, overallTime)
+    return startValue + (endValue - startValue) * nowTime / overallTime
+end
 
 local function hsvToRgb(h, s, v)
     h = h % 360
@@ -201,7 +219,6 @@ local function hsvToRgb(h, s, v)
     end
 
     local m = v - c
-    print(h)
     r, g, b = r + m, g + m, b + m
     r = math.floor(r * 255)
     g = math.floor(g * 255)
@@ -250,6 +267,45 @@ local function has_value (tab, val)
     return false
 end
 
+local function drawStardust(meteorStartX, meteorToX, meteorStartY, meteorToY, quantity, skin)
+    for j = 1, quantity do
+        -- その時刻での星の座標を取得
+        local parentTime = (OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET) * j / 60
+        local baseX = calcComplementValueByTime(meteorStartX, meteorToX, parentTime, OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET)
+        local baseY = calcComplementValueByTime(meteorStartY, meteorToY, parentTime, OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET)
+        -- 星が外すぎるなら星屑を出さない
+        if -BASE_WIDTH * 0.5 <= baseX and baseX <= BASE_WIDTH * 1.5 and -BASE_HEIGHT * 0.5 <= baseY and baseY <= BASE_HEIGHT * 1.5 then
+            local size = math.random(METEOR_INFO.STARDUST_SIZE_MIN, METEOR_INFO.STARDUST_SIZE_MAX)
+            local moveLength = 2 * METEOR_INFO.HEIGHT
+            -- 適当に後方にぶちまける
+            local direction = METEOR_INFO.ANGLE - 180
+            local deltaDirection = math.random(0, METEOR_INFO.STARDUST_DIRECTION_VARIATION) - METEOR_INFO.STARDUST_DIRECTION_VARIATION / 2
+            direction = math.rad(direction + deltaDirection)
+            local toX = baseX + moveLength * -math.sin(direction)
+            local toY = baseY + moveLength * math.cos(direction)
+
+            local meteorInitAngle = math.random(0, 359)
+
+            table.insert(skin.destination, {
+                id = "meteorBody", loop = -1, dst = {
+                    {time = 0, x = baseX, y = baseY, w = size, h = size, angle = 0, a = 0},
+                    {time = INPUT_WAIT + parentTime - 1, angle = meteorInitAngle, a = 0},
+                    {time = INPUT_WAIT + parentTime, angle = meteorInitAngle, a = 255},
+                    {time = INPUT_WAIT + parentTime + METEOR_INFO.STARDUST_ANIM_TIME, x = toX, y = toY, angle = METEOR_INFO.STARDUST_ROTATION + meteorInitAngle}
+                }
+            })
+            table.insert(skin.destination, {
+                id = "meteorLight", loop = -1, dst = {
+                    {time = 0, x = baseX, y = baseY, w = size, h = size, angle = 0, a = 0},
+                    {time = INPUT_WAIT + parentTime - 1, angle = meteorInitAngle, a = 0},
+                    {time = INPUT_WAIT + parentTime, angle = meteorInitAngle, a = 255},
+                    {time = INPUT_WAIT + parentTime + METEOR_INFO.STARDUST_ANIM_TIME, x = toX, y = toY, angle = METEOR_INFO.STARDUST_ROTATION + meteorInitAngle}
+                }
+            })
+        end
+    end
+end
+
 local function insertOptionAnimationTable(skin, id, op, x, y, width, height, angle, r, g, b)
     if r == nil then
         r = 255
@@ -263,29 +319,29 @@ local function insertOptionAnimationTable(skin, id, op, x, y, width, height, ang
 
     -- 消えるとき 上の出現中が消えると同時に表示され, 消失までアニメーション
     table.insert(skin.destination, {
-        id = id, op = {-op}, timer = op + 10, loop = OPTION_ANIMATION_TIME,
+        id = id, op = {-op}, timer = op + 10, loop = OPTION_INFO.ANIMATION_TIME,
         dst = {
             {time = 0, x = x, y = y, w = width, h = height, angle = angle, r = r, g = g, b = b},
-            {time = OPTION_ANIMATION_TIME - 1, x = BASE_WIDTH / 2, y = BASE_HEIGHT / 2, w = 0, h = 0, a = 255},
-            {time = OPTION_ANIMATION_TIME}
+            {time = OPTION_INFO.ANIMATION_TIME - 1, x = BASE_WIDTH / 2, y = BASE_HEIGHT / 2, w = 0, h = 0, a = 255},
+            {time = OPTION_INFO.ANIMATION_TIME}
         }
     })
     -- 出現時
     table.insert(skin.destination, {
-        id = id, op = {op}, timer = op, loop = OPTION_ANIMATION_TIME,
+        id = id, op = {op}, timer = op, loop = OPTION_INFO.ANIMATION_TIME,
         dst = {
             {time = 0, x = BASE_WIDTH / 2, y = BASE_HEIGHT / 2, w = 0, h = 0, angle = angle, r = r, g = g, b = b},
-            {time = OPTION_ANIMATION_TIME - 1, x = x, y = y, w = width, h = height},
-            {time = OPTION_ANIMATION_TIME, x = 0, y = 0, w = 0, h = 0},
+            {time = OPTION_INFO.ANIMATION_TIME - 1, x = x, y = y, w = width, h = height},
+            {time = OPTION_INFO.ANIMATION_TIME, x = 0, y = 0, w = 0, h = 0},
         }
     })
     -- 出現中
     table.insert(skin.destination, {
-        id = id, op = {op}, timer = op, loop = OPTION_ANIMATION_TIME,
+        id = id, op = {op}, timer = op, loop = OPTION_INFO.ANIMATION_TIME,
         dst = {
             {time = 0, x = x, y = y, w = width, h = height, angle = angle, a = 0, r = r, g = g, b = b},
-            {time = OPTION_ANIMATION_TIME - 1, a = 0},
-            {time = OPTION_ANIMATION_TIME, a = 255},
+            {time = OPTION_INFO.ANIMATION_TIME - 1, a = 0},
+            {time = OPTION_INFO.ANIMATION_TIME, a = 255},
         }
     })
 end
@@ -297,12 +353,12 @@ local function loadOptionImgs(skin, optionTexts, optionIdPrefix, ref, x, y)
     local nonactiveImages = {}
     for i, val in ipairs(optionTexts) do
         table.insert(skin.image, {
-            id = val .. optionActiveTextSuffix, src = 2, x = x + OPTION_ITEM_W, y = y + OPTION_ITEM_H * i,
-            w = OPTION_ITEM_W, h = OPTION_ITEM_H
+            id = val .. optionActiveTextSuffix, src = 2, x = x + OPTION_INFO.ITEM_W, y = y + OPTION_INFO.ITEM_H * i,
+            w = OPTION_INFO.ITEM_W, h = OPTION_INFO.ITEM_H
         })
         table.insert(skin.image, {
-            id = val .. optionNonactiveTextSuffix, src = 2, x = x, y = y + OPTION_ITEM_H * (i - 1),
-            w = OPTION_ITEM_W, h = OPTION_ITEM_H * 3
+            id = val .. optionNonactiveTextSuffix, src = 2, x = x, y = y + OPTION_INFO.ITEM_H * (i - 1),
+            w = OPTION_INFO.ITEM_W, h = OPTION_INFO.ITEM_H * 3
         })
         table.insert(activeImages, val .. optionActiveTextSuffix)
         table.insert(nonactiveImages, val .. optionNonactiveTextSuffix)
@@ -320,12 +376,12 @@ local function destinationOptionHeader2(skin, baseX, baseY, width, titleTextId, 
     local keyOffset = 16
 
     -- 各オプションヘッダBG出力
-    insertOptionAnimationTable(skin, "optionHeader2LeftBg", op, baseX, baseY, OPTION_HEADER2_EDGE_BG_W, OPTION_HEADER2_EDGE_BG_H, 0)
-    insertOptionAnimationTable(skin, "optionHeader2RightBg", op, baseX + width - OPTION_HEADER2_EDGE_BG_W, baseY, OPTION_HEADER2_EDGE_BG_W, OPTION_HEADER2_EDGE_BG_H, 0)
-    insertOptionAnimationTable(skin, "gray2", op, baseX + OPTION_HEADER2_EDGE_BG_W, baseY, width - OPTION_HEADER2_EDGE_BG_W * 2, OPTION_HEADER2_EDGE_BG_H, 0)
+    insertOptionAnimationTable(skin, "optionHeader2LeftBg", op, baseX, baseY, OPTION_INFO.HEADER2_EDGE_BG_W, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
+    insertOptionAnimationTable(skin, "optionHeader2RightBg", op, baseX + width - OPTION_INFO.HEADER2_EDGE_BG_W, baseY, OPTION_INFO.HEADER2_EDGE_BG_W, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
+    insertOptionAnimationTable(skin, "gray2", op, baseX + OPTION_INFO.HEADER2_EDGE_BG_W, baseY, width - OPTION_INFO.HEADER2_EDGE_BG_W * 2, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
 
     -- オプションヘッダテキスト出力
-    insertOptionAnimationTable(skin, titleTextId, op, baseX + 20, baseY, OPTION_HEADER2_TEXT_W, OPTION_HEADER2_TEXT_H, 0)
+    insertOptionAnimationTable(skin, titleTextId, op, baseX + 20, baseY, OPTION_INFO.HEADER2_TEXT_W, OPTION_INFO.HEADER2_TEXT_H, 0)
 
     -- オプションの使用キー出力
     for i = 1, 7 do
@@ -355,27 +411,27 @@ local function destinationPlayOption(skin, baseX, baseY, titleTextId, optionIdPr
     if isLarge == false then
         width = 480
     end
-    local optionBoxOffsetX = (width - OPTION_ITEM_W) / 2
-    local optionButtonOffsetX = (width - OPTION_BUTTON_W) / 2
+    local optionBoxOffsetX = (width - OPTION_INFO.ITEM_W) / 2
+    local optionButtonOffsetX = (width - OPTION_INFO.BUTTON_W) / 2
     local optionItemOffsetY = 100
 
     -- ヘッダ出力
     destinationOptionHeader2(skin, baseX, baseY + headerOffset, width, titleTextId, activeKeys, op)
 
     -- オプション一覧背景
-    insertOptionAnimationTable(skin, "optionSelectBg", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - OPTION_ITEM_H, OPTION_ITEM_W, OPTION_BG_H, 0)
+    insertOptionAnimationTable(skin, "optionSelectBg", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - OPTION_INFO.ITEM_H, OPTION_INFO.ITEM_W, OPTION_INFO.BG_H, 0)
 
     -- オプション出力
-    insertOptionAnimationTable(skin, optionIdPrefix .. "Nonactive", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - 2 - OPTION_ITEM_H, OPTION_ITEM_W, OPTION_ITEM_H * 3, 0)
-    insertOptionAnimationTable(skin, "activeOptionFrame", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY, ACTIVE_OPTION_FRAME_W, ACTIVE_OPTION_FRAME_H, 0)
-    insertOptionAnimationTable(skin, optionIdPrefix .. "Active", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - 2, OPTION_ITEM_W, OPTION_ITEM_H, 0)
+    insertOptionAnimationTable(skin, optionIdPrefix .. "Nonactive", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - 2 - OPTION_INFO.ITEM_H, OPTION_INFO.ITEM_W, OPTION_INFO.ITEM_H * 3, 0)
+    insertOptionAnimationTable(skin, "activeOptionFrame", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY, OPTION_INFO.ACTIVE_FRAME_W, OPTION_INFO.ACTIVE_FRAME_H, 0)
+    insertOptionAnimationTable(skin, optionIdPrefix .. "Active", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - 2, OPTION_INFO.ITEM_W, OPTION_INFO.ITEM_H, 0)
 
 
     -- ボタン出力
-    insertOptionAnimationTable(skin, optionIdPrefix .. "UpButton", op, baseX + optionButtonOffsetX, baseY + 192, OPTION_BUTTON_W, OPTION_BUTTON_H, 0)
+    insertOptionAnimationTable(skin, optionIdPrefix .. "UpButton", op, baseX + optionButtonOffsetX, baseY + 192, OPTION_INFO.BUTTON_W, OPTION_INFO.BUTTON_H, 0)
 
     -- 下
-    insertOptionAnimationTable(skin, optionIdPrefix .. "DownButton", op, baseX + optionButtonOffsetX, baseY, OPTION_BUTTON_W, OPTION_BUTTON_H, 0)
+    insertOptionAnimationTable(skin, optionIdPrefix .. "DownButton", op, baseX + optionButtonOffsetX, baseY, OPTION_INFO.BUTTON_W, OPTION_INFO.BUTTON_H, 0)
 end
 
 local function destinationNumberOption(skin, baseX, baseY, titleTextId, optionIdPrefix, isLarge, activeKeys, op)
@@ -385,39 +441,39 @@ local function destinationNumberOption(skin, baseX, baseY, titleTextId, optionId
     if isLarge == false then
         width = 480
     end
-    local optionBoxOffsetX = (width - OPTION_NUMBER_BG_W) / 2
-    local optionButtonOffsetX = (width - OPTION_BUTTON_W) / 2
+    local optionBoxOffsetX = (width - OPTION_INFO.NUMBER_BG_W) / 2
+    local optionButtonOffsetX = (width - OPTION_INFO.BUTTON_W) / 2
     local optionOffsetY = 5
 
     -- ヘッダ出力
-    destinationOptionHeader2(skin, baseX, baseY + height - OPTION_HEADER_H, width, titleTextId, activeKeys, op)
+    destinationOptionHeader2(skin, baseX, baseY + height - OPTION_INFO.HEADER_H, width, titleTextId, activeKeys, op)
 
     -- オプション背景
-    insertOptionAnimationTable(skin, "optionNumberBg", op, baseX + optionBoxOffsetX, baseY + optionOffsetY, OPTION_NUMBER_BG_W, OPTION_NUMBER_BG_H, 0)
+    insertOptionAnimationTable(skin, "optionNumberBg", op, baseX + optionBoxOffsetX, baseY + optionOffsetY, OPTION_INFO.NUMBER_BG_W, OPTION_INFO.NUMBER_BG_H, 0)
 
     -- 数値出力
     insertOptionAnimationTable(skin, optionIdPrefix, op,
-        baseX + width / 2 - OPTION_NUMBER_W * (digit - 0.5) - 4,
+        baseX + width / 2 - OPTION_INFO.NUMBER_W * (digit - 0.5) - 4,
         baseY + optionOffsetY + 12,
-        OPTION_NUMBER_W, OPTION_NUMBER_H, 0)
+        OPTION_INFO.NUMBER_W, OPTION_INFO.NUMBER_H, 0)
 
     -- ms出力
     insertOptionAnimationTable(skin, "millisecondTextImg", op,
         baseX + width / 2 + 6,
         baseY + optionOffsetY + 12,
-        39, OPTION_NUMBER_H, 0)
+        39, OPTION_INFO.NUMBER_H, 0)
 
     -- ボタン出力
     -- beatorajaの現バージョンは未実装
     insertOptionAnimationTable(skin, optionIdPrefix .. "DownButton", op,
         baseX + width / 2 - 186,
         baseY,
-        OPTION_NUMBER_BUTTON_SIZE, OPTION_NUMBER_BUTTON_SIZE, 0)
+        OPTION_INFO.NUMBER_BUTTON_SIZE, OPTION_INFO.NUMBER_BUTTON_SIZE, 0)
 
     insertOptionAnimationTable(skin, optionIdPrefix .. "UpButton", op,
-        baseX + width / 2 + 186 - OPTION_NUMBER_BUTTON_SIZE,
+        baseX + width / 2 + 186 - OPTION_INFO.NUMBER_BUTTON_SIZE,
         baseY,
-        OPTION_NUMBER_BUTTON_SIZE, OPTION_NUMBER_BUTTON_SIZE, 0)
+        OPTION_INFO.NUMBER_BUTTON_SIZE, OPTION_INFO.NUMBER_BUTTON_SIZE, 0)
 
 end
 
@@ -561,11 +617,11 @@ local function main()
         {id = "music48keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*4, y = PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
         -- オプションのkeys
         {id = "upperOptionButtonBg" , src = 2, x = 1321, y = PARTS_TEXTURE_SIZE - UPPER_OPTION_H, w = UPPER_OPTION_W, h = UPPER_OPTION_H},
-        {id = "keysSet", src = 2, x = 1441, y = 836, w = 129, h = OPTION_ITEM_H * 8, divy = 8, len = 8, ref = 11, act = 11},
+        {id = "keysSet", src = 2, x = 1441, y = 836, w = 129, h = OPTION_INFO.ITEM_H * 8, divy = 8, len = 8, ref = 11, act = 11},
         -- オプションのLNモード
-        {id = "lnModeSet" , src = 2, x = 1570, y = 836, w = 129, h = OPTION_ITEM_H * 3, divy = 3, len = 3, ref = 308, act = 308},
+        {id = "lnModeSet" , src = 2, x = 1570, y = 836, w = 129, h = OPTION_INFO.ITEM_H * 3, divy = 3, len = 3, ref = 308, act = 308},
         -- ソート
-        {id = "sortModeSet" , src = 2, x = 1699, y = 836, w = 258, h = OPTION_ITEM_H * 8, divy = 8, len = 8, ref = 12, act = 12},
+        {id = "sortModeSet" , src = 2, x = 1699, y = 836, w = 258, h = OPTION_INFO.ITEM_H * 8, divy = 8, len = 8, ref = 12, act = 12},
 
         -- 空プア表記用スラッシュ
         {id = "slashForEmptyPoor", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W * 11, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
@@ -583,77 +639,77 @@ local function main()
         {id = "judgeHard", src = 0, x = 1298, y = PARTS_OFFSET + 361 + PLAY_STATUS_TEXT_H * 2, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H},
         {id = "judgeVeryhard", src = 0, x = 1298, y = PARTS_OFFSET + 361 + PLAY_STATUS_TEXT_H * 3, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H},
         -- アクティブなオブション用背景
-        {id = "activeOptionFrame", src = 2, x = 0, y = PARTS_TEXTURE_SIZE - ACTIVE_OPTION_FRAME_H, w = ACTIVE_OPTION_FRAME_W, h = ACTIVE_OPTION_FRAME_H},
+        {id = "activeOptionFrame", src = 2, x = 0, y = PARTS_TEXTURE_SIZE - OPTION_INFO.ACTIVE_FRAME_H, w = OPTION_INFO.ACTIVE_FRAME_W, h = OPTION_INFO.ACTIVE_FRAME_H},
         -- オプション画面の端
-        {id = "optionWndEdge", src = 2, x = 360, y = PARTS_TEXTURE_SIZE - OPTION_WND_EDGE_SIZE, w = OPTION_WND_EDGE_SIZE, h = OPTION_WND_EDGE_SIZE},
+        {id = "optionWndEdge", src = 2, x = 360, y = PARTS_TEXTURE_SIZE - OPTION_INFO.WND_EDGE_SIZE, w = OPTION_INFO.WND_EDGE_SIZE, h = OPTION_INFO.WND_EDGE_SIZE},
         -- オプションのヘッダ
-        {id = "optionHeaderLeft", src = 2, x = 392, y = PARTS_TEXTURE_SIZE - OPTION_HEADER_H, w = 16, h = OPTION_HEADER_H},
+        {id = "optionHeaderLeft", src = 2, x = 392, y = PARTS_TEXTURE_SIZE - OPTION_INFO.HEADER_H, w = 16, h = OPTION_INFO.HEADER_H},
         -- オプションのヘッダテキスト
-        {id = "optionHeaderPlayOption", src = 2, x = 1441, y = 0, w = OPTION_HEADER_TEXT_W, h = OPTION_HEADER_H},
-        {id = "optionHeaderAssistOption", src = 2, x = 1441, y = OPTION_HEADER_H, w = OPTION_HEADER_TEXT_W, h = OPTION_HEADER_H},
-        {id = "optionHeaderOtherOption", src = 2, x = 1441, y = OPTION_HEADER_H * 2, w = OPTION_HEADER_TEXT_W, h = OPTION_HEADER_H},
+        {id = "optionHeaderPlayOption", src = 2, x = 1441, y = 0, w = OPTION_INFO.HEADER_TEXT_W, h = OPTION_INFO.HEADER_H},
+        {id = "optionHeaderAssistOption", src = 2, x = 1441, y = OPTION_INFO.HEADER_H, w = OPTION_INFO.HEADER_TEXT_W, h = OPTION_INFO.HEADER_H},
+        {id = "optionHeaderOtherOption", src = 2, x = 1441, y = OPTION_INFO.HEADER_H * 2, w = OPTION_INFO.HEADER_TEXT_W, h = OPTION_INFO.HEADER_H},
         -- オプション用キー
         {id = "optionSmallKeyActive", src = 2, x = 673, y = PARTS_TEXTURE_SIZE - SMALL_KEY_H * 2, w = SMALL_KEY_W, h = SMALL_KEY_H},
         {id = "optionSmallKeyNonActive", src = 2, x = 673, y = PARTS_TEXTURE_SIZE - SMALL_KEY_H, w = SMALL_KEY_W, h = SMALL_KEY_H},
         -- 各オプション選択部分背景
-        {id = "optionSelectBg", src = 2, x = 0, y = 1834, w = OPTION_ITEM_W, h = OPTION_BG_H},
-        {id = "optionNumberBg", src = 2, x = 0, y = 1788, w = OPTION_NUMBER_BG_W, h = OPTION_NUMBER_BG_H},
+        {id = "optionSelectBg", src = 2, x = 0, y = 1834, w = OPTION_INFO.ITEM_W, h = OPTION_INFO.BG_H},
+        {id = "optionNumberBg", src = 2, x = 0, y = 1788, w = OPTION_INFO.NUMBER_BG_W, h = OPTION_INFO.NUMBER_BG_H},
         -- 各オプションヘッダBG
-        {id = "optionHeader2LeftBg", src = 2, x = 0, y = 1966, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H},
-        {id = "optionHeader2RightBg", src = 2, x = OPTION_HEADER2_EDGE_BG_W, y = 1966, w = OPTION_HEADER2_EDGE_BG_W, h = OPTION_HEADER2_EDGE_BG_H},
+        {id = "optionHeader2LeftBg", src = 2, x = 0, y = 1966, w = OPTION_INFO.HEADER2_EDGE_BG_W, h = OPTION_INFO.HEADER2_EDGE_BG_H},
+        {id = "optionHeader2RightBg", src = 2, x = OPTION_INFO.HEADER2_EDGE_BG_W, y = 1966, w = OPTION_INFO.HEADER2_EDGE_BG_W, h = OPTION_INFO.HEADER2_EDGE_BG_H},
         -- 各オプションヘッダテキスト
-        {id = "optionHeader2NotesOrder1", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = 0, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionHeader2NotesOrder2", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 1, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionHeader2GaugeType", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 2, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionHeader2DpOption", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 3, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionHeader2FixedHiSpeed", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 4, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionHeader2GaugeAutoShift", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 5, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionHeader2BgaShow", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 6, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionHeader2NotesDisplayTime", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 7, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
-        {id = "optionHeader2JudgeTiming", src = 2, x = OPTION_HEADER2_TEXT_SRC_X, y = OPTION_HEADER2_TEXT_H * 8, w = OPTION_HEADER2_TEXT_W, h = OPTION_HEADER2_TEXT_H},
+        {id = "optionHeader2NotesOrder1", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = 0, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2NotesOrder2", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 1, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2GaugeType", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 2, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2DpOption", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 3, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2FixedHiSpeed", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 4, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2GaugeAutoShift", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 5, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2BgaShow", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 6, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2NotesDisplayTime", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 7, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2JudgeTiming", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 8, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
         -- オプション用ボタン
-        {id = "notesOrder1UpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 42, click = 1},
-        {id = "notesOrder1DownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 42},
-        {id = "notesOrder2UpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 43, click = 1},
-        {id = "notesOrder2DownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 43},
-        {id = "gaugeTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 40, click = 1},
-        {id = "gaugeTypeDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 40},
-        {id = "dpTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 54, click = 1},
-        {id = "dpTypeDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 54},
-        {id = "hiSpeedTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 55, click = 1},
-        {id = "hiSpeedTypeDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 55},
-        {id = "gaugeAutoShiftUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 78, click = 1},
-        {id = "gaugeAutoShiftDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 78},
-        {id = "bgaShowUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 72, click = 1},
-        {id = "bgaShowDownButton", src = 2, x = 408 + OPTION_BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_BUTTON_H * 2, w = OPTION_BUTTON_W, h = OPTION_BUTTON_H * 2, divy = 2, act = 72},
+        {id = "notesOrder1UpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 42, click = 1},
+        {id = "notesOrder1DownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 42},
+        {id = "notesOrder2UpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 43, click = 1},
+        {id = "notesOrder2DownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 43},
+        {id = "gaugeTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 40, click = 1},
+        {id = "gaugeTypeDownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 40},
+        {id = "dpTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 54, click = 1},
+        {id = "dpTypeDownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 54},
+        {id = "hiSpeedTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 55, click = 1},
+        {id = "hiSpeedTypeDownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 55},
+        {id = "gaugeAutoShiftUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 78, click = 1},
+        {id = "gaugeAutoShiftDownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 78},
+        {id = "bgaShowUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 72, click = 1},
+        {id = "bgaShowDownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 72},
         {
             id = "notesDisplayTimeUpButton", src = 2,
-            x = 998 + OPTION_NUMBER_BUTTON_SIZE,
-            y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_BUTTON_SIZE * 2,
-            w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE * 2,
+            x = 998 + OPTION_INFO.NUMBER_BUTTON_SIZE,
+            y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_BUTTON_SIZE * 2,
+            w = OPTION_INFO.NUMBER_BUTTON_SIZE, h = OPTION_INFO.NUMBER_BUTTON_SIZE * 2,
             divy = 2, act = 0},
         {
             id = "notesDisplayTimeDownButton", src = 2,
             x = 998,
-            y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_BUTTON_SIZE * 2,
-            w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE * 2,
+            y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_BUTTON_SIZE * 2,
+            w = OPTION_INFO.NUMBER_BUTTON_SIZE, h = OPTION_INFO.NUMBER_BUTTON_SIZE * 2,
             divy = 2, act = 0, click = 1},
         {
             id = "judgeTimingUpButton", src = 2,
-            x = 998 + OPTION_NUMBER_BUTTON_SIZE,
-            y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_BUTTON_SIZE * 2,
-            w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE * 2,
+            x = 998 + OPTION_INFO.NUMBER_BUTTON_SIZE,
+            y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_BUTTON_SIZE * 2,
+            w = OPTION_INFO.NUMBER_BUTTON_SIZE, h = OPTION_INFO.NUMBER_BUTTON_SIZE * 2,
             divy = 2, act = 0
         },
         {
             id = "judgeTimingDownButton", src = 2,
             x = 998,
-            y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_BUTTON_SIZE * 2,
-            w = OPTION_NUMBER_BUTTON_SIZE, h = OPTION_NUMBER_BUTTON_SIZE * 2,
+            y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_BUTTON_SIZE * 2,
+            w = OPTION_INFO.NUMBER_BUTTON_SIZE, h = OPTION_INFO.NUMBER_BUTTON_SIZE * 2,
             divy = 2, act = 0, click = 1
         },
         -- その他オプション用
-        {id = "millisecondTextImg", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_H * 3, w = 39, h = OPTION_NUMBER_H},
+        {id = "millisecondTextImg", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H * 3, w = 39, h = OPTION_INFO.NUMBER_H},
         -- ON/OFFオプション用ボタン(アシストは後のforで処理)
 
         -- ヘルプヘッダ
@@ -751,28 +807,28 @@ local function main()
     optionTexts = {
         "assistedEasy", "easy", "normal", "hard", "exHard", "hazard",
     }
-    loadOptionImgs(skin, optionTexts, "gaugeType", 40, OPTION_ITEM_W * 2, 0)
+    loadOptionImgs(skin, optionTexts, "gaugeType", 40, OPTION_INFO.ITEM_W * 2, 0)
     -- DPオプション
     optionTexts = {
         "off", "flip", "battle", "battleAs"
     }
-    loadOptionImgs(skin, optionTexts, "dpType", 54, OPTION_ITEM_W * 2, OPTION_ITEM_H * 12)
+    loadOptionImgs(skin, optionTexts, "dpType", 54, OPTION_INFO.ITEM_W * 2, OPTION_INFO.ITEM_H * 12)
     -- ハイスピード固定
     optionTexts = {
         "off", "startBpm", "maxBpm", "mainBpm", "minBpm"
     }
-    loadOptionImgs(skin, optionTexts, "hiSpeedType", 55, 0, OPTION_ITEM_H * 12)
+    loadOptionImgs(skin, optionTexts, "hiSpeedType", 55, 0, OPTION_INFO.ITEM_H * 12)
 
     -- GAS
     optionTexts = {
         "none", "continue", "hardToGroove", "bestClear", "selectToUnder"
     }
-    loadOptionImgs(skin, optionTexts, "gaugeAutoShift", 78, 0, OPTION_ITEM_H * 12 * 2)
+    loadOptionImgs(skin, optionTexts, "gaugeAutoShift", 78, 0, OPTION_INFO.ITEM_H * 12 * 2)
     -- BGA
     optionTexts = {
         "on", "auto", "off"
     }
-    loadOptionImgs(skin, optionTexts, "bgaShow", 72, OPTION_ITEM_W * 2, OPTION_ITEM_H * 12 * 2)
+    loadOptionImgs(skin, optionTexts, "bgaShow", 72, OPTION_INFO.ITEM_W * 2, OPTION_INFO.ITEM_H * 12 * 2)
 
     -- アシストオプション
     local assistTexts = {
@@ -782,25 +838,25 @@ local function main()
         -- assist名
         table.insert(skin.image, {
             id = assistText .. "TextImg", src = 2,
-            x = OPTION_ITEM_W * 4, y = OPTION_HEADER_H * (3 + i),
-            w = OPTION_HEADER_TEXT_W, h = OPTION_HEADER_H
+            x = OPTION_INFO.ITEM_W * 4, y = OPTION_INFO.HEADER_H * (3 + i),
+            w = OPTION_INFO.HEADER_TEXT_W, h = OPTION_INFO.HEADER_H
         })
         -- 説明
         table.insert(skin.image, {
             id = assistText .. "DescriptionTextImg", src = 2,
-            x = OPTION_ITEM_W * 4, y = OPTION_HEADER_H * (3 + 7 + i),
-            w = OPTION_HEADER_TEXT_W * 2, h = OPTION_HEADER_H
+            x = OPTION_INFO.ITEM_W * 4, y = OPTION_INFO.HEADER_H * (3 + 7 + i),
+            w = OPTION_INFO.HEADER_TEXT_W * 2, h = OPTION_INFO.HEADER_H
         })
         -- ON/OFF
         table.insert(skin.image, {
             id = assistText .. "ButtonOff", src = 2,
-            x = 696, y = PARTS_TEXTURE_SIZE - OPTION_SWITCH_BUTTON_H * 2,
-            w = OPTION_SWITCH_BUTTON_W, h = OPTION_SWITCH_BUTTON_H,
+            x = 696, y = PARTS_TEXTURE_SIZE - OPTION_INFO.SWITCH_BUTTON_H * 2,
+            w = OPTION_INFO.SWITCH_BUTTON_W, h = OPTION_INFO.SWITCH_BUTTON_H,
         })
         table.insert(skin.image, {
             id = assistText .. "ButtonOn", src = 2,
-            x = 696, y = PARTS_TEXTURE_SIZE - OPTION_SWITCH_BUTTON_H,
-            w = OPTION_SWITCH_BUTTON_W, h = OPTION_SWITCH_BUTTON_H,
+            x = 696, y = PARTS_TEXTURE_SIZE - OPTION_INFO.SWITCH_BUTTON_H,
+            w = OPTION_INFO.SWITCH_BUTTON_W, h = OPTION_INFO.SWITCH_BUTTON_H,
         })
         table.insert(skin.imageset, {
             id = assistText .. "ButtonImgset", ref = 300 + i, act = 300 + i,
@@ -837,8 +893,8 @@ local function main()
         {id = "numOfLnNotes"     , src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 351, align = 0},
         {id = "numOfBssNotes"    , src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 353, align = 0},
         -- オプション
-        {id = "notesDisplayTime", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_H, w = OPTION_NUMBER_W * 10, h = OPTION_NUMBER_H, divx = 10, digit = 4, ref = 312},
-        {id = "judgeTiming", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_NUMBER_H * 2, w = OPTION_NUMBER_W * 12, h = OPTION_NUMBER_H * 2, divx = 12, divy = 2, digit = 4, ref = 12},
+        {id = "notesDisplayTime", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H, w = OPTION_INFO.NUMBER_W * 10, h = OPTION_INFO.NUMBER_H, divx = 10, digit = 4, ref = 312},
+        {id = "judgeTiming", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H * 2, w = OPTION_INFO.NUMBER_W * 12, h = OPTION_INFO.NUMBER_H * 2, divx = 12, divy = 2, digit = 4, ref = 12},
     }
 
     -- 各種ステータス用数値(パーツ共通)
@@ -1229,36 +1285,36 @@ local function main()
         -- 上部オプション
         {
             id = "upperOptionButtonBg", dst = {
-                {x = 674, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H - 1, w = 270, h = OPTION_SWITCH_BUTTON_H}
+                {x = 674, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H - 1, w = 270, h = OPTION_INFO.SWITCH_BUTTON_H}
             }
         },
         -- 上部オプションの上のやつの区切り
         {
             id = "white", dst = {
-                {x = 680 + 129, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H + 6 - 1, w = 1, h = OPTION_ITEM_H, r = 102, g = 102, b = 102}
+                {x = 680 + 129, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H + 6 - 1, w = 1, h = OPTION_INFO.ITEM_H, r = 102, g = 102, b = 102}
             }
         },
         {
             id = "upperOptionButtonBg", dst = {
-                {x = 674, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H - 54, w = 270, h = OPTION_SWITCH_BUTTON_H}
+                {x = 674, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H - 54, w = 270, h = OPTION_INFO.SWITCH_BUTTON_H}
             }
         },
         -- keys
         {
             id = "keysSet", dst = {
-                {x = 680, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H + 6 - 1, w = 129, h = OPTION_ITEM_H}
+                {x = 680, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H + 6 - 1, w = 129, h = OPTION_INFO.ITEM_H}
             }
         },
         -- LN
         {
             id = "lnModeSet", dst = {
-                {x = 809, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H + 6 - 1, w = 129, h = OPTION_ITEM_H}
+                {x = 809, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H + 6 - 1, w = 129, h = OPTION_INFO.ITEM_H}
             }
         },
         -- ソート
         {
             id = "sortModeSet", dst = {
-                {x = 680, y = BASE_HEIGHT - OPTION_SWITCH_BUTTON_H - 54 + 6, w = 258, h = OPTION_ITEM_H}
+                {x = 680, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H - 54 + 6, w = 258, h = OPTION_INFO.ITEM_H}
             }
         },
 
@@ -1698,23 +1754,23 @@ local function main()
             }
         })
         -- 横長
-        insertOptionAnimationTable(skin, "white", op, OPTION_WND_OFFSET_X, OPTION_WND_OFFSET_Y + OPTION_WND_EDGE_SIZE, OPTION_WND_W, OPTION_WND_H - OPTION_WND_EDGE_SIZE * 2, 0)
+        insertOptionAnimationTable(skin, "white", op, OPTION_INFO.WND_OFFSET_X, OPTION_INFO.WND_OFFSET_Y + OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_W, OPTION_INFO.WND_H - OPTION_INFO.WND_EDGE_SIZE * 2, 0)
         -- 縦長
-        insertOptionAnimationTable(skin, "white", op, OPTION_WND_OFFSET_X + OPTION_WND_EDGE_SIZE, OPTION_WND_OFFSET_Y, OPTION_WND_W - OPTION_WND_EDGE_SIZE * 2, OPTION_WND_H, 0)
+        insertOptionAnimationTable(skin, "white", op, OPTION_INFO.WND_OFFSET_X + OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_OFFSET_Y, OPTION_INFO.WND_W - OPTION_INFO.WND_EDGE_SIZE * 2, OPTION_INFO.WND_H, 0)
         -- 四隅
-        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_WND_OFFSET_X, OPTION_WND_OFFSET_Y, OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 90)
-        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, OPTION_WND_OFFSET_Y, OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 180)
-        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, OPTION_WND_OFFSET_Y + OPTION_WND_H - OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 270)
-        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_WND_OFFSET_X, OPTION_WND_OFFSET_Y + OPTION_WND_H - OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 0)
+        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_INFO.WND_OFFSET_X, OPTION_INFO.WND_OFFSET_Y, OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_EDGE_SIZE, 90)
+        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_INFO.WND_OFFSET_X + OPTION_INFO.WND_W - OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_OFFSET_Y, OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_EDGE_SIZE, 180)
+        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_INFO.WND_OFFSET_X + OPTION_INFO.WND_W - OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_OFFSET_Y + OPTION_INFO.WND_H - OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_EDGE_SIZE, 270)
+        insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_INFO.WND_OFFSET_X, OPTION_INFO.WND_OFFSET_Y + OPTION_INFO.WND_H - OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_EDGE_SIZE, 0)
 
         -- オプションのヘッダ部分
-        insertOptionAnimationTable(skin, "optionHeaderLeft", op, 192, 932, 16, OPTION_HEADER_H, 0)
+        insertOptionAnimationTable(skin, "optionHeaderLeft", op, 192, 932, 16, OPTION_INFO.HEADER_H, 0)
         insertOptionAnimationTable(skin, "purpleRed", op, 212, 932, 1516, 2, 0)
     end
     -- オプションのヘッダテキスト
     local optionTypes = {"optionHeaderPlayOption", "optionHeaderAssistOption", "optionHeaderOtherOption"}
     for i, v in ipairs(optionTypes) do
-        insertOptionAnimationTable(skin, v, 21 + (i - 1), 220, 932, OPTION_HEADER_TEXT_W, OPTION_HEADER_H, 0)
+        insertOptionAnimationTable(skin, v, 21 + (i - 1), 220, 932, OPTION_INFO.HEADER_TEXT_W, OPTION_INFO.HEADER_H, 0)
     end
 
     -- プレイプション
@@ -1728,9 +1784,9 @@ local function main()
     for i, assistText in ipairs(assistTexts) do
         local baseY = 865 - 109 * (i - 1)
         -- 小さいキーの背景
-        insertOptionAnimationTable(skin, "optionHeader2LeftBg", 22, 192, baseY, OPTION_HEADER2_EDGE_BG_W, OPTION_HEADER2_EDGE_BG_H, 0)
-        insertOptionAnimationTable(skin, "optionHeader2RightBg", 22, 192 + 96 - OPTION_HEADER2_EDGE_BG_W, baseY, OPTION_HEADER2_EDGE_BG_W, OPTION_HEADER2_EDGE_BG_H, 0)
-        insertOptionAnimationTable(skin, "gray2", 22, 192 + OPTION_HEADER2_EDGE_BG_W, baseY, 96 - OPTION_HEADER2_EDGE_BG_W * 2, OPTION_HEADER2_EDGE_BG_H, 0)
+        insertOptionAnimationTable(skin, "optionHeader2LeftBg", 22, 192, baseY, OPTION_INFO.HEADER2_EDGE_BG_W, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
+        insertOptionAnimationTable(skin, "optionHeader2RightBg", 22, 192 + 96 - OPTION_INFO.HEADER2_EDGE_BG_W, baseY, OPTION_INFO.HEADER2_EDGE_BG_W, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
+        insertOptionAnimationTable(skin, "gray2", 22, 192 + OPTION_INFO.HEADER2_EDGE_BG_W, baseY, 96 - OPTION_INFO.HEADER2_EDGE_BG_W * 2, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
 
         -- 小さいキー
         for j = 1, 7 do
@@ -1757,24 +1813,24 @@ local function main()
         end
 
         -- 文字
-        insertOptionAnimationTable(skin, assistText .. "TextImg", 22, 314, baseY, OPTION_HEADER_TEXT_W, OPTION_HEADER_H, 0)
-        insertOptionAnimationTable(skin, assistText .. "DescriptionTextImg", 22, 672, baseY, OPTION_HEADER_TEXT_W * 2, OPTION_HEADER_H, 0)
+        insertOptionAnimationTable(skin, assistText .. "TextImg", 22, 314, baseY, OPTION_INFO.HEADER_TEXT_W, OPTION_INFO.HEADER_H, 0)
+        insertOptionAnimationTable(skin, assistText .. "DescriptionTextImg", 22, 672, baseY, OPTION_INFO.HEADER_TEXT_W * 2, OPTION_INFO.HEADER_H, 0)
 
         -- ボタン
-        insertOptionAnimationTable(skin, assistText .. "ButtonImgset", 22, 1426, baseY - (OPTION_SWITCH_BUTTON_H - OPTION_HEADER_H) / 2, OPTION_SWITCH_BUTTON_W, OPTION_SWITCH_BUTTON_H, 0)
+        insertOptionAnimationTable(skin, assistText .. "ButtonImgset", 22, 1426, baseY - (OPTION_INFO.SWITCH_BUTTON_H - OPTION_INFO.HEADER_H) / 2, OPTION_INFO.SWITCH_BUTTON_W, OPTION_INFO.SWITCH_BUTTON_H, 0)
     end
 
     -- その他オプション
     -- ヘルプ背景
-    insertOptionAnimationTable(skin, "gray2", 23, OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W, OPTION_WND_OFFSET_Y, HELP_WND_W - OPTION_WND_EDGE_SIZE, HELP_WND_H - OPTION_WND_EDGE_SIZE, 0)
-    insertOptionAnimationTable(skin, "gray2", 23, OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W + OPTION_WND_EDGE_SIZE, OPTION_WND_OFFSET_Y + OPTION_WND_EDGE_SIZE, HELP_WND_W - OPTION_WND_EDGE_SIZE, HELP_WND_H - OPTION_WND_EDGE_SIZE, 0)
+    insertOptionAnimationTable(skin, "gray2", 23, OPTION_INFO.WND_OFFSET_X + OPTION_INFO.WND_W - HELP_WND_W, OPTION_INFO.WND_OFFSET_Y, HELP_WND_W - OPTION_INFO.WND_EDGE_SIZE, HELP_WND_H - OPTION_INFO.WND_EDGE_SIZE, 0)
+    insertOptionAnimationTable(skin, "gray2", 23, OPTION_INFO.WND_OFFSET_X + OPTION_INFO.WND_W - HELP_WND_W + OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_OFFSET_Y + OPTION_INFO.WND_EDGE_SIZE, HELP_WND_W - OPTION_INFO.WND_EDGE_SIZE, HELP_WND_H - OPTION_INFO.WND_EDGE_SIZE, 0)
 
     -- 隅
-    insertOptionAnimationTable(skin, "optionWndEdge", 23, OPTION_WND_OFFSET_X + OPTION_WND_W - OPTION_WND_EDGE_SIZE, OPTION_WND_OFFSET_Y, OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 180, 64, 64, 64)
+    insertOptionAnimationTable(skin, "optionWndEdge", 23, OPTION_INFO.WND_OFFSET_X + OPTION_INFO.WND_W - OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_OFFSET_Y, OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_EDGE_SIZE, 180, 64, 64, 64)
     insertOptionAnimationTable(skin, "optionWndEdge", 23,
-        OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W,
-        OPTION_WND_OFFSET_Y + HELP_WND_H - OPTION_WND_EDGE_SIZE,
-        OPTION_WND_EDGE_SIZE, OPTION_WND_EDGE_SIZE, 0, 64, 64, 64)
+        OPTION_INFO.WND_OFFSET_X + OPTION_INFO.WND_W - HELP_WND_W,
+        OPTION_INFO.WND_OFFSET_Y + HELP_WND_H - OPTION_INFO.WND_EDGE_SIZE,
+        OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_EDGE_SIZE, 0, 64, 64, 64)
 
 
     destinationPlayOption(skin, 192, 205, "optionHeader2GaugeAutoShift", "gaugeAutoShift", true, {2}, 23)
@@ -1783,45 +1839,45 @@ local function main()
     destinationNumberOption(skin, 1088, 614, "optionHeader2JudgeTiming", "judgeTiming", true, {5, 7}, 23)
 
     -- ヘルプヘッダ
-    local helpHeaderOffsetX = OPTION_WND_OFFSET_X + OPTION_WND_W - HELP_WND_W + 3
-    local helpHeaderOffsetY = OPTION_WND_OFFSET_Y + HELP_WND_H - HELP_ICON_SIZE - 3
+    local helpHeaderOffsetX = OPTION_INFO.WND_OFFSET_X + OPTION_INFO.WND_W - HELP_WND_W + 3
+    local helpHeaderOffsetY = OPTION_INFO.WND_OFFSET_Y + HELP_WND_H - HELP_ICON_SIZE - 3
     insertOptionAnimationTable(skin, "helpIcon", 23, helpHeaderOffsetX, helpHeaderOffsetY, HELP_ICON_SIZE, HELP_ICON_SIZE, 0)
     insertOptionAnimationTable(skin, "helpHeaderText", 23, helpHeaderOffsetX + HELP_ICON_SIZE + 1, helpHeaderOffsetY + 13, 122, 30, 0)
     insertOptionAnimationTable(skin, "white", 23, helpHeaderOffsetX + 6, helpHeaderOffsetY, 652, 2, 0)
 
     -- ヘルプ内容
     table.insert(skin.destination, {
-        id = "helpNumberKeys", op = {23}, loop = OPTION_ANIMATION_TIME, timer = 23, dst = {
+        id = "helpNumberKeys", op = {23}, loop = OPTION_INFO.ANIMATION_TIME, timer = 23, dst = {
             {time = 0, x = BASE_WIDTH / 2, y = BASE_HEIGHT / 2, w = 0, h = 0},
-            {time = OPTION_ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
-            {time = 3500 + OPTION_ANIMATION_TIME, a = 255},
-            {time = 4000 + OPTION_ANIMATION_TIME, a = 0},
-            {time = 15500 + OPTION_ANIMATION_TIME, a = 0},
-            {time = 16000 + OPTION_ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+            {time = OPTION_INFO.ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
+            {time = 3500 + OPTION_INFO.ANIMATION_TIME, a = 255},
+            {time = 4000 + OPTION_INFO.ANIMATION_TIME, a = 0},
+            {time = 15500 + OPTION_INFO.ANIMATION_TIME, a = 0},
+            {time = 16000 + OPTION_INFO.ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT1_W, h = HELP_TEXT_H},
         }
     })
     table.insert(skin.destination, {
-        id = "helpFunctionKeys1", op = {23}, loop = OPTION_ANIMATION_TIME, timer = 23, dst = {
+        id = "helpFunctionKeys1", op = {23}, loop = OPTION_INFO.ANIMATION_TIME, timer = 23, dst = {
             {time = 0, a = 0},
-            {time = 3500 + OPTION_ANIMATION_TIME, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246, w = HELP_TEXT1_W, h = 246},
-            {time = 4000 + OPTION_ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246, w = HELP_TEXT1_W, h = 246},
-            {time = 7500 + OPTION_ANIMATION_TIME, a = 255},
-            {time = 8000 + OPTION_ANIMATION_TIME, a = 0},
-            {time = 16000 + OPTION_ANIMATION_TIME, a = 0},
+            {time = 3500 + OPTION_INFO.ANIMATION_TIME, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246, w = HELP_TEXT1_W, h = 246},
+            {time = 4000 + OPTION_INFO.ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246, w = HELP_TEXT1_W, h = 246},
+            {time = 7500 + OPTION_INFO.ANIMATION_TIME, a = 255},
+            {time = 8000 + OPTION_INFO.ANIMATION_TIME, a = 0},
+            {time = 16000 + OPTION_INFO.ANIMATION_TIME, a = 0},
         }
     })
     table.insert(skin.destination, {
-        id = "helpFunctionKeys2", op = {23}, loop = OPTION_ANIMATION_TIME, timer = 23, dst = {
+        id = "helpFunctionKeys2", op = {23}, loop = OPTION_INFO.ANIMATION_TIME, timer = 23, dst = {
             {time = 0, a = 0},
-            {time = 3500 + OPTION_ANIMATION_TIME, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246 - 163, w = 470, h = 163},
-            {time = 4000 + OPTION_ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246 - 163, w = 470, h = 163},
-            {time = 7500 + OPTION_ANIMATION_TIME, a = 255},
-            {time = 8000 + OPTION_ANIMATION_TIME, a = 0},
-            {time = 16000 + OPTION_ANIMATION_TIME, a = 0},
+            {time = 3500 + OPTION_INFO.ANIMATION_TIME, a = 0, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246 - 163, w = 470, h = 163},
+            {time = 4000 + OPTION_INFO.ANIMATION_TIME, a = 255, x = helpHeaderOffsetX + 9, y = helpHeaderOffsetY - 246 - 163, w = 470, h = 163},
+            {time = 7500 + OPTION_INFO.ANIMATION_TIME, a = 255},
+            {time = 8000 + OPTION_INFO.ANIMATION_TIME, a = 0},
+            {time = 16000 + OPTION_INFO.ANIMATION_TIME, a = 0},
         }
     })
     table.insert(skin.destination, {
-        id = "helpPlayKey", op = {23}, loop = OPTION_ANIMATION_TIME, timer = 23, dst = {
+        id = "helpPlayKey", op = {23}, loop = OPTION_INFO.ANIMATION_TIME, timer = 23, dst = {
             {time = 0, a = 0},
             {time = 7500, a = 0, x = helpHeaderOffsetX + 9 + 64, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT2_W, h = HELP_TEXT_H},
             {time = 8000, a = 255, x = helpHeaderOffsetX + 9 + 64, y = helpHeaderOffsetY - HELP_TEXT_H, w = HELP_TEXT2_W, h = HELP_TEXT_H},
@@ -1855,35 +1911,35 @@ local function main()
     -- 選曲画面突入時アニメーション
     -- 白背景
     local radius = BASE_WIDTH / math.cos(math.atan2(BASE_HEIGHT, BASE_WIDTH))
-    local bgInitXLeft  = -BASE_WIDTH + METEOR_WIDTH / 2
-    local bgInitXRight = BASE_WIDTH / 2 - METEOR_WIDTH / 2
-    local tx, ty = rotationByCenter(bgInitXLeft, -BASE_HEIGHT, METEOR_RADIAN)
+    local bgInitXLeft  = -BASE_WIDTH + METEOR_INFO.WIDTH / 2
+    local bgInitXRight = BASE_WIDTH / 2 - METEOR_INFO.WIDTH / 2
+    local tx, ty = rotationByCenter(bgInitXLeft, -BASE_HEIGHT, METEOR_INFO.RADIAN)
     local dstLeft = {
-        {time = 0, x = tx, y = ty, w = BASE_WIDTH*1.5, h = BASE_HEIGHT*4, angle = METEOR_ANGLE}
+        {time = 0, x = tx, y = ty, w = BASE_WIDTH*1.5, h = BASE_HEIGHT*4, angle = METEOR_INFO.ANGLE}
     }
-    tx, ty = rotationByCenter(bgInitXRight, -BASE_HEIGHT, METEOR_RADIAN)
+    tx, ty = rotationByCenter(bgInitXRight, -BASE_HEIGHT, METEOR_INFO.RADIAN)
     local dstRight = {
-        {time = 0, x = tx, y = ty, w = BASE_WIDTH*1.5, h = BASE_HEIGHT*4, angle = METEOR_ANGLE}
+        {time = 0, x = tx, y = ty, w = BASE_WIDTH*1.5, h = BASE_HEIGHT*4, angle = METEOR_INFO.ANGLE}
     }
-    local startAnimToXLeft = bgInitXLeft - METEOR_WIDTH * NUM_OF_METEOR
-    local startAnimToXRight = bgInitXRight + METEOR_WIDTH * NUM_OF_METEOR
+    local startAnimToXLeft = bgInitXLeft - METEOR_INFO.WIDTH * METEOR_INFO.QUANTITY
+    local startAnimToXRight = bgInitXRight + METEOR_INFO.WIDTH * METEOR_INFO.QUANTITY
     local startAnimToY = -BASE_HEIGHT
-    for i = 1, NUM_OF_METEOR do
-        local initYForTimer = -radius - METEOR_HEIGHT - METEOR_INTERVAL_Y * (i - 1) -- これは一次変換しない
-        local toYForTimer   = radius - (i - 1) * METEOR_INTERVAL_Y + NUM_OF_METEOR * METEOR_INTERVAL_Y
+    for i = 1, METEOR_INFO.QUANTITY do
+        local initYForTimer = -radius - METEOR_INFO.HEIGHT - METEOR_INFO.INTERVAL_Y * (i - 1) -- これは一次変換しない
+        local toYForTimer   = radius - (i - 1) * METEOR_INFO.INTERVAL_Y + METEOR_INFO.QUANTITY * METEOR_INFO.INTERVAL_Y
         _, initYForTimer = calcOpeningAnimationStartPosition(0, initYForTimer, 0, toYForTimer, OPENING_ANIM_TIME_OFFSET)
-        local percentage    = ((BASE_HEIGHT - METEOR_HEIGHT) / 2 - initYForTimer) / (toYForTimer - initYForTimer)
+        local percentage    = ((BASE_HEIGHT - METEOR_INFO.HEIGHT) / 2 - initYForTimer) / (toYForTimer - initYForTimer)
         local targetTime    = (OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET) * percentage
-        local x = bgInitXLeft + (startAnimToXLeft - bgInitXLeft) * i / NUM_OF_METEOR
-        local y = -BASE_HEIGHT + (startAnimToY + BASE_HEIGHT / 2) * i / NUM_OF_METEOR
+        local x = bgInitXLeft + (startAnimToXLeft - bgInitXLeft) * i / METEOR_INFO.QUANTITY
+        local y = -BASE_HEIGHT + (startAnimToY + BASE_HEIGHT / 2) * i / METEOR_INFO.QUANTITY
 
-        tx, ty = rotationByCenter(x, y, METEOR_RADIAN)
+        tx, ty = rotationByCenter(x, y, METEOR_INFO.RADIAN)
         table.insert(dstLeft, {
             time = INPUT_WAIT + targetTime, x = tx, y = ty, acc = 3
         })
 
-        x = bgInitXRight + (startAnimToXRight - bgInitXRight) * i / NUM_OF_METEOR
-        tx, ty = rotationByCenter(x, y, METEOR_RADIAN)
+        x = bgInitXRight + (startAnimToXRight - bgInitXRight) * i / METEOR_INFO.QUANTITY
+        tx, ty = rotationByCenter(x, y, METEOR_INFO.RADIAN)
         table.insert(dstRight, {
             time = INPUT_WAIT + targetTime, x = tx, y = ty, acc = 3
         })
@@ -1894,90 +1950,115 @@ local function main()
     table.insert(skin.destination, {
         id = "white", loop = -1, center = 1,  dst = dstRight
     })
-    -- 流星帯
-    local hue = 0
-    local deltaHue = 360.0 / NUM_OF_METEOR
-    for i = 1, NUM_OF_METEOR do
-        local ii = NUM_OF_METEOR - i
-        local initXLeft  = BASE_WIDTH / 2 + (ii * METEOR_WIDTH) - METEOR_WIDTH / 2
-        local initXRight = BASE_WIDTH / 2 - (ii * METEOR_WIDTH) - METEOR_WIDTH / 2
+
+    -- 流星
+    -- ひたすら座標計算超カオス
+    local hue = 0.0
+    local deltaHue = 360.0 / METEOR_INFO.QUANTITY
+    local startdustDst = {destination = {}}
+    for i = 1, METEOR_INFO.QUANTITY do
+        local ii = METEOR_INFO.QUANTITY - i
+        local initXLeft  = BASE_WIDTH / 2 + (ii * METEOR_INFO.WIDTH) - METEOR_INFO.WIDTH / 2
+        local initXRight = BASE_WIDTH / 2 - (ii * METEOR_INFO.WIDTH) - METEOR_INFO.WIDTH / 2
         local toXLeft    = initXLeft
         local toXRight   = initXRight
-        local initYLeft  = -radius - ii * METEOR_INTERVAL_Y - METEOR_HEIGHT
+        local initYLeft  = -radius - ii * METEOR_INFO.INTERVAL_Y - METEOR_INFO.HEIGHT
         local initYRight = initYLeft
-        local toYLeft    = radius - ii * METEOR_INTERVAL_Y + NUM_OF_METEOR * METEOR_INTERVAL_Y
+        local toYLeft    = radius - ii * METEOR_INFO.INTERVAL_Y + METEOR_INFO.QUANTITY * METEOR_INFO.INTERVAL_Y
         local toYRight   = toYLeft
         local startXLeft, startYLeft   = calcOpeningAnimationStartPosition(initXLeft, initYLeft, toXLeft, toYLeft, OPENING_ANIM_TIME_OFFSET)
         local startXRight, startYRight = calcOpeningAnimationStartPosition(initXRight, initYRight, toXRight, toYRight, OPENING_ANIM_TIME_OFFSET)
-        startXLeft, startYLeft = rotationByCenter(startXLeft, startYLeft, METEOR_RADIAN)
-        toXLeft, toYLeft = rotationByCenter(toXLeft, toYLeft, METEOR_RADIAN)
+        startXLeft, startYLeft = rotationByCenter(startXLeft, startYLeft, METEOR_INFO.RADIAN)
+        toXLeft, toYLeft = rotationByCenter(toXLeft, toYLeft, METEOR_INFO.RADIAN)
 
-        local r, g, b = hsvToRgb(math.floor(hue), METEOR_SATURATION, METEOR_BRIGHTNESS)
+        local r, g, b = hsvToRgb(math.floor(hue), METEOR_INFO.SATURATION, METEOR_INFO.BRIGHTNESS)
         hue = hue + deltaHue
-        local meteorInitXLeft = BASE_WIDTH / 2 + (ii * METEOR_WIDTH) - METEOR_BODY_SIZE / 2
-        local meteorInitXRight = BASE_WIDTH / 2 - (ii * METEOR_WIDTH) - METEOR_BODY_SIZE / 2
+        local meteorInitXLeft  = BASE_WIDTH / 2 + (ii * METEOR_INFO.WIDTH) - METEOR_INFO.BODY_SIZE / 2
+        local meteorInitXRight = BASE_WIDTH / 2 - (ii * METEOR_INFO.WIDTH) - METEOR_INFO.BODY_SIZE / 2
         local meteorToXLeft    = meteorInitXLeft
         local meteorToXRight   = meteorInitXRight
-        local meteorInitYLeft  = -radius - ii * METEOR_INTERVAL_Y - METEOR_BODY_SIZE / 2
+        local meteorInitYLeft  = -radius - ii * METEOR_INFO.INTERVAL_Y - METEOR_INFO.BODY_SIZE / 2
         local meteorInitYRight = meteorInitYLeft
-        local meteorToYLeft    = radius - ii * METEOR_INTERVAL_Y + NUM_OF_METEOR * METEOR_INTERVAL_Y + METEOR_HEIGHT - METEOR_BODY_SIZE / 2
+        local meteorToYLeft    = radius - ii * METEOR_INFO.INTERVAL_Y + METEOR_INFO.QUANTITY * METEOR_INFO.INTERVAL_Y + METEOR_INFO.HEIGHT - METEOR_INFO.BODY_SIZE / 2
         local meteorToYRight   = meteorToYLeft
         local meteorStartXLeft, meteorStartYLeft   = calcOpeningAnimationStartPosition(meteorInitXLeft, meteorInitYLeft, meteorToXLeft, meteorToYLeft, OPENING_ANIM_TIME_OFFSET)
         local meteorStartXRight, meteorStartYRight = calcOpeningAnimationStartPosition(meteorInitXRight, meteorInitYRight, meteorToXRight, meteorToYRight, OPENING_ANIM_TIME_OFFSET)
-        meteorStartXLeft, meteorStartYLeft = rotationByCenter(meteorStartXLeft, meteorStartYLeft, METEOR_RADIAN)
-        meteorToXLeft, meteorToYLeft = rotationByCenter(meteorToXLeft, meteorToYLeft, METEOR_RADIAN)
+        meteorStartXLeft, meteorStartYLeft = rotationByCenter(meteorStartXLeft, meteorStartYLeft, METEOR_INFO.RADIAN)
+        meteorToXLeft, meteorToYLeft = rotationByCenter(meteorToXLeft, meteorToYLeft, METEOR_INFO.RADIAN)
+        local meteorDx, meteorDy = linearRotation(METEOR_INFO.BODY_SIZE, METEOR_INFO.BODY_SIZE, METEOR_INFO.RADIAN)
         local meteorInitAngle = math.random(0, 359)
+        meteorStartXLeft = meteorStartXLeft + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
+        meteorToXLeft    = meteorToXLeft    + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
+        meteorStartYLeft = meteorStartYLeft + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
+        meteorToYLeft    = meteorToYLeft    + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
 
         -- 回転の都合で隙間ができるので, 描画幅を+1する
         table.insert(skin.destination, {
             id = "white", loop = -1, center = 1, dst = {
-                {time = 0, x = startXLeft, y = startYLeft, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+                {time = 0, x = startXLeft, y = startYLeft, w = METEOR_INFO.WIDTH+1, h = METEOR_INFO.HEIGHT, angle = METEOR_INFO.ANGLE, r = r, g = g, b = b},
                 {time = INPUT_WAIT},
                 {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = toXLeft, y = toYLeft}
             }
         })
+
+        -- 星本体
+        local sr, sg, sb = hsvToRgb(math.floor(hue), METEOR_INFO.METEOR_BODY_SATURATION, METEOR_INFO.METEOR_BODY_BRIGHTNESS)
         table.insert(skin.destination, {
-            id = "meteorBody", loop = -1, center = 5, dst = {
-                {time = 0, x = meteorStartXLeft, y = meteorStartYLeft, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+            id = "meteorBody", loop = -1, dst = {
+                {time = 0, x = meteorStartXLeft, y = meteorStartYLeft, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0, r = sr, g = sg, b = sb},
                 {time = INPUT_WAIT, angle = meteorInitAngle},
-                {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXLeft, y = meteorToYLeft, angle = METEOR_ROTATION_VALUE + meteorInitAngle}
+                {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXLeft, y = meteorToYLeft, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
             }
         })
         table.insert(skin.destination, {
-            id = "meteorLight", loop = -1, center = 5, dst = {
-                {time = 0, x = meteorStartXLeft, y = meteorStartYLeft, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+            id = "meteorLight", loop = -1, dst = {
+                {time = 0, x = meteorStartXLeft, y = meteorStartYLeft, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0},
                 {time = INPUT_WAIT, angle = meteorInitAngle},
-                {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXLeft, y = meteorToYLeft, angle = METEOR_ROTATION_VALUE + meteorInitAngle}
+                {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXLeft, y = meteorToYLeft, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
             }
         })
-        if i ~= NUM_OF_METEOR+1 then
-            startXRight, startYRight = rotationByCenter(startXRight, startYRight, METEOR_RADIAN)
-            toXRight, toYRight = rotationByCenter(toXRight, toYRight, METEOR_RADIAN)
-            meteorStartXRight, meteorStartYRight = rotationByCenter(meteorStartXRight, meteorStartYRight, METEOR_RADIAN)
-            meteorToXRight, meteorToYRight = rotationByCenter(meteorToXRight, meteorToYRight, METEOR_RADIAN)
+
+        if i ~= METEOR_INFO.QUANTITY then
+            startXRight, startYRight = rotationByCenter(startXRight, startYRight, METEOR_INFO.RADIAN)
+            toXRight, toYRight = rotationByCenter(toXRight, toYRight, METEOR_INFO.RADIAN)
+            meteorStartXRight, meteorStartYRight = rotationByCenter(meteorStartXRight, meteorStartYRight, METEOR_INFO.RADIAN)
+            meteorToXRight, meteorToYRight = rotationByCenter(meteorToXRight, meteorToYRight, METEOR_INFO.RADIAN)
+            meteorStartXRight = meteorStartXRight + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
+            meteorToXRight    = meteorToXRight    + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
+            meteorStartYRight = meteorStartYRight + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
+            meteorToYRight    = meteorToYRight    + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
 
             table.insert(skin.destination, {
                 id = "white", loop = -1, center = 1, dst = {
-                    {time = 0, x = startXRight, y = startYRight, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+                    {time = 0, x = startXRight, y = startYRight, w = METEOR_INFO.WIDTH+1, h = METEOR_INFO.HEIGHT, angle = METEOR_INFO.ANGLE, r = r, g = g, b = b},
                     {time = INPUT_WAIT},
                     {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = toXRight, y = toYRight}
                 }
             })
+            -- 星本体
             table.insert(skin.destination, {
-                id = "meteorBody", loop = -1, center = 5, dst = {
-                    {time = 0, x = meteorStartXRight, y = meteorStartYRight, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+                id = "meteorBody", loop = -1, dst = {
+                    {time = 0, x = meteorStartXRight, y = meteorStartYRight, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0, r = sr, g = sg, b = sb},
                     {time = INPUT_WAIT, angle = meteorInitAngle},
-                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXRight, y = meteorToYRight, angle = METEOR_ROTATION_VALUE + meteorInitAngle}
+                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXRight, y = meteorToYRight, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
                 }
             })
             table.insert(skin.destination, {
-                id = "meteorLight", loop = -1, center = 5, dst = {
-                    {time = 0, x = meteorStartXRight, y = meteorStartYRight, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+                id = "meteorLight", loop = -1, dst = {
+                    {time = 0, x = meteorStartXRight, y = meteorStartYRight, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0},
                     {time = INPUT_WAIT, angle = meteorInitAngle},
-                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXRight, y = meteorToYRight, angle = METEOR_ROTATION_VALUE + meteorInitAngle}
+                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXRight, y = meteorToYRight, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
                 }
             })
         end
+
+        -- 星屑
+        drawStardust(meteorStartXLeft, meteorToXLeft, meteorStartYLeft, meteorToYLeft, METEOR_INFO.STARDUST_QUANTITY, startdustDst)
+        drawStardust(meteorStartXRight, meteorToXRight, meteorStartYRight, meteorToYRight, METEOR_INFO.STARDUST_QUANTITY, startdustDst)
+    end
+    
+    for key, dst in ipairs(startdustDst.destination) do
+        table.insert(skin.destination, dst)
     end
 
     return skin
