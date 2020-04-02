@@ -142,6 +142,18 @@ local OPTION_WND_OFFSET_X = (WIDTH - OPTION_WND_W) / 2
 local OPTION_WND_OFFSET_Y = (HEIGHT - OPTION_WND_H) / 2
 local OPTION_ANIMATION_TIME = 150
 
+local INPUT_WAIT = 500 -- シーン開始からインプット受付までの時間
+local OPENING_ANIM_TIME = 6000 -- シーン開始時のアニメーション時間
+local OPENING_ANIM_TIME_OFFSET = 0 -- アニメーション開始時刻のずれ
+local METEOR_INTERVAL_Y = 100 -- 各流星のy座標ズレ
+local NUM_OF_METEOR = 12
+local METEOR_WIDTH = 100
+local METEOR_ANGLE = 20
+local METEOR_SATURATION = 0.13
+local METEOR_BRIGHTNESS = 1.0
+local METEOR_RADIAN = math.rad(METEOR_ANGLE)
+local METEOR_HEIGHT = BASE_WIDTH / math.cos(math.atan2(BASE_HEIGHT, BASE_WIDTH))
+
 local header = {
     type = 5,
     name = "Social Skin dev",
@@ -149,16 +161,83 @@ local header = {
     h = HEIGHT,
     fadeout = 500,
     scene = 3000,
-    input = 500,
+    input = INPUT_WAIT,
     property = {
+        -- {
+        --     name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}, def = 915}
+        -- },
         {
             name = "密度グラフ表示", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}
         },
     },
     filepath = {
-        {name = "Background", path = "../select/background/*.png"}
+        {name = "背景選択----------------", path="../select/dummy/*"},
+        {name = "背景(png)", path = "../select/background/*.png"},
+        -- {name = "背景(mp4)", path = "../select/background/*.mp4"}
     },
 }
+
+local function hsvToRgb(h, s, v)
+    h = h % 360
+    local c = v * s * 1.0
+    local hp = h / 60.0
+    local x = c * (1 - math.abs(hp % 2 - 1))
+
+    local r, g, b
+    if 0 <= hp and hp < 1 then
+        r, g, b = c, x, 0
+    elseif 1 <= hp and hp < 2 then
+        r, g, b = x, c, 0
+    elseif 2 <= hp and hp < 3 then
+        r, g, b = 0, c, x
+    elseif 3 <= hp and hp < 4 then
+        r, g, b = 0, x, c
+    elseif 4 <= hp and hp < 5 then
+        r, g, b = x, 0, c
+    elseif 5 <= hp and hp < 6 then
+        r, g, b = c, 0, x
+    end
+
+    local m = v - c
+    print(h)
+    r, g, b = r + m, g + m, b + m
+    r = math.floor(r * 255)
+    g = math.floor(g * 255)
+    b = math.floor(b * 255)
+    return r, g, b
+end
+
+local function pivotEdgeToCenter(x, y)
+    x = x - BASE_WIDTH / 2
+    y = y - BASE_HEIGHT / 2
+    return x, y
+end
+
+local function pivotCenterToEdge(x, y)
+    x = x + BASE_WIDTH / 2
+    y = y + BASE_HEIGHT / 2
+    return x, y
+end
+
+local function linearRotation(x, y, radian)
+    local tx, ty = x, y
+    x = tx * math.cos(radian) + ty * -math.sin(radian)
+    y = tx * math.sin(radian) + ty * math.cos(radian)
+    return x, y
+end
+
+-- 画面中央を中心に座標を回転 動くのは座標だけで画像自体は回転しない
+local function rotationByCenter(x, y, radian)
+    x, y = pivotEdgeToCenter(x, y)
+    x, y = linearRotation(x, y, radian)
+    return pivotCenterToEdge(x, y)
+end
+
+local function calcOpeningAnimationStartPosition(initX, initY, toX, toY, timeOffset)
+    local x = initX + (toX - initX) * (1.0 * timeOffset / OPENING_ANIM_TIME)
+    local y = initY + (toY - initY) * (1.0 * timeOffset / OPENING_ANIM_TIME)
+    return x, y
+end
 
 local function has_value (tab, val)
     for index, value in ipairs(tab) do
@@ -391,14 +470,16 @@ local function main()
     skin.source = {
         {id = 0, path = "../select/parts/parts.png"},
         {id = 1, path = "../select/background/*.png"},
+        {id = 101, path = "../select/background/*.mp4"},
+        {id = 102, path = "Blue&Green Full of Stars.mp4"},
         {id = 2, path = "../select/parts/option.png"},
         {id = 3, path = "../select/parts/help.png"},
         {id = 4, path = "../select/parts/stagefile_frame.png"},
+        {id = 5, path = "../select/parts/meteor.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
 
     skin.image = {
-        {id = "background", src = 1, x = 0, y = 0, w = WIDTH, h = HEIGHT},
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
         {id = "stagefileFrame", src = 4, x = 0, y = 0, w = 702, h = 542},
         -- 選曲バー種類
@@ -591,6 +672,9 @@ local function main()
         {id = "numOfLnNotesIcon"     , src = 0, x = 945 + NOTES_ICON_SIZE*2, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
         {id = "numOfBssNotesIcon"    , src = 0, x = 945 + NOTES_ICON_SIZE*3, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
 
+        -- 開幕アニメーション用
+        {id = "forOpeningSquare", src = 1, x = PARTS_TEXTURE_SIZE - 3, y = PARTS_TEXTURE_SIZE - 3, w = 3, h = 3},
+
         -- 検索ボックス
         {id = "searchBox", src = 0, x = 773, y = PARTS_TEXTURE_SIZE - 62, w = 1038, h = 62},
 
@@ -603,6 +687,14 @@ local function main()
         {id = "gray2", src = 999, x = 4, y = 1, w = 1, h = 1},
         {id = "pink", src = 999, x = 5, y = 0, w = 1, h = 1},
     }
+
+    -- if skin_config.option["背景形式"] ~= 916 then
+    --     table.insert(skin.image, {id = "background", src = 1, x = 0, y = 0, w = WIDTH, h = HEIGHT})
+    -- else
+    --     table.insert(skin.image, {id = "background", src = 102, x = 0, y = 0, w = WIDTH, h = HEIGHT})
+    -- end
+    table.insert(skin.image, {id = "background", src = 1, x = 0, y = 0, w = WIDTH, h = HEIGHT})
+
 
     -- 密度グラフ
     skin.judgegraph = {
@@ -1755,6 +1847,91 @@ local function main()
     for i = 1, 6 do
         destinationSmallKeysInHelp(skin, 1100, 469 - (i - 1) * 41, {7}, 12000, 3500, 500, 16000);
         destinationSmallKeysInHelp(skin, 1100 + 95, 469 - (i - 1) * 41, replayActiveKeys[i], 12000, 3500, 500, 16000);
+    end
+
+    -- 選曲画面突入時アニメーション
+    -- 白背景
+    local radius = BASE_WIDTH / math.cos(math.atan2(BASE_HEIGHT, BASE_WIDTH))
+    local bgInitXLeft  = -BASE_WIDTH + METEOR_WIDTH / 2
+    local bgInitXRight = BASE_WIDTH / 2 - METEOR_WIDTH / 2
+    local tx, ty = rotationByCenter(bgInitXLeft, -BASE_HEIGHT, METEOR_RADIAN)
+    local dstLeft = {
+        {time = 0, x = tx, y = ty, w = BASE_WIDTH*1.5, h = BASE_HEIGHT*4, angle = METEOR_ANGLE}
+    }
+    tx, ty = rotationByCenter(bgInitXRight, -BASE_HEIGHT, METEOR_RADIAN)
+    local dstRight = {
+        {time = 0, x = tx, y = ty, w = BASE_WIDTH*1.5, h = BASE_HEIGHT*4, angle = METEOR_ANGLE}
+    }
+    local startAnimToXLeft = bgInitXLeft - METEOR_WIDTH * NUM_OF_METEOR
+    local startAnimToXRight = bgInitXRight + METEOR_WIDTH * NUM_OF_METEOR
+    local startAnimToY = -BASE_HEIGHT
+    for i = 1, NUM_OF_METEOR do
+        local initYForTimer = -radius - METEOR_HEIGHT - METEOR_INTERVAL_Y * (i - 1) -- これは一次変換しない
+        local toYForTimer   = radius - (i - 1) * METEOR_INTERVAL_Y + NUM_OF_METEOR * METEOR_INTERVAL_Y
+        _, initYForTimer = calcOpeningAnimationStartPosition(0, initYForTimer, 0, toYForTimer, OPENING_ANIM_TIME_OFFSET)
+        local percentage    = ((BASE_HEIGHT - METEOR_HEIGHT) / 2 - initYForTimer) / (toYForTimer - initYForTimer)
+        local targetTime    = (OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET) * percentage
+        local x = bgInitXLeft + (startAnimToXLeft - bgInitXLeft) * i / NUM_OF_METEOR
+        local y = -BASE_HEIGHT + (startAnimToY + BASE_HEIGHT / 2) * i / NUM_OF_METEOR
+
+        tx, ty = rotationByCenter(x, y, METEOR_RADIAN)
+        table.insert(dstLeft, {
+            time = INPUT_WAIT + targetTime, x = tx, y = ty, acc = 3
+        })
+
+        x = bgInitXRight + (startAnimToXRight - bgInitXRight) * i / NUM_OF_METEOR
+        tx, ty = rotationByCenter(x, y, METEOR_RADIAN)
+        table.insert(dstRight, {
+            time = INPUT_WAIT + targetTime, x = tx, y = ty, acc = 3
+        })
+    end
+    table.insert(skin.destination, {
+        id = "white", loop = -1, center = 1,  dst = dstLeft
+    })
+    table.insert(skin.destination, {
+        id = "white", loop = -1, center = 1,  dst = dstRight
+    })
+    -- 流星帯
+    local hue = 0
+    local deltaHue = 360.0 / NUM_OF_METEOR
+    for i = 1, NUM_OF_METEOR do
+        local ii = NUM_OF_METEOR - i
+        local initXLeft  = BASE_WIDTH / 2 + (ii * METEOR_WIDTH) - METEOR_WIDTH / 2
+        local initXRight = BASE_WIDTH / 2 - (ii * METEOR_WIDTH) - METEOR_WIDTH / 2
+        local toXLeft    = initXLeft
+        local toXRight   = initXRight
+        local initYLeft  = -radius - ii * METEOR_INTERVAL_Y - METEOR_HEIGHT
+        local initYRight = initYLeft
+        local toYLeft    = radius - ii * METEOR_INTERVAL_Y + NUM_OF_METEOR * METEOR_INTERVAL_Y
+        local toYRight   = toYLeft
+        local startXLeft, startYLeft   = calcOpeningAnimationStartPosition(initXLeft, initYLeft, toXLeft, toYLeft, OPENING_ANIM_TIME_OFFSET)
+        local startXRight, startYRight = calcOpeningAnimationStartPosition(initXRight, initYRight, toXRight, toYRight, OPENING_ANIM_TIME_OFFSET)
+        startXLeft, startYLeft = rotationByCenter(startXLeft, startYLeft, METEOR_RADIAN)
+        toXLeft, toYLeft = rotationByCenter(toXLeft, toYLeft, METEOR_RADIAN)
+
+        local r, g, b = hsvToRgb(math.floor(hue), METEOR_SATURATION, METEOR_BRIGHTNESS)
+        hue = hue + deltaHue
+        print("r:" .. r .. " g:" .. g .. " b:" .. b)
+
+        -- 回転の都合で隙間ができるので, 描画幅を+1する
+        table.insert(skin.destination, {
+            id = "white", loop = -1, center = 1, dst = {
+                {time = 0, x = startXLeft, y = startYLeft, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+                {time = INPUT_WAIT},
+                {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = toXLeft, y = toYLeft}
+            }
+        })
+        if i ~= NUM_OF_METEOR+1 then
+            startXRight, startYRight = rotationByCenter(startXRight, startYRight, METEOR_RADIAN)
+            toXRight, toYRight = rotationByCenter(toXRight, toYRight, METEOR_RADIAN)
+            table.insert(skin.destination, {
+                id = "white", loop = -1, center = 1, dst = {
+                    {time = 0, x = startXRight, y = startYRight, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+                    {time = INPUT_WAIT},
+                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = toXRight, y = toYRight}
+                }
+            })
+        end
     end
 
     return skin
