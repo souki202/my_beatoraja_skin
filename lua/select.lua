@@ -153,6 +153,8 @@ local METEOR_SATURATION = 0.13
 local METEOR_BRIGHTNESS = 1.0
 local METEOR_RADIAN = math.rad(METEOR_ANGLE)
 local METEOR_HEIGHT = BASE_WIDTH / math.cos(math.atan2(BASE_HEIGHT, BASE_WIDTH))
+local METEOR_ROTATION_VALUE = 3600
+local METEOR_BODY_SIZE = 256
 
 local header = {
     type = 5,
@@ -471,7 +473,6 @@ local function main()
         {id = 0, path = "../select/parts/parts.png"},
         {id = 1, path = "../select/background/*.png"},
         {id = 101, path = "../select/background/*.mp4"},
-        {id = 102, path = "Blue&Green Full of Stars.mp4"},
         {id = 2, path = "../select/parts/option.png"},
         {id = 3, path = "../select/parts/help.png"},
         {id = 4, path = "../select/parts/stagefile_frame.png"},
@@ -674,6 +675,8 @@ local function main()
 
         -- 開幕アニメーション用
         {id = "forOpeningSquare", src = 1, x = PARTS_TEXTURE_SIZE - 3, y = PARTS_TEXTURE_SIZE - 3, w = 3, h = 3},
+        {id = "meteorBody", src = 5, x = 0, y = 0, w = 256, h = 256},
+        {id = "meteorLight", src = 5, x = 0, y = 256, w = 256, h = 256},
 
         -- 検索ボックス
         {id = "searchBox", src = 0, x = 773, y = PARTS_TEXTURE_SIZE - 62, w = 1038, h = 62},
@@ -1911,7 +1914,19 @@ local function main()
 
         local r, g, b = hsvToRgb(math.floor(hue), METEOR_SATURATION, METEOR_BRIGHTNESS)
         hue = hue + deltaHue
-        print("r:" .. r .. " g:" .. g .. " b:" .. b)
+        local meteorInitXLeft = BASE_WIDTH / 2 + (ii * METEOR_WIDTH) - METEOR_BODY_SIZE / 2
+        local meteorInitXRight = BASE_WIDTH / 2 - (ii * METEOR_WIDTH) - METEOR_BODY_SIZE / 2
+        local meteorToXLeft    = meteorInitXLeft
+        local meteorToXRight   = meteorInitXRight
+        local meteorInitYLeft  = -radius - ii * METEOR_INTERVAL_Y - METEOR_BODY_SIZE / 2
+        local meteorInitYRight = meteorInitYLeft
+        local meteorToYLeft    = radius - ii * METEOR_INTERVAL_Y + NUM_OF_METEOR * METEOR_INTERVAL_Y + METEOR_HEIGHT - METEOR_BODY_SIZE / 2
+        local meteorToYRight   = meteorToYLeft
+        local meteorStartXLeft, meteorStartYLeft   = calcOpeningAnimationStartPosition(meteorInitXLeft, meteorInitYLeft, meteorToXLeft, meteorToYLeft, OPENING_ANIM_TIME_OFFSET)
+        local meteorStartXRight, meteorStartYRight = calcOpeningAnimationStartPosition(meteorInitXRight, meteorInitYRight, meteorToXRight, meteorToYRight, OPENING_ANIM_TIME_OFFSET)
+        meteorStartXLeft, meteorStartYLeft = rotationByCenter(meteorStartXLeft, meteorStartYLeft, METEOR_RADIAN)
+        meteorToXLeft, meteorToYLeft = rotationByCenter(meteorToXLeft, meteorToYLeft, METEOR_RADIAN)
+        local meteorInitAngle = math.random(0, 359)
 
         -- 回転の都合で隙間ができるので, 描画幅を+1する
         table.insert(skin.destination, {
@@ -1921,14 +1936,45 @@ local function main()
                 {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = toXLeft, y = toYLeft}
             }
         })
+        table.insert(skin.destination, {
+            id = "meteorBody", loop = -1, center = 5, dst = {
+                {time = 0, x = meteorStartXLeft, y = meteorStartYLeft, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+                {time = INPUT_WAIT, angle = meteorInitAngle},
+                {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXLeft, y = meteorToYLeft, angle = METEOR_ROTATION_VALUE + meteorInitAngle}
+            }
+        })
+        table.insert(skin.destination, {
+            id = "meteorLight", loop = -1, center = 5, dst = {
+                {time = 0, x = meteorStartXLeft, y = meteorStartYLeft, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+                {time = INPUT_WAIT, angle = meteorInitAngle},
+                {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXLeft, y = meteorToYLeft, angle = METEOR_ROTATION_VALUE + meteorInitAngle}
+            }
+        })
         if i ~= NUM_OF_METEOR+1 then
             startXRight, startYRight = rotationByCenter(startXRight, startYRight, METEOR_RADIAN)
             toXRight, toYRight = rotationByCenter(toXRight, toYRight, METEOR_RADIAN)
+            meteorStartXRight, meteorStartYRight = rotationByCenter(meteorStartXRight, meteorStartYRight, METEOR_RADIAN)
+            meteorToXRight, meteorToYRight = rotationByCenter(meteorToXRight, meteorToYRight, METEOR_RADIAN)
+
             table.insert(skin.destination, {
                 id = "white", loop = -1, center = 1, dst = {
                     {time = 0, x = startXRight, y = startYRight, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
                     {time = INPUT_WAIT},
                     {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = toXRight, y = toYRight}
+                }
+            })
+            table.insert(skin.destination, {
+                id = "meteorBody", loop = -1, center = 5, dst = {
+                    {time = 0, x = meteorStartXRight, y = meteorStartYRight, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+                    {time = INPUT_WAIT, angle = meteorInitAngle},
+                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXRight, y = meteorToYRight, angle = METEOR_ROTATION_VALUE + meteorInitAngle}
+                }
+            })
+            table.insert(skin.destination, {
+                id = "meteorLight", loop = -1, center = 5, dst = {
+                    {time = 0, x = meteorStartXRight, y = meteorStartYRight, w = METEOR_WIDTH+1, h = METEOR_HEIGHT, angle = METEOR_ANGLE, r = r, g = g, b = b},
+                    {time = INPUT_WAIT, angle = meteorInitAngle},
+                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXRight, y = meteorToYRight, angle = METEOR_ROTATION_VALUE + meteorInitAngle}
                 }
             })
         end
