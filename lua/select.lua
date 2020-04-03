@@ -147,28 +147,34 @@ local HELP_TEXT2_W = 530
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 
-local OPENING_ANIM_TIME = 5000 -- シーン開始時のアニメーション時間
-local OPENING_ANIM_TIME_OFFSET = 300 -- アニメーション開始時刻のずれ
+local OPENING_ANIM_TIME = 1500 -- シーン開始時のアニメーション時間
+local OPENING_ANIM_TIME_OFFSET = 00 -- アニメーション開始時刻のずれ
 local METEOR_INFO = {
-    QUANTITY = 10,
-    INTERVAL_Y = 1000,
-    WIDTH = 200,
+    BACKGROUND_COLOR = {r = 0, g = 0, b = 0},
+    DEFAULT_QUANTITY = 6,
+    QUANTITY = 6,
+    INTERVAL_Y = 300,
+    WIDTH = 192,
     ANGLE = -20,
     RADIAN = math.rad(-20),
     SATURATION = 0.13,
     BRIGHTNESS = 1.0,
     HEIGHT = BASE_WIDTH / math.cos(math.atan2(BASE_HEIGHT, BASE_WIDTH)),
     ROTATION_VALUE = 1800,
-    BODY_SIZE = 256,
+    BODY_SIZE = 384,
     STARDUST_QUANTITY = 60,
     STARDUST_SIZE_MAX = 64,
     STARDUST_SIZE_MIN = 28,
     STARDUST_ROTATION = 480,
     STARDUST_ANIM_TIME = 1500,
     STARDUST_DIRECTION_VARIATION = 40,
+    STARDUST_MOVE_LENGTH = 4000,
     METEOR_BODY_SATURATION = 0.4,
     METEOR_BODY_BRIGHTNESS = 1.0
 }
+
+METEOR_INFO.WIDTH     = METEOR_INFO.DEFAULT_QUANTITY / METEOR_INFO.QUANTITY * METEOR_INFO.WIDTH
+METEOR_INFO.BODY_SIZE = METEOR_INFO.DEFAULT_QUANTITY / METEOR_INFO.QUANTITY * METEOR_INFO.BODY_SIZE
 
 local header = {
     type = 5,
@@ -185,12 +191,37 @@ local header = {
         {
             name = "密度グラフ表示", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}
         },
+        {
+            name = "開幕アニメーション種類", item = {{name = "無し", op = 915}, {name = "流星", op = 916}}
+        },
     },
     filepath = {
         {name = "背景選択----------------", path="../dummy/*"},
         {name = "背景(png)", path = "../select/background/*.png"},
         -- {name = "背景(mp4)", path = "../select/background/*.mp4"}
     },
+    offset = {
+        {name = "流星群(0で既定値)---------------------------------------------------", id = 40},
+        {name = "流星アニメーション時間(ms 既定値1500 0<x)", id = 41, x = 0},
+        {name = "流星アニメーション開始時間オフセット(ms 既定値0 0<=x<流星アニメーション時間)", id = 42, x = 0},
+        {name = "本数(既定値6 0<x)", id = 43, x = 0},
+        {name = "各流星のズレ(既定値300)", id = 44, x = 0},
+        {name = "角度(既定値-20)", id = 45, a = 0},
+        {name = "虹の彩度(既定値13 0<=x<=100)", id = 46, x = 0},
+        {name = "虹の明度(既定値100 0<=x<=100)", id = 47, x = 0},
+        {name = "星の大きさ(% 既定値100)", id = 48, x = 0},
+        {name = "星の回転量(既定値1800)", id = 49, a = 0},
+        {name = "星屑の量(既定値60)", id = 50, x = 0},
+        {name = "星屑の最大の大きさ(既定値64)", id = 51, x = 0},
+        {name = "星屑の最小の大きさ(既定値28)", id = 52, x = 0},
+        {name = "星屑の回転量(既定値480)", id = 53, a = 0},
+        {name = "星屑のアニメーション時間(既定値1500)", id = 54, x = 0},
+        {name = "星屑の角度のばらつき(既定値40)", id = 55, a = 0},
+        {name = "星屑の移動量(既定値4000)", id = 56, x = 0},
+        {name = "星屑の彩度(既定値40 0<=x<=100)", id = 57, x = 0},
+        {name = "星屑の明度(既定値100 0<=x<=100)", id = 58, x = 0},
+        {name = "背景色(既定値0 0<=r,g,b<=255 仕様の都合でrgbはそれぞれxywに割り当て)", id = 59, x = 0, y = 0, w = 0},
+    }
 }
 
 local function calcComplementValueByTime(startValue, endValue, nowTime, overallTime)
@@ -276,7 +307,7 @@ local function drawStardust(meteorStartX, meteorToX, meteorStartY, meteorToY, qu
         -- 星が外すぎるなら星屑を出さない
         if -BASE_WIDTH * 0.5 <= baseX and baseX <= BASE_WIDTH * 1.5 and -BASE_HEIGHT * 0.5 <= baseY and baseY <= BASE_HEIGHT * 1.5 then
             local size = math.random(METEOR_INFO.STARDUST_SIZE_MIN, METEOR_INFO.STARDUST_SIZE_MAX)
-            local moveLength = 2 * METEOR_INFO.HEIGHT
+            local moveLength = METEOR_INFO.STARDUST_MOVE_LENGTH
             -- 適当に後方にぶちまける
             local direction = METEOR_INFO.ANGLE - 180
             local deltaDirection = math.random(0, METEOR_INFO.STARDUST_DIRECTION_VARIATION) - METEOR_INFO.STARDUST_DIRECTION_VARIATION / 2
@@ -518,7 +549,77 @@ local function destinationSmallKeysInHelp(skin, baseX, baseY, activeKeys, appear
     end
 end
 
+local function initialize()
+    local v = getTableValue(skin_config.offset, "流星アニメーション時間(ms 既定値1500 0<x)", {x = OPENING_ANIM_TIME})
+    if v.x ~= 0 then OPENING_ANIM_TIME = v.x end
+
+    v = getTableValue(skin_config.offset, "流星アニメーション開始時間オフセット(ms 既定値0 0<=x<流星アニメーション時間)", {x = OPENING_ANIM_TIME_OFFSET})
+    if v.x ~= 0 then  OPENING_ANIM_TIME_OFFSET = v.x end
+
+
+    v = getTableValue(skin_config.offset, "本数(既定値6 0<x)", {x = METEOR_INFO.QUANTITY})
+    if v.x ~= 0 then METEOR_INFO.QUANTITY = v.x end
+    METEOR_INFO.WIDTH = METEOR_INFO.DEFAULT_QUANTITY / (METEOR_INFO.QUANTITY - 0.5) * METEOR_INFO.WIDTH
+
+    v = getTableValue(skin_config.offset, "各流星のズレ(既定値300)", {x = METEOR_INFO.INTERVAL_Y})
+    if v.x ~= 0 then METEOR_INFO.INTERVAL_Y = v.x end
+
+    v = getTableValue(skin_config.offset, "角度(既定値-20)", {a = METEOR_INFO.ANGLE})
+    if v.a ~= 0 then METEOR_INFO.ANGLE = v.a end
+    METEOR_INFO.RADIAN = math.rad(METEOR_INFO.ANGLE)
+
+    v = getTableValue(skin_config.offset, "虹の彩度(既定値13 0<=x<=100)", {x = METEOR_INFO.SATURATION})
+    if v.x ~= 0 then METEOR_INFO.SATURATION = v.x / 100.0 end
+
+    v = getTableValue(skin_config.offset, "虹の明度(既定値100 0<=x<=100)", {x = METEOR_INFO.BRIGHTNESS})
+    if v.x ~= 0 then METEOR_INFO.BRIGHTNESS = v.x / 100.0 end
+
+    v = getTableValue(skin_config.offset, "星の大きさ(% 既定値100)", {x = 0})
+    if v.x ~= 0 then
+        METEOR_INFO.BODY_SIZE = METEOR_INFO.BODY_SIZE * v.x / 100.0
+    end
+    METEOR_INFO.BODY_SIZE = METEOR_INFO.DEFAULT_QUANTITY / METEOR_INFO.QUANTITY * METEOR_INFO.BODY_SIZE
+
+    v = getTableValue(skin_config.offset, "星の回転量(既定値1800)", {a = METEOR_INFO.ROTATION_VALUE})
+    if v.a ~= 0 then METEOR_INFO.ROTATION_VALUE = v.a end
+
+    -- ここから星屑
+    v = getTableValue(skin_config.offset, "星屑の量(既定値60)", {x = METEOR_INFO.STARDUST_QUANTITY})
+    if v.x ~= 0 then METEOR_INFO.STARDUST_QUANTITY = v.x end
+
+    v = getTableValue(skin_config.offset, "星屑の最大の大きさ(既定値64)", {x = METEOR_INFO.STARDUST_SIZE_MAX})
+    if v.x ~= 0 then METEOR_INFO.STARDUST_SIZE_MAX = v.x end
+
+    v = getTableValue(skin_config.offset, "星屑の最小の大きさ(既定値28)", {x = METEOR_INFO.STARDUST_SIZE_MIN})
+    if v.x ~= 0 then METEOR_INFO.STARDUST_SIZE_MIN = v.x end
+
+    v = getTableValue(skin_config.offset, "星屑の回転量(既定値480)", {a = METEOR_INFO.STARDUST_ROTATION})
+    if v.a ~= 0 then METEOR_INFO.STARDUST_ROTATION = v.a end
+
+    v = getTableValue(skin_config.offset, "星屑のアニメーション時間(既定値1500)", {x = METEOR_INFO.STARDUST_ANIM_TIME})
+    if v.x ~= 0 then METEOR_INFO.STARDUST_ANIM_TIME = v.x end
+
+    v = getTableValue(skin_config.offset, "星屑の角度のばらつき(既定値40)", {a = METEOR_INFO.STARDUST_DIRECTION_VARIATION})
+    if v.a ~= 0 then METEOR_INFO.STARDUST_DIRECTION_VARIATION = v.a end
+
+    v = getTableValue(skin_config.offset, "星屑の移動量(既定値4000)", {x = METEOR_INFO.STARDUST_MOVE_LENGTH})
+    if v.x ~= 0 then METEOR_INFO.STARDUST_MOVE_LENGTH = v.x end
+
+    v = getTableValue(skin_config.offset, "星屑の彩度(既定値40 0<=x<=100)", {x = METEOR_INFO.METEOR_BODY_SATURATION})
+    if v.x ~= 0 then METEOR_INFO.METEOR_BODY_SATURATION = v.x / 100.0 end
+
+    v = getTableValue(skin_config.offset, "星屑の明度(既定値100 0<=x<=100)", {x = METEOR_INFO.METEOR_BODY_BRIGHTNESS})
+    if v.x ~= 0 then METEOR_INFO.METEOR_BODY_BRIGHTNESS = v.x / 100.0 end
+
+    v = getTableValue(skin_config.offset, "背景色(既定値0 0<=r,g,b<=255)", {x = 0, y = 0, w = 0})
+    if v.x ~= 0 then METEOR_INFO.BACKGROUND_COLOR.r = v.x end
+    if v.y ~= 0 then METEOR_INFO.BACKGROUND_COLOR.g = v.y end
+    if v.w ~= 0 then METEOR_INFO.BACKGROUND_COLOR.b = v.w end
+end
+
 local function main()
+    initialize()
+
 	local skin = {}
 	-- ヘッダ情報をスキン本体にコピー
 	for k, v in pairs(header) do
@@ -1909,156 +2010,158 @@ local function main()
     end
 
     -- 選曲画面突入時アニメーション
-    -- 白背景
-    local radius = BASE_WIDTH / math.cos(math.atan2(BASE_HEIGHT, BASE_WIDTH))
-    local bgInitXLeft  = -BASE_WIDTH + METEOR_INFO.WIDTH / 2
-    local bgInitXRight = BASE_WIDTH / 2 - METEOR_INFO.WIDTH / 2
-    local tx, ty = rotationByCenter(bgInitXLeft, -BASE_HEIGHT, METEOR_INFO.RADIAN)
-    local dstLeft = {
-        {time = 0, x = tx, y = ty, w = BASE_WIDTH*1.5, h = BASE_HEIGHT*4, angle = METEOR_INFO.ANGLE}
-    }
-    tx, ty = rotationByCenter(bgInitXRight, -BASE_HEIGHT, METEOR_INFO.RADIAN)
-    local dstRight = {
-        {time = 0, x = tx, y = ty, w = BASE_WIDTH*1.5, h = BASE_HEIGHT*4, angle = METEOR_INFO.ANGLE}
-    }
-    local startAnimToXLeft = bgInitXLeft - METEOR_INFO.WIDTH * METEOR_INFO.QUANTITY
-    local startAnimToXRight = bgInitXRight + METEOR_INFO.WIDTH * METEOR_INFO.QUANTITY
-    local startAnimToY = -BASE_HEIGHT
-    for i = 1, METEOR_INFO.QUANTITY do
-        local initYForTimer = -radius - METEOR_INFO.HEIGHT - METEOR_INFO.INTERVAL_Y * (i - 1) -- これは一次変換しない
-        local toYForTimer   = radius - (i - 1) * METEOR_INFO.INTERVAL_Y + METEOR_INFO.QUANTITY * METEOR_INFO.INTERVAL_Y
-        _, initYForTimer = calcOpeningAnimationStartPosition(0, initYForTimer, 0, toYForTimer, OPENING_ANIM_TIME_OFFSET)
-        local percentage    = ((BASE_HEIGHT - METEOR_INFO.HEIGHT) / 2 - initYForTimer) / (toYForTimer - initYForTimer)
-        local targetTime    = (OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET) * percentage
-        local x = bgInitXLeft + (startAnimToXLeft - bgInitXLeft) * i / METEOR_INFO.QUANTITY
-        local y = -BASE_HEIGHT + (startAnimToY + BASE_HEIGHT / 2) * i / METEOR_INFO.QUANTITY
+    if getTableValue(skin_config.option, "開幕アニメーション種類", 915) == 916 then
+        -- 背景
+        local radius = BASE_WIDTH / math.cos(math.atan2(BASE_HEIGHT, BASE_WIDTH))
+        local bgInitXLeft  = -BASE_WIDTH + METEOR_INFO.WIDTH / 2
+        local bgInitXRight = BASE_WIDTH / 2 - METEOR_INFO.WIDTH / 2
+        local tx, ty = rotationByCenter(bgInitXLeft, -BASE_HEIGHT, METEOR_INFO.RADIAN)
+        local dstLeft = {
+            {time = 0, x = tx, y = ty, w = BASE_WIDTH*1.5, h = BASE_HEIGHT*4, angle = METEOR_INFO.ANGLE, r = METEOR_INFO.BACKGROUND_COLOR.r, g = METEOR_INFO.BACKGROUND_COLOR.g, b = METEOR_INFO.BACKGROUND_COLOR.b}
+        }
+        tx, ty = rotationByCenter(bgInitXRight, -BASE_HEIGHT, METEOR_INFO.RADIAN)
+        local dstRight = {
+            {time = 0, x = tx, y = ty, w = BASE_WIDTH*1.5, h = BASE_HEIGHT*4, angle = METEOR_INFO.ANGLE, r = METEOR_INFO.BACKGROUND_COLOR.r, g = METEOR_INFO.BACKGROUND_COLOR.g, b = METEOR_INFO.BACKGROUND_COLOR.b}
+        }
+        local startAnimToXLeft = bgInitXLeft - METEOR_INFO.WIDTH * METEOR_INFO.QUANTITY
+        local startAnimToXRight = bgInitXRight + METEOR_INFO.WIDTH * METEOR_INFO.QUANTITY
+        local startAnimToY = -BASE_HEIGHT
+        for i = 1, METEOR_INFO.QUANTITY do
+            local initYForTimer = -radius - METEOR_INFO.HEIGHT - METEOR_INFO.INTERVAL_Y * (i - 1) -- これは一次変換しない
+            local toYForTimer   = radius - (i - 1) * METEOR_INFO.INTERVAL_Y + METEOR_INFO.QUANTITY * METEOR_INFO.INTERVAL_Y
+            _, initYForTimer = calcOpeningAnimationStartPosition(0, initYForTimer, 0, toYForTimer, OPENING_ANIM_TIME_OFFSET)
+            local percentage    = ((BASE_HEIGHT - METEOR_INFO.HEIGHT) / 2 - initYForTimer) / (toYForTimer - initYForTimer)
+            local targetTime    = (OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET) * percentage
+            local x = bgInitXLeft + (startAnimToXLeft - bgInitXLeft) * i / METEOR_INFO.QUANTITY
+            local y = -BASE_HEIGHT + (startAnimToY + BASE_HEIGHT / 2) * i / METEOR_INFO.QUANTITY
 
-        tx, ty = rotationByCenter(x, y, METEOR_INFO.RADIAN)
-        table.insert(dstLeft, {
-            time = INPUT_WAIT + targetTime, x = tx, y = ty, acc = 3
-        })
+            tx, ty = rotationByCenter(x, y, METEOR_INFO.RADIAN)
+            table.insert(dstLeft, {
+                time = INPUT_WAIT + targetTime, x = tx, y = ty, acc = 3
+            })
 
-        x = bgInitXRight + (startAnimToXRight - bgInitXRight) * i / METEOR_INFO.QUANTITY
-        tx, ty = rotationByCenter(x, y, METEOR_INFO.RADIAN)
-        table.insert(dstRight, {
-            time = INPUT_WAIT + targetTime, x = tx, y = ty, acc = 3
-        })
-    end
-    table.insert(skin.destination, {
-        id = "white", loop = -1, center = 1,  dst = dstLeft
-    })
-    table.insert(skin.destination, {
-        id = "white", loop = -1, center = 1,  dst = dstRight
-    })
-
-    -- 流星
-    -- ひたすら座標計算超カオス
-    local hue = 0.0
-    local deltaHue = 360.0 / METEOR_INFO.QUANTITY
-    local startdustDst = {destination = {}}
-    for i = 1, METEOR_INFO.QUANTITY do
-        local ii = METEOR_INFO.QUANTITY - i
-        local initXLeft  = BASE_WIDTH / 2 + (ii * METEOR_INFO.WIDTH) - METEOR_INFO.WIDTH / 2
-        local initXRight = BASE_WIDTH / 2 - (ii * METEOR_INFO.WIDTH) - METEOR_INFO.WIDTH / 2
-        local toXLeft    = initXLeft
-        local toXRight   = initXRight
-        local initYLeft  = -radius - ii * METEOR_INFO.INTERVAL_Y - METEOR_INFO.HEIGHT
-        local initYRight = initYLeft
-        local toYLeft    = radius - ii * METEOR_INFO.INTERVAL_Y + METEOR_INFO.QUANTITY * METEOR_INFO.INTERVAL_Y
-        local toYRight   = toYLeft
-        local startXLeft, startYLeft   = calcOpeningAnimationStartPosition(initXLeft, initYLeft, toXLeft, toYLeft, OPENING_ANIM_TIME_OFFSET)
-        local startXRight, startYRight = calcOpeningAnimationStartPosition(initXRight, initYRight, toXRight, toYRight, OPENING_ANIM_TIME_OFFSET)
-        startXLeft, startYLeft = rotationByCenter(startXLeft, startYLeft, METEOR_INFO.RADIAN)
-        toXLeft, toYLeft = rotationByCenter(toXLeft, toYLeft, METEOR_INFO.RADIAN)
-
-        local r, g, b = hsvToRgb(math.floor(hue), METEOR_INFO.SATURATION, METEOR_INFO.BRIGHTNESS)
-        hue = hue + deltaHue
-        local meteorInitXLeft  = BASE_WIDTH / 2 + (ii * METEOR_INFO.WIDTH) - METEOR_INFO.BODY_SIZE / 2
-        local meteorInitXRight = BASE_WIDTH / 2 - (ii * METEOR_INFO.WIDTH) - METEOR_INFO.BODY_SIZE / 2
-        local meteorToXLeft    = meteorInitXLeft
-        local meteorToXRight   = meteorInitXRight
-        local meteorInitYLeft  = -radius - ii * METEOR_INFO.INTERVAL_Y - METEOR_INFO.BODY_SIZE / 2
-        local meteorInitYRight = meteorInitYLeft
-        local meteorToYLeft    = radius - ii * METEOR_INFO.INTERVAL_Y + METEOR_INFO.QUANTITY * METEOR_INFO.INTERVAL_Y + METEOR_INFO.HEIGHT - METEOR_INFO.BODY_SIZE / 2
-        local meteorToYRight   = meteorToYLeft
-        local meteorStartXLeft, meteorStartYLeft   = calcOpeningAnimationStartPosition(meteorInitXLeft, meteorInitYLeft, meteorToXLeft, meteorToYLeft, OPENING_ANIM_TIME_OFFSET)
-        local meteorStartXRight, meteorStartYRight = calcOpeningAnimationStartPosition(meteorInitXRight, meteorInitYRight, meteorToXRight, meteorToYRight, OPENING_ANIM_TIME_OFFSET)
-        meteorStartXLeft, meteorStartYLeft = rotationByCenter(meteorStartXLeft, meteorStartYLeft, METEOR_INFO.RADIAN)
-        meteorToXLeft, meteorToYLeft = rotationByCenter(meteorToXLeft, meteorToYLeft, METEOR_INFO.RADIAN)
-        local meteorDx, meteorDy = linearRotation(METEOR_INFO.BODY_SIZE, METEOR_INFO.BODY_SIZE, METEOR_INFO.RADIAN)
-        local meteorInitAngle = math.random(0, 359)
-        meteorStartXLeft = meteorStartXLeft + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
-        meteorToXLeft    = meteorToXLeft    + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
-        meteorStartYLeft = meteorStartYLeft + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
-        meteorToYLeft    = meteorToYLeft    + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
-
-        -- 回転の都合で隙間ができるので, 描画幅を+1する
+            x = bgInitXRight + (startAnimToXRight - bgInitXRight) * i / METEOR_INFO.QUANTITY
+            tx, ty = rotationByCenter(x, y, METEOR_INFO.RADIAN)
+            table.insert(dstRight, {
+                time = INPUT_WAIT + targetTime, x = tx, y = ty, acc = 3
+            })
+        end
         table.insert(skin.destination, {
-            id = "white", loop = -1, center = 1, dst = {
-                {time = 0, x = startXLeft, y = startYLeft, w = METEOR_INFO.WIDTH+1, h = METEOR_INFO.HEIGHT, angle = METEOR_INFO.ANGLE, r = r, g = g, b = b},
-                {time = INPUT_WAIT},
-                {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = toXLeft, y = toYLeft}
-            }
-        })
-
-        -- 星本体
-        local sr, sg, sb = hsvToRgb(math.floor(hue), METEOR_INFO.METEOR_BODY_SATURATION, METEOR_INFO.METEOR_BODY_BRIGHTNESS)
-        table.insert(skin.destination, {
-            id = "meteorBody", loop = -1, dst = {
-                {time = 0, x = meteorStartXLeft, y = meteorStartYLeft, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0, r = sr, g = sg, b = sb},
-                {time = INPUT_WAIT, angle = meteorInitAngle},
-                {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXLeft, y = meteorToYLeft, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
-            }
+            id = "white", loop = -1, center = 1,  dst = dstLeft
         })
         table.insert(skin.destination, {
-            id = "meteorLight", loop = -1, dst = {
-                {time = 0, x = meteorStartXLeft, y = meteorStartYLeft, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0},
-                {time = INPUT_WAIT, angle = meteorInitAngle},
-                {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXLeft, y = meteorToYLeft, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
-            }
+            id = "white", loop = -1, center = 1,  dst = dstRight
         })
 
-        if i ~= METEOR_INFO.QUANTITY then
-            startXRight, startYRight = rotationByCenter(startXRight, startYRight, METEOR_INFO.RADIAN)
-            toXRight, toYRight = rotationByCenter(toXRight, toYRight, METEOR_INFO.RADIAN)
-            meteorStartXRight, meteorStartYRight = rotationByCenter(meteorStartXRight, meteorStartYRight, METEOR_INFO.RADIAN)
-            meteorToXRight, meteorToYRight = rotationByCenter(meteorToXRight, meteorToYRight, METEOR_INFO.RADIAN)
-            meteorStartXRight = meteorStartXRight + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
-            meteorToXRight    = meteorToXRight    + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
-            meteorStartYRight = meteorStartYRight + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
-            meteorToYRight    = meteorToYRight    + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
+        -- 流星
+        -- ひたすら座標計算超カオス
+        local hue = 0.0
+        local deltaHue = 360.0 / METEOR_INFO.QUANTITY
+        local startdustDst = {destination = {}}
+        for i = 1, METEOR_INFO.QUANTITY do
+            local ii = METEOR_INFO.QUANTITY - i
+            local initXLeft  = BASE_WIDTH / 2 + (ii * METEOR_INFO.WIDTH) - METEOR_INFO.WIDTH / 2
+            local initXRight = BASE_WIDTH / 2 - (ii * METEOR_INFO.WIDTH) - METEOR_INFO.WIDTH / 2
+            local toXLeft    = initXLeft
+            local toXRight   = initXRight
+            local initYLeft  = -radius - ii * METEOR_INFO.INTERVAL_Y - METEOR_INFO.HEIGHT
+            local initYRight = initYLeft
+            local toYLeft    = radius - ii * METEOR_INFO.INTERVAL_Y + METEOR_INFO.QUANTITY * METEOR_INFO.INTERVAL_Y
+            local toYRight   = toYLeft
+            local startXLeft, startYLeft   = calcOpeningAnimationStartPosition(initXLeft, initYLeft, toXLeft, toYLeft, OPENING_ANIM_TIME_OFFSET)
+            local startXRight, startYRight = calcOpeningAnimationStartPosition(initXRight, initYRight, toXRight, toYRight, OPENING_ANIM_TIME_OFFSET)
+            startXLeft, startYLeft = rotationByCenter(startXLeft, startYLeft, METEOR_INFO.RADIAN)
+            toXLeft, toYLeft = rotationByCenter(toXLeft, toYLeft, METEOR_INFO.RADIAN)
 
+            local r, g, b = hsvToRgb(math.floor(hue), METEOR_INFO.SATURATION, METEOR_INFO.BRIGHTNESS)
+            hue = hue + deltaHue
+            local meteorInitXLeft  = BASE_WIDTH / 2 + (ii * METEOR_INFO.WIDTH) - METEOR_INFO.BODY_SIZE / 2
+            local meteorInitXRight = BASE_WIDTH / 2 - (ii * METEOR_INFO.WIDTH) - METEOR_INFO.BODY_SIZE / 2
+            local meteorToXLeft    = meteorInitXLeft
+            local meteorToXRight   = meteorInitXRight
+            local meteorInitYLeft  = -radius - ii * METEOR_INFO.INTERVAL_Y - METEOR_INFO.BODY_SIZE / 2
+            local meteorInitYRight = meteorInitYLeft
+            local meteorToYLeft    = radius - ii * METEOR_INFO.INTERVAL_Y + METEOR_INFO.QUANTITY * METEOR_INFO.INTERVAL_Y + METEOR_INFO.HEIGHT - METEOR_INFO.BODY_SIZE / 2
+            local meteorToYRight   = meteorToYLeft
+            local meteorStartXLeft, meteorStartYLeft   = calcOpeningAnimationStartPosition(meteorInitXLeft, meteorInitYLeft, meteorToXLeft, meteorToYLeft, OPENING_ANIM_TIME_OFFSET)
+            local meteorStartXRight, meteorStartYRight = calcOpeningAnimationStartPosition(meteorInitXRight, meteorInitYRight, meteorToXRight, meteorToYRight, OPENING_ANIM_TIME_OFFSET)
+            meteorStartXLeft, meteorStartYLeft = rotationByCenter(meteorStartXLeft, meteorStartYLeft, METEOR_INFO.RADIAN)
+            meteorToXLeft, meteorToYLeft = rotationByCenter(meteorToXLeft, meteorToYLeft, METEOR_INFO.RADIAN)
+            local meteorDx, meteorDy = linearRotation(METEOR_INFO.BODY_SIZE, METEOR_INFO.BODY_SIZE, METEOR_INFO.RADIAN)
+            local meteorInitAngle = math.random(0, 359)
+            meteorStartXLeft = meteorStartXLeft + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
+            meteorToXLeft    = meteorToXLeft    + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
+            meteorStartYLeft = meteorStartYLeft + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
+            meteorToYLeft    = meteorToYLeft    + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
+
+            -- 回転の都合で隙間ができるので, 描画幅を+1する
             table.insert(skin.destination, {
                 id = "white", loop = -1, center = 1, dst = {
-                    {time = 0, x = startXRight, y = startYRight, w = METEOR_INFO.WIDTH+1, h = METEOR_INFO.HEIGHT, angle = METEOR_INFO.ANGLE, r = r, g = g, b = b},
+                    {time = 0, x = startXLeft, y = startYLeft, w = METEOR_INFO.WIDTH+1, h = METEOR_INFO.HEIGHT, angle = METEOR_INFO.ANGLE, r = r, g = g, b = b},
                     {time = INPUT_WAIT},
-                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = toXRight, y = toYRight}
+                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = toXLeft, y = toYLeft}
                 }
             })
+
             -- 星本体
+            local sr, sg, sb = hsvToRgb(math.floor(hue), METEOR_INFO.METEOR_BODY_SATURATION, METEOR_INFO.METEOR_BODY_BRIGHTNESS)
             table.insert(skin.destination, {
                 id = "meteorBody", loop = -1, dst = {
-                    {time = 0, x = meteorStartXRight, y = meteorStartYRight, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0, r = sr, g = sg, b = sb},
+                    {time = 0, x = meteorStartXLeft, y = meteorStartYLeft, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0, r = sr, g = sg, b = sb},
                     {time = INPUT_WAIT, angle = meteorInitAngle},
-                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXRight, y = meteorToYRight, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
+                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXLeft, y = meteorToYLeft, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
                 }
             })
             table.insert(skin.destination, {
                 id = "meteorLight", loop = -1, dst = {
-                    {time = 0, x = meteorStartXRight, y = meteorStartYRight, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0},
+                    {time = 0, x = meteorStartXLeft, y = meteorStartYLeft, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0},
                     {time = INPUT_WAIT, angle = meteorInitAngle},
-                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXRight, y = meteorToYRight, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
+                    {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXLeft, y = meteorToYLeft, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
                 }
             })
+
+            if i ~= METEOR_INFO.QUANTITY then
+                startXRight, startYRight = rotationByCenter(startXRight, startYRight, METEOR_INFO.RADIAN)
+                toXRight, toYRight = rotationByCenter(toXRight, toYRight, METEOR_INFO.RADIAN)
+                meteorStartXRight, meteorStartYRight = rotationByCenter(meteorStartXRight, meteorStartYRight, METEOR_INFO.RADIAN)
+                meteorToXRight, meteorToYRight = rotationByCenter(meteorToXRight, meteorToYRight, METEOR_INFO.RADIAN)
+                meteorStartXRight = meteorStartXRight + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
+                meteorToXRight    = meteorToXRight    + (meteorDx - METEOR_INFO.BODY_SIZE) / 2
+                meteorStartYRight = meteorStartYRight + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
+                meteorToYRight    = meteorToYRight    + (meteorDy - METEOR_INFO.BODY_SIZE) / 2
+
+                table.insert(skin.destination, {
+                    id = "white", loop = -1, center = 1, dst = {
+                        {time = 0, x = startXRight, y = startYRight, w = METEOR_INFO.WIDTH+1, h = METEOR_INFO.HEIGHT, angle = METEOR_INFO.ANGLE, r = r, g = g, b = b},
+                        {time = INPUT_WAIT},
+                        {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = toXRight, y = toYRight}
+                    }
+                })
+                -- 星本体
+                table.insert(skin.destination, {
+                    id = "meteorBody", loop = -1, dst = {
+                        {time = 0, x = meteorStartXRight, y = meteorStartYRight, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0, r = sr, g = sg, b = sb},
+                        {time = INPUT_WAIT, angle = meteorInitAngle},
+                        {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXRight, y = meteorToYRight, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
+                    }
+                })
+                table.insert(skin.destination, {
+                    id = "meteorLight", loop = -1, dst = {
+                        {time = 0, x = meteorStartXRight, y = meteorStartYRight, w = METEOR_INFO.BODY_SIZE, h = METEOR_INFO.BODY_SIZE, angle = 0},
+                        {time = INPUT_WAIT, angle = meteorInitAngle},
+                        {time = INPUT_WAIT + OPENING_ANIM_TIME - OPENING_ANIM_TIME_OFFSET, x = meteorToXRight, y = meteorToYRight, angle = METEOR_INFO.ROTATION_VALUE + meteorInitAngle}
+                    }
+                })
+            end
+
+            -- 星屑
+            drawStardust(meteorStartXLeft, meteorToXLeft, meteorStartYLeft, meteorToYLeft, METEOR_INFO.STARDUST_QUANTITY, startdustDst)
+            drawStardust(meteorStartXRight, meteorToXRight, meteorStartYRight, meteorToYRight, METEOR_INFO.STARDUST_QUANTITY, startdustDst)
         end
 
-        -- 星屑
-        drawStardust(meteorStartXLeft, meteorToXLeft, meteorStartYLeft, meteorToYLeft, METEOR_INFO.STARDUST_QUANTITY, startdustDst)
-        drawStardust(meteorStartXRight, meteorToXRight, meteorStartYRight, meteorToYRight, METEOR_INFO.STARDUST_QUANTITY, startdustDst)
-    end
-    
-    for key, dst in ipairs(startdustDst.destination) do
-        table.insert(skin.destination, dst)
+        for key, dst in ipairs(startdustDst.destination) do
+            table.insert(skin.destination, dst)
+        end
     end
 
     return skin
