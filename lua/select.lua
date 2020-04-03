@@ -611,10 +611,11 @@ local function initialize()
     v = getTableValue(skin_config.offset, "星屑の明度(既定値100 0<=x<=100)", {x = METEOR_INFO.METEOR_BODY_BRIGHTNESS})
     if v.x ~= 0 then METEOR_INFO.METEOR_BODY_BRIGHTNESS = v.x / 100.0 end
 
-    v = getTableValue(skin_config.offset, "背景色(既定値0 0<=r,g,b<=255)", {x = 0, y = 0, w = 0})
+    v = getTableValue(skin_config.offset, "背景色(既定値0 0<=r,g,b<=255 仕様の都合でrgbはそれぞれxywに割り当て)", {x = 0, y = 0, w = 0})
     if v.x ~= 0 then METEOR_INFO.BACKGROUND_COLOR.r = v.x end
     if v.y ~= 0 then METEOR_INFO.BACKGROUND_COLOR.g = v.y end
     if v.w ~= 0 then METEOR_INFO.BACKGROUND_COLOR.b = v.w end
+    print(v.x)
 end
 
 local function main()
