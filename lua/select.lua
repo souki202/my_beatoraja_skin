@@ -176,6 +176,21 @@ local METEOR_INFO = {
 METEOR_INFO.WIDTH     = METEOR_INFO.DEFAULT_QUANTITY / METEOR_INFO.QUANTITY * METEOR_INFO.WIDTH
 METEOR_INFO.BODY_SIZE = METEOR_INFO.DEFAULT_QUANTITY / METEOR_INFO.QUANTITY * METEOR_INFO.BODY_SIZE
 
+local REVERSE_ANIM_INFO = {
+    TIME_OFFSET = 0, -- アニメーションを途中から開始する
+    STARTING_X = 960, -- 伝播の起点
+    STARTING_Y = 540,
+    DIRECTION = 0, -- ひっくり返る向き 0:縦 1:横
+    DIV_X = 19,
+    DIV_Y = 11,
+    PROPAGATION_TIME = 10, -- 0.01sで進むピクセル数
+    REVERSE_TIME = 500, -- ひっくり返るのにかかる時間
+    VARIATION_TIME = 500, -- ms
+    TIME_INVERSE_RESOLUTION = 50 -- 時間の分解能 低い程分解能が高い
+}
+
+local FOV = 45
+
 local header = {
     type = 5,
     name = "Social Skin dev",
@@ -192,7 +207,7 @@ local header = {
             name = "密度グラフ表示", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}
         },
         {
-            name = "開幕アニメーション種類", item = {{name = "無し", op = 915}, {name = "流星", op = 916}}
+            name = "開幕アニメーション種類", item = {{name = "無し", op = 915}, {name = "流星", op = 916}, {name = "タイル", op = 917}}
         },
     },
     filepath = {
@@ -296,6 +311,28 @@ local function has_value (tab, val)
         end
     end
     return false
+end
+
+-- z, y, z座標(zはbeatorajaに対する相対座標)をbeatoraja画面上に透視投影した2D座標x, yに変換する
+-- fovは度数法
+-- 座標系は左手系
+local function perspectiveConvert(x, y, z, fov)
+    -- 受け付けないfov
+    if fov <= 0 or fov >= 180 then
+        return 0, 0
+    end
+    -- 平行移動
+    x, y = pivotEdgeToCenter(x, y)
+
+    local radFov = math.rad(fov)
+    -- fovからカメラのzを求める
+    local r = BASE_WIDTH / 2 / math.tan(radFov / 2)
+
+    -- 変換
+    x = x / (1 + z / r)
+    y = y / (1 + z / r)
+
+    return pivotCenterToEdge(x, y)
 end
 
 local function drawStardust(meteorStartX, meteorToX, meteorStartY, meteorToY, quantity, skin)
@@ -615,7 +652,6 @@ local function initialize()
     if v.x ~= 0 then METEOR_INFO.BACKGROUND_COLOR.r = v.x end
     if v.y ~= 0 then METEOR_INFO.BACKGROUND_COLOR.g = v.y end
     if v.w ~= 0 then METEOR_INFO.BACKGROUND_COLOR.b = v.w end
-    print(v.x)
 end
 
 local function main()
@@ -2061,6 +2097,7 @@ local function main()
         local startdustDst = {destination = {}}
         for i = 1, METEOR_INFO.QUANTITY do
             local ii = METEOR_INFO.QUANTITY - i
+            -- 起点となる回転前の座標を計算
             local initXLeft  = BASE_WIDTH / 2 + (ii * METEOR_INFO.WIDTH) - METEOR_INFO.WIDTH / 2
             local initXRight = BASE_WIDTH / 2 - (ii * METEOR_INFO.WIDTH) - METEOR_INFO.WIDTH / 2
             local toXLeft    = initXLeft
@@ -2164,7 +2201,82 @@ local function main()
             table.insert(skin.destination, dst)
         end
     end
+    if getTableValue(skin_config.option, "開幕アニメーション種類", 915) == 917 then
+        -- 各マスの情報を入れる
+        local squareInfo = {} -- x, y, w, h, centerX, centerY, lengthが入る. x,yは左下
+        local minLength = 999999
+        for x = 1, REVERSE_ANIM_INFO.DIV_X do
+            for y = 1, REVERSE_ANIM_INFO.DIV_Y do
+                local posX = math.floor((x - 1) * (BASE_WIDTH / REVERSE_ANIM_INFO.DIV_X))
+                local posY = math.floor((y - 1) * (BASE_HEIGHT / REVERSE_ANIM_INFO.DIV_Y))
+                local nextPosX = math.floor(x * (BASE_WIDTH / REVERSE_ANIM_INFO.DIV_X))
+                local nextPosY = math.floor(y * (BASE_HEIGHT / REVERSE_ANIM_INFO.DIV_Y))
+                local w = nextPosX - posX
+                local h = nextPosY - posY
+                local centerX = math.floor((nextPosX + posX) / 2)
+                local centerY = math.floor((nextPosY + posY) / 2)
+                local length = (REVERSE_ANIM_INFO.STARTING_X - centerX) ^ 2 + (REVERSE_ANIM_INFO.STARTING_Y - centerY) ^ 2
+                length = math.sqrt(length)
+                table.insert(squareInfo, {x = posX, y = posY, w = w, h = h, centerX = centerX, centerY = centerY, length = length, deltaTime = math.random(0, REVERSE_ANIM_INFO.VARIATION_TIME)})
+                minLength = math.min(minLength, length)
+            end
+        end
+        -- 遠い方を下に描画するためにソート
+        table.sort(squareInfo, function (a, b) return (a.length < b.length) end)
 
+        -- print("num of squares: " .. #squareInfo)
+        -- 描画+アニメーション
+        for n, square in pairs(squareInfo) do
+            -- print("now: " .. n)
+            -- 各線について計算していく
+            if REVERSE_ANIM_INFO.DIRECTION == 0 then -- 横軸に対してひっくり返る
+                local startTime = INPUT_WAIT + 1000 * square.length / (REVERSE_ANIM_INFO.PROPAGATION_TIME * 100) - REVERSE_ANIM_INFO.TIME_OFFSET
+                startTime = math.max(0, startTime)
+
+                -- 初期化
+                local dst = {}
+                for line = 1, square.h do
+                    dst[line] = {id = "white", loop = -1, dst = {}}
+                    table.insert(dst[line].dst, {
+                        time = 0, x = square.x, y = square.y + line - 1, w = square.w, h = 1, a = 255, r = 0, g = 0, b = 0
+                    })
+                    table.insert(dst[line].dst, {
+                        time = startTime + square.deltaTime
+                    })
+                end
+
+                -- それぞれの時間について
+                local fixedTime = REVERSE_ANIM_INFO.REVERSE_TIME
+                if REVERSE_ANIM_INFO.REVERSE_TIME % REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION ~= 0 then
+                    fixedTime = REVERSE_ANIM_INFO.REVERSE_TIME + (REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION - REVERSE_ANIM_INFO.REVERSE_TIME % REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION)
+                end
+                for i = 1, REVERSE_ANIM_INFO.REVERSE_TIME, REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION do
+                    local rad = math.pi * i / REVERSE_ANIM_INFO.REVERSE_TIME
+                    local a   = 255 - 255 * i / REVERSE_ANIM_INFO.REVERSE_TIME
+                    a = math.max(0, a)
+                    local drawedY = {}
+                    --それぞれの線について
+                    local nextX, nextY  = perspectiveConvert(square.x, square.centerY + (0 - square.h / 2) * math.cos(rad), (square.h / 2 - 0) * math.sin(rad), FOV)
+                    for line = 1, square.h do
+                        -- それぞれの時間での座標を計算
+                        local x, y    = nextX, nextY
+                        nextX, nextY  = perspectiveConvert(square.x, square.centerY + (line - square.h / 2) * math.cos(rad), (square.h / 2 - line) * math.sin(rad), FOV)
+                        local x2, _ = perspectiveConvert(square.x + square.w, square.centerY + (line - 1 - square.h / 2) * math.cos(rad) + 1, (square.h / 2 - line - 1) * math.sin(rad), FOV)
+                        y = math.floor(y + 0.5)
+                        x = math.floor(x + 0.5)
+                        local h = math.floor(nextY + 0.5) - y
+                        table.insert(dst[line].dst, {
+                            time = startTime + i + square.deltaTime, x = x, y = y, w = math.floor(x2 - x + 0.5), h = h, a = a
+                        })
+                    end
+                end
+
+                for _, d in pairs(dst) do
+                    table.insert(skin.destination, d)
+                end
+            end
+        end
+    end
     return skin
 end
 
