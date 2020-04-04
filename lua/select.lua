@@ -2290,7 +2290,7 @@ local function main()
 
         -- print("num of squares: " .. #squareInfo)
         -- 描画+アニメーション
-        for n, square in pairs(squareInfo) do
+        for _, square in pairs(squareInfo) do
             -- print("now: " .. n)
             -- 各線について計算していく
             local startTime = INPUT_WAIT + 1000 * square.length / (REVERSE_ANIM_INFO.PROPAGATION_TIME * 100) - REVERSE_ANIM_INFO.TIME_OFFSET
@@ -2325,7 +2325,7 @@ local function main()
             end
             for i = 1, REVERSE_ANIM_INFO.REVERSE_TIME, REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION do
                 local rad = math.pi * i / REVERSE_ANIM_INFO.REVERSE_TIME
-                local a   = 255 - 255 * i / REVERSE_ANIM_INFO.REVERSE_TIME / (REVERSE_ANIM_INFO.TIME_RATE_UP_TO_TRANSPARENCY / 100)
+                local a   = 255 - 255 * i / REVERSE_ANIM_INFO.REVERSE_TIME / (REVERSE_ANIM_INFO.TIME_RATE_UP_TO_TRANSPARENCY / 100.0)
                 if REVERSE_ANIM_INFO.IS_REVERSE == 1 then
                     rad = -rad
                 end
