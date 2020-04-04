@@ -178,18 +178,22 @@ METEOR_INFO.BODY_SIZE = METEOR_INFO.DEFAULT_QUANTITY / METEOR_INFO.QUANTITY * ME
 
 local REVERSE_ANIM_INFO = {
     TIME_OFFSET = 0, -- アニメーションを途中から開始する
-    STARTING_X = 960, -- 伝播の起点
-    STARTING_Y = 540,
-    DIRECTION = 0, -- ひっくり返る向き 0:縦 1:横
-    DIV_X = 19,
-    DIV_Y = 11,
-    PROPAGATION_TIME = 10, -- 0.01sで進むピクセル数
-    REVERSE_TIME = 500, -- ひっくり返るのにかかる時間
-    VARIATION_TIME = 500, -- ms
-    TIME_INVERSE_RESOLUTION = 50 -- 時間の分解能 低い程分解能が高い
+    STARTING_X = 0, -- 伝播の起点
+    STARTING_Y = 560,
+    DIRECTION = 1, -- ひっくり返る向き 0:縦 1:横
+    IS_REVERSE = 0, -- ひっくり返る向きを逆にするかどうか
+    DIV_X = 16,
+    DIV_Y = 16,
+    PROPAGATION_TIME = 40, -- 0.01sで進むピクセル数
+    REVERSE_TIME = 300, -- ひっくり返るのにかかる時間
+    VARIATION_TIME = 150, -- ms
+    TIME_INVERSE_RESOLUTION = 125, -- 時間の分解能 低い程分解能が高い
+    IMAGE_INVERSE_RESOLUTION = 8, -- タイルの分解能 低いほど分解能が高い
+    TIME_RATE_UP_TO_TRANSPARENCY = 90, -- タイルが透明になるまでの時間の%
+    COLOR = {r = 0, g = 0, b = 0}
 }
 
-local FOV = 45
+local FOV = 90
 
 local header = {
     type = 5,
@@ -209,33 +213,52 @@ local header = {
         {
             name = "開幕アニメーション種類", item = {{name = "無し", op = 915}, {name = "流星", op = 916}, {name = "タイル", op = 917}}
         },
+        {
+            name = "タイルアニメーション設定------------------------", item = {{name = "-"}}
+        },
+        {
+            name = "タイルの回転方向", item = {{name = "縦", op = 920}, {name = "縦(反転)", op = 921}, {name = "横", op = 922}, {name = "横(反転)", op = 923}}
+        },
     },
     filepath = {
-        {name = "背景選択----------------", path="../dummy/*"},
+        {name = "背景選択-----------------------------------------", path="../dummy/*"},
         {name = "背景(png)", path = "../select/background/*.png"},
         -- {name = "背景(mp4)", path = "../select/background/*.mp4"}
     },
     offset = {
-        {name = "流星群(0で既定値)---------------------------------------------------", id = 40},
-        {name = "流星アニメーション時間(ms 既定値1500 0<x)", id = 41, x = 0},
-        {name = "流星アニメーション開始時間オフセット(ms 既定値0 0<=x<流星アニメーション時間)", id = 42, x = 0},
-        {name = "本数(既定値6 0<x)", id = 43, x = 0},
-        {name = "各流星のズレ(既定値300)", id = 44, x = 0},
-        {name = "角度(既定値-20)", id = 45, a = 0},
-        {name = "虹の彩度(既定値13 0<=x<=100)", id = 46, x = 0},
-        {name = "虹の明度(既定値100 0<=x<=100)", id = 47, x = 0},
-        {name = "星の大きさ(% 既定値100)", id = 48, x = 0},
-        {name = "星の回転量(既定値1800)", id = 49, a = 0},
-        {name = "星屑の量(既定値60)", id = 50, x = 0},
-        {name = "星屑の最大の大きさ(既定値64)", id = 51, x = 0},
-        {name = "星屑の最小の大きさ(既定値28)", id = 52, x = 0},
-        {name = "星屑の回転量(既定値480)", id = 53, a = 0},
-        {name = "星屑のアニメーション時間(既定値1500)", id = 54, x = 0},
-        {name = "星屑の角度のばらつき(既定値40)", id = 55, a = 0},
-        {name = "星屑の移動量(既定値4000)", id = 56, x = 0},
-        {name = "星屑の彩度(既定値40 0<=x<=100)", id = 57, x = 0},
-        {name = "星屑の明度(既定値100 0<=x<=100)", id = 58, x = 0},
-        {name = "背景色(既定値0 0<=r,g,b<=255 仕様の都合でrgbはそれぞれxywに割り当て)", id = 59, x = 0, y = 0, w = 0},
+        {name = "全体設定(0で既定値)------------------------------", x = 0},
+        {name = "FOV (既定値90 -1で平行投影 0<x<180 or x=-1)", x = 0},
+        {name = "流星群(0で既定値)--------------------------------", x = 0},
+        {name = "流星アニメーション時間(ms 既定値1500 0<x)", x = 0},
+        {name = "流星アニメーション開始時間オフセット(ms 既定値0 0<=x<流星アニメーション時間)", x = 0},
+        {name = "本数(既定値6 0<x)", x = 0},
+        {name = "各流星のズレ(既定値300)", x = 0},
+        {name = "角度(既定値-20)", a = 0},
+        {name = "虹の彩度(既定値13 0<=x<=100)", x = 0},
+        {name = "虹の明度(既定値100 0<=x<=100)", x = 0},
+        {name = "星の大きさ(% 既定値100)", x = 0},
+        {name = "星の回転量(既定値1800)", a = 0},
+        {name = "星屑の量(既定値60)", x = 0},
+        {name = "星屑の最大の大きさ(既定値64)", x = 0},
+        {name = "星屑の最小の大きさ(既定値28)", x = 0},
+        {name = "星屑の回転量(既定値480)", a = 0},
+        {name = "星屑のアニメーション時間(既定値1500)", x = 0},
+        {name = "星屑の角度のばらつき(既定値40)", a = 0},
+        {name = "星屑の移動量(既定値4000)", x = 0},
+        {name = "星屑の彩度(既定値40 0<=x<=100)", x = 0},
+        {name = "星屑の明度(既定値100 0<=x<=100)", x = 0},
+        {name = "背景色(既定値0 0<=r,g,b<=255 仕様の都合でrgbはそれぞれxywに割り当て)", x = 0, y = 0, w = 0},
+        {name = "タイル(0で既定値)------------------------------", x = 0},
+        {name = "タイルアニメーション開始時間オフセット(ms 既定値0 0<=x<500)", x = 0},
+        {name = "伝播の起点座標(既定値0,0 画面左下原点)", x = 0, y = 0},
+        {name = "画面分割数(既定値16,16 x,y>0)", x = 0, y = 0},
+        {name = "伝播速度(10ms毎のpx数 既定値40 x>0)", x = 0},
+        {name = "タイルの回転時間(既定値300 x>0)", x = 0},
+        {name = "各タイルの回転開始時間のずれ(既定値150 x>0)", x = 0},
+        {name = "タイル回転の分割時間(このms毎に分割 規定値125 x>0)", x = 0},
+        {name = "タイルの分割数(このpx毎に分割 既定値8 x>0)", x = 0},
+        {name = "タイルが透明になるまでの時間の割合(既定値90 0<=x<=100)", x = 0},
+        {name = "タイルの色(既定値0 0<=r,g,b<=255 rgbはそれぞれxywに割り当て)", x = 0, y = 0, w = 0},
     }
 }
 
@@ -316,10 +339,14 @@ end
 -- z, y, z座標(zはbeatorajaに対する相対座標)をbeatoraja画面上に透視投影した2D座標x, yに変換する
 -- fovは度数法
 -- 座標系は左手系
-local function perspectiveConvert(x, y, z, fov)
+local function perspectiveProjection(x, y, z, fov)
     -- 受け付けないfov
-    if fov <= 0 or fov >= 180 then
+    if fov == 0 or fov < -1 or fov >= 180 then
         return 0, 0
+    end
+    -- 0なら平行投影とする
+    if fov == -1 then
+        return x, y
     end
     -- 平行移動
     x, y = pivotEdgeToCenter(x, y)
@@ -587,12 +614,16 @@ local function destinationSmallKeysInHelp(skin, baseX, baseY, activeKeys, appear
 end
 
 local function initialize()
-    local v = getTableValue(skin_config.offset, "流星アニメーション時間(ms 既定値1500 0<x)", {x = OPENING_ANIM_TIME})
+    -- 全体設定
+    local v = getTableValue(skin_config.offset, "FOV (既定値90 -1で平行投影 0<x<180 or x=-1)", {x = FOV})
+    if v.x ~= 0 then FOV = v.x end
+
+    -- ここから流星設定
+    v = getTableValue(skin_config.offset, "流星アニメーション時間(ms 既定値1500 0<x)", {x = OPENING_ANIM_TIME})
     if v.x ~= 0 then OPENING_ANIM_TIME = v.x end
 
     v = getTableValue(skin_config.offset, "流星アニメーション開始時間オフセット(ms 既定値0 0<=x<流星アニメーション時間)", {x = OPENING_ANIM_TIME_OFFSET})
     if v.x ~= 0 then  OPENING_ANIM_TIME_OFFSET = v.x end
-
 
     v = getTableValue(skin_config.offset, "本数(既定値6 0<x)", {x = METEOR_INFO.QUANTITY})
     if v.x ~= 0 then METEOR_INFO.QUANTITY = v.x end
@@ -652,6 +683,39 @@ local function initialize()
     if v.x ~= 0 then METEOR_INFO.BACKGROUND_COLOR.r = v.x end
     if v.y ~= 0 then METEOR_INFO.BACKGROUND_COLOR.g = v.y end
     if v.w ~= 0 then METEOR_INFO.BACKGROUND_COLOR.b = v.w end
+
+    -- タイル設定
+    local c = getTableValue(skin_config.option, "タイルの回転方向", 920)
+    if c == 920 then REVERSE_ANIM_INFO.DIRECTION, REVERSE_ANIM_INFO.IS_REVERSE = 0, 0
+    elseif c == 921 then REVERSE_ANIM_INFO.DIRECTION, REVERSE_ANIM_INFO.IS_REVERSE = 0, 1
+    elseif c == 922 then REVERSE_ANIM_INFO.DIRECTION, REVERSE_ANIM_INFO.IS_REVERSE = 1, 0
+    else REVERSE_ANIM_INFO.DIRECTION, REVERSE_ANIM_INFO.IS_REVERSE = 1, 1
+    end
+    print(c)
+    v = getTableValue(skin_config.offset, "タイルアニメーション開始時間オフセット(ms 既定値0 0<=x<500)", {x = REVERSE_ANIM_INFO.TIME_OFFSET})
+    if v.x ~= 0 then REVERSE_ANIM_INFO.TIME_OFFSET = v.x end
+    v = getTableValue(skin_config.offset, "伝播の起点座標(既定値0,0 画面左下原点)", {x = REVERSE_ANIM_INFO.STARTING_X, y = REVERSE_ANIM_INFO.STARTING_Y})
+    if v.x ~= 0 then REVERSE_ANIM_INFO.STARTING_X = v.x end
+    if v.y ~= 0 then REVERSE_ANIM_INFO.STARTING_Y = v.y end
+    v = getTableValue(skin_config.offset, "画面分割数(既定値16,16 x,y>0)", {x = REVERSE_ANIM_INFO.DIV_X, y = REVERSE_ANIM_INFO.DIV_Y})
+    if v.x ~= 0 then REVERSE_ANIM_INFO.DIV_X = v.x end
+    if v.y ~= 0 then REVERSE_ANIM_INFO.DIV_Y = v.y end
+    v = getTableValue(skin_config.offset, "伝播速度(10ms毎のpx数 既定値40 x>0)", {x = REVERSE_ANIM_INFO.PROPAGATION_TIME})
+    if v.x ~= 0 then REVERSE_ANIM_INFO.PROPAGATION_TIME = v.x end
+    v = getTableValue(skin_config.offset, "タイルの回転時間(既定値300 x>0)", {x = REVERSE_ANIM_INFO.REVERSE_TIME})
+    if v.x ~= 0 then REVERSE_ANIM_INFO.REVERSE_TIME = v.x end
+    v = getTableValue(skin_config.offset, "各タイルの回転開始時間のずれ(既定値150 x>0)", {x = REVERSE_ANIM_INFO.VARIATION_TIME})
+    if v.x ~= 0 then REVERSE_ANIM_INFO.VARIATION_TIME = v.x end
+    v = getTableValue(skin_config.offset, "タイル回転の分割時間(このms毎に分割 規定値125 x>0)", {x = REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION})
+    if v.x ~= 0 then REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION = v.x end
+    v = getTableValue(skin_config.offset, "タイルの分割数(このpx毎に分割 既定値8 x>0)", {x = REVERSE_ANIM_INFO.IMAGE_INVERSE_RESOLUTION})
+    if v.x ~= 0 then REVERSE_ANIM_INFO.IMAGE_INVERSE_RESOLUTION = v.x end
+    v = getTableValue(skin_config.offset, "タイルが透明になるまでの時間の割合(既定値90 0<=x<=100)", {x = REVERSE_ANIM_INFO.TIME_RATE_UP_TO_TRANSPARENCY})
+    if v.x ~= 0 then REVERSE_ANIM_INFO.TIME_RATE_UP_TO_TRANSPARENCY = v.x end
+    v = getTableValue(skin_config.offset, "タイルの色(既定値0 0<=r,g,b<=255 rgbはそれぞれxywに割り当て)", {x = 0, y = 0, w = 0})
+    if v.x ~= 0 then METEOR_INFO.COLOR.r = v.x end
+    if v.y ~= 0 then METEOR_INFO.COLOR.g = v.y end
+    if v.w ~= 0 then METEOR_INFO.COLOR.b = v.w end
 end
 
 local function main()
@@ -2229,51 +2293,80 @@ local function main()
         for n, square in pairs(squareInfo) do
             -- print("now: " .. n)
             -- 各線について計算していく
-            if REVERSE_ANIM_INFO.DIRECTION == 0 then -- 横軸に対してひっくり返る
-                local startTime = INPUT_WAIT + 1000 * square.length / (REVERSE_ANIM_INFO.PROPAGATION_TIME * 100) - REVERSE_ANIM_INFO.TIME_OFFSET
-                startTime = math.max(0, startTime)
+            local startTime = INPUT_WAIT + 1000 * square.length / (REVERSE_ANIM_INFO.PROPAGATION_TIME * 100) - REVERSE_ANIM_INFO.TIME_OFFSET
+            startTime = math.max(0, startTime)
 
-                -- 初期化
-                local dst = {}
-                for line = 1, square.h do
-                    dst[line] = {id = "white", loop = -1, dst = {}}
+            -- 初期化
+            local dst = {}
+            local n = square.h
+            if REVERSE_ANIM_INFO.DIRECTION == 1 then
+                n = square.w
+            end
+            for line = 1, n do
+                dst[line] = {id = "white", loop = -1, dst = {}}
+                if REVERSE_ANIM_INFO.DIRECTION == 0 then -- 横軸に対してひっくり返る
                     table.insert(dst[line].dst, {
-                        time = 0, x = square.x, y = square.y + line - 1, w = square.w, h = 1, a = 255, r = 0, g = 0, b = 0
+                        time = 0, x = square.x, y = square.y + line - 1, w = square.w, h = 1, a = 255, r = REVERSE_ANIM_INFO.COLOR.r, g = REVERSE_ANIM_INFO.COLOR.g, b = REVERSE_ANIM_INFO.COLOR.b
                     })
+                else -- 縦軸方向に対して
                     table.insert(dst[line].dst, {
-                        time = startTime + square.deltaTime
+                        time = 0, x = square.x + line - 1, y = square.y, w = 1, h = square.h, a = 255, r = REVERSE_ANIM_INFO.COLOR.r, g = REVERSE_ANIM_INFO.COLOR.g, b = REVERSE_ANIM_INFO.COLOR.b
                     })
                 end
+                table.insert(dst[line].dst, {
+                    time = startTime + square.deltaTime
+                })
+            end
 
-                -- それぞれの時間について
-                local fixedTime = REVERSE_ANIM_INFO.REVERSE_TIME
-                if REVERSE_ANIM_INFO.REVERSE_TIME % REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION ~= 0 then
-                    fixedTime = REVERSE_ANIM_INFO.REVERSE_TIME + (REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION - REVERSE_ANIM_INFO.REVERSE_TIME % REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION)
+            -- それぞれの時間について
+            local fixedTime = REVERSE_ANIM_INFO.REVERSE_TIME
+            if REVERSE_ANIM_INFO.REVERSE_TIME % REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION ~= 0 then
+                fixedTime = REVERSE_ANIM_INFO.REVERSE_TIME + (REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION - REVERSE_ANIM_INFO.REVERSE_TIME % REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION)
+            end
+            for i = 1, REVERSE_ANIM_INFO.REVERSE_TIME, REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION do
+                local rad = math.pi * i / REVERSE_ANIM_INFO.REVERSE_TIME
+                local a   = 255 - 255 * i / REVERSE_ANIM_INFO.REVERSE_TIME / (REVERSE_ANIM_INFO.TIME_RATE_UP_TO_TRANSPARENCY / 100)
+                if REVERSE_ANIM_INFO.IS_REVERSE == 1 then
+                    rad = -rad
                 end
-                for i = 1, REVERSE_ANIM_INFO.REVERSE_TIME, REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION do
-                    local rad = math.pi * i / REVERSE_ANIM_INFO.REVERSE_TIME
-                    local a   = 255 - 255 * i / REVERSE_ANIM_INFO.REVERSE_TIME
-                    a = math.max(0, a)
-                    local drawedY = {}
-                    --それぞれの線について
-                    local nextX, nextY  = perspectiveConvert(square.x, square.centerY + (0 - square.h / 2) * math.cos(rad), (square.h / 2 - 0) * math.sin(rad), FOV)
-                    for line = 1, square.h do
+                a = math.max(0, a)
+                --それぞれの線について
+                local res = REVERSE_ANIM_INFO.IMAGE_INVERSE_RESOLUTION
+                if REVERSE_ANIM_INFO.DIRECTION == 0 then -- 横軸に対してひっくり返る
+                    local nextX, nextY  = perspectiveProjection(square.x, square.centerY + (res - 1 - square.h / 2) * math.cos(rad), (square.h / 2 - res - 1) * math.sin(rad), FOV)
+                    for line = res, square.h, res do
+                        local nextLine = math.min(line + res, square.h)
                         -- それぞれの時間での座標を計算
                         local x, y    = nextX, nextY
-                        nextX, nextY  = perspectiveConvert(square.x, square.centerY + (line - square.h / 2) * math.cos(rad), (square.h / 2 - line) * math.sin(rad), FOV)
-                        local x2, _ = perspectiveConvert(square.x + square.w, square.centerY + (line - 1 - square.h / 2) * math.cos(rad) + 1, (square.h / 2 - line - 1) * math.sin(rad), FOV)
-                        y = math.floor(y + 0.5)
+                        nextX, nextY  = perspectiveProjection(square.x, square.centerY + (nextLine - square.h / 2) * math.cos(rad), (square.h / 2 - nextLine) * math.sin(rad), FOV)
+                        local x2, _ = perspectiveProjection(square.x + square.w, square.centerY + (line - 1 - square.h / 2) * math.cos(rad) + 1, (square.h / 2 - line - 1) * math.sin(rad), FOV)
                         x = math.floor(x + 0.5)
+                        y = math.floor(y + 0.5)
                         local h = math.floor(nextY + 0.5) - y
                         table.insert(dst[line].dst, {
                             time = startTime + i + square.deltaTime, x = x, y = y, w = math.floor(x2 - x + 0.5), h = h, a = a
                         })
                     end
+                else
+                    local nextX, nextY  = perspectiveProjection(square.centerX + (res - 1 - square.w / 2) * math.cos(rad), square.y, (square.w / 2 - res - 1) * math.sin(rad), FOV)
+                    for line = res, square.w, res do
+                        local nextLine = math.min(line + res, square.w)
+                        -- それぞれの時間での座標を計算
+                        local x, y    = nextX, nextY
+                        nextX, nextY  = perspectiveProjection(square.centerX + (nextLine - square.w / 2) * math.cos(rad), square.y, (square.w / 2 - nextLine) * math.sin(rad), FOV)
+                        local _, y2 = perspectiveProjection(square.centerX + (line - 1 - square.w / 2) * math.cos(rad), square.y + square.h, (square.w / 2 - line - 1) * math.sin(rad), FOV)
+                        x = math.floor(x + 0.5)
+                        y = math.floor(y + 0.5)
+                        local w = math.floor(nextX + 0.5) - x
+                        table.insert(dst[line].dst, {
+                            time = startTime + i + square.deltaTime, x = x, y = y, w = w, h = math.floor(y2 - y + 0.5), a = a
+                        })
+                    end
                 end
+            end
 
-                for _, d in pairs(dst) do
-                    table.insert(skin.destination, d)
-                end
+            for _, d in pairs(dst) do
+                table.insert(skin.destination, d)
             end
         end
     end
