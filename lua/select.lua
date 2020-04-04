@@ -713,9 +713,9 @@ local function initialize()
     v = getTableValue(skin_config.offset, "タイルが透明になるまでの時間の割合(既定値90 0<=x<=100)", {x = REVERSE_ANIM_INFO.TIME_RATE_UP_TO_TRANSPARENCY})
     if v.x ~= 0 then REVERSE_ANIM_INFO.TIME_RATE_UP_TO_TRANSPARENCY = v.x end
     v = getTableValue(skin_config.offset, "タイルの色(既定値0 0<=r,g,b<=255 rgbはそれぞれxywに割り当て)", {x = 0, y = 0, w = 0})
-    if v.x ~= 0 then METEOR_INFO.COLOR.r = v.x end
-    if v.y ~= 0 then METEOR_INFO.COLOR.g = v.y end
-    if v.w ~= 0 then METEOR_INFO.COLOR.b = v.w end
+    if v.x ~= 0 then REVERSE_ANIM_INFO.COLOR.r = v.x end
+    if v.y ~= 0 then REVERSE_ANIM_INFO.COLOR.g = v.y end
+    if v.w ~= 0 then REVERSE_ANIM_INFO.COLOR.b = v.w end
 end
 
 local function main()
