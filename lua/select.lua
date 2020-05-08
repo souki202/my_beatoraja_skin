@@ -1,3 +1,19 @@
+-- Copyright 2019-2020 tori-blog.net.
+-- This file is part of SocialSkin.
+
+-- SocialSkin is free program: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+
+-- SocialSkin is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+
+-- You should have received a copy of the GNU General Public License
+-- along with SocialSkin.  If not, see <http://www.gnu.org/licenses/>.
+
 require("define")
 
 local PARTS_TEXTURE_SIZE = 2048
@@ -241,7 +257,7 @@ local header = {
             name = "曲情報表示形式", item = {{name = "難易度リスト", op = 935}, {name = "密度", op = 936}}
         },
         {
-            name = "密度の標準桁数", item = {{name = "2桁", op = 938}, {name = "1桁", op = 939}}
+            name = "密度の標準桁数", item = {{name = "1桁", op = 938}, {name = "2桁", op = 939}}
         },
         {
             name = "開幕アニメーション種類", item = {{name = "無し", op = 930}, {name = "流星", op = 931}, {name = "タイル", op = 932}}
@@ -2002,11 +2018,11 @@ local function main()
                 }
             })
 
-            local offset = 60
+            local offset = 62
             if getTableValue(skin_config.option, "密度の標準桁数", 938) == 938 then
-                offset = 60
+                offset = 46
             else
-                offset = 45
+                offset = 62
             end
             -- 数値
             table.insert(skin.destination, {
