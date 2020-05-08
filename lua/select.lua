@@ -65,17 +65,37 @@ local MUSIC_SLIDER_BUTTON_W = 22
 local MUSIC_SLIDER_BUTTON_H = 48
 
 -- 左下のレベルが並んでいる部分
-local LARGE_LEVEL_HEIGHT = 40
+local LARGE_LEVEL_H = 40
+local LARGE_LEVEL_W = 30
 local LARGE_LEVEL_X = 140
 local LARGE_LEVEL_Y = 275
+local LARGE_LEVEL_DOT_SIZE = 12
 local LARGE_LEVEL_INTERVAL = 136
 local LEVEL_ICON_WIDTH = 105
-local LEVEL_ICON_INTERVAL = LARGE_LEVEL_INTERVAL
 local LEVEL_ICON_SRC_X = 1128
 local NONACTIVE_LEVEL_ICON_H = 82
 local ACTIVE_LEVEL_ICON_H = 75
 local ACTIVE_LEVEL_TEXT_H = 31
 local LEVEL_ICON_Y = 318
+
+local DENSITY_INFO = {
+    TEXT_W = 108,
+    TEXT_H = 31,
+
+    NUMBER_Y = 275,
+
+    ICON_W = 105,
+    ICON_H = 75,
+    ICON_Y = 316,
+
+    DIFFICULTY_ICON_X = 102,
+    DIFFICULTY_TEXT_X = 100,
+    DIFFICULTY_ICON_Y = 318 - 2; -- ICON_Y - 2
+    DIFFICULTY_NUMBER_X = 125,
+
+    START_X = 316,
+    INTERVAL_X = 168,
+}
 
 local LEVEL_NAME_TABLE = {"Beginner", "Normal", "Hyper", "Another", "Insane"}
 local JUDGE_NAME_TABLE = {"Perfect", "Great", "Good", "Bad", "Poor"}
@@ -203,6 +223,7 @@ local header = {
     fadeout = 500,
     scene = 3000,
     input = INPUT_WAIT,
+    -- 使用済みリスト 910 915 920 925 930 935
     property = {
         {
             name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}
@@ -217,7 +238,13 @@ local header = {
             name = "フォルダのランプグラフの色", item = {{name = "デフォルト", op = 927}, {name = "独自仕様", op = 928}}
         },
         {
-            name = "開幕アニメーション種類", item = {{name = "無し", op = 915}, {name = "流星", op = 916}, {name = "タイル", op = 917}}
+            name = "曲情報表示形式", item = {{name = "難易度リスト", op = 935}, {name = "密度", op = 936}}
+        },
+        {
+            name = "密度の標準桁数", item = {{name = "2桁", op = 938}, {name = "1桁", op = 939}}
+        },
+        {
+            name = "開幕アニメーション種類", item = {{name = "無し", op = 930}, {name = "流星", op = 931}, {name = "タイル", op = 932}}
         },
         {
             name = "タイルアニメーション設定------------------------", item = {{name = "-"}}
@@ -827,6 +854,28 @@ local function main()
         {id = "activeHyperNote"      , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
         {id = "activeAnotherNote"    , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
         {id = "activeInsaneNote"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        -- 密度アイコン 難易度アイコン部分のアイコン表示は上ので読み込み済み
+        -- 今のところのソースは, 平均はnormal, 終わり100notesはhyper, 最大値はanotherアイコン
+        -- dstはdensity用の値 DENSITY_INFO参照
+        {id = "densityAverageIcon"   , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "densityEndIcon"       , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "densityPeakIcon"      , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "densityAverageNote"   , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "densityEndNote"       , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "densityPeakNote"      , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "densityDifficultyBeginnerText", src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*0, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityDifficultyNormalText"  , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*1, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityDifficultyHyperText"   , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*2, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityDifficultyAnotherText" , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*3, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityDifficultyInsaneText"  , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*4, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityAverageText" , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*5, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityEndText"     , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*6, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityPeakText"    , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*7, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        -- 密度表示部分のdot
+        {id = "densityAverageDot", src = 0, x = 1074, y = PARTS_OFFSET + 175 + LARGE_LEVEL_H*1, w = LARGE_LEVEL_DOT_SIZE, h = LARGE_LEVEL_DOT_SIZE},
+        {id = "densityEndDot"    , src = 0, x = 1074, y = PARTS_OFFSET + 175 + LARGE_LEVEL_H*2, w = LARGE_LEVEL_DOT_SIZE, h = LARGE_LEVEL_DOT_SIZE},
+        {id = "densityPeakDot"   , src = 0, x = 1074, y = PARTS_OFFSET + 175 + LARGE_LEVEL_H*3, w = LARGE_LEVEL_DOT_SIZE, h = LARGE_LEVEL_DOT_SIZE},
+
         -- 楽曲のkeys
         {id = "music7keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*0, y = PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
         {id = "music5keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*2, y = PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
@@ -1123,11 +1172,18 @@ local function main()
         {id = "barPlayLevelInsane",   src = 0, x = 771, y = PARTS_OFFSET + 21*5, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
         {id = "barPlayLevelUnknown2", src = 0, x = 771, y = PARTS_OFFSET + 21*6, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
         -- 左側の難易度表記数字
-        {id = "largeLevelBeginner", src = 0, x = 771, y = PARTS_OFFSET + 147, w = 30*10, h = LARGE_LEVEL_HEIGHT, divx = 10, digit = 2, ref = 45, align = 2},
-        {id = "largeLevelNormal", src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_HEIGHT * 1, w = 30*10, h = LARGE_LEVEL_HEIGHT, divx = 10, digit = 2, ref = 46, align = 2},
-        {id = "largeLevelHyper", src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_HEIGHT * 2, w = 30*10, h = LARGE_LEVEL_HEIGHT, divx = 10, digit = 2, ref = 47, align = 2},
-        {id = "largeLevelAnother", src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_HEIGHT * 3, w = 30*10, h = LARGE_LEVEL_HEIGHT, divx = 10, digit = 2, ref = 48, align = 2},
-        {id = "largeLevelInsane", src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_HEIGHT * 4, w = 30*10, h = LARGE_LEVEL_HEIGHT, divx = 10, digit = 2, ref = 49, align = 2},
+        {id = "largeLevelBeginner", src = 0, x = 771, y = PARTS_OFFSET + 147                         , w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 45, align = 2},
+        {id = "largeLevelNormal"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 1, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 46, align = 2},
+        {id = "largeLevelHyper"   , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 2, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 47, align = 2},
+        {id = "largeLevelAnother" , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 3, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 48, align = 2},
+        {id = "largeLevelInsane"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 4, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 49, align = 2},
+        -- 密度
+        {id = "densityAverageNumber"    , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 1, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 364, align = 0},
+        {id = "densityAverageAfterDot"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 1, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 1, ref = 365, align = 1},
+        {id = "densityEndNumber"        , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 2, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 362, align = 0},
+        {id = "densityEndAfterDot"      , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 2, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 1, ref = 363, align = 1},
+        {id = "densityPeakNumber"       , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 3, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 360, align = 0},
+        {id = "densityPeakAfterDot"     , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 3, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 1, ref = 361, align = 1},
         -- exscore用
         {id = "richExScore", src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_NUMBER_W * 10, h = EXSCORE_NUMBER_H, divx = 10, digit = 5, ref = 71, align = 0},
         -- 上部プレイヤー情報
@@ -1843,52 +1899,132 @@ local function main()
     })
 
     -- レベルアイコン周り
-    for i = 1, 5 do
-        -- レベル表記
-        table.insert(skin.destination, {
-            id = "largeLevel" .. LEVEL_NAME_TABLE[i], op = {150 + i}, dst = {
-                {x = LARGE_LEVEL_X + LARGE_LEVEL_INTERVAL * (i - 1) - 15, y = LARGE_LEVEL_Y, w = 30, h = 40}
-            }
-        })
+    if getTableValue(skin_config.option, "曲情報表示形式", 935) == 935 then
+        -- 難易度表示
+        for i = 1, 5 do
+            -- レベル表記
+            table.insert(skin.destination, {
+                id = "largeLevel" .. LEVEL_NAME_TABLE[i], op = {150 + i}, dst = {
+                    {x = LARGE_LEVEL_X + LARGE_LEVEL_INTERVAL * (i - 1) - 15, y = LARGE_LEVEL_Y, w = 30, h = 40}
+                }
+            })
 
-        -- 非アクティブ時のレベルアイコン
-        table.insert(skin.destination, {
-            id = "nonActive" .. LEVEL_NAME_TABLE[i] .. "Icon", op = {-150 - i}, dst = {
-                {x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - (NONACTIVE_LEVEL_ICON_H - ACTIVE_LEVEL_ICON_H), w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H}
-            }
-        })
+            -- 非アクティブ時のレベルアイコン
+            table.insert(skin.destination, {
+                id = "nonActive" .. LEVEL_NAME_TABLE[i] .. "Icon", op = {-150 - i}, dst = {
+                    {x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - (NONACTIVE_LEVEL_ICON_H - ACTIVE_LEVEL_ICON_H), w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H}
+                }
+            })
 
-        -- アクティブ時のレベルアイコン(背景)
-        table.insert(skin.destination, {
-            id = "active" .. LEVEL_NAME_TABLE[i] .. "Icon", op = {150 + i}, dst = {
-                {x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - 2, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H}
-            }
-        })
+            -- アクティブ時のレベルアイコン(背景)
+            table.insert(skin.destination, {
+                id = "active" .. LEVEL_NAME_TABLE[i] .. "Icon", op = {150 + i}, dst = {
+                    {x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - 2, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H}
+                }
+            })
 
-        -- アクティブ時のレベルアイコンのノート
-        table.insert(skin.destination, {
-            id = "active" .. LEVEL_NAME_TABLE[i] .. "Note", op = {150 + i}, loop = 0, timer = 11, filter = 1, dst = {
-                {time = 0, angle = 0, acc = 2, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - 5, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-                {time = 500, angle = -10, acc = 2, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y + 10, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-                {time = 501, angle = -10, acc = 2, a = 0},
-                {time = 1000, angle = 0, acc = 2, a = 0},
-            }
-        })
-        table.insert(skin.destination, {
-            id = "active" .. LEVEL_NAME_TABLE[i] .. "Note", op = {150 + i}, loop = 0, timer = 11, filter = 1, dst = {
-                {time = 0, angle = 0, acc = 1, a = 0},
-                {time = 500, angle = -10, acc = 1, a = 0},
-                {time = 501, angle = -10, acc = 1, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y + 10, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-                {time = 1000, angle = 0, acc = 1, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - 5, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-            }
-        })
+            -- アクティブ時のレベルアイコンのノート
+            table.insert(skin.destination, {
+                id = "active" .. LEVEL_NAME_TABLE[i] .. "Note", op = {150 + i}, loop = 0, timer = 11, filter = 1, dst = {
+                    {time = 0, angle = 0, acc = 2, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - 5, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+                    {time = 500, angle = -10, acc = 2, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y + 10, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+                    {time = 501, angle = -10, acc = 2, a = 0},
+                    {time = 1000, angle = 0, acc = 2, a = 0},
+                }
+            })
+            table.insert(skin.destination, {
+                id = "active" .. LEVEL_NAME_TABLE[i] .. "Note", op = {150 + i}, loop = 0, timer = 11, filter = 1, dst = {
+                    {time = 0, angle = 0, acc = 1, a = 0},
+                    {time = 500, angle = -10, acc = 1, a = 0},
+                    {time = 501, angle = -10, acc = 1, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y + 10, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+                    {time = 1000, angle = 0, acc = 1, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - 5, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+                }
+            })
 
-        -- アクティブ時のレベルアイコンのテキスト
-        table.insert(skin.destination,  {
-            id = "active" .. LEVEL_NAME_TABLE[i] .. "Text", op = {150 + i}, dst = {
-                {x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y + 1, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H}
-            }
-        })
+            -- アクティブ時のレベルアイコンのテキスト
+            table.insert(skin.destination,  {
+                id = "active" .. LEVEL_NAME_TABLE[i] .. "Text", op = {150 + i}, dst = {
+                    {x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y + 1, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H}
+                }
+            })
+        end
+    elseif getTableValue(skin_config.option, "曲情報表示形式", 935) == 936 then
+        -- 密度表示
+
+        -- 難易度部分
+        for i = 1, 5 do
+            -- レベルアイコン(背景)
+            table.insert(skin.destination, {
+                id = "active" .. LEVEL_NAME_TABLE[i] .. "Icon", op = {150 + i}, dst = {
+                    {x = DENSITY_INFO.DIFFICULTY_ICON_X, y = DENSITY_INFO.ICON_Y, w = DENSITY_INFO.ICON_W, h = DENSITY_INFO.ICON_H}
+                }
+            })
+            -- レベルアイコンのノート
+            table.insert(skin.destination, {
+                id = "active" .. LEVEL_NAME_TABLE[i] .. "Note", op = {150 + i}, dst = {
+                    {x = DENSITY_INFO.DIFFICULTY_ICON_X, y = DENSITY_INFO.ICON_Y, w = DENSITY_INFO.ICON_W, h = DENSITY_INFO.ICON_H},
+                }
+            })
+            -- 文字
+            table.insert(skin.destination, {
+                id = "densityDifficulty" .. LEVEL_NAME_TABLE[i] .. "Text", op = {150 + i}, dst = {
+                    {x = DENSITY_INFO.DIFFICULTY_TEXT_X - 2, y = DENSITY_INFO.ICON_Y - 1, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H}
+                }
+            })
+
+            -- レベル表記
+            table.insert(skin.destination, {
+                id = "largeLevel" .. LEVEL_NAME_TABLE[i], op = {150 + i}, dst = {
+                    {x = DENSITY_INFO.DIFFICULTY_NUMBER_X, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL_W, h = LARGE_LEVEL_H}
+                }
+            })
+        end
+
+        -- 密度部分
+        local startX = DENSITY_INFO.START_X
+        local types = {"Average", "End", "Peak"}
+
+        for i = 1, 3 do
+            -- アイコン部分
+            table.insert(skin.destination, {
+                id = "density" ..  types[i] .. "Icon", op = {2}, dst = {
+                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1), y = DENSITY_INFO.ICON_Y, w = DENSITY_INFO.ICON_W, h = DENSITY_INFO.ICON_H}
+                }
+            })
+            table.insert(skin.destination, {
+                id = "density" ..  types[i] .. "Note", op = {2}, dst = {
+                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1), y = DENSITY_INFO.ICON_Y + 4, w = DENSITY_INFO.ICON_W, h = DENSITY_INFO.ICON_H}
+                }
+            })
+            table.insert(skin.destination, {
+                id = "density" ..  types[i] .. "Text", op = {2}, dst = {
+                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) - 2, y = DENSITY_INFO.ICON_Y - 1, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H}
+                }
+            })
+
+            local offset = 60
+            if getTableValue(skin_config.option, "密度の標準桁数", 938) == 938 then
+                offset = 60
+            else
+                offset = 45
+            end
+            -- 数値
+            table.insert(skin.destination, {
+                id = "density" ..  types[i] .. "Dot", op = {2}, dst = {
+                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL_DOT_SIZE, h = LARGE_LEVEL_DOT_SIZE}
+                }
+            })
+            table.insert(skin.destination, {
+                id = "density" ..  types[i] .. "Number", op = {2}, dst = {
+                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset - 59, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL_W, h = LARGE_LEVEL_H}
+                }
+            })
+            table.insert(skin.destination, {
+                id = "density" ..  types[i] .. "AfterDot", op = {2}, dst = {
+                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset + 12, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL_W, h = LARGE_LEVEL_H}
+                }
+            })
+        end
     end
 
     -- ランク出力
@@ -2166,7 +2302,7 @@ local function main()
     end
 
     -- 選曲画面突入時アニメーション
-    if getTableValue(skin_config.option, "開幕アニメーション種類", 915) == 916 then
+    if getTableValue(skin_config.option, "開幕アニメーション種類", 930) == 931 then
         -- 背景
         local radius = BASE_WIDTH / math.cos(math.atan2(BASE_HEIGHT, BASE_WIDTH))
         local bgInitXLeft  = -BASE_WIDTH + METEOR_INFO.WIDTH / 2
@@ -2320,7 +2456,7 @@ local function main()
             table.insert(skin.destination, dst)
         end
     end
-    if getTableValue(skin_config.option, "開幕アニメーション種類", 915) == 917 then
+    if getTableValue(skin_config.option, "開幕アニメーション種類", 930) == 932 then
         -- 各マスの情報を入れる
         local squareInfo = {} -- x, y, w, h, centerX, centerY, lengthが入る. x,yは左下
         local minLength = 999999
