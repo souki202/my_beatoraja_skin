@@ -204,11 +204,17 @@ local header = {
     scene = 3000,
     input = INPUT_WAIT,
     property = {
-        -- {
-        --     name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}, def = 915}
-        -- },
+        {
+            name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}
+        },
         {
             name = "密度グラフ表示", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}
+        },
+        {
+            name = "フォルダのランプグラフ", item = {{name = "ON", op = 925}, {name = "OFF", op = 926}}
+        },
+        {
+            name = "フォルダのランプグラフの色", item = {{name = "デフォルト", op = 927}, {name = "独自仕様", op = 928}}
         },
         {
             name = "開幕アニメーション種類", item = {{name = "無し", op = 915}, {name = "流星", op = 916}, {name = "タイル", op = 917}}
@@ -223,7 +229,7 @@ local header = {
     filepath = {
         {name = "背景選択-----------------------------------------", path="../dummy/*"},
         {name = "背景(png)", path = "../select/background/*.png"},
-        -- {name = "背景(mp4)", path = "../select/background/*.mp4"}
+        {name = "背景(mp4)", path = "../select/background/*.mp4"}
     },
     offset = {
         {name = "全体設定(0で既定値)------------------------------", x = 0},
@@ -254,13 +260,21 @@ local header = {
         {name = "画面分割数(既定値16,16 x,y>0)", x = 0, y = 0},
         {name = "伝播速度(10ms毎のpx数 既定値40 x>0)", x = 0},
         {name = "タイルの回転時間(既定値300 x>0)", x = 0},
-        {name = "各タイルの回転開始時間のずれ(既定値150 x>0)", x = 0},
+        {name = "各タイルの回転開始時間のばらつき(既定値150 x>0)", x = 0},
         {name = "タイル回転の分割時間(このms毎に分割 規定値125 x>0)", x = 0},
         {name = "タイルの分割数(このpx毎に分割 既定値8 x>0)", x = 0},
         {name = "タイルが透明になるまでの時間の割合(既定値90 0<=x<=100)", x = 0},
         {name = "タイルの色(既定値0 0<=r,g,b<=255 rgbはそれぞれxywに割り当て)", x = 0, y = 0, w = 0},
     }
 }
+
+local function isViewFolderLampGraph()
+    return getTableValue(skin_config.option, "フォルダのランプグラフ", 925) == 925
+end
+
+local function isDefaultLampGraphColor()
+    return getTableValue(skin_config.option, "フォルダのランプグラフの色", 927) == 927
+end
 
 local function calcComplementValueByTime(startValue, endValue, nowTime, overallTime)
     return startValue + (endValue - startValue) * nowTime / overallTime
@@ -691,7 +705,7 @@ local function initialize()
     elseif c == 922 then REVERSE_ANIM_INFO.DIRECTION, REVERSE_ANIM_INFO.IS_REVERSE = 1, 0
     else REVERSE_ANIM_INFO.DIRECTION, REVERSE_ANIM_INFO.IS_REVERSE = 1, 1
     end
-    print(c)
+
     v = getTableValue(skin_config.offset, "タイルアニメーション開始時間オフセット(ms 既定値0 0<=x<500)", {x = REVERSE_ANIM_INFO.TIME_OFFSET})
     if v.x ~= 0 then REVERSE_ANIM_INFO.TIME_OFFSET = v.x end
     v = getTableValue(skin_config.offset, "伝播の起点座標(既定値0,0 画面左下原点)", {x = REVERSE_ANIM_INFO.STARTING_X, y = REVERSE_ANIM_INFO.STARTING_Y})
@@ -704,7 +718,7 @@ local function initialize()
     if v.x ~= 0 then REVERSE_ANIM_INFO.PROPAGATION_TIME = v.x end
     v = getTableValue(skin_config.offset, "タイルの回転時間(既定値300 x>0)", {x = REVERSE_ANIM_INFO.REVERSE_TIME})
     if v.x ~= 0 then REVERSE_ANIM_INFO.REVERSE_TIME = v.x end
-    v = getTableValue(skin_config.offset, "各タイルの回転開始時間のずれ(既定値150 x>0)", {x = REVERSE_ANIM_INFO.VARIATION_TIME})
+    v = getTableValue(skin_config.offset, "各タイルの回転開始時間のばらつき(既定値150 x>0)", {x = REVERSE_ANIM_INFO.VARIATION_TIME})
     if v.x ~= 0 then REVERSE_ANIM_INFO.VARIATION_TIME = v.x end
     v = getTableValue(skin_config.offset, "タイル回転の分割時間(このms毎に分割 規定値125 x>0)", {x = REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION})
     if v.x ~= 0 then REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION = v.x end
@@ -735,6 +749,7 @@ local function main()
         {id = 3, path = "../select/parts/help.png"},
         {id = 4, path = "../select/parts/stagefile_frame.png"},
         {id = 5, path = "../select/parts/meteor.png"},
+        {id = 6, path = "../select/parts/lamp_gauge_rainbow.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
 
@@ -747,8 +762,11 @@ local function main()
         {id = "barGrade"  , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*2, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         {id = "barNograde", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*2, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         {id = "barFolder" , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*3, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barFolderWithLamp" , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*7, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         {id = "barTable"  , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*4, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barTableWithLamp"  , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*8, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         {id = "barCommand", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*5, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barCommandWithLamp", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*9, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         {id = "barSearch" , src = 0, x = 0, y = PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         -- 選曲バークリアランプ
         {id = "barLampMax", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*0, w = 110, h = LAMP_HEIGHT},
@@ -949,12 +967,12 @@ local function main()
         {id = "pink", src = 999, x = 5, y = 0, w = 1, h = 1},
     }
 
-    -- if skin_config.option["背景形式"] ~= 916 then
-    --     table.insert(skin.image, {id = "background", src = 1, x = 0, y = 0, w = WIDTH, h = HEIGHT})
-    -- else
-    --     table.insert(skin.image, {id = "background", src = 102, x = 0, y = 0, w = WIDTH, h = HEIGHT})
-    -- end
-    table.insert(skin.image, {id = "background", src = 1, x = 0, y = 0, w = WIDTH, h = HEIGHT})
+    local c = getTableValue(skin_config.option, "背景形式", 915)
+    if c == 915 then
+        table.insert(skin.image, {id = "background", src = 1, x = 0, y = 0, w = -1, h = -1})
+    elseif c == 916 then
+        table.insert(skin.image, {id = "background", src = 101, x = 0, y = 0, w = -1, h = -1})
+    end
 
 
     -- 密度グラフ
@@ -968,25 +986,54 @@ local function main()
         {id = "bpmGraph", delay = 0},
     }
 
+    if isDefaultLampGraphColor() then
+        skin.graph = {
+            {id = "lampGraph", src = 0, x = 607, y = PARTS_OFFSET + 22, w = 11, h = 16, divx = 11, divy = 2, cycle = 16.6*4, type = -1}
+        }
+    else
+        skin.graph = {
+            {id = "lampGraph", src = 6, x = 0, y = 0, w = 1408, h = 256, divx = 11, divy = 256, cycle = 2000, type = -1},
+        }
+    end
+
     -- 選曲スライダー
     skin.slider = {
         {id = "musicSelectSlider", src = 0, x = 1541, y = PARTS_OFFSET + 263, w = MUSIC_SLIDER_BUTTON_W, h = MUSIC_SLIDER_BUTTON_H, type = 1, range = 768 - MUSIC_SLIDER_BUTTON_H / 2 - 3, angle = 2, align = 0},
     }
 
-    skin.imageset = {
-        {
-            id = "bar", images = {
-                "barSong",
-                "barFolder",
-                "barTable",
-                "barGrade",
-                "barNosong",
-                "barNograde",
-                "barCommand",
-                "barSearch",
-            }
-        },
-    }
+    if isViewFolderLampGraph() then
+        skin.imageset = {
+            {
+                id = "bar", images = {
+                    "barSong",
+                    "barFolderWithLamp",
+                    "barTableWithLamp",
+                    "barGrade",
+                    -- "barGrade",
+                    "barNosong",
+                    "barCommandWithLamp",
+                    "barNosong",
+                    "barSearch",
+                }
+            },
+        }
+    else
+        skin.imageset = {
+            {
+                id = "bar", images = {
+                    "barSong",
+                    "barFolder",
+                    "barTable",
+                    "barGrade",
+                    -- "barGrade",
+                    "barNosong",
+                    "barCommand",
+                    "barNosong",
+                    "barSearch",
+                }
+            },
+        }
+    end
 
     -- ランク
     -- local ranks = {"Max", "Aaa", "Aa", "a", "b", "c", "d", "e", "f"}
@@ -1228,6 +1275,14 @@ local function main()
             }
         },
     }
+
+    if isViewFolderLampGraph() then
+        skin.songlist.graph = {
+            id = "lampGraph", dst = {
+                {x = 170, y = 9, w = 397, h = 8}
+            }
+        }
+    end
 
     local levelPosX = 19
     local levelPosY = 12
@@ -2281,7 +2336,7 @@ local function main()
                 local centerY = math.floor((nextPosY + posY) / 2)
                 local length = (REVERSE_ANIM_INFO.STARTING_X - centerX) ^ 2 + (REVERSE_ANIM_INFO.STARTING_Y - centerY) ^ 2
                 length = math.sqrt(length)
-                table.insert(squareInfo, {x = posX, y = posY, w = w, h = h, centerX = centerX, centerY = centerY, length = length, deltaTime = math.random(0, REVERSE_ANIM_INFO.VARIATION_TIME)})
+                table.insert(squareInfo, {x = posX, y = posY, w = w, h = h, centerX = centerX, centerY = centerY, length = length, deltaTime = math.floor(math.random(0, REVERSE_ANIM_INFO.VARIATION_TIME) / 2)})
                 minLength = math.min(minLength, length)
             end
         end
@@ -2323,7 +2378,7 @@ local function main()
             if REVERSE_ANIM_INFO.REVERSE_TIME % REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION ~= 0 then
                 fixedTime = REVERSE_ANIM_INFO.REVERSE_TIME + (REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION - REVERSE_ANIM_INFO.REVERSE_TIME % REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION)
             end
-            for i = 1, REVERSE_ANIM_INFO.REVERSE_TIME, REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION do
+            for i = 1, fixedTime, REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION do
                 local rad = math.pi * i / REVERSE_ANIM_INFO.REVERSE_TIME
                 local a   = 255 - 255 * i / REVERSE_ANIM_INFO.REVERSE_TIME / (REVERSE_ANIM_INFO.TIME_RATE_UP_TO_TRANSPARENCY / 100.0)
                 if REVERSE_ANIM_INFO.IS_REVERSE == 1 then
@@ -2370,6 +2425,7 @@ local function main()
             end
         end
     end
+    
     return skin
 end
 
