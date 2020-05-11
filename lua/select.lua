@@ -1038,13 +1038,14 @@ local function main()
 
     -- 選曲バーのクリアランプ
     for i, lamp in ipairs(LAMP_NAMES) do
+        print("barLamp" .. lamp)
         table.insert(skin.image, {
             id = "barLamp" .. lamp, src = 0,
             x = 656, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
             w = 110, h = LAMP_HEIGHT
         })
         table.insert(skin.image, {
-            id = "barLampRivalYou" .. lamp, src = 0,
+            id = "barLampRivalPlayer" .. lamp, src = 0,
             x = 656, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
             w = 110, h = LAMP_HEIGHT / 2
         })
@@ -1420,63 +1421,86 @@ local function main()
     }
     local lampPosX = 17
     local lampPosY = 41;
-    skin.songlist.lamp = {
-        {
-            id = "barLampNoplay", dst = {
+
+    skin.songlist.lamp = {}
+    skin.songlist.playerlamp = {}
+    skin.songlist.rivallamp = {}
+
+    for i, lamp in ipairs(LAMP_NAMES) do
+        table.insert(skin.songlist.lamp, 1, {
+            id = "barLamp" .. lamp, dst = {
                 {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
             }
-        },
-        {
-            id = "barLampFailed", dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+        })
+        table.insert(skin.songlist.playerlamp, 1, {
+            id = "barLampRivalPlayer" .. lamp, dst = {
+                {x = lampPosX, y = lampPosY + LAMP_HEIGHT / 2, w = 110, h = LAMP_HEIGHT / 2}
             }
-        },
-        {
-            id = "barLampAssist", dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+        })
+        table.insert(skin.songlist.rivallamp, 1, {
+            id = "barLampRivalTarget" .. lamp, dst = {
+                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT / 2}
             }
-        },
-        {
-            id = "barLampLassist", dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-            }
-        },
-        {
-            id = "barLampEasy", dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-            }
-        },
-        {
-            id = "barLampNormal", dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-            }
-        },
-        {
-            id = "barLampHard", dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-            }
-        },
-        {
-            id = "barLampExhard", dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-            }
-        },
-        {
-            id = "barLampFc", dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-            }
-        },
-        {
-            id = "barLampPerfect", dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-            }
-        },
-        {
-            id = "barLampMax", dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-            }
-        },
-    }
+        })
+    end
+
+    -- skin.songlist.lamp = {
+    --     {
+    --         id = "barLampNoplay", dst = {
+    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+    --         }
+    --     },
+    --     {
+    --         id = "barLampFailed", dst = {
+    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+    --         }
+    --     },
+    --     {
+    --         id = "barLampAssist", dst = {
+    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+    --         }
+    --     },
+    --     {
+    --         id = "barLampLassist", dst = {
+    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+    --         }
+    --     },
+    --     {
+    --         id = "barLampEasy", dst = {
+    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+    --         }
+    --     },
+    --     {
+    --         id = "barLampNormal", dst = {
+    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+    --         }
+    --     },
+    --     {
+    --         id = "barLampHard", dst = {
+    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+    --         }
+    --     },
+    --     {
+    --         id = "barLampExhard", dst = {
+    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+    --         }
+    --     },
+    --     {
+    --         id = "barLampFc", dst = {
+    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+    --         }
+    --     },
+    --     {
+    --         id = "barLampPerfect", dst = {
+    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+    --         }
+    --     },
+    --     {
+    --         id = "barLampMax", dst = {
+    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
+    --         }
+    --     },
+    -- }
 
     skin.destination = {
         -- 背景
