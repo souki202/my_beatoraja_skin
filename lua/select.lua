@@ -80,6 +80,15 @@ local MUSIC_BAR = {
     DIFFICULTY_NUMBER_H = 21,
 }
 
+local RIVAL = {
+    NAME_X   = 957,
+    PLAYER_Y = 338,
+    RIVAL_Y  = 290,
+
+    FONT_SIZE = 24,
+    MAX_W = 178,
+}
+
 -- スクロールバー
 local MUSIC_SLIDER_H = 768
 local MUSIC_SLIDER_BUTTON_W = 22
@@ -1218,7 +1227,8 @@ local function main()
         {id = "densityPeakNumber"       , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 3, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 360, align = 2},
         -- {id = "densityPeakAfterDot"     , src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*4, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 361, align = 1},
         -- exscore用
-        {id = "richExScore", src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_NUMBER_W * 10, h = EXSCORE_NUMBER_H, divx = 10, digit = 5, ref = 71, align = 0},
+        {id = "richExScore",  src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_NUMBER_W * 10, h = EXSCORE_NUMBER_H, divx = 10, digit = 5, ref = 71, align = 0},
+        {id = "rivalExScore", src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_NUMBER_W * 10, h = EXSCORE_NUMBER_H, divx = 10, digit = 5, ref = 271, align = 0},
         -- 上部プレイヤー情報
         {id = "numOfCoin", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 8, ref = 33, align = 0},
         {id = "numOfDia", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 8, ref = 30, align = 0},
@@ -1299,6 +1309,9 @@ local function main()
 
 		{id = "bartext", font = 0, size = BAR_FONT_SIZE, align = 2, overflow = 1},
         {id = "searchText", font = 0, size = 24, ref = 30},
+
+        {id = "playerName", font = 0, size = RIVAL.FONT_SIZE, align = 2, ref = 2, overflow = 1},
+        {id = "rivalName" , font = 0, size = RIVAL.FONT_SIZE, align = 2, ref = 1, overflow = 1},
     }
 
     -- 選曲バー設定
@@ -1443,64 +1456,6 @@ local function main()
             }
         })
     end
-
-    -- skin.songlist.lamp = {
-    --     {
-    --         id = "barLampNoplay", dst = {
-    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-    --         }
-    --     },
-    --     {
-    --         id = "barLampFailed", dst = {
-    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-    --         }
-    --     },
-    --     {
-    --         id = "barLampAssist", dst = {
-    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-    --         }
-    --     },
-    --     {
-    --         id = "barLampLassist", dst = {
-    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-    --         }
-    --     },
-    --     {
-    --         id = "barLampEasy", dst = {
-    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-    --         }
-    --     },
-    --     {
-    --         id = "barLampNormal", dst = {
-    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-    --         }
-    --     },
-    --     {
-    --         id = "barLampHard", dst = {
-    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-    --         }
-    --     },
-    --     {
-    --         id = "barLampExhard", dst = {
-    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-    --         }
-    --     },
-    --     {
-    --         id = "barLampFc", dst = {
-    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-    --         }
-    --     },
-    --     {
-    --         id = "barLampPerfect", dst = {
-    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-    --         }
-    --     },
-    --     {
-    --         id = "barLampMax", dst = {
-    --             {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-    --         }
-    --     },
-    -- }
 
     skin.destination = {
         -- 背景
@@ -2099,25 +2054,47 @@ local function main()
             }
         })
     end
+
     -- exscoreとnext
     table.insert(skin.destination, {
-        id = "exScoreTextImg", dst = {
+        id = "exScoreTextImg", op = {624}, dst = {
             {x = 822, y = 338, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
         }
     })
     table.insert(skin.destination, {
-        id = "nextRankTextImg", dst = {
+        id = "nextRankTextImg", op = {624}, dst = {
             {x = 822, y = 301, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
         }
     })
     table.insert(skin.destination, {
-        id = "richExScore", dst = {
+        id = "richExScore", op = {624}, dst = {
             {x = 1070 - EXSCORE_NUMBER_W * 5, y = 337, w = EXSCORE_NUMBER_W, h = EXSCORE_NUMBER_H}
         }
     })
     table.insert(skin.destination, {
-        id = "nextRank", dst = {
+        id = "nextRank", op = {624}, dst = {
             {x = 1070 - NORMAL_NUMBER_W * PLAY_STATUS_DIGIT, y = 301, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
+        }
+    })
+    -- ライバル名とexScore
+    table.insert(skin.destination, {
+        id = "playerName", op = {625}, dst = {
+            {x = RIVAL.NAME_X, y = RIVAL.PLAYER_Y - 4, w = RIVAL.MAX_W, h = RIVAL.FONT_SIZE, r = 0, g = 0, b = 0}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "richExScore", op = {625}, dst = {
+            {x = 1070 - EXSCORE_NUMBER_W * 5, y = RIVAL.PLAYER_Y, w = EXSCORE_NUMBER_W, h = EXSCORE_NUMBER_H}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "rivalName", op = {625}, dst = {
+            {x = RIVAL.NAME_X, y = RIVAL.RIVAL_Y - 4, w = RIVAL.MAX_W, h = RIVAL.FONT_SIZE, r = 0, g = 0, b = 0}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "rivalExScore", op = {625}, dst = {
+            {x = 1070 - EXSCORE_NUMBER_W * 5, y = RIVAL.RIVAL_Y, w = EXSCORE_NUMBER_W, h = EXSCORE_NUMBER_H}
         }
     })
 
