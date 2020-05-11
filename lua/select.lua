@@ -74,6 +74,11 @@ local DIA_H = 47
 local GAUGE_REFLECTION_W = 37
 local GAUGE_REFLECTION_H = 24
 
+-- Music bar
+local MUSIC_BAR = {
+    DIFFICULTY_NUMBER_W = 16,
+    DIFFICULTY_NUMBER_H = 21,
+}
 
 -- スクロールバー
 local MUSIC_SLIDER_H = 768
@@ -104,6 +109,8 @@ local DENSITY_INFO = {
     ICON_H = 75,
     ICON_Y = 316,
 
+    DOT_SIZE = 7,
+
     DIFFICULTY_ICON_X = 102,
     DIFFICULTY_TEXT_X = 100,
     DIFFICULTY_ICON_Y = 318 - 2; -- ICON_Y - 2
@@ -115,6 +122,7 @@ local DENSITY_INFO = {
 
 local LEVEL_NAME_TABLE = {"Beginner", "Normal", "Hyper", "Another", "Insane"}
 local JUDGE_NAME_TABLE = {"Perfect", "Great", "Good", "Bad", "Poor"}
+local LAMP_NAMES = {"Max", "Perfect", "Fc", "Exhard", "Hard", "Normal", "Easy", "Lassist", "Assist", "Failed", "Noplay"}
 
 -- スコア詳細
 local PLAY_STATUS_TEXT_SRC_X = 1127
@@ -811,18 +819,7 @@ local function main()
         {id = "barCommand", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*5, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         {id = "barCommandWithLamp", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*9, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         {id = "barSearch" , src = 0, x = 0, y = PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        -- 選曲バークリアランプ
-        {id = "barLampMax", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*0, w = 110, h = LAMP_HEIGHT},
-        {id = "barLampPerfect", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*1, w = 110, h = LAMP_HEIGHT},
-        {id = "barLampFc", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*2, w = 110, h = LAMP_HEIGHT},
-        {id = "barLampExhard", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*3, w = 110, h = LAMP_HEIGHT},
-        {id = "barLampHard", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*4, w = 110, h = LAMP_HEIGHT},
-        {id = "barLampNormal", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*5, w = 110, h = LAMP_HEIGHT},
-        {id = "barLampEasy", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*6, w = 110, h = LAMP_HEIGHT},
-        {id = "barLampLassist", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*7, w = 110, h = LAMP_HEIGHT},
-        {id = "barLampAssist", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*8, w = 110, h = LAMP_HEIGHT},
-        {id = "barLampFailed", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*9, w = 110, h = LAMP_HEIGHT},
-        {id = "barLampNoplay", src = 0, x = 656, y = PARTS_OFFSET + LAMP_HEIGHT*10, w = 110, h = LAMP_HEIGHT},
+        -- 選曲バークリアランプはimagesの後
         -- 選曲バー中央
         {id = "barCenterFrame", src = 0, x = 0, y = PARTS_OFFSET + 782, w = 714, h = 154},
         -- 選曲バーLN表示
@@ -888,9 +885,9 @@ local function main()
         {id = "densityEndText"     , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*6, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
         {id = "densityPeakText"    , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*7, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
         -- 密度表示部分のdot
-        {id = "densityAverageDot", src = 0, x = 1074, y = PARTS_OFFSET + 175 + LARGE_LEVEL_H*1, w = LARGE_LEVEL_DOT_SIZE, h = LARGE_LEVEL_DOT_SIZE},
-        {id = "densityEndDot"    , src = 0, x = 1074, y = PARTS_OFFSET + 175 + LARGE_LEVEL_H*2, w = LARGE_LEVEL_DOT_SIZE, h = LARGE_LEVEL_DOT_SIZE},
-        {id = "densityPeakDot"   , src = 0, x = 1074, y = PARTS_OFFSET + 175 + LARGE_LEVEL_H*3, w = LARGE_LEVEL_DOT_SIZE, h = LARGE_LEVEL_DOT_SIZE},
+        {id = "densityAverageDot", src = 0, x = 931, y = PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*1, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
+        {id = "densityEndDot"    , src = 0, x = 931, y = PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
+        {id = "densityPeakDot"   , src = 0, x = 931, y = PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
 
         -- 楽曲のkeys
         {id = "music7keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*0, y = PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
@@ -1039,6 +1036,25 @@ local function main()
         table.insert(skin.image, {id = "background", src = 101, x = 0, y = 0, w = -1, h = -1})
     end
 
+    -- 選曲バーのクリアランプ
+    for i, lamp in ipairs(LAMP_NAMES) do
+        table.insert(skin.image, {
+            id = "barLamp" .. lamp, src = 0,
+            x = 656, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
+            w = 110, h = LAMP_HEIGHT
+        })
+        table.insert(skin.image, {
+            id = "barLampRivalYou" .. lamp, src = 0,
+            x = 656, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
+            w = 110, h = LAMP_HEIGHT / 2
+        })
+        table.insert(skin.image, {
+            id = "barLampRivalTarget" .. lamp, src = 0,
+            x = 656, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1) + LAMP_HEIGHT / 2,
+            w = 110, h = LAMP_HEIGHT / 2
+        })
+    end
+
 
     -- 密度グラフ
     skin.judgegraph = {
@@ -1180,13 +1196,13 @@ local function main()
 
     skin.value = {
         -- 選曲バー難易度数値
-        {id = "barPlayLevelUnknown",  src = 0, x = 771, y = PARTS_OFFSET,        w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelBeginner", src = 0, x = 771, y = PARTS_OFFSET + 21*1, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelNormal",   src = 0, x = 771, y = PARTS_OFFSET + 21*2, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelHyper",    src = 0, x = 771, y = PARTS_OFFSET + 21*3, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelAnother",  src = 0, x = 771, y = PARTS_OFFSET + 21*4, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelInsane",   src = 0, x = 771, y = PARTS_OFFSET + 21*5, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelUnknown2", src = 0, x = 771, y = PARTS_OFFSET + 21*6, w = 16*10, h = 21, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelUnknown",  src = 0, x = 771, y = PARTS_OFFSET,                                   w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelBeginner", src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*1, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelNormal",   src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelHyper",    src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelAnother",  src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*4, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelInsane",   src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*5, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelUnknown2", src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*6, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
         -- 左側の難易度表記数字
         {id = "largeLevelBeginner", src = 0, x = 771, y = PARTS_OFFSET + 147                         , w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 45, align = 2},
         {id = "largeLevelNormal"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 1, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 46, align = 2},
@@ -1195,11 +1211,11 @@ local function main()
         {id = "largeLevelInsane"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 4, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 49, align = 2},
         -- 密度
         {id = "densityAverageNumber"    , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 1, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 364, align = 0},
-        {id = "densityAverageAfterDot"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 1, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 1, ref = 365, align = 1},
+        {id = "densityAverageAfterDot"  , src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 365, align = 1},
         {id = "densityEndNumber"        , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 2, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 362, align = 0},
-        {id = "densityEndAfterDot"      , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 2, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 1, ref = 363, align = 1},
-        {id = "densityPeakNumber"       , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 3, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 360, align = 0},
-        {id = "densityPeakAfterDot"     , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 3, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 1, ref = 361, align = 1},
+        {id = "densityEndAfterDot"      , src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 363, align = 1},
+        {id = "densityPeakNumber"       , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 3, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 360, align = 2},
+        -- {id = "densityPeakAfterDot"     , src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*4, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 361, align = 1},
         -- exscore用
         {id = "richExScore", src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_NUMBER_W * 10, h = EXSCORE_NUMBER_H, divx = 10, digit = 5, ref = 71, align = 0},
         -- 上部プレイヤー情報
@@ -2018,28 +2034,36 @@ local function main()
                 }
             })
 
-            local offset = 62
+            -- super magic number
+            local offset = 63
             if getTableValue(skin_config.option, "密度の標準桁数", 938) == 938 then
-                offset = 46
-            else
-                offset = 62
+                offset = 47
             end
-            -- 数値
-            table.insert(skin.destination, {
-                id = "density" ..  types[i] .. "Dot", op = {2}, dst = {
-                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL_DOT_SIZE, h = LARGE_LEVEL_DOT_SIZE}
-                }
-            })
+            if types[i] == "Peak" then
+                offset = 83
+            end
+
+            -- 整数部分
             table.insert(skin.destination, {
                 id = "density" ..  types[i] .. "Number", op = {2}, dst = {
-                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset - 59, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL_W, h = LARGE_LEVEL_H}
+                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset - LARGE_LEVEL_W*2, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL_W, h = LARGE_LEVEL_H}
                 }
             })
-            table.insert(skin.destination, {
-                id = "density" ..  types[i] .. "AfterDot", op = {2}, dst = {
-                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset + 12, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL_W, h = LARGE_LEVEL_H}
-                }
-            })
+            -- peakは小数点以下が現在は表示できないので出さない
+            if types[i] ~= "Peak" then
+                -- dot
+                table.insert(skin.destination, {
+                    id = "density" ..  types[i] .. "Dot", op = {2}, dst = {
+                        {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset, y = DENSITY_INFO.NUMBER_Y, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE}
+                    }
+                })
+                -- 小数点以下
+                table.insert(skin.destination, {
+                    id = "density" ..  types[i] .. "AfterDot", op = {2}, dst = {
+                        {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset + 8, y = DENSITY_INFO.NUMBER_Y, w = MUSIC_BAR.DIFFICULTY_NUMBER_W, h = MUSIC_BAR.DIFFICULTY_NUMBER_H}
+                    }
+                })
+            end
         end
     end
 
