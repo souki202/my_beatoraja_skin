@@ -14,6 +14,9 @@
 -- You should have received a copy of the GNU General Public License
 -- along with SocialSkin.  If not, see <http://www.gnu.org/licenses/>.
 
+-- 背景画像 花のイラストなら「百花繚乱」 - 無料で使えるフリー素材 https://flowerillust.com/
+-- フォント Source Han Sans Adobe Systems Incorporated
+
 require("define")
 
 local PARTS_TEXTURE_SIZE = 2048
@@ -78,6 +81,9 @@ local GAUGE_REFLECTION_H = 24
 local MUSIC_BAR = {
     DIFFICULTY_NUMBER_W = 16,
     DIFFICULTY_NUMBER_H = 21,
+
+    TROPHY_W = 56,
+    TROPHY_H = 56,
 }
 
 local RIVAL = {
@@ -179,7 +185,7 @@ local OPTION_INFO = {
     HEADER2_TEXT_SRC_X = 1709,
     HEADER2_TEXT_W = 300,
     HEADER2_TEXT_H = 42,
-    BG_H = 132,
+    BG_H = 44*5,
     NUMBER_BG_W = 240,
     NUMBER_BG_H = 46,
     NUMBER_W = 16,
@@ -256,7 +262,7 @@ local header = {
     fadeout = 500,
     scene = 3000,
     input = INPUT_WAIT,
-    -- 使用済みリスト 910 915 920 925 930 935
+    -- 使用済みリスト 910 915 920 925 930 935 940
     property = {
         {
             name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}
@@ -275,6 +281,9 @@ local header = {
         },
         {
             name = "密度の標準桁数", item = {{name = "1桁", op = 938}, {name = "2桁", op = 939}}
+        },
+        {
+            name = "オプションのスコア目標表示", item = {{name = "非表示", op = 940}, {name = "表示", op = 941}}
         },
         {
             name = "開幕アニメーション種類", item = {{name = "無し", op = 930}, {name = "流星", op = 931}, {name = "タイル", op = 932}}
@@ -520,25 +529,32 @@ local function loadOptionImgs(skin, optionTexts, optionIdPrefix, ref, x, y)
     local optionNonactiveTextSuffix = optionIdPrefix .. "OptionImgNonactive"
     local activeImages = {}
     local nonactiveImages = {}
+    local viewRange = 5
+
     for i, val in ipairs(optionTexts) do
         table.insert(skin.image, {
-            id = val .. optionActiveTextSuffix, src = 2, x = x + OPTION_INFO.ITEM_W, y = y + OPTION_INFO.ITEM_H * i,
+            id = val .. optionActiveTextSuffix, src = 2, x = x + OPTION_INFO.ITEM_W, y = y + OPTION_INFO.ITEM_H * (i + 1),
             w = OPTION_INFO.ITEM_W, h = OPTION_INFO.ITEM_H
         })
         table.insert(skin.image, {
-            id = val .. optionNonactiveTextSuffix, src = 2, x = x, y = y + OPTION_INFO.ITEM_H * (i - 1),
-            w = OPTION_INFO.ITEM_W, h = OPTION_INFO.ITEM_H * 3
+            id = val .. optionNonactiveTextSuffix, src = 2, x = x, y = y + OPTION_INFO.ITEM_H * (i + 1 - (viewRange - 1) / 2),
+            w = OPTION_INFO.ITEM_W, h = OPTION_INFO.ITEM_H * viewRange
         })
-        table.insert(activeImages, val .. optionActiveTextSuffix)
-        table.insert(nonactiveImages, val .. optionNonactiveTextSuffix)
+        if ref == 77 then -- pacemakerだけ逆順
+            table.insert(activeImages, 1, val .. optionActiveTextSuffix)
+            table.insert(nonactiveImages, 1, val .. optionNonactiveTextSuffix)
+        else
+            table.insert(activeImages, val .. optionActiveTextSuffix)
+            table.insert(nonactiveImages, val .. optionNonactiveTextSuffix)
+        end
     end
+
     table.insert(skin.imageset, {
         id = optionIdPrefix .. "Active", ref = ref, images = activeImages
     })
     table.insert(skin.imageset, {
         id = optionIdPrefix .. "Nonactive", ref = ref, images = nonactiveImages
     })
-
 end
 
 local function destinationOptionHeader2(skin, baseX, baseY, width, titleTextId, activeKeys, op)
@@ -576,29 +592,29 @@ end
 --- baseX: 右端X, baseY: 下へボタンの最下部(影含む), activeKeys: オプション変更に使用するキー(配列)
 local function destinationPlayOption(skin, baseX, baseY, titleTextId, optionIdPrefix, isLarge, activeKeys, op)
     local width = 640
-    local headerOffset = 258
+    local headerOffset = 346
     if isLarge == false then
         width = 480
     end
     local optionBoxOffsetX = (width - OPTION_INFO.ITEM_W) / 2
     local optionButtonOffsetX = (width - OPTION_INFO.BUTTON_W) / 2
-    local optionItemOffsetY = 100
+    local optionItemOffsetY = 57
+    local viewRange = 5
 
     -- ヘッダ出力
     destinationOptionHeader2(skin, baseX, baseY + headerOffset, width, titleTextId, activeKeys, op)
 
     -- オプション一覧背景
-    insertOptionAnimationTable(skin, "optionSelectBg", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - OPTION_INFO.ITEM_H, OPTION_INFO.ITEM_W, OPTION_INFO.BG_H, 0)
+    insertOptionAnimationTable(skin, "optionSelectBg", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY, OPTION_INFO.ITEM_W, OPTION_INFO.BG_H, 0)
 
     -- オプション出力
-    insertOptionAnimationTable(skin, optionIdPrefix .. "Nonactive", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - 2 - OPTION_INFO.ITEM_H, OPTION_INFO.ITEM_W, OPTION_INFO.ITEM_H * 3, 0)
-    insertOptionAnimationTable(skin, "activeOptionFrame", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY, OPTION_INFO.ACTIVE_FRAME_W, OPTION_INFO.ACTIVE_FRAME_H, 0)
-    insertOptionAnimationTable(skin, optionIdPrefix .. "Active", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY - 2, OPTION_INFO.ITEM_W, OPTION_INFO.ITEM_H, 0)
+    insertOptionAnimationTable(skin, optionIdPrefix .. "Nonactive", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY                             , OPTION_INFO.ITEM_W        , OPTION_INFO.ITEM_H * viewRange, 0)
+    insertOptionAnimationTable(skin, "activeOptionFrame"          , op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY + OPTION_INFO.ITEM_H * 2 + 2, OPTION_INFO.ACTIVE_FRAME_W, OPTION_INFO.ACTIVE_FRAME_H, 0)
+    insertOptionAnimationTable(skin, optionIdPrefix .. "Active"   , op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY + OPTION_INFO.ITEM_H * 2    , OPTION_INFO.ITEM_W        , OPTION_INFO.ITEM_H, 0)
 
 
     -- ボタン出力
-    insertOptionAnimationTable(skin, optionIdPrefix .. "UpButton", op, baseX + optionButtonOffsetX, baseY + 192, OPTION_INFO.BUTTON_W, OPTION_INFO.BUTTON_H, 0)
-
+    insertOptionAnimationTable(skin, optionIdPrefix .. "UpButton", op, baseX + optionButtonOffsetX, baseY + 282, OPTION_INFO.BUTTON_W, OPTION_INFO.BUTTON_H, 0)
     -- 下
     insertOptionAnimationTable(skin, optionIdPrefix .. "DownButton", op, baseX + optionButtonOffsetX, baseY, OPTION_INFO.BUTTON_W, OPTION_INFO.BUTTON_H, 0)
 end
@@ -768,24 +784,33 @@ local function initialize()
 
     v = getTableValue(skin_config.offset, "タイルアニメーション開始時間オフセット(ms 既定値0 0<=x<500)", {x = REVERSE_ANIM_INFO.TIME_OFFSET})
     if v.x ~= 0 then REVERSE_ANIM_INFO.TIME_OFFSET = v.x end
+
     v = getTableValue(skin_config.offset, "伝播の起点座標(既定値0,0 画面左下原点)", {x = REVERSE_ANIM_INFO.STARTING_X, y = REVERSE_ANIM_INFO.STARTING_Y})
     if v.x ~= 0 then REVERSE_ANIM_INFO.STARTING_X = v.x end
     if v.y ~= 0 then REVERSE_ANIM_INFO.STARTING_Y = v.y end
+
     v = getTableValue(skin_config.offset, "画面分割数(既定値16,16 x,y>0)", {x = REVERSE_ANIM_INFO.DIV_X, y = REVERSE_ANIM_INFO.DIV_Y})
     if v.x ~= 0 then REVERSE_ANIM_INFO.DIV_X = v.x end
     if v.y ~= 0 then REVERSE_ANIM_INFO.DIV_Y = v.y end
+
     v = getTableValue(skin_config.offset, "伝播速度(10ms毎のpx数 既定値40 x>0)", {x = REVERSE_ANIM_INFO.PROPAGATION_TIME})
     if v.x ~= 0 then REVERSE_ANIM_INFO.PROPAGATION_TIME = v.x end
+
     v = getTableValue(skin_config.offset, "タイルの回転時間(既定値300 x>0)", {x = REVERSE_ANIM_INFO.REVERSE_TIME})
     if v.x ~= 0 then REVERSE_ANIM_INFO.REVERSE_TIME = v.x end
+
     v = getTableValue(skin_config.offset, "各タイルの回転開始時間のばらつき(既定値150 x>0)", {x = REVERSE_ANIM_INFO.VARIATION_TIME})
     if v.x ~= 0 then REVERSE_ANIM_INFO.VARIATION_TIME = v.x end
+
     v = getTableValue(skin_config.offset, "タイル回転の分割時間(このms毎に分割 規定値125 x>0)", {x = REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION})
     if v.x ~= 0 then REVERSE_ANIM_INFO.TIME_INVERSE_RESOLUTION = v.x end
+
     v = getTableValue(skin_config.offset, "タイルの分割数(このpx毎に分割 既定値8 x>0)", {x = REVERSE_ANIM_INFO.IMAGE_INVERSE_RESOLUTION})
     if v.x ~= 0 then REVERSE_ANIM_INFO.IMAGE_INVERSE_RESOLUTION = v.x end
+
     v = getTableValue(skin_config.offset, "タイルが透明になるまでの時間の割合(既定値90 0<=x<=100)", {x = REVERSE_ANIM_INFO.TIME_RATE_UP_TO_TRANSPARENCY})
     if v.x ~= 0 then REVERSE_ANIM_INFO.TIME_RATE_UP_TO_TRANSPARENCY = v.x end
+
     v = getTableValue(skin_config.offset, "タイルの色(既定値0 0<=r,g,b<=255 rgbはそれぞれxywに割り当て)", {x = 0, y = 0, w = 0})
     if v.x ~= 0 then REVERSE_ANIM_INFO.COLOR.r = v.x end
     if v.y ~= 0 then REVERSE_ANIM_INFO.COLOR.g = v.y end
@@ -833,6 +858,10 @@ local function main()
         {id = "barCenterFrame", src = 0, x = 0, y = PARTS_OFFSET + 782, w = 714, h = 154},
         -- 選曲バーLN表示
         {id = "barLn", src = 0, x = 607, y = PARTS_OFFSET, w = 30, h = 22},
+        -- トロフィー
+        {id ="goldTrophy"  , src = 0, x = 1896, y = PARTS_OFFSET + MUSIC_BAR.TROPHY_H*0, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
+        {id ="silverTrophy", src = 0, x = 1896, y = PARTS_OFFSET + MUSIC_BAR.TROPHY_H*1, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
+        {id ="bronzeTrophy", src = 0, x = 1896, y = PARTS_OFFSET + MUSIC_BAR.TROPHY_H*2, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
         -- プレイ
         {id = "playButton", src = 0, x = 773, y = PARTS_OFFSET + 377, w = DECIDE_BUTTON_W, h = DECIDE_BUTTON_H},
         {id = "playButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 15}, -- ボタン起動用ダミー
@@ -943,36 +972,39 @@ local function main()
         {id = "optionSmallKeyActive", src = 2, x = 673, y = PARTS_TEXTURE_SIZE - SMALL_KEY_H * 2, w = SMALL_KEY_W, h = SMALL_KEY_H},
         {id = "optionSmallKeyNonActive", src = 2, x = 673, y = PARTS_TEXTURE_SIZE - SMALL_KEY_H, w = SMALL_KEY_W, h = SMALL_KEY_H},
         -- 各オプション選択部分背景
-        {id = "optionSelectBg", src = 2, x = 0, y = 1834, w = OPTION_INFO.ITEM_W, h = OPTION_INFO.BG_H},
+        {id = "optionSelectBg", src = 2, x = 0, y = 1568, w = OPTION_INFO.ITEM_W, h = OPTION_INFO.BG_H},
         {id = "optionNumberBg", src = 2, x = 0, y = 1788, w = OPTION_INFO.NUMBER_BG_W, h = OPTION_INFO.NUMBER_BG_H},
         -- 各オプションヘッダBG
         {id = "optionHeader2LeftBg", src = 2, x = 0, y = 1966, w = OPTION_INFO.HEADER2_EDGE_BG_W, h = OPTION_INFO.HEADER2_EDGE_BG_H},
         {id = "optionHeader2RightBg", src = 2, x = OPTION_INFO.HEADER2_EDGE_BG_W, y = 1966, w = OPTION_INFO.HEADER2_EDGE_BG_W, h = OPTION_INFO.HEADER2_EDGE_BG_H},
         -- 各オプションヘッダテキスト
-        {id = "optionHeader2NotesOrder1", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = 0, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
-        {id = "optionHeader2NotesOrder2", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 1, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
-        {id = "optionHeader2GaugeType", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 2, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
-        {id = "optionHeader2DpOption", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 3, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
-        {id = "optionHeader2FixedHiSpeed", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 4, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
-        {id = "optionHeader2GaugeAutoShift", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 5, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
-        {id = "optionHeader2BgaShow", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 6, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2NotesOrder1"     , src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = 0, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2NotesOrder2"     , src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 1, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2GaugeType"       , src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 2, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2DpOption"        , src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 3, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2FixedHiSpeed"    , src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 4, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2GaugeAutoShift"  , src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 5, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2BgaShow"         , src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 6, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
         {id = "optionHeader2NotesDisplayTime", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 7, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
-        {id = "optionHeader2JudgeTiming", src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 8, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2JudgeTiming"     , src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 8, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
+        {id = "optionHeader2PeaceMaker"      , src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 9, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
         -- オプション用ボタン
-        {id = "notesOrder1UpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 42, click = 1},
-        {id = "notesOrder1DownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 42},
-        {id = "notesOrder2UpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 43, click = 1},
-        {id = "notesOrder2DownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 43},
-        {id = "gaugeTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 40, click = 1},
-        {id = "gaugeTypeDownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 40},
-        {id = "dpTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 54, click = 1},
-        {id = "dpTypeDownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 54},
-        {id = "hiSpeedTypeUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 55, click = 1},
-        {id = "hiSpeedTypeDownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 55},
-        {id = "gaugeAutoShiftUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 78, click = 1},
+        {id = "notesOrder1UpButton"     , src = 2, x = 408                       , y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 42, click = 1},
+        {id = "notesOrder1DownButton"   , src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 42},
+        {id = "notesOrder2UpButton"     , src = 2, x = 408                       , y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 43, click = 1},
+        {id = "notesOrder2DownButton"   , src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 43},
+        {id = "gaugeTypeUpButton"       , src = 2, x = 408                       , y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 40, click = 1},
+        {id = "gaugeTypeDownButton"     , src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 40},
+        {id = "dpTypeUpButton"          , src = 2, x = 408                       , y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 54, click = 1},
+        {id = "dpTypeDownButton"        , src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 54},
+        {id = "hiSpeedTypeUpButton"     , src = 2, x = 408                       , y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 55, click = 1},
+        {id = "hiSpeedTypeDownButton"   , src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 55},
+        {id = "gaugeAutoShiftUpButton"  , src = 2, x = 408                       , y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 78, click = 1},
         {id = "gaugeAutoShiftDownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 78},
-        {id = "bgaShowUpButton", src = 2, x = 408, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 72, click = 1},
-        {id = "bgaShowDownButton", src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 72},
+        {id = "bgaShowUpButton"         , src = 2, x = 408                       , y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 72, click = 1},
+        {id = "bgaShowDownButton"       , src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 72},
+        {id = "paceMakerUpButton"       , src = 2, x = 408                       , y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 77, click = 1},
+        {id = "paceMakerDownButton"     , src = 2, x = 408 + OPTION_INFO.BUTTON_W, y = PARTS_TEXTURE_SIZE - OPTION_INFO.BUTTON_H * 2, w = OPTION_INFO.BUTTON_W, h = OPTION_INFO.BUTTON_H * 2, divy = 2, act = 77},
         {
             id = "notesDisplayTimeUpButton", src = 2,
             x = 998 + OPTION_INFO.NUMBER_BUTTON_SIZE,
@@ -1152,23 +1184,28 @@ local function main()
     optionTexts = {
         "off", "flip", "battle", "battleAs"
     }
-    loadOptionImgs(skin, optionTexts, "dpType", 54, OPTION_INFO.ITEM_W * 2, OPTION_INFO.ITEM_H * 12)
+    loadOptionImgs(skin, optionTexts, "dpType", 54, OPTION_INFO.ITEM_W * 2, OPTION_INFO.ITEM_H * 14)
     -- ハイスピード固定
     optionTexts = {
         "off", "startBpm", "maxBpm", "mainBpm", "minBpm"
     }
-    loadOptionImgs(skin, optionTexts, "hiSpeedType", 55, 0, OPTION_INFO.ITEM_H * 12)
+    loadOptionImgs(skin, optionTexts, "hiSpeedType", 55, 0, OPTION_INFO.ITEM_H * 14)
+    -- PeaceMaker
+    optionTexts = {
+        "next", "max", "aaa+", "aaa", "aaa-", "aa+", "aa", "aa-", "a+", "a", "a-"
+    }
+    loadOptionImgs(skin, optionTexts, "paceMaker", 77, 2048, 0)
 
     -- GAS
     optionTexts = {
         "none", "continue", "hardToGroove", "bestClear", "selectToUnder"
     }
-    loadOptionImgs(skin, optionTexts, "gaugeAutoShift", 78, 0, OPTION_INFO.ITEM_H * 12 * 2)
+    loadOptionImgs(skin, optionTexts, "gaugeAutoShift", 78, 0, OPTION_INFO.ITEM_H * 23)
     -- BGA
     optionTexts = {
         "on", "auto", "off"
     }
-    loadOptionImgs(skin, optionTexts, "bgaShow", 72, OPTION_INFO.ITEM_W * 2, OPTION_INFO.ITEM_H * 12 * 2)
+    loadOptionImgs(skin, optionTexts, "bgaShow", 72, OPTION_INFO.ITEM_W * 2, OPTION_INFO.ITEM_H * 23)
 
     -- アシストオプション
     local assistTexts = {
@@ -1362,18 +1399,36 @@ local function main()
         }
     }
 
+    -- skin.songlist.trophy = {
+    --     {
+    --         id = "bronzeTrophy", dst = {
+    --             {x = 146, y = 11, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H}
+    --         }
+    --     },
+    --     {
+    --         id = "silverTrophy", dst = {
+    --             {x = 146, y = 11, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H}
+    --         }
+    --     },
+    --     {
+    --         id = "goldTrophy", dst = {
+    --             {x = 146, y = 11, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H}
+    --         }
+    --     },
+    -- }
+
     -- 曲名等
     skin.songlist.text = {
         {
             id = "bartext", filter = 1,
             dst = {
-                {x = 570, y = 30 - 9, w = 397, h = BAR_FONT_SIZE, r = 0, g = 0, b = 0, filter = 1}
+                {x = 570, y = 21, w = 397, h = BAR_FONT_SIZE, r = 0, g = 0, b = 0, filter = 1}
             }
         },
         {
             id = "bartext", filter = 1,
             dst = {
-                {x = 570, y = 30 - 9, w = 397, h = BAR_FONT_SIZE, r = 200, g = 0, b = 0, filter = 1}
+                {x = 570, y = 21, w = 397, h = BAR_FONT_SIZE, r = 200, g = 0, b = 0, filter = 1}
             }
         },
     }
@@ -2208,12 +2263,20 @@ local function main()
     end
 
     -- プレイプション
-    destinationPlayOption(skin, 192, 607, "optionHeader2NotesOrder1", "notesOrder1", true, {1, 2}, 21)
-    destinationPlayOption(skin, 1088, 607, "optionHeader2NotesOrder2", "notesOrder2", true, {6, 7}, 21)
-    destinationPlayOption(skin, 192, 205, "optionHeader2GaugeType", "gaugeType", false, {3}, 21)
-    destinationPlayOption(skin, 720, 205, "optionHeader2DpOption", "dpType", false, {4}, 21)
-    destinationPlayOption(skin, 1248, 205, "optionHeader2FixedHiSpeed", "hiSpeedType", false, {5}, 21)
-
+    if getTableValue(skin_config.option, "オプションのスコア目標表示", 940) == 940 then
+        destinationPlayOption(skin, 192, 517, "optionHeader2NotesOrder1", "notesOrder1", true, {1, 2}, 21)
+        destinationPlayOption(skin, 1088, 517, "optionHeader2NotesOrder2", "notesOrder2", true, {6, 7}, 21)
+        destinationPlayOption(skin, 192, 115, "optionHeader2GaugeType", "gaugeType", false, {3}, 21)
+        destinationPlayOption(skin, 720, 115, "optionHeader2DpOption", "dpType", false, {4}, 21)
+        destinationPlayOption(skin, 1248, 115, "optionHeader2FixedHiSpeed", "hiSpeedType", false, {5}, 21)
+    else
+        destinationPlayOption(skin, 192, 517, "optionHeader2NotesOrder1", "notesOrder1", false, {1, 2}, 21)
+        destinationPlayOption(skin, 720, 517, "optionHeader2DpOption", "dpType", false, {4}, 21)
+        destinationPlayOption(skin, 1248, 517, "optionHeader2NotesOrder2", "notesOrder2", false, {6, 7}, 21)
+        destinationPlayOption(skin, 192, 115, "optionHeader2PeaceMaker", "paceMaker", false, {}, 21)
+        destinationPlayOption(skin, 720, 115, "optionHeader2GaugeType", "gaugeType", false, {3}, 21)
+        destinationPlayOption(skin, 1248, 115, "optionHeader2FixedHiSpeed", "hiSpeedType", false, {5}, 21)
+    end
     -- アシスト
     for i, assistText in ipairs(assistTexts) do
         local baseY = 865 - 109 * (i - 1)
@@ -2267,8 +2330,8 @@ local function main()
         OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_EDGE_SIZE, 0, 64, 64, 64)
 
 
-    destinationPlayOption(skin, 192, 205, "optionHeader2GaugeAutoShift", "gaugeAutoShift", true, {2}, 23)
-    destinationPlayOption(skin, 192, 607, "optionHeader2BgaShow", "bgaShow", true, {1}, 23)
+    destinationPlayOption(skin, 192, 115, "optionHeader2GaugeAutoShift", "gaugeAutoShift", true, {2}, 23)
+    destinationPlayOption(skin, 192, 517, "optionHeader2BgaShow", "bgaShow", true, {1}, 23)
     destinationNumberOption(skin, 1088, 794, "optionHeader2NotesDisplayTime", "notesDisplayTime", true, {4, 6}, 23)
     destinationNumberOption(skin, 1088, 614, "optionHeader2JudgeTiming", "judgeTiming", true, {5, 7}, 23)
 
