@@ -30,8 +30,6 @@ local BAR_FONT_SIZE = 32
 local LAMP_HEIGHT = 28
 local MUSIC_BAR_IMG_HEIGHT = 78
 local MUSIC_BAR_IMG_WIDTH = 607
-local STAGEFILE_BG_WIDTH = 640
-local STAGEFILE_BG_HEIGHT = 480
 
 local NORMAL_NUMBER_SRC_X = 946
 local NORMAL_NUMBER_SRC_Y = PARTS_OFFSET
@@ -56,8 +54,13 @@ local COURSE_LABEL_W = 192
 local COURSE_LABEL_H = 64
 
 -- stage fileまわり
-local STAGE_FILE_DST_X = 105
-local STAGE_FILE_DST_Y = 446
+local STAGE_FILE = {
+    X = 105,
+    Y = 464,
+    W = 640,
+    H = 480,
+    FRAME_OFFSET = 31,
+}
 
 -- 上部のLNモードとkeysのボタンサイズ
 local UPPER_OPTION_W = 270
@@ -86,80 +89,125 @@ local MUSIC_BAR = {
     TROPHY_H = 56,
 }
 
-local RIVAL = {
-    NAME_X   = 957,
-    PLAYER_Y = 338,
-    RIVAL_Y  = 290,
-
-    FONT_SIZE = 24,
-    MAX_W = 178,
-}
-
 -- スクロールバー
 local MUSIC_SLIDER_H = 768
 local MUSIC_SLIDER_BUTTON_W = 22
 local MUSIC_SLIDER_BUTTON_H = 48
 
--- 左下のレベルが並んでいる部分
-local LARGE_LEVEL_H = 40
-local LARGE_LEVEL_W = 30
-local LARGE_LEVEL_X = 140
-local LARGE_LEVEL_Y = 275
-local LARGE_LEVEL_DOT_SIZE = 12
-local LARGE_LEVEL_INTERVAL = 136
-local LEVEL_ICON_WIDTH = 105
-local LEVEL_ICON_SRC_X = 1128
-local NONACTIVE_LEVEL_ICON_H = 82
-local ACTIVE_LEVEL_ICON_H = 75
-local ACTIVE_LEVEL_TEXT_H = 31
-local LEVEL_ICON_Y = 318
-
-local DENSITY_INFO = {
-    TEXT_W = 108,
-    TEXT_H = 31,
-
-    NUMBER_Y = 275,
-
-    ICON_W = 105,
-    ICON_H = 75,
-    ICON_Y = 316,
-
-    DOT_SIZE = 7,
-
-    DIFFICULTY_ICON_X = 102,
-    DIFFICULTY_TEXT_X = 100,
-    DIFFICULTY_ICON_Y = 318 - 2; -- ICON_Y - 2
-    DIFFICULTY_NUMBER_X = 125,
-
-    START_X = 316,
-    INTERVAL_X = 168,
-}
 
 local LEVEL_NAME_TABLE = {"Beginner", "Normal", "Hyper", "Another", "Insane"}
 local JUDGE_NAME_TABLE = {"Perfect", "Great", "Good", "Bad", "Poor"}
 local LAMP_NAMES = {"Max", "Perfect", "Fc", "Exhard", "Hard", "Normal", "Easy", "Lassist", "Assist", "Failed", "Noplay"}
 
 -- スコア詳細
-local PLAY_STATUS_TEXT_SRC_X = 1127
-local PLAY_STATUS_TEXT_SRC_Y = PARTS_OFFSET + 263
-local PLAY_STATUS_TEXT_W = 168
-local PLAY_STATUS_TEXT_H = 22
-local PLAY_STATUS_TEXT_BASE_X = 95
-local PLAY_STATUS_TEXT_BASE_Y = 200
-local PLAY_STATUS_INTERVAL_X = 347
-local PLAY_STATUS_INTERVAL_Y = 29
-local PLAY_STATUS_NUMBER_BASE_X = PLAY_STATUS_TEXT_BASE_X + 290
-local PLAY_STATUS_NUMBER_BASE_Y = PLAY_STATUS_TEXT_BASE_Y
-local PLAY_STATUS_DIGIT = 8
+local SCORE_INFO = {
+    TEXT_SRC_X = 1127,
+    TEXT_SRC_Y = PARTS_OFFSET + 263,
+    TEXT_W = 168,
+    TEXT_H = 22,
+    TEXT_BASE_X = 95,
+    TEXT_BASE_Y = 225,
+    NUMBER_OFFSET_X = 273,
+    NUMBER_BASE_Y = 225,
+    INTERVAL_X = 292,
+    INTERVAL_Y = 29,
+    DIGIT = 8,
+}
 
-local RANK_SRC_X = 1653
-local RANK_W = 133
-local RANK_H = 59
-local RANK_X = 895
-local RANK_Y = 400
+local JUDGE_DIFFICULTY = {
+    W = 136,
+    H = 22,
+}
 
-local EXSCORE_NUMBER_W = 22
-local EXSCORE_NUMBER_H = 30
+-- exscoreと楽曲難易度周り
+local EXSCORE_AREA = {
+    NUMBER_W = 22,
+    NUMBER_H = 30,
+    TEXT_X = 802,
+    NUMBER_X = 1070,
+    Y = 385,
+    NEXT_Y = 348,
+
+    RANKING_NUMBER_W = NORMAL_NUMBER_W,
+    RANKING_NUMBER_H = NORMAL_NUMBER_H,
+    IR_Y = 311,
+    IR_W = 26,
+    IR_H = 22,
+}
+
+local RIVAL = {
+    NAME_X   = 802,
+    PLAYER_Y = 385,
+    RIVAL_Y  = 343,
+
+    FONT_SIZE = 24,
+    MAX_W = 178,
+}
+
+local SCORE_RANK = {
+    SRC_X = 1653,
+    W = 133,
+    H = 59,
+    X = 895,
+    Y = 430,
+}
+
+-- 左下のレベルが並んでいる部分
+local LARGE_LEVEL = {
+    NUMBER_H = 40,
+    NUMBER_W = 30,
+    X = 140,
+    Y = 305,
+    INTERVAL = 136,
+    DOT_SIZE = 12,
+
+    ICON_W = 105,
+    SRC_X = 1128,
+    NONACTIVE_ICON_H = 82,
+    ACTIVE_ICON_H = 75,
+    ACTIVE_TEXT_H = 31,
+    ICON_X = 102,
+    ICON_Y = 348,
+}
+
+local DENSITY_INFO = {
+    TEXT_W = 108,
+    TEXT_H = 31,
+
+    NUMBER_Y = 305,
+
+    ICON_W = 105,
+    ICON_H = 75,
+    ICON_Y = 346,
+
+    DOT_SIZE = 7,
+
+    DIFFICULTY_ICON_X = 102,
+    DIFFICULTY_TEXT_X = 100,
+    DIFFICULTY_ICON_Y = 348 - 2; -- ICON_Y - 2
+    DIFFICULTY_NUMBER_X = 125,
+
+    START_X = 316,
+    INTERVAL_X = 168,
+}
+
+-- IR
+local IR = {
+    TEXT_W = 99,
+    TEXT_H = 18,
+    NUMBER_NUM_W = 11,
+    NUMBER_NUM_H = 15,
+    NUMBER_PERCENT_W = 7,
+    NUMBER_PERCENT_H = 9,
+    PERCENT_W = 9,
+    PERCENT_H = 9,
+    DIGIT = 5,
+
+    X = 701,
+    Y = 229,
+    INTERVAL_X = 198,
+    INTERVAL_Y = 25,
+}
 
 -- 密度グラフ
 local NOTES_ICON_SIZE = 42
@@ -885,35 +933,35 @@ local function main()
         {id = "courseMusic5Label", src = 0, x = 773, y = PARTS_OFFSET + 519 + COURSE_LABEL_H*4, w = COURSE_LABEL_W, h = COURSE_LABEL_H},
 
         -- レベルアイコン
-        {id = "nonActiveBeginnerIcon", src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
-        {id = "nonActiveNormalIcon"  , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
-        {id = "nonActiveHyperIcon"   , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
-        {id = "nonActiveAnotherIcon" , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
-        {id = "nonActiveInsaneIcon"  , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET, w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H},
-        {id = "activeBeginnerIcon"   , src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeNormalIcon"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeHyperIcon"      , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeAnotherIcon"    , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeInsaneIcon"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeBeginnerText"   , src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
-        {id = "activeNormalText"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
-        {id = "activeHyperText"      , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
-        {id = "activeAnotherText"    , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
-        {id = "activeInsaneText"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H},
-        {id = "activeBeginnerNote"   , src = 0, x = LEVEL_ICON_SRC_X, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeNormalNote"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeHyperNote"      , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeAnotherNote"    , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "activeInsaneNote"     , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*4, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "nonActiveBeginnerIcon", src = 0, x = LARGE_LEVEL.SRC_X, y = PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
+        {id = "nonActiveNormalIcon"  , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
+        {id = "nonActiveHyperIcon"   , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
+        {id = "nonActiveAnotherIcon" , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
+        {id = "nonActiveInsaneIcon"  , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
+        {id = "activeBeginnerIcon"   , src = 0, x = LARGE_LEVEL.SRC_X, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeNormalIcon"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeHyperIcon"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeAnotherIcon"    , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeInsaneIcon"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeBeginnerText"   , src = 0, x = LARGE_LEVEL.SRC_X, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
+        {id = "activeNormalText"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
+        {id = "activeHyperText"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
+        {id = "activeAnotherText"    , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
+        {id = "activeInsaneText"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
+        {id = "activeBeginnerNote"   , src = 0, x = LARGE_LEVEL.SRC_X, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeNormalNote"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeHyperNote"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeAnotherNote"    , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeInsaneNote"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
         -- 密度アイコン 難易度アイコン部分のアイコン表示は上ので読み込み済み
         -- 今のところのソースは, 平均はnormal, 終わり100notesはhyper, 最大値はanotherアイコン
         -- dstはdensity用の値 DENSITY_INFO参照
-        {id = "densityAverageIcon"   , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "densityEndIcon"       , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "densityPeakIcon"      , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "densityAverageNote"   , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*1, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "densityEndNote"       , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*2, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-        {id = "densityPeakNote"      , src = 0, x = LEVEL_ICON_SRC_X + LEVEL_ICON_WIDTH*3, y = PARTS_OFFSET + NONACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_ICON_H + ACTIVE_LEVEL_TEXT_H, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+        {id = "densityAverageIcon"   , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "densityEndIcon"       , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "densityPeakIcon"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "densityAverageNote"   , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "densityEndNote"       , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "densityPeakNote"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
         {id = "densityDifficultyBeginnerText", src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*0, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
         {id = "densityDifficultyNormalText"  , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*1, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
         {id = "densityDifficultyHyperText"   , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*2, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
@@ -945,6 +993,8 @@ local function main()
 
         -- 空プア表記用スラッシュ
         {id = "slashForEmptyPoor", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W * 11, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
+        -- ランキング用スラッシュ(同じ)
+        {id = "slashForRanking"  , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W * 11, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
         -- 上部プレイヤー情報 expゲージの背景とゲージ本体は汎用カラー
         {id = "rankTextImg", src = 0, x = 1298, y = PARTS_OFFSET + 267, w = RANK_IMG_W, h = RANK_IMG_H},
         {id = "coin", src = 0, x = 1298 + 108, y = PARTS_OFFSET + 266, w = COIN_W, h = COIN_H},
@@ -954,10 +1004,10 @@ local function main()
         -- BPM用チルダ
         {id = "bpmTilda", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + 68, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
         -- 判定難易度
-        {id = "judgeEasy", src = 0, x = 1298, y = PARTS_OFFSET + 361, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H},
-        {id = "judgeNormal", src = 0, x = 1298, y = PARTS_OFFSET + 361 + PLAY_STATUS_TEXT_H * 1, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H},
-        {id = "judgeHard", src = 0, x = 1298, y = PARTS_OFFSET + 361 + PLAY_STATUS_TEXT_H * 2, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H},
-        {id = "judgeVeryhard", src = 0, x = 1298, y = PARTS_OFFSET + 361 + PLAY_STATUS_TEXT_H * 3, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H},
+        {id = "judgeEasy"    , src = 0, x = 1298, y = PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 0, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
+        {id = "judgeNormal"  , src = 0, x = 1298, y = PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 1, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
+        {id = "judgeHard"    , src = 0, x = 1298, y = PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 2, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
+        {id = "judgeVeryhard", src = 0, x = 1298, y = PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 3, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
         -- アクティブなオブション用背景
         {id = "activeOptionFrame", src = 2, x = 0, y = PARTS_TEXTURE_SIZE - OPTION_INFO.ACTIVE_FRAME_H, w = OPTION_INFO.ACTIVE_FRAME_W, h = OPTION_INFO.ACTIVE_FRAME_H},
         -- オプション画面の端
@@ -1057,6 +1107,12 @@ local function main()
         {id = "meteorBody", src = 5, x = 0, y = 0, w = 256, h = 256},
         {id = "meteorLight", src = 5, x = 0, y = 256, w = 256, h = 256},
 
+        -- IR用ドットと%
+        {id = "irDot", src = 0, x = NORMAL_NUMBER_SRC_X + IR.NUMBER_PERCENT_W * 10 + 15, y = PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H},
+        {id = "irPercent", src = 0, x = NORMAL_NUMBER_SRC_X + IR.NUMBER_PERCENT_W * 11 + 15, y = PARTS_OFFSET + 68, w = IR.PERCENT_W, h = IR.PERCENT_H},
+        -- IR用文字画像
+        {id = "irRankingText", src = 0, x = 1298, y = PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 4, w = EXSCORE_AREA.IR_W, h = EXSCORE_AREA.IR_H},
+
         -- 検索ボックス
         {id = "searchBox", src = 0, x = 773, y = PARTS_TEXTURE_SIZE - 62, w = 1038, h = 62},
 
@@ -1094,6 +1150,16 @@ local function main()
             id = "barLampRivalTarget" .. lamp, src = 0,
             x = 656, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1) + LAMP_HEIGHT / 2,
             w = 110, h = LAMP_HEIGHT / 2
+        })
+    end
+
+    -- IR部分の文字の画像読み込み
+    local irTexts = {
+        "Max", "Perfect", "Fullcombo", "Exhard", "Hard", "Clear", "Easy", "Lassist", "Aassist", "Failed", "Player", "NumOfFullcombo", "NumOfClear"
+    }
+    for i, t in ipairs(irTexts) do
+        table.insert(skin.image, {
+            id = "ir" .. t .. "Text", src = 0, x = 1563, y = PARTS_OFFSET + 313 + IR.TEXT_H * (i - 1), w = IR.TEXT_W, h = IR.TEXT_H
         })
     end
 
@@ -1164,8 +1230,8 @@ local function main()
     for i, rank in ipairs(ranks) do
         table.insert(skin.image, {
             id = "rank" .. rank, src = 0,
-            x = RANK_SRC_X, y = PARTS_OFFSET + RANK_H * i,
-            w = RANK_W, h = RANK_H
+            x = SCORE_RANK.SRC_X, y = PARTS_OFFSET + SCORE_RANK.H * i,
+            w = SCORE_RANK.W, h = SCORE_RANK.H
         })
     end
 
@@ -1251,21 +1317,24 @@ local function main()
         {id = "barPlayLevelInsane",   src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*5, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
         {id = "barPlayLevelUnknown2", src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*6, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
         -- 左側の難易度表記数字
-        {id = "largeLevelBeginner", src = 0, x = 771, y = PARTS_OFFSET + 147                         , w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 45, align = 2},
-        {id = "largeLevelNormal"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 1, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 46, align = 2},
-        {id = "largeLevelHyper"   , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 2, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 47, align = 2},
-        {id = "largeLevelAnother" , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 3, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 48, align = 2},
-        {id = "largeLevelInsane"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 4, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 49, align = 2},
+        {id = "largeLevelBeginner", src = 0, x = 771, y = PARTS_OFFSET + 147                         , w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 45, align = 2},
+        {id = "largeLevelNormal"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 1, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 46, align = 2},
+        {id = "largeLevelHyper"   , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 2, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 47, align = 2},
+        {id = "largeLevelAnother" , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 3, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 48, align = 2},
+        {id = "largeLevelInsane"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 4, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 49, align = 2},
         -- 密度
-        {id = "densityAverageNumber"    , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 1, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 364, align = 0},
+        {id = "densityAverageNumber"    , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 1, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 364, align = 0},
         {id = "densityAverageAfterDot"  , src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 365, align = 1},
-        {id = "densityEndNumber"        , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 2, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 362, align = 0},
+        {id = "densityEndNumber"        , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 2, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 362, align = 0},
         {id = "densityEndAfterDot"      , src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 363, align = 1},
-        {id = "densityPeakNumber"       , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL_H * 3, w = LARGE_LEVEL_W*10, h = LARGE_LEVEL_H, divx = 10, digit = 2, ref = 360, align = 2},
+        {id = "densityPeakNumber"       , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 3, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 360, align = 2},
         -- {id = "densityPeakAfterDot"     , src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*4, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 361, align = 1},
         -- exscore用
-        {id = "richExScore",  src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_NUMBER_W * 10, h = EXSCORE_NUMBER_H, divx = 10, digit = 5, ref = 71, align = 0},
-        {id = "rivalExScore", src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_NUMBER_W * 10, h = EXSCORE_NUMBER_H, divx = 10, digit = 5, ref = 271, align = 0},
+        {id = "richExScore",  src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_AREA.NUMBER_W * 10, h = EXSCORE_AREA.NUMBER_H, divx = 10, digit = 5, ref = 71, align = 0},
+        {id = "rivalExScore", src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_AREA.NUMBER_W * 10, h = EXSCORE_AREA.NUMBER_H, divx = 10, digit = 5, ref = 271, align = 0},
+        -- IR
+        {id = "irRanking"         , src = 0, x = NORMAL_NUMBER_SRC_X, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W*10, h = NORMAL_NUMBER_H, divx = 10, digit = 5, ref = 179, align = 0},
+        {id = "irPlayerForRanking", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, digit = 5, ref = 200, align = 0},
         -- 上部プレイヤー情報
         {id = "numOfCoin", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 8, ref = 33, align = 0},
         {id = "numOfDia", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 8, ref = 30, align = 0},
@@ -1281,6 +1350,30 @@ local function main()
         {id = "notesDisplayTime", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H, w = OPTION_INFO.NUMBER_W * 10, h = OPTION_INFO.NUMBER_H, divx = 10, digit = 4, ref = 312},
         {id = "judgeTiming", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H * 2, w = OPTION_INFO.NUMBER_W * 12, h = OPTION_INFO.NUMBER_H * 2, divx = 12, divy = 2, digit = 4, ref = 12},
     }
+    -- IR irTextsに対応する値を入れていく
+    -- {人数, percentage, afterdot} で, irTextsに対応するrefsを入れる
+    local irNumbers = {
+        -- MAXから
+        {224, 225, 240}, {222, 223, 239}, {218, 219, 238}, {208, 209, 233}, {216, 217, 237}, {214, 215, 236},
+        -- ここからEASY
+        {212, 213, 235}, {206, 207, 232}, {204, 205, 231}, {210, 211, 234},
+        -- ここからplayer
+        {200, 0, 0}, {228, 229, 242}, {226, 227, 241}
+    }
+    for i, refs in ipairs(irNumbers) do
+        local type = irTexts[i]
+        table.insert(skin.value, {
+            id = "ir" .. type .. "Number", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, divy = 1, digit = IR.DIGIT, ref = refs[1]
+        })
+        if refs[2] ~= 0 then
+            table.insert(skin.value, {
+                id = "ir" .. type .. "Percentage", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W, y = PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 2, ref = refs[2]
+            })
+            table.insert(skin.value, {
+                id = "ir" .. type .. "PercentageAfterDot", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W, y = PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 1, ref = refs[3]
+            })
+        end
+    end
 
     -- 各種ステータス用数値(パーツ共通)
     local commonStatusTexts = {
@@ -1294,7 +1387,7 @@ local function main()
         "playCountFolder", "clearCountFolder",
     }
     local useNormalNumberTexts = {
-        exScore = 71, hiScore = 100, nextRank = 154, 
+        exScore = 71, hiScore = 100, nextRank = 154,
         numOfPerfect = 110, numOfGreat = 111, numOfGood = 112, numOfBad = 113, numOfPoor = 114, numOfEmptyPoor = 420,
         maxCombo = 75, totalNotes = 74, missCount = 427, playCount = 77, clearCount = 78,
         bpm = 90, bpmMax = 90, bpmMin = 91,
@@ -1303,14 +1396,14 @@ local function main()
     }
 
     for i, val in ipairs(commonStatusTexts) do
-        local digit = PLAY_STATUS_DIGIT
+        local digit = SCORE_INFO.DIGIT
         if val == "bpm" or val == "bpmMax" or val == "bpmMin" then
             digit = 3
         end
         table.insert(skin.image, {
                 id = val .. "TextImg", src = 0,
-                x = PLAY_STATUS_TEXT_SRC_X, y = PLAY_STATUS_TEXT_SRC_Y + PLAY_STATUS_TEXT_H * (i - 1),
-                w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H
+                x = SCORE_INFO.TEXT_SRC_X, y = SCORE_INFO.TEXT_SRC_Y + SCORE_INFO.TEXT_H * (i - 1),
+                w = SCORE_INFO.TEXT_W, h = SCORE_INFO.TEXT_H
         })
         table.insert(skin.value, {
                 id = val, src = 0,
@@ -1347,8 +1440,8 @@ local function main()
 		{id = "bartext", font = 0, size = BAR_FONT_SIZE, align = 2, overflow = 1},
         {id = "searchText", font = 0, size = 24, ref = 30},
 
-        {id = "playerName", font = 0, size = RIVAL.FONT_SIZE, align = 2, ref = 2, overflow = 1},
-        {id = "rivalName" , font = 0, size = RIVAL.FONT_SIZE, align = 2, ref = 1, overflow = 1},
+        {id = "playerName", font = 0, size = RIVAL.FONT_SIZE, align = 0, ref = 2, overflow = 1},
+        {id = "rivalName" , font = 0, size = RIVAL.FONT_SIZE, align = 0, ref = 1, overflow = 1},
     }
 
     -- 選曲バー設定
@@ -1536,25 +1629,25 @@ local function main()
         -- noステージファイル背景
         {
             id = "black", op = {190, 2}, dst = {
-                {x = STAGE_FILE_DST_X, y = STAGE_FILE_DST_Y, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT, a = 64}
+                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = 64}
             }
         },
         -- ステージファイル背景(アス比固定機能がないため見えない)
         {
             id = "black", op = {191, 2}, dst = {
-                {x = STAGE_FILE_DST_X, y = STAGE_FILE_DST_Y, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT, a = 255}
+                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = 255}
             }
         },
         -- ステージファイル
         {
             id = -100, op = {2}, filter = 1, dst = {
-                {x = STAGE_FILE_DST_X, y = STAGE_FILE_DST_Y, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT}
+                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
             }
         },
         -- ステージファイルマスク
         {
             id = "black", op = {191, 2}, timer = 11, loop = 300, dst = {
-                {time = 0  , a = 128, x = STAGE_FILE_DST_X, y = STAGE_FILE_DST_Y, w = STAGEFILE_BG_WIDTH, h = STAGEFILE_BG_HEIGHT},
+                {time = 0  , a = 128, x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H},
                 {time = 200, a = 128},
                 {time = 300, a = 0}
             }
@@ -1562,32 +1655,32 @@ local function main()
         -- Stage fileフレーム
         { -- 設定無し
             id = "stagefileFrame", op = {2, 150}, dst = {
-                {x = 74, y = 415, w = 702, h = 542}
+                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y = STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2}
             }
         },
         { -- beginner
             id = "stagefileFrame", op = {2, 151}, dst = {
-                {x = 74, y = 415, w = 702, h = 542, r = 153, g = 255, b = 153}
+                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 153, g = 255, b = 153}
             }
         },
         { -- normal
             id = "stagefileFrame", op = {2, 152}, dst = {
-                {x = 74, y = 415, w = 702, h = 542, r = 153, g = 255, b = 255}
+                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 153, g = 255, b = 255}
             }
         },
         { -- hyper
             id = "stagefileFrame", op = {2, 153}, dst = {
-                {x = 74, y = 415, w = 702, h = 542, r = 255, g = 204, b = 102}
+                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 255, g = 204, b = 102}
             }
         },
         { -- another
             id = "stagefileFrame", op = {2, 154}, dst = {
-                {x = 74, y = 415, w = 702, h = 542, r = 255, g = 102, b = 102}
+                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 255, g = 102, b = 102}
             }
         },
         { -- insane
             id = "stagefileFrame", op = {2, 155}, dst = {
-                {x = 74, y = 415, w = 702, h = 542, r = 204, g = 0, b = 102}
+                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 204, g = 0, b = 102}
             }
         },
         -- コース曲一覧表示は下のforで
@@ -1744,7 +1837,7 @@ local function main()
         -- BPM
         {
             id = "bpmTextImg", op = {2}, dst = {
-                {x = 1207, y = 547, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
+                {x = 1207, y = 547, w = SCORE_INFO.TEXT_W, h = SCORE_INFO.TEXT_H}
             }
         },
         -- BPM変化なし
@@ -1772,7 +1865,7 @@ local function main()
         -- keys
         {
             id = "keysTextImg", op = {2}, dst = {
-                {x = 1207, y = 517, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
+                {x = 1207, y = 517, w = SCORE_INFO.TEXT_W, h = SCORE_INFO.TEXT_H}
             }
         },
         -- 楽曲keys ゴリ押し
@@ -1815,22 +1908,22 @@ local function main()
         -- 判定難易度
         {
             id = "judgeEasy", op = {183}, dst = {
-                {x = 1335, y = 517, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
+                {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
             }
         },
         {
             id = "judgeNormal", op = {182}, dst = {
-                {x = 1335, y = 517, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
+                {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
             }
         },
         {
             id = "judgeHard", op = {181}, dst = {
-                {x = 1335, y = 517, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
+                {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
             }
         },
         {
             id = "judgeVeryhard", op = {180}, dst = {
-                {x = 1335, y = 517, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
+                {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
             }
         },
 
@@ -1868,28 +1961,6 @@ local function main()
             }
         },
         -- 各ノーツ数は下のfor
-
-        -- 自分好みの色にしようとした努力の痕跡
-        -- {
-        --     id = "black", dst = {
-        --         {x = BASE_WIDTH - 700, y = 100, w = 600, h = 200}
-        --     }
-        -- },
-        -- {
-        --     id = "notesGraph", dst = {
-        --         {x = BASE_WIDTH - 700, y = 100, w = 600, h = 200}
-        --     }
-        -- },
-        -- {
-        --     id = "white", blend = 9, dst = {
-        --         {x = BASE_WIDTH - 700, y = 100, w = 600, h = 200}
-        --     }
-        -- },
-        -- {
-        --     id = "pink", blend = 2, dst = {
-        --         {x = BASE_WIDTH - 700, y = 100, w = 600, h = 200}
-        --     }
-        -- },
     }
 
     -- コースの曲一覧
@@ -1971,29 +2042,29 @@ local function main()
             -- レベル表記
             table.insert(skin.destination, {
                 id = "largeLevel" .. LEVEL_NAME_TABLE[i], op = {150 + i}, dst = {
-                    {x = LARGE_LEVEL_X + LARGE_LEVEL_INTERVAL * (i - 1) - 15, y = LARGE_LEVEL_Y, w = 30, h = 40}
+                    {x = LARGE_LEVEL.X + LARGE_LEVEL.INTERVAL * (i - 1) - 15, y = LARGE_LEVEL.Y, w = 30, h = 40}
                 }
             })
 
             -- 非アクティブ時のレベルアイコン
             table.insert(skin.destination, {
                 id = "nonActive" .. LEVEL_NAME_TABLE[i] .. "Icon", op = {-150 - i}, dst = {
-                    {x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - (NONACTIVE_LEVEL_ICON_H - ACTIVE_LEVEL_ICON_H), w = LEVEL_ICON_WIDTH, h = NONACTIVE_LEVEL_ICON_H}
+                    {x = LARGE_LEVEL.ICON_X + LARGE_LEVEL.INTERVAL * (i - 1), y = LARGE_LEVEL.ICON_Y - (LARGE_LEVEL.NONACTIVE_ICON_H - LARGE_LEVEL.ACTIVE_ICON_H), w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H}
                 }
             })
 
             -- アクティブ時のレベルアイコン(背景)
             table.insert(skin.destination, {
                 id = "active" .. LEVEL_NAME_TABLE[i] .. "Icon", op = {150 + i}, dst = {
-                    {x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - 2, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H}
+                    {x = LARGE_LEVEL.ICON_X + LARGE_LEVEL.INTERVAL * (i - 1), y = LARGE_LEVEL.ICON_Y - 2, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H}
                 }
             })
 
             -- アクティブ時のレベルアイコンのノート
             table.insert(skin.destination, {
                 id = "active" .. LEVEL_NAME_TABLE[i] .. "Note", op = {150 + i}, loop = 0, timer = 11, filter = 1, dst = {
-                    {time = 0, angle = 0, acc = 2, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - 5, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-                    {time = 500, angle = -10, acc = 2, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y + 10, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+                    {time = 0, angle = 0, acc = 2, a = 255, x = LARGE_LEVEL.ICON_X + LARGE_LEVEL.INTERVAL * (i - 1), y = LARGE_LEVEL.ICON_Y - 5, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+                    {time = 500, angle = -10, acc = 2, a = 255, x = LARGE_LEVEL.ICON_X + LARGE_LEVEL.INTERVAL * (i - 1), y = LARGE_LEVEL.ICON_Y + 10, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
                     {time = 501, angle = -10, acc = 2, a = 0},
                     {time = 1000, angle = 0, acc = 2, a = 0},
                 }
@@ -2002,15 +2073,15 @@ local function main()
                 id = "active" .. LEVEL_NAME_TABLE[i] .. "Note", op = {150 + i}, loop = 0, timer = 11, filter = 1, dst = {
                     {time = 0, angle = 0, acc = 1, a = 0},
                     {time = 500, angle = -10, acc = 1, a = 0},
-                    {time = 501, angle = -10, acc = 1, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y + 10, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
-                    {time = 1000, angle = 0, acc = 1, a = 255, x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y - 5, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_ICON_H},
+                    {time = 501, angle = -10, acc = 1, a = 255, x = LARGE_LEVEL.ICON_X + LARGE_LEVEL.INTERVAL * (i - 1), y = LARGE_LEVEL.ICON_Y + 10, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+                    {time = 1000, angle = 0, acc = 1, a = 255, x = LARGE_LEVEL.ICON_X + LARGE_LEVEL.INTERVAL * (i - 1), y = LARGE_LEVEL.ICON_Y - 5, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
                 }
             })
 
             -- アクティブ時のレベルアイコンのテキスト
             table.insert(skin.destination,  {
                 id = "active" .. LEVEL_NAME_TABLE[i] .. "Text", op = {150 + i}, dst = {
-                    {x = 102 + LARGE_LEVEL_INTERVAL * (i - 1), y = LEVEL_ICON_Y + 1, w = LEVEL_ICON_WIDTH, h = ACTIVE_LEVEL_TEXT_H}
+                    {x = LARGE_LEVEL.ICON_X + LARGE_LEVEL.INTERVAL * (i - 1), y = LARGE_LEVEL.ICON_Y + 1, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H}
                 }
             })
         end
@@ -2041,7 +2112,7 @@ local function main()
             -- レベル表記
             table.insert(skin.destination, {
                 id = "largeLevel" .. LEVEL_NAME_TABLE[i], op = {150 + i}, dst = {
-                    {x = DENSITY_INFO.DIFFICULTY_NUMBER_X, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL_W, h = LARGE_LEVEL_H}
+                    {x = DENSITY_INFO.DIFFICULTY_NUMBER_X, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL.NUMBER_W, h = LARGE_LEVEL.NUMBER_H}
                 }
             })
         end
@@ -2080,7 +2151,7 @@ local function main()
             -- 整数部分
             table.insert(skin.destination, {
                 id = "density" ..  types[i] .. "Number", op = {2}, dst = {
-                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset - LARGE_LEVEL_W*2, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL_W, h = LARGE_LEVEL_H}
+                    {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset - LARGE_LEVEL.NUMBER_W*2, y = DENSITY_INFO.NUMBER_Y, w = LARGE_LEVEL.NUMBER_W, h = LARGE_LEVEL.NUMBER_H}
                 }
             })
             -- peakは小数点以下が現在は表示できないので出さない
@@ -2105,7 +2176,7 @@ local function main()
     for i, rank in ipairs(ranks) do
         table.insert(skin.destination, {
             id = "rank" .. rank, op = {{2, 3}, 200 + (i - 1)}, dst = {
-                {x = RANK_X, y = RANK_Y, w = RANK_W, h = RANK_H}
+                {x = SCORE_RANK.X, y = SCORE_RANK.Y, w = SCORE_RANK.W, h = SCORE_RANK.H}
             }
         })
     end
@@ -2113,22 +2184,42 @@ local function main()
     -- exscoreとnext
     table.insert(skin.destination, {
         id = "exScoreTextImg", op = {624}, dst = {
-            {x = 822, y = 338, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
-        }
-    })
-    table.insert(skin.destination, {
-        id = "nextRankTextImg", op = {624}, dst = {
-            {x = 822, y = 301, w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H}
+            {x = EXSCORE_AREA.TEXT_X, y = EXSCORE_AREA.Y, w = SCORE_INFO.TEXT_W, h = SCORE_INFO.TEXT_H}
         }
     })
     table.insert(skin.destination, {
         id = "richExScore", op = {624}, dst = {
-            {x = 1070 - EXSCORE_NUMBER_W * 5, y = 337, w = EXSCORE_NUMBER_W, h = EXSCORE_NUMBER_H}
+            {x = EXSCORE_AREA.NUMBER_X - EXSCORE_AREA.NUMBER_W * 5, y = EXSCORE_AREA.Y, w = EXSCORE_AREA.NUMBER_W, h = EXSCORE_AREA.NUMBER_H}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "nextRankTextImg", op = {624}, dst = {
+            {x = EXSCORE_AREA.TEXT_X, y = EXSCORE_AREA.NEXT_Y, w = SCORE_INFO.TEXT_W, h = SCORE_INFO.TEXT_H}
         }
     })
     table.insert(skin.destination, {
         id = "nextRank", op = {624}, dst = {
-            {x = 1070 - NORMAL_NUMBER_W * PLAY_STATUS_DIGIT, y = 301, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
+            {x = EXSCORE_AREA.NUMBER_X - NORMAL_NUMBER_W * SCORE_INFO.DIGIT, y = EXSCORE_AREA.NEXT_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "irRankingText", dst = {
+            {x = EXSCORE_AREA.TEXT_X, y = EXSCORE_AREA.IR_Y, w = EXSCORE_AREA.IR_W, h = EXSCORE_AREA.IR_H}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "irRanking", dst = {
+            {x = EXSCORE_AREA.NUMBER_X - IR.NUMBER_NUM_W * 5 - NORMAL_NUMBER_W * 6, y = EXSCORE_AREA.IR_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "slashForRanking", dst = {
+            {x = EXSCORE_AREA.NUMBER_X - IR.NUMBER_NUM_W * 5 - NORMAL_NUMBER_W * 1, y = EXSCORE_AREA.IR_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "irPlayerNumber", dst = {
+            {x = EXSCORE_AREA.NUMBER_X - IR.NUMBER_NUM_W * 5, y = EXSCORE_AREA.IR_Y, w = IR.NUMBER_NUM_W, h = IR.NUMBER_NUM_H}
         }
     })
     -- ライバル名とexScore
@@ -2139,7 +2230,7 @@ local function main()
     })
     table.insert(skin.destination, {
         id = "richExScore", op = {625}, dst = {
-            {x = 1070 - EXSCORE_NUMBER_W * 5, y = RIVAL.PLAYER_Y, w = EXSCORE_NUMBER_W, h = EXSCORE_NUMBER_H}
+            {x = EXSCORE_AREA.NUMBER_X - EXSCORE_AREA.NUMBER_W * 5, y = RIVAL.PLAYER_Y, w = EXSCORE_AREA.NUMBER_W, h = EXSCORE_AREA.NUMBER_H}
         }
     })
     table.insert(skin.destination, {
@@ -2149,19 +2240,20 @@ local function main()
     })
     table.insert(skin.destination, {
         id = "rivalExScore", op = {625}, dst = {
-            {x = 1070 - EXSCORE_NUMBER_W * 5, y = RIVAL.RIVAL_Y, w = EXSCORE_NUMBER_W, h = EXSCORE_NUMBER_H}
+            {x = EXSCORE_AREA.NUMBER_X - EXSCORE_AREA.NUMBER_W * 5, y = RIVAL.RIVAL_Y, w = EXSCORE_AREA.NUMBER_W, h = EXSCORE_AREA.NUMBER_H}
         }
     })
 
     -- 各種ステータス
     local statusLine = {
         {"numOfPerfect", "numOfGreat", "numOfGood", "numOfBad", "numOfPoor"},
-        {"exScore", "hiScore", "maxCombo", "totalNotes", "missCount"},
-        {"playCount", "clearCount"}
+        {"hiScore", "maxCombo", "totalNotes", "missCount", "playCount", "clearCount"},
     }
     for i, arr in ipairs(statusLine) do
         for j, val in ipairs(arr) do
-            local numberX = PLAY_STATUS_NUMBER_BASE_X + (i - 1) * PLAY_STATUS_INTERVAL_X - NORMAL_NUMBER_W * 8
+            local baseX = SCORE_INFO.TEXT_BASE_X + SCORE_INFO.INTERVAL_X * (i - 1)
+            local baseY = SCORE_INFO.TEXT_BASE_Y - SCORE_INFO.INTERVAL_Y * (j - 1)
+            local numberX = baseX + SCORE_INFO.NUMBER_OFFSET_X - NORMAL_NUMBER_W * 8
             if val == "numOfPoor" then
                 numberX = numberX - NORMAL_NUMBER_W * 5
             end
@@ -2170,9 +2262,9 @@ local function main()
             table.insert(skin.destination, {
                 id = val .. "TextImg", dst = {
                     {
-                        x = PLAY_STATUS_TEXT_BASE_X + (i - 1) * PLAY_STATUS_INTERVAL_X,
-                        y = PLAY_STATUS_TEXT_BASE_Y - (j - 1) * PLAY_STATUS_INTERVAL_Y,
-                        w = PLAY_STATUS_TEXT_W, h = PLAY_STATUS_TEXT_H
+                        x = baseX,
+                        y = baseY,
+                        w = SCORE_INFO.TEXT_W, h = SCORE_INFO.TEXT_H
                     }
                 }
             })
@@ -2182,7 +2274,7 @@ local function main()
                 id = val, op = {2}, dst = {
                     {
                         x = numberX,
-                        y = PLAY_STATUS_NUMBER_BASE_Y - (j - 1) * PLAY_STATUS_INTERVAL_Y,
+                        y = baseY,
                         w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H
                     }
                 }
@@ -2191,7 +2283,7 @@ local function main()
                 id = val, op = {3}, dst = {
                     {
                         x = numberX,
-                        y = PLAY_STATUS_NUMBER_BASE_Y - (j - 1) * PLAY_STATUS_INTERVAL_Y,
+                        y = baseY,
                         w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H
                     }
                 }
@@ -2202,7 +2294,7 @@ local function main()
                     id = val .. "Folder", op = {1}, dst = {
                         {
                             x = numberX,
-                            y = PLAY_STATUS_NUMBER_BASE_Y - (j - 1) * PLAY_STATUS_INTERVAL_Y,
+                            y = baseY,
                             w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H
                         }
                     }
@@ -2213,8 +2305,8 @@ local function main()
                 table.insert(skin.destination, {
                     id = "slashForEmptyPoor", dst = {
                         {
-                            x = numberX + 64 + NORMAL_NUMBER_W * 4,
-                            y = PLAY_STATUS_NUMBER_BASE_Y - (j - 1) * PLAY_STATUS_INTERVAL_Y,
+                            x = numberX + NORMAL_NUMBER_W*8,
+                            y = baseY,
                             w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H
                         }
                     }
@@ -2223,11 +2315,60 @@ local function main()
                     id = "numOfEmptyPoor", dst = {
                         {
                             x = numberX + NORMAL_NUMBER_W + NORMAL_NUMBER_W*4,
-                            y = PLAY_STATUS_NUMBER_BASE_Y - (j - 1) * PLAY_STATUS_INTERVAL_Y,
+                            y = baseY,
                             w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H
                         }
                     }
                 })
+            end
+        end
+    end
+
+    -- IR
+    local irTextOrder = {
+        {"Max", "Perfect", "Fullcombo", "Exhard", "Hard", "Clear", "Easy",},
+        {"Player", "NumOfFullcombo", "NumOfClear", "", "Lassist", "Aassist", "Failed"}
+    }
+    for i, _ in ipairs(irTextOrder) do
+        for j, type in ipairs(irTextOrder[i]) do
+            if irTextOrder[i][j] ~= "" then
+                local baseX = IR.X + IR.INTERVAL_X * (i - 1)
+                local baseY = IR.Y - IR.INTERVAL_Y * (j - 1)
+                -- 画像
+                table.insert(skin.destination, {
+                    id = "ir" .. type .. "Text", dst = {
+                        {x = baseX, y = baseY, w = IR.TEXT_W, h = IR.TEXT_H}
+                    }
+                })
+                -- 数値
+                table.insert(skin.destination, {
+                    id = "ir" .. type .. "Number", dst = {
+                        {x = baseX + 146 - IR.NUMBER_NUM_W * IR.DIGIT, y = baseY + 1, w = IR.NUMBER_NUM_W, h = IR.NUMBER_NUM_H}
+                    }
+                })
+                -- player以外はパーセンテージも
+                if irTextOrder[i][j] ~= "Player" then
+                    table.insert(skin.destination, {
+                        id = "ir" .. type .. "Percentage", dst = {
+                            {x = baseX + 164 - IR.NUMBER_PERCENT_W * 2, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
+                        }
+                    })
+                    table.insert(skin.destination, {
+                        id = "irDot", dst = {
+                            {x = baseX + 164, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
+                        }
+                    })
+                    table.insert(skin.destination, {
+                        id = "ir" .. type .. "PercentageAfterDot", dst = {
+                            {x = baseX + 174 - IR.NUMBER_PERCENT_W * 1, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
+                        }
+                    })
+                    table.insert(skin.destination, {
+                        id = "irPercent", dst = {
+                            {x = baseX + 177, y = baseY + 1, w = IR.PERCENT_W, h = IR.PERCENT_H}
+                        }
+                    })
+                end
             end
         end
     end
