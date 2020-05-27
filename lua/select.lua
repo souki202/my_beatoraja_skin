@@ -207,6 +207,21 @@ local IR = {
     Y = 229,
     INTERVAL_X = 198,
     INTERVAL_Y = 25,
+
+    LOADING = {
+        FRAME_W = 249,
+        FRAME_H = 62,
+        FRAME_X = 681,
+        FRAME_Y = 3,
+        WAVE_LEVEL = 5,
+        WAVE_W = 4,
+        WAVE_H = 25,
+        WAVE_TIME_INTERVAL = 500, -- ms
+        WAITING_TEXT_W = 138,
+        WAITING_TEXT_H = 21,
+        LOADING_TEXT_W = 181,
+        LOADING_TEXT_H = 21,
+    },
 }
 
 -- 密度グラフ
@@ -1112,6 +1127,15 @@ local function main()
         {id = "irPercent", src = 0, x = NORMAL_NUMBER_SRC_X + IR.NUMBER_PERCENT_W * 11 + 15, y = PARTS_OFFSET + 68, w = IR.PERCENT_W, h = IR.PERCENT_H},
         -- IR用文字画像
         {id = "irRankingText", src = 0, x = 1298, y = PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 4, w = EXSCORE_AREA.IR_W, h = EXSCORE_AREA.IR_H},
+        -- IR loading
+        {id = "irLoadingFrame"   , src = 0, x = 965, y = PARTS_OFFSET + 771, w = IR.LOADING.FRAME_W, h = IR.LOADING.FRAME_H},
+        {id = "irLoadingWave1"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*0, y = PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
+        {id = "irLoadingWave2"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*1, y = PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
+        {id = "irLoadingWave3"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*2, y = PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
+        {id = "irLoadingWave4"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*3, y = PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
+        {id = "irLoadingWave5"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*4, y = PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
+        {id = "irLoadingWaitText", src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*5, y = PARTS_OFFSET + 771, w = IR.LOADING.WAITING_TEXT_W, h = IR.LOADING.WAITING_TEXT_H},
+        {id = "irLoadingLoadText", src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*5, y = PARTS_OFFSET + 771 + IR.LOADING.WAITING_TEXT_H, w = IR.LOADING.LOADING_TEXT_W, h = IR.LOADING.LOADING_TEXT_H},
 
         -- 検索ボックス
         {id = "searchBox", src = 0, x = 773, y = PARTS_TEXTURE_SIZE - 62, w = 1038, h = 62},
@@ -1367,7 +1391,7 @@ local function main()
         })
         if refs[2] ~= 0 then
             table.insert(skin.value, {
-                id = "ir" .. type .. "Percentage", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W, y = PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 2, ref = refs[2]
+                id = "ir" .. type .. "Percentage", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W, y = PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 3, ref = refs[2]
             })
             table.insert(skin.value, {
                 id = "ir" .. type .. "PercentageAfterDot", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W, y = PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 1, ref = refs[3]
@@ -2213,7 +2237,7 @@ local function main()
         }
     })
     table.insert(skin.destination, {
-        id = "slashForRanking", dst = {
+        id = "slashForRanking", op = {-606}, dst = {
             {x = EXSCORE_AREA.NUMBER_X - IR.NUMBER_NUM_W * 5 - NORMAL_NUMBER_W * 1, y = EXSCORE_AREA.IR_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
         }
     })
@@ -2350,27 +2374,47 @@ local function main()
                 if irTextOrder[i][j] ~= "Player" then
                     table.insert(skin.destination, {
                         id = "ir" .. type .. "Percentage", dst = {
-                            {x = baseX + 164 - IR.NUMBER_PERCENT_W * 2, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
+                            {x = baseX + 168 - IR.NUMBER_PERCENT_W * 3, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
                         }
                     })
                     table.insert(skin.destination, {
-                        id = "irDot", dst = {
-                            {x = baseX + 164, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
+                        id = "irDot", op = {-606}, dst = {
+                            {x = baseX + 168, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
                         }
                     })
                     table.insert(skin.destination, {
                         id = "ir" .. type .. "PercentageAfterDot", dst = {
-                            {x = baseX + 174 - IR.NUMBER_PERCENT_W * 1, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
+                            {x = baseX + 178 - IR.NUMBER_PERCENT_W * 1, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
                         }
                     })
                     table.insert(skin.destination, {
-                        id = "irPercent", dst = {
-                            {x = baseX + 177, y = baseY + 1, w = IR.PERCENT_W, h = IR.PERCENT_H}
+                        id = "irPercent", op = {-606}, dst = {
+                            {x = baseX + 179, y = baseY + 1, w = IR.PERCENT_W, h = IR.PERCENT_H}
                         }
                     })
                 end
             end
         end
+    end
+    -- IRロード表示
+    table.insert(skin.destination, {
+        id = "irLoadingFrame", op = {606, -1, -1030}, dst = {
+            {x = IR.LOADING.FRAME_X, y = IR.LOADING.FRAME_Y, w = IR.LOADING.FRAME_W, h = IR.LOADING.FRAME_H}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "irLoadingLoadText", op = {606, -1, -1030}, dst = {
+            {x = IR.LOADING.FRAME_X + 49, y = IR.LOADING.FRAME_Y + 20, w = IR.LOADING.LOADING_TEXT_W, h = IR.LOADING.LOADING_TEXT_H}
+        }
+    })
+    for i = 1, IR.LOADING.WAVE_LEVEL do
+        table.insert(skin.destination, {
+            id = "irLoadingWave" .. i, op = {606, -1, -1030}, loop = 0, timer = 11, dst = {
+                {time = 0, a = 0, acc = 3, x = IR.LOADING.FRAME_X + 19 + IR.LOADING.WAVE_W * (i - 1), y = IR.LOADING.FRAME_Y + 18, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
+                {time = IR.LOADING.WAVE_TIME_INTERVAL * i, a = 255},
+                {time = IR.LOADING.WAVE_TIME_INTERVAL * (IR.LOADING.WAVE_LEVEL + 1)}
+            }
+        })
     end
 
     -- プレイオプション
