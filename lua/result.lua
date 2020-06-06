@@ -940,7 +940,7 @@ local function main()
     }
 
     skin.judgegraph = {
-        {id = "notesGraph", noGap = 1, orderReverse = 1, type = 0, backTexOff = 1},
+        {id = "notesGraph", noGap = 1, orderReverse = 0, type = 0, backTexOff = 1},
         {id = "judgesGraph", noGap = 1, orderReverse = 1, type = 1, backTexOff = 1},
         {id = "elGraph", noGap = 1, orderReverse = 1, type = 2, backTexOff = 1},
     }
