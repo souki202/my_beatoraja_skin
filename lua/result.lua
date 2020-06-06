@@ -5,8 +5,8 @@ local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048
 local BG_ID = "background"
 
--- local CLEAR_TYPE = main_state.number(370)
-local CLEAR_TYPE = 8
+local CLEAR_TYPE = 0 -- 後で初期化
+-- local CLEAR_TYPE = 6
 
 local LAMPS = {
     NO_PLAY = 0,
@@ -266,6 +266,14 @@ local JUDGE = {
         INTERVAL_Y = -49,
     },
 
+    EL_TEXT = {
+        EX = 437,
+        LX = 503,
+        Y = 304,
+        W = 55,
+        H = 18,
+    },
+
     NUM = {
         DIGIT = 4,
         X = 340,
@@ -412,8 +420,23 @@ local GRAPH = {
     JUDGE_TEXT = {
         X = 7,
         Y = 75,
-        W = 143,
+        W = 189,
         H = 22,
+    },
+
+    GROOVE_TEXT = {
+        X = 7,
+        Y = 5,
+        W = 189,
+        H = 22,
+    },
+
+    GROOVE_NUM = {
+        X = 608, -- グラフエリアからの値
+        Y = 295,
+        DOT = 1, -- x からの差分 あとでグラフからの差分に再計算
+        AF_X = 20, -- x からの差分 あとでグラフからの差分に再計算
+        SYMBOL_X = 20, -- x からの差分 あとでグラフからの差分に再計算
     },
 
     JUDGE_GRAPH = {
@@ -434,6 +457,60 @@ local GRAPH = {
     PREFIX = {"notes", "judges", "el"}
 }
 
+GRAPH.GROOVE_NUM.DOT = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.DOT
+GRAPH.GROOVE_NUM.AF_X = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.AF_X
+GRAPH.GROOVE_NUM.SYMBOL_X = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.SYMBOL_X
+
+local LARGE_LAMP = {
+    SIZE = 71,
+    PREFIX = {"failed", "aeasy", "laeasy", "easy", "normal", "hard", "exhard", "fullcombo", "perfect", "perfect"},
+    LEN = {9, 17, 19, 11, 12, 12, 15, 12, 10, 10}, -- 空白込み
+    POS = { -- 文字の左端部分の座標間隔と, 画像側の文字左端と文字領域左端の差 座標間隔の1文字目だけ絶対座標
+        INIT_Y = 533,
+        AT_TOP_Y = 950,
+        PERFECT = {759, 48, 45, 49, 42, 46, 49, 42, 27, 27},
+        PERFECT_D = {10, 12, 10, 12, 12, 12, 12, 23, 23, 23},
+        FULLCOMBO = {685, 45, 51, 42, 43, 47, 53, 62, 51, 53, 27, 27},
+        FULLCOMBO_D = {11, 10, 16, 16, 12, 9, 3, 11, 9, 22, 22, 22},
+        EXHARD = {652, 39, 50, 27, 48, 52, 49, 0, 70, 45, 42, 38, 53, 50, 26},
+        EXHARD_D = {12, 8, 23, 8, 10, 12, 11, 0, 13, 17, 12, 9, 10, 23, 23},
+        HARD = {710, 48, 52, 49, 0, 70, 45, 42, 38, 53, 50, 26},
+        HARD_D = {11, 10, 10, 10, 0, 12, 16, 12, 9, 10, 23, 23},
+        NORMAL = {708, 64, 49, 47, 26, 0, 64, 45, 42, 38, 53, 50},
+        NORMAL_D = {4, 10, 11, 23, 11, 0, 12, 16, 12, 9, 10, 23},
+        EASY = {735, 38, 50, 50, 0, 57, 45, 42, 38, 53, 50},
+        EASY_D = {12, 8, 11, 17, 0, 12, 16, 12, 9, 10, 23},
+        LAEASY = {581, 42, 20, 51, 44, 47, 22, 51, 0, 57, 38, 50, 50, 0, 57, 45, 42, 38, 53},
+        LAEASY_D = {16, 23, 8, 10, 10, 23, 10, 14, 0, 12, 8, 11, 17, 0, 12, 16, 12, 9, 10},
+        AEASY = {609, 51, 44, 47, 22, 51, 0, 57, 38, 50, 50, 0, 57, 45, 42, 38, 53},
+        AEASY_D = {8, 10, 10, 23, 10, 14, 0, 12, 8, 11, 17, 0, 12, 16, 12, 9, 10},
+        FAILED = {800, 36, 52, 24, 41, 44, 52, 23, 23},
+        FAILED_D = {12, 8, 23, 16, 12, 10, 27, 27, 27},
+    },
+    ANIMATION = {
+        START_TIME = 0,
+        POP_DURATION = 250,
+        END_POP = 500,
+        TO_TOP_TIME = 800,
+        AT_TOP_TIME = 1300,
+        END_TIME = 1700,
+
+        START_BRIGHT_ROOP = 4000,
+        BRIGHT_ROOP_INTERVAL = 3000,
+
+        INIT_SIZE_MUL = 5,
+        INIT_DX_MUL = 3,
+
+        TO_TOP_DIV = 20, -- 何msごとにするか AT_TOP_TIME - TO_TOP_TIMEを割り切れる値にする
+        ROOP_BRIGHT_DIV = 20,
+        BRIGHT_INTERVAL = 2, -- これ*TO_TOP_DIV が各文字の光る間隔
+        BRIGHT_DURATION = 5, -- これ*TO_TOP_DIV が各文字の光だしから完全に光るまでの時間と,完全に光ってから消える時間
+        MAX_BRIGHT = 255, -- 最大に輝いているときのアルファ
+        ROOP_BRIGHT = 128, -- ループ時に輝いているときのアルファ
+        WHITE_BG_ALPHA = 178,
+    },
+}
+
 local RANKS = {
     X = 571,
     Y = 704,
@@ -442,7 +519,7 @@ local RANKS = {
     PREFIX = {"max", "aaa", "aa", "a", "b", "c", "d", "e", "f", "f"}, -- 最後のはスコア0
 
     ANIMATION = {
-        START_TIME = 100,
+        START_TIME = LARGE_LAMP.ANIMATION.END_TIME + 300,
         GET_IN_TIME = 500, -- start timeからの差分
         SHINE_TIME = 585,
         DEL_SHINE_TIME = 700,
@@ -482,7 +559,7 @@ local NEW_RECORD = {
     },
 
     ANIMATION = {
-        START_TIME = RANKS.ANIMATION.END_TIME + 300,
+        START_TIME = RANKS.ANIMATION.START_TIME + RANKS.ANIMATION.END_TIME + 300,
         POP_TOP_TIME = 150, -- start timeからの差分
         POP_BOTTOM_TIME = 500,
         END_TIME = 1000,
@@ -508,45 +585,8 @@ local NEW_RECORD = {
     }
 }
 
-local LARGE_LAMP = {
-    SIZE = 71,
-    PREFIX = {"failed", "aeasy", "laeasy", "easy", "normal", "hard", "exhard", "fullcombo", "perfect", "perfect"},
-    LEN = {9, 17, 19, 11, 12, 12, 15, 12, 10, 10}, -- 空白込み
-    POS = { -- 文字の左端部分の座標間隔と, 画像側の文字左端と文字領域左端の差 座標間隔の1文字目だけ絶対座標
-        INIT_Y = 533,
-        AT_TOP_Y = 950,
-        FAILED = {},
-        PERFECT = {759, 48, 45, 49, 42, 46, 49, 42, 27, 27},
-        PERFECT_D = {10, 12, 10, 12, 12, 12, 12, 23, 23, 23},
-        FULLCOMBO = {685, 45, 51, 42, 43, 47, 53, 62, 51, 53, 27, 27},
-        FULLCOMBO_D = {11, 10, 16, 16, 12, 9, 3, 11, 9, 22, 22, 22},
-    },
-    ANIMATION = {
-        START_TIME = 0,
-        POP_DURATION = 250,
-        END_POP = 500,
-        TO_TOP_TIME = 800,
-        AT_TOP_TIME = 1300,
-        END_TIME = 3000,
-
-        START_BRIGHT_ROOP = 4000,
-        BRIGHT_ROOP_INTERVAL = 3000,
-
-        INIT_SIZE_MUL = 5,
-        INIT_DX_MUL = 3,
-
-        TO_TOP_DIV = 20, -- 何msごとにするか AT_TOP_TIME - TO_TOP_TIMEを割り切れる値にする
-        ROOP_BRIGHT_DIV = 20,
-        BRIGHT_INTERVAL = 2, -- これ*TO_TOP_DIV が各文字の光る間隔
-        BRIGHT_DURATION = 5, -- これ*TO_TOP_DIV が各文字の光だしから完全に光るまでの時間と,完全に光ってから消える時間
-        MAX_BRIGHT = 255, -- 最大に輝いているときのアルファ
-        ROOP_BRIGHT = 128, -- ループ時に輝いているときのアルファ
-        WHITE_BG_ALPHA = 178,
-    },
-}
-
 local header = {
-    type = 5,
+    type = 7,
     name = "Social Skin dev result",
     w = WIDTH,
     h = HEIGHT,
@@ -716,6 +756,8 @@ local function main()
         skin[k] = v
     end
 
+    CLEAR_TYPE = main_state.number(370)
+
     skin.source = {
         {id = 0, path = "../result/parts/parts.png"},
         {id = 1, path = "../result/parts/shine.png"},
@@ -731,7 +773,9 @@ local function main()
     skin.image = {
         {id = "grayItemBg", src = 0, x = 529, y = 0, w = GRAY_ITEM.W, h = GRAY_ITEM.H},
         {id = "percentageFor24Px", src = 0, x = 1848, y = 40, w = NUM_24PX.PERCENT.W, h = NUM_24PX.PERCENT.H},
+        {id = "percentageFor24PxWhite", src = 0, x = 1848, y = 189, w = NUM_24PX.PERCENT.W, h = NUM_24PX.PERCENT.H},
         {id = "dotFor24Px", src = 0, x = 2034, y = 50, w = NUM_24PX.DOT_SIZE, h = NUM_24PX.DOT_SIZE},
+        {id = "dotFor24PxWhite", src = 0, x = 2034, y = 199, w = NUM_24PX.DOT_SIZE, h = NUM_24PX.DOT_SIZE},
         {id = "changeArrow", src = 0, x = 0, y = 49, w = CHANGE_ARROW.W, h = CHANGE_ARROW.H},
         {id = "titleDevidingLine", src = 0, x = 0, y = TEXTURE_SIZE - 1, w = TITLE_BAR.DEVIDING_LINE.W, h = 1},
         {id = "scoreDevidingLine", src = 0, x = 0, y = TEXTURE_SIZE - 1, w = SCORE.DEVIDING_LINE.W, h = 1},
@@ -751,7 +795,10 @@ local function main()
         {id = "comboText"      , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = VALUE_ITEM_TEXT.SRC_Y + VALUE_ITEM_TEXT.H*3, w = VALUE_ITEM_TEXT.W, h = VALUE_ITEM_TEXT.H},
         {id = "comboBreakText" , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = VALUE_ITEM_TEXT.SRC_Y + VALUE_ITEM_TEXT.H*4, w = VALUE_ITEM_TEXT.W, h = VALUE_ITEM_TEXT.H},
 
+        -- 判定部分
         {id = "judgeSlash", src = 0, x = 1872, y = 36, w = JUDGE.SLASH.W, h = JUDGE.SLASH.H},
+        {id = "earlyText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 396, w = JUDGE.EL_TEXT.W, h = JUDGE.EL_TEXT.H},
+        {id = "lateText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 396 + JUDGE.EL_TEXT.H, w = JUDGE.EL_TEXT.W, h = JUDGE.EL_TEXT.H},
 
         {id = "irSuffix18px", src = 0, x = 0, y = 70, w = IR.SUFFIX_S_TEXT.W, h = IR.SUFFIX_S_TEXT.H},
         {id = "irSuffix24px", src = 0, x = 18, y = 70, w = IR.SUFFIX_L_TEXT.W, h = IR.SUFFIX_L_TEXT.H},
@@ -763,7 +810,7 @@ local function main()
         {id = "lampNow", src = 0, x = 845 + LAMP.OLD.W, y = 0, w = LAMP.NOW.W, h = LAMP.NOW.H * 11, len = 11, divy = 11, ref = 370},
 
         -- グラフ
-        {id = "gaugeFrame", src = 0, x = 0, y = TEXTURE_SIZE - 371, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW*2},
+        {id = "grooveGaugeFrame", src = 0, x = 0, y = TEXTURE_SIZE - 371, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW*2},
         {id = "judgeFrame", src = 0, x = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, y = TEXTURE_SIZE - 367, w = GRAPH.WND_JUDGE.W + GRAPH.WND_JUDGE.SHADOW*2, h = GRAPH.WND_JUDGE.H + GRAPH.WND_JUDGE.SHADOW*2},
         {id = "notesDescription", src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*0, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
         {id = "judgesDescription", src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*1, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
@@ -771,6 +818,7 @@ local function main()
         {id = "notesGraphText" , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*0, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
         {id = "judgesGraphText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*1, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
         {id = "elGraphText"    , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*2, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
+        {id = "grooveGaugeText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.GROOVE_TEXT.H*3, w = GRAPH.GROOVE_TEXT.W ,h = GRAPH.GROOVE_TEXT.H},
 
         -- ランク
         {id = "rankShine", src = 1, x = 0, y = 0, w = RANKS.SHINE.W, h = RANKS.SHINE.H},
@@ -840,16 +888,16 @@ local function main()
         })
     end
 
+    -- 各種グラフ
+    skin.gaugegraph = {
+		{id = "grooveGaugeGraph", assistClearBGColor = "440044cc", assistAndEasyFailBGColor = "004444cc", grooveFailBGColor = "004400cc", grooveClearAndHardBGColor = "440000cc", exHardBGColor = "444400cc", hazardBGColor = "444444cc", borderColor = "440000cc"}
+    }
 
-    -- skin.gaugegraph = {
-	-- 	{id = "gaugeGraph", assistClearBGColor = "440044cc", assistAndEasyFailBGColor = "004444cc", grooveFailBGColor = "004400cc", grooveClearAndHardBGColor = "440000cc", exHardBGColor = "444400cc", hazardBGColor = "444444cc", borderColor = "440000cc"}
-    -- }
-
-    -- skin.judgegraph = {
-    --     {id = "notesGraph", noGap = 1, orderReverse = 1, type = 0, backTexOff = 1},
-    --     {id = "judgesGraph", noGap = 1, orderReverse = 1, type = 1, backTexOff = 1},
-    --     {id = "elGraph", noGap = 1, orderReverse = 1, type = 2, backTexOff = 1},
-    -- }
+    skin.judgegraph = {
+        {id = "notesGraph", noGap = 1, orderReverse = 1, type = 0, backTexOff = 1},
+        {id = "judgesGraph", noGap = 1, orderReverse = 1, type = 1, backTexOff = 1},
+        {id = "elGraph", noGap = 1, orderReverse = 1, type = 2, backTexOff = 1},
+    }
 
     skin.value = {
         {id = "difficultyValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 2, ref = 96, align = 0},
@@ -878,6 +926,9 @@ local function main()
         {id = "standardValueAfterDot", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = TIMING.NUM_AFTER_DOT.DIGIT, ref = 377, align = 0, padding = 1},
         {id = "averageValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = TIMING.NUM.DIGIT, ref = 374, align = 0},
         {id = "averageValueAfterDot", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = TIMING.NUM_AFTER_DOT.DIGIT, ref = 375, align = 0, padding = 1},
+        -- groove gaugeの値
+        {id = "grooveGaugeValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = 185, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 3, ref = 107, align = 0},
+        {id = "grooveGaugeValueAfterDot", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = 185, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 1, ref = 407, align = 0, padding = 1},
     }
 
     -- 判定読み込み
@@ -936,22 +987,41 @@ local function main()
                 }
             }
         },
-        -- グラフ
-        {
-            id = "gaugeGraph", dst = {
-                {x = GRAPH.WND_GAUGE.X + GRAPH.GAUGE.X, y = GRAPH.WND_GAUGE.Y + GRAPH.GAUGE.Y, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H}
-            }
-        },
-        -- グラフフレーム
-        {
-            id = "gaugeFrame", dst = {
-                {
-                    x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.SHADOW,
-                    w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW * 2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW * 2
-                }
-            }
-        },
     }
+
+    -- groove gauge出力
+    local grooveX = GRAPH.WND_GAUGE.X + GRAPH.GAUGE.X
+    local grooveY = GRAPH.WND_GAUGE.Y + GRAPH.GAUGE.Y
+    table.insert(skin.destination, {
+        id = "grooveGaugeGraph", dst = {
+            {x = grooveX, y = grooveY, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "grooveGaugeText", dst = {
+            {x = grooveX + GRAPH.GROOVE_TEXT.X, y = grooveY + GRAPH.GROOVE_TEXT.Y, w = GRAPH.GROOVE_TEXT.W, h = GRAPH.GROOVE_TEXT.H}
+        },
+    })
+    dstNumberRightJustify(skin, "grooveGaugeValue", grooveX + GRAPH.GROOVE_NUM.X, grooveY + GRAPH.GROOVE_NUM.Y, NUM_24PX.W, NUM_24PX.H, 3)
+    table.insert(skin.destination, {
+        id = "dotFor24PxWhite", dst = {
+            {x = grooveX + GRAPH.GROOVE_NUM.DOT, y = grooveY + GRAPH.GROOVE_NUM.Y, w = NUM_24PX.DOT_SIZE, h = NUM_24PX.DOT_SIZE}
+        }
+    })
+    dstNumberRightJustify(skin, "grooveGaugeValueAfterDot", grooveX + GRAPH.GROOVE_NUM.AF_X, grooveY + GRAPH.GROOVE_NUM.Y, NUM_24PX.W, NUM_24PX.H, 1)
+    table.insert(skin.destination, {
+        id = "percentageFor24PxWhite", dst = {
+            {x = grooveX + GRAPH.GROOVE_NUM.SYMBOL_X, y = grooveY + GRAPH.GROOVE_NUM.Y, w = NUM_24PX.PERCENT.W, h = NUM_24PX.PERCENT.H}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "grooveGaugeFrame", dst = {
+            {
+                x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.SHADOW,
+                w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW * 2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW * 2
+            }
+        }
+    })
 
     -- グラフ出力
     for i, text in ipairs(GRAPH.PREFIX) do
@@ -1208,6 +1278,17 @@ local function main()
 
     -- 各種判定
     destinationWindow(skin, JUDGE.WND.X, JUDGE.WND.Y, JUDGE.WND.W, JUDGE.WND.H)
+    -- early lateの文字
+    table.insert(skin.destination, {
+        id = "earlyText", dst = {
+            {x = JUDGE.WND.X + JUDGE.EL_TEXT.EX, y = JUDGE.WND.Y + JUDGE.EL_TEXT.Y, w = JUDGE.EL_TEXT.W, h = JUDGE.EL_TEXT.H}
+        }
+    })
+    table.insert(skin.destination, {
+        id = "lateText", dst = {
+            {x = JUDGE.WND.X + JUDGE.EL_TEXT.LX, y = JUDGE.WND.Y + JUDGE.EL_TEXT.Y, w = JUDGE.EL_TEXT.W, h = JUDGE.EL_TEXT.H}
+        }
+    })
     for i, text in ipairs(JUDGE.PREFIX) do
         local x = JUDGE.WND.X + JUDGE.TEXT.X
         local y = JUDGE.WND.Y + JUDGE.TEXT.Y + JUDGE.TEXT.INTERVAL_Y * (i - 1)
@@ -1333,17 +1414,18 @@ local function main()
             local op = 300 + (i - 2)
             local cx = RANKS.X + RANKS.W / 2
             local cy = RANKS.Y + RANKS.H / 2
-            if i == 2 then
-                -- 一旦暗くする
-                table.insert(skin.destination, {
-                    id = "black", loop = st + RANKS.ANIMATION.END_TIME, op = {op}, dst = {
-                        {time = 0, a = 0, acc = 1},
-                        {time = st - 1, a = 0},
-                        {time = st, a = 128, x = 0, y = 0, w = WIDTH, h = HEIGHT},
-                        {time = st + RANKS.ANIMATION.GET_IN_TIME, a = 0},
-                        {time = st + RANKS.ANIMATION.END_TIME},
-                    }
-                })
+            -- 一旦暗くする
+            table.insert(skin.destination, {
+                id = "black", loop = st + RANKS.ANIMATION.END_TIME, op = {op}, dst = {
+                    {time = 0, a = 0, acc = 1},
+                    {time = st - 1, a = 0},
+                    {time = st, a = 128, x = 0, y = 0, w = WIDTH, h = HEIGHT},
+                    {time = st + RANKS.ANIMATION.GET_IN_TIME, a = 0},
+                    {time = st + RANKS.ANIMATION.END_TIME},
+                }
+            })
+            -- A以上のみ輝かせる
+            if i <= 4 then
                 -- 輝き
                 table.insert(skin.destination, {
                     id = "rankShine", loop = st + RANKS.ANIMATION.END_TIME, op = {op, 90}, blend = 2, dst = {
@@ -1403,70 +1485,70 @@ local function main()
                         },
                     }
                 })
-
-                -- 波紋
-                table.insert(skin.destination, {
-                    id = rank .. "Text", loop = st + RANKS.ANIMATION.END_TIME, op = {op}, dst = {
-                        {time = 0, a = 0},
-                        {time = st + RANKS.ANIMATION.GET_IN_TIME - 1},
-                        {time = st + RANKS.ANIMATION.GET_IN_TIME, x = RANKS.X, y = RANKS.Y, w = RANKS.W, h = RANKS.H, a = 255},
-                        {
-                            time = st + RANKS.ANIMATION.RIPPLE_TIME,
-                            x = cx - RANKS.W * RANKS.ANIMATION.RIPPLE_MUL / 2,
-                            y = cy - RANKS.H * RANKS.ANIMATION.RIPPLE_MUL / 2,
-                            w = RANKS.W * RANKS.ANIMATION.RIPPLE_MUL,
-                            h = RANKS.H * RANKS.ANIMATION.RIPPLE_MUL,
-                            a = 0
-                        },
-                        {
-                            time = st + RANKS.ANIMATION.END_TIME
-                        },
-                    }
-                })
-
-                -- 本体
-                table.insert(skin.destination, {
-                    id = rank .. "Text", loop = st + RANKS.ANIMATION.END_TIME, op = {op}, dst = {
-                        {time = 0, a = 0},
-                        {time = st - 1, a = 0},
-                        {
-                            time = st,
-                            x = cx - RANKS.W * RANKS.ANIMATION.START_MUL / 2,
-                            y = cy - RANKS.H * RANKS.ANIMATION.START_MUL / 2,
-                            w = RANKS.W * RANKS.ANIMATION.START_MUL,
-                            h = RANKS.H * RANKS.ANIMATION.START_MUL,
-                            a = 255, r = 64, g = 64, b = 64, acc = 1,
-                        },
-                        {
-                            time = st + RANKS.ANIMATION.GET_IN_TIME,
-                            x = RANKS.X, y = RANKS.Y, w = RANKS.W, h = RANKS.H,
-                            a = 255, r = 255, g = 255, b = 255, acc = 0,
-                        },
-                        {
-                            time = st + RANKS.ANIMATION.RIPPLE_TIME,
-                        },
-                        {
-                            time = st + RANKS.ANIMATION.END_TIME
-                        },
-                    }
-                })
-
-                -- 光る文字
-                table.insert(skin.destination, {
-                    id = rank .. "BrightText", loop = st + RANKS.ANIMATION.END_TIME, op = {op}, dst = {
-                        {
-                            time = 0,
-                            x = RANKS.X, y = RANKS.Y, w = RANKS.W, h = RANKS.H,
-                            a = 0, acc = 3,
-                        },
-                        {time = st + RANKS.ANIMATION.BRIGHT_TIME, a = 255},
-                        {time = st + RANKS.ANIMATION.BRIGHT_TIME + RANKS.ANIMATION.BRIGHT_DURATION, a = 0},
-                        {time = st + RANKS.ANIMATION.BRIGHT_TIME2, a = 255},
-                        {time = st + RANKS.ANIMATION.BRIGHT_TIME2 + RANKS.ANIMATION.BRIGHT_DURATION, a = 0},
-                        {time = st + RANKS.ANIMATION.END_TIME},
-                    }
-                })
             end
+
+            -- 波紋
+            table.insert(skin.destination, {
+                id = rank .. "Text", loop = st + RANKS.ANIMATION.END_TIME, op = {op}, dst = {
+                    {time = 0, a = 0},
+                    {time = st + RANKS.ANIMATION.GET_IN_TIME - 1},
+                    {time = st + RANKS.ANIMATION.GET_IN_TIME, x = RANKS.X, y = RANKS.Y, w = RANKS.W, h = RANKS.H, a = 255},
+                    {
+                        time = st + RANKS.ANIMATION.RIPPLE_TIME,
+                        x = cx - RANKS.W * RANKS.ANIMATION.RIPPLE_MUL / 2,
+                        y = cy - RANKS.H * RANKS.ANIMATION.RIPPLE_MUL / 2,
+                        w = RANKS.W * RANKS.ANIMATION.RIPPLE_MUL,
+                        h = RANKS.H * RANKS.ANIMATION.RIPPLE_MUL,
+                        a = 0
+                    },
+                    {
+                        time = st + RANKS.ANIMATION.END_TIME
+                    },
+                }
+            })
+
+            -- 本体
+            table.insert(skin.destination, {
+                id = rank .. "Text", loop = st + RANKS.ANIMATION.END_TIME, op = {op}, dst = {
+                    {time = 0, a = 0},
+                    {time = st - 1, a = 0},
+                    {
+                        time = st,
+                        x = cx - RANKS.W * RANKS.ANIMATION.START_MUL / 2,
+                        y = cy - RANKS.H * RANKS.ANIMATION.START_MUL / 2,
+                        w = RANKS.W * RANKS.ANIMATION.START_MUL,
+                        h = RANKS.H * RANKS.ANIMATION.START_MUL,
+                        a = 255, r = 64, g = 64, b = 64, acc = 1,
+                    },
+                    {
+                        time = st + RANKS.ANIMATION.GET_IN_TIME,
+                        x = RANKS.X, y = RANKS.Y, w = RANKS.W, h = RANKS.H,
+                        a = 255, r = 255, g = 255, b = 255, acc = 0,
+                    },
+                    {
+                        time = st + RANKS.ANIMATION.RIPPLE_TIME,
+                    },
+                    {
+                        time = st + RANKS.ANIMATION.END_TIME
+                    },
+                }
+            })
+
+            -- 光る文字
+            table.insert(skin.destination, {
+                id = rank .. "BrightText", loop = st + RANKS.ANIMATION.END_TIME, op = {op}, dst = {
+                    {
+                        time = 0,
+                        x = RANKS.X, y = RANKS.Y, w = RANKS.W, h = RANKS.H,
+                        a = 0, acc = 3,
+                    },
+                    {time = st + RANKS.ANIMATION.BRIGHT_TIME, a = 255},
+                    {time = st + RANKS.ANIMATION.BRIGHT_TIME + RANKS.ANIMATION.BRIGHT_DURATION, a = 0},
+                    {time = st + RANKS.ANIMATION.BRIGHT_TIME2, a = 255},
+                    {time = st + RANKS.ANIMATION.BRIGHT_TIME2 + RANKS.ANIMATION.BRIGHT_DURATION, a = 0},
+                    {time = st + RANKS.ANIMATION.END_TIME},
+                }
+            })
         end
     end
 
@@ -1595,17 +1677,19 @@ local function main()
     local nowLLTextX = 0
     local lampUpperText = string.upper(LARGE_LAMP.PREFIX[CLEAR_TYPE])
     local popInterval = LARGE_LAMP.ANIMATION.END_POP / LARGE_LAMP.LEN[CLEAR_TYPE]
-    -- まず白背景
+    local bgId = "white"
+    if CLEAR_TYPE == LAMPS.FAILED then bgId = "black" end
+    -- まず背景
     table.insert(skin.destination, {
-        id = "white", loop = -1, dst = {
+        id = bgId, loop = -1, dst = {
             {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = LARGE_LAMP.ANIMATION.WHITE_BG_ALPHA},
             {time = INPUT_WAIT - 1},
             {time = INPUT_WAIT, a = 0},
         }
     })
-    -- まず白背景
+    -- まず背景
     table.insert(skin.destination, {
-        id = "white", timer = 1, loop = -1, dst = {
+        id = bgId, timer = 1, loop = -1, dst = {
             {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = LARGE_LAMP.ANIMATION.WHITE_BG_ALPHA},
             {time = LARGE_LAMP.ANIMATION.TO_TOP_TIME},
             {time = LARGE_LAMP.ANIMATION.AT_TOP_TIME, a = 0},
