@@ -566,9 +566,8 @@ local NEW_RECORD = {
         SHINE_DURATION = 150,
         DUST_DURATION = 300, -- pop timeからの差分
         DUST_DEL = 500, -- pop timeからの差分
-        
-        BRIGHT_INTERVAL = 2500,
 
+        BRIGHT_INTERVAL = 2500,
         BRIGHT_DURATION = 300,
 
         POP_Y = 10,
@@ -602,6 +601,25 @@ local header = {
         {name = "背景選択-----------------------------------------", path="../dummy/*"},
         {name = "CLEAR背景(png)", path = "../result/background/isclear/clear/*.png"},
         {name = "FAILED背景(png)", path = "../result/background/isclear/failed/*.png"},
+        {name = "背景選択2-----------------------------------------", path="../dummy/*"},
+        {name = "AAA背景(png)", path = "../result/background/ranks/aaa/*.png"},
+        {name = "AA背景(png)" , path = "../result/background/ranks/aa/*.png"},
+        {name = "A背景(png)"  , path = "../result/background/ranks/a/*.png"},
+        {name = "B背景(png)"  , path = "../result/background/ranks/b/*.png"},
+        {name = "C背景(png)"  , path = "../result/background/ranks/c/*.png"},
+        {name = "D背景(png)"  , path = "../result/background/ranks/d/*.png"},
+        {name = "E背景(png)"  , path = "../result/background/ranks/e/*.png"},
+        {name = "F背景(png)"  , path = "../result/background/ranks/f/*.png"},
+        {name = "背景選択3-----------------------------------------", path="../dummy/*"},
+        {name = "FAILED(ランプ毎)背景(png)", path = "../result/background/lamps/failed/*.png"},
+        {name = "ASSIST EASY背景(png)"    , path = "../result/background/lamps/aeasy/*.png"},
+        {name = "LASSIST EASY背景(png)"   , path = "../result/background/lamps/laeasy/*.png"},
+        {name = "EASY背景(png)"           , path = "../result/background/lamps/easy/*.png"},
+        {name = "NORMAL背景(png)"         , path = "../result/background/lamps/normal/*.png"},
+        {name = "HARD背景(png)"           , path = "../result/background/lamps/hard/*.png"},
+        {name = "EXHARD背景(png)"         , path = "../result/background/lamps/exhard/*.png"},
+        {name = "FULLCOMBO背景(png)"      , path = "../result/background/lamps/fullcombo/*.png"},
+        {name = "PERFECT背景(png)"        , path = "../result/background/lamps/perfect/*.png"},
     },
 
 }
@@ -627,11 +645,19 @@ local function loadBackground(skin)
             })
         end
     elseif getTableValue(skin_config.option, "背景の分類", 910) == 911 then
-        -- ランクごと
-        print("hoehoge")
+        -- スコア0のOPTION_RESULT_0_1Pはヌルポなので見ない
+        for i = 1, 8 do
+            if main_state.option(300 + (i - 1)) then
+                table.insert(skin.image, {
+                    id = BG_ID, src = 110 + (i - 1), x = 0, y = 0, w = -1, h = -1
+                })
+            end
+        end
     elseif getTableValue(skin_config.option, "背景の分類", 910) == 912 then
-        -- ランプごと
-        print("hoehoge")
+        local id = 120 + CLEAR_TYPE - 1
+        table.insert(skin.image, {
+            id = BG_ID, src = id, x = 0, y = 0, w = -1, h = -1
+        })
     end
 end
 
@@ -764,6 +790,26 @@ local function main()
         {id = 2, path = "../result/parts/shine_circle.png"},
         {id = 100, path = "../result/background/isclear/clear/*.png"},
         {id = 101, path = "../result/background/isclear/failed/*.png"},
+        -- AAAからランク毎
+        {id = 110, path = "../result/background/ranks/aaa/*.png"},
+        {id = 111, path = "../result/background/ranks/aa/*.png"},
+        {id = 112, path = "../result/background/ranks/a/*.png"},
+        {id = 113, path = "../result/background/ranks/b/*.png"},
+        {id = 114, path = "../result/background/ranks/c/*.png"},
+        {id = 115, path = "../result/background/ranks/d/*.png"},
+        {id = 116, path = "../result/background/ranks/e/*.png"},
+        {id = 117, path = "../result/background/ranks/f/*.png"},
+        -- {id = 118, path = "../result/background/ranks/f/*.png"},
+        -- FAILEDからランプ毎
+        {id = 120, path = "../result/background/lamps/failed/*.png"},
+        {id = 121, path = "../result/background/lamps/aeasy/*.png"},
+        {id = 122, path = "../result/background/lamps/laeasy/*.png"},
+        {id = 123, path = "../result/background/lamps/easy/*.png"},
+        {id = 124, path = "../result/background/lamps/normal/*.png"},
+        {id = 125, path = "../result/background/lamps/hard/*.png"},
+        {id = 126, path = "../result/background/lamps/exhard/*.png"},
+        {id = 127, path = "../result/background/lamps/fullcombo/*.png"},
+        {id = 128, path = "../result/background/lamps/perfect/*.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
     table.insert(skin.source, {
@@ -1683,17 +1729,8 @@ local function main()
     table.insert(skin.destination, {
         id = bgId, loop = -1, dst = {
             {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = LARGE_LAMP.ANIMATION.WHITE_BG_ALPHA},
-            {time = INPUT_WAIT - 1},
-            {time = INPUT_WAIT, a = 0},
-        }
-    })
-    -- まず背景
-    table.insert(skin.destination, {
-        id = bgId, timer = 1, loop = -1, dst = {
-            {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = LARGE_LAMP.ANIMATION.WHITE_BG_ALPHA},
-            {time = LARGE_LAMP.ANIMATION.TO_TOP_TIME},
-            {time = LARGE_LAMP.ANIMATION.AT_TOP_TIME, a = 0},
-            -- {time = LARGE_LAMP.ANIMATION.START_TIME + LARGE_LAMP.ANIMATION.END_TIME},
+            {time = INPUT_WAIT + LARGE_LAMP.ANIMATION.TO_TOP_TIME},
+            {time = INPUT_WAIT + LARGE_LAMP.ANIMATION.AT_TOP_TIME, a = 0},
         }
     })
     -- また超カオス
