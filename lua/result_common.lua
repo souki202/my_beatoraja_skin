@@ -786,7 +786,7 @@ local function dstNumberRightJustify(skin, id, x, y, w, h, digit)
 end
 
 local function examineIsCourse()
-    return main_state.option(1008) == true
+    return main_state.option(1008) == true or main_state.option(3)
 end
 
 local function main()
@@ -796,15 +796,16 @@ local function main()
         skin[k] = v
     end
 
-    if examineIsCourse() and isCourseResult == false or CLEAR_TYPE == LAMPS.NO_PLAY then
+    CLEAR_TYPE = main_state.number(370)
+    if CLEAR_TYPE == LAMPS.NO_PLAY then
+        print(examineIsCourse())
+        print(isCourseResult)
         -- コース途中のリザルトならクリアかfailedしか無い
         if main_state.option(90) then
             CLEAR_TYPE = LAMPS.NORMAL
         else
             CLEAR_TYPE = LAMPS.FAILED
         end
-    else
-        CLEAR_TYPE = main_state.number(370)
     end
 
     skin.source = {
