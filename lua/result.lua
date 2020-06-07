@@ -775,6 +775,10 @@ local function dstNumberRightJustify(skin, id, x, y, w, h, digit)
     })
 end
 
+local function examineIsCourse()
+    return main_state.option(1008) == true
+end
+
 local function main()
     local skin = {}
 	-- ヘッダ情報をスキン本体にコピー
@@ -782,8 +786,16 @@ local function main()
         skin[k] = v
     end
 
-    CLEAR_TYPE = main_state.number(370)
-
+    if examineIsCourse() then
+        if main_state.option(90) then
+            CLEAR_TYPE = LAMPS.NORMAL
+        else
+            CLEAR_TYPE = LAMPS.FAILED
+        end
+    else
+        CLEAR_TYPE = main_state.number(370)
+    end
+    
     skin.source = {
         {id = 0, path = "../result/parts/parts.png"},
         {id = 1, path = "../result/parts/shine.png"},
