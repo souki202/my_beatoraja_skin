@@ -83,6 +83,12 @@ local STAGE_FILE = {
     W = 640,
     H = 480,
     FRAME_OFFSET = 31,
+
+    SHADOW = {
+        X = -12,
+        Y = -12,
+        A = 102,
+    },
 }
 
 -- 上部のLNモードとkeysのボタンサイズ
@@ -338,6 +344,11 @@ local REVERSE_ANIM_INFO = {
     COLOR = {r = 0, g = 0, b = 0}
 }
 
+local FAVORITE = {
+    W = 27,
+    H = 26,
+}
+
 local FOV = 90
 
 local header = {
@@ -348,45 +359,49 @@ local header = {
     fadeout = 500,
     scene = 3000,
     input = INPUT_WAIT,
-    -- 使用済みリスト 910 915 920 925 930 935 940
+    -- 使用済みリスト 910 915 920 925 930 935 940 945
     property = {
         {
-            name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}
+            name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}, def = "画像(png)"}
         },
         {
-            name = "密度グラフ表示", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}
+            name = "密度グラフ表示", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}, def = "ON"}
         },
         {
-            name = "フォルダのランプグラフ", item = {{name = "ON", op = 925}, {name = "OFF", op = 926}}
+            name = "フォルダのランプグラフ", item = {{name = "ON", op = 925}, {name = "OFF", op = 926}, def = "ON"}
         },
         {
-            name = "フォルダのランプグラフの色", item = {{name = "デフォルト", op = 927}, {name = "独自仕様", op = 928}}
+            name = "フォルダのランプグラフの色", item = {{name = "デフォルト", op = 927}, {name = "独自仕様", op = 928}, def = "独自仕様"}
         },
         {
-            name = "曲情報表示形式", item = {{name = "難易度リスト", op = 935}, {name = "密度", op = 936}}
+            name = "ステージファイル枠の種類", item = {{name = "枠", op = 945}, {name = "影1(ボケ)", op = 946}, {name = "影2", op = 947}, {name = "無し", op = 949}, def = "影2"},
         },
         {
-            name = "密度の標準桁数", item = {{name = "1桁", op = 938}, {name = "2桁", op = 939}}
+            name = "曲情報表示形式", item = {{name = "難易度リスト", op = 935}, {name = "密度", op = 936}, def = "密度"}
         },
         {
-            name = "オプションのスコア目標表示", item = {{name = "非表示", op = 940}, {name = "表示", op = 941}}
+            name = "密度の標準桁数", item = {{name = "1桁", op = 938}, {name = "2桁", op = 939}, def = "1桁"}
         },
         {
-            name = "開幕アニメーション種類", item = {{name = "無し", op = 930}, {name = "流星", op = 931}, {name = "タイル", op = 932}}
+            name = "オプションのスコア目標表示", item = {{name = "非表示", op = 940}, {name = "表示", op = 941}, def = "非表示"}
+        },
+        {
+            name = "開幕アニメーション種類", item = {{name = "無し", op = 930}, {name = "流星", op = 931}, {name = "タイル", op = 932}, def = "無し"}
         },
         {
             name = "タイルアニメーション設定------------------------", item = {{name = "-"}}
         },
         {
-            name = "タイルの回転方向", item = {{name = "縦", op = 920}, {name = "縦(反転)", op = 921}, {name = "横", op = 922}, {name = "横(反転)", op = 923}}
+            name = "タイルの回転方向", item = {{name = "縦", op = 920}, {name = "縦(反転)", op = 921}, {name = "横", op = 922}, {name = "横(反転)", op = "縦"}}
         },
     },
     filepath = {
         {name = "背景選択-----------------------------------------", path="../dummy/*"},
-        {name = "背景(png)", path = "../select/background/*.png"},
+        {name = "背景(png)", path = "../select/background/*.png", def = "default"},
         {name = "背景(mp4)", path = "../select/background/*.mp4"}
     },
     offset = {
+        {name = "影2の座標と濃さ差分", x = 0, y = 0, a = 0, id = 40},
         {name = "全体設定(0で既定値)------------------------------", x = 0},
         {name = "FOV (既定値90 -1で平行投影 0<x<180 or x=-1)", x = 0},
         {name = "流星群(0で既定値)--------------------------------", x = 0},
@@ -926,7 +941,8 @@ local function main()
 
     skin.image = {
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
-        {id = "stagefileFrame", src = 4, x = 0, y = 0, w = 702, h = 542},
+        {id = "stagefileFrame", src = 4, x = 0, y = 0, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2},
+        {id = "stagefileShadow", src = 4, x = 0, y = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2},
         -- 選曲バー種類
         {id = "barSong"   , src = 0, x = 0, y = PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         {id = "barNosong" , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*1, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
@@ -944,6 +960,8 @@ local function main()
         {id = "barCenterFrame", src = 0, x = 0, y = PARTS_OFFSET + 782, w = 714, h = 154},
         -- 選曲バーLN表示
         {id = "barLn", src = 0, x = 607, y = PARTS_OFFSET, w = 30, h = 22},
+        -- Favorite
+        -- {id = "favoriteButton", src = 0, x = 1563, y = 263, w = FAVORITE.W*2, h = FAVORITE.H, divx = 2, act = 9999},
         -- トロフィー
         {id ="goldTrophy"  , src = 0, x = 1896, y = PARTS_OFFSET + MUSIC_BAR.TROPHY_H*0, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
         {id ="silverTrophy", src = 0, x = 1896, y = PARTS_OFFSET + MUSIC_BAR.TROPHY_H*1, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
@@ -1710,6 +1728,18 @@ local function main()
                 {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = 255}
             }
         },
+        -- stage file影1
+        {
+            id = "black", op = {2, 947}, offset = 40, dst = {
+                {x = STAGE_FILE.X + STAGE_FILE.SHADOW.X, y = STAGE_FILE.Y + STAGE_FILE.SHADOW.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = STAGE_FILE.SHADOW.A}
+            }
+        },
+        -- stage file影2(デフォルト)
+        {
+            id = "stagefileShadow", op = {2, 946}, dst = {
+                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y = STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2}
+            }
+        },
         -- ステージファイル
         {
             id = -100, op = {2}, filter = 1, dst = {
@@ -1726,32 +1756,32 @@ local function main()
         },
         -- Stage fileフレーム
         { -- 設定無し
-            id = "stagefileFrame", op = {2, 150}, dst = {
+            id = "stagefileFrame", op = {2, 150, 945}, dst = {
                 {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y = STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2}
             }
         },
         { -- beginner
-            id = "stagefileFrame", op = {2, 151}, dst = {
+            id = "stagefileFrame", op = {2, 151, 945}, dst = {
                 {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 153, g = 255, b = 153}
             }
         },
         { -- normal
-            id = "stagefileFrame", op = {2, 152}, dst = {
+            id = "stagefileFrame", op = {2, 152, 945}, dst = {
                 {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 153, g = 255, b = 255}
             }
         },
         { -- hyper
-            id = "stagefileFrame", op = {2, 153}, dst = {
+            id = "stagefileFrame", op = {2, 153, 945}, dst = {
                 {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 255, g = 204, b = 102}
             }
         },
         { -- another
-            id = "stagefileFrame", op = {2, 154}, dst = {
+            id = "stagefileFrame", op = {2, 154, 945}, dst = {
                 {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 255, g = 102, b = 102}
             }
         },
         { -- insane
-            id = "stagefileFrame", op = {2, 155}, dst = {
+            id = "stagefileFrame", op = {2, 155, 945}, dst = {
                 {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 204, g = 0, b = 102}
             }
         },
