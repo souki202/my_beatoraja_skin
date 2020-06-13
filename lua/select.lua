@@ -180,6 +180,14 @@ local SCORE_RANK = {
     X = 895,
     Y = 430,
 }
+local SONG_LIST = {
+    LABEL = {
+        X = 70,
+        Y = 11,
+        W = 50,
+        H = 22,
+    },
+}
 
 -- 左下のレベルが並んでいる部分
 local LARGE_LEVEL = {
@@ -398,7 +406,10 @@ local header = {
     filepath = {
         {name = "背景選択-----------------------------------------", path="../dummy/*"},
         {name = "背景(png)", path = "../select/background/*.png", def = "default"},
-        {name = "背景(mp4)", path = "../select/background/*.mp4"}
+        {name = "背景(mp4)", path = "../select/background/*.mp4"},
+        {name = "他画像-----------------------------------------", path="../dummy/*"},
+        {name = "NoImage画像", path = "../select/noimage/*.png", def = "default"},
+
     },
     offset = {
         {name = "影2の座標と濃さ差分", x = 0, y = 0, a = 0, id = 40},
@@ -936,6 +947,7 @@ local function main()
         {id = 4, path = "../select/parts/stagefile_frame.png"},
         {id = 5, path = "../select/parts/meteor.png"},
         {id = 6, path = "../select/parts/lamp_gauge_rainbow.png"},
+        {id = 7, path = "../select/noimage/*.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
 
@@ -943,6 +955,7 @@ local function main()
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
         {id = "stagefileFrame", src = 4, x = 0, y = 0, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2},
         {id = "stagefileShadow", src = 4, x = 0, y = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2},
+        {id = "noImage", src = 7, x = 0, y = 0, w = -1, h = -1},
         -- 選曲バー種類
         {id = "barSong"   , src = 0, x = 0, y = PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         {id = "barNosong" , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*1, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
@@ -959,7 +972,11 @@ local function main()
         -- 選曲バー中央
         {id = "barCenterFrame", src = 0, x = 0, y = PARTS_OFFSET + 782, w = 714, h = 154},
         -- 選曲バーLN表示
-        {id = "barLn", src = 0, x = 607, y = PARTS_OFFSET, w = 30, h = 22},
+        {id = "barLn"    , src = 0, x = 607, y = PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*0, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+        {id = "barRandom", src = 0, x = 607, y = PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*1, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+        {id = "barBomb"  , src = 0, x = 607, y = PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*2, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+        {id = "barCn"    , src = 0, x = 607, y = PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*3, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+        {id = "barHcn"   , src = 0, x = 607, y = PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*4, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
         -- Favorite
         -- {id = "favoriteButton", src = 0, x = 1563, y = 263, w = FAVORITE.W*2, h = FAVORITE.H, divx = 2, act = 9999},
         -- トロフィー
@@ -1228,17 +1245,17 @@ local function main()
     for i, lamp in ipairs(LAMP_NAMES) do
         table.insert(skin.image, {
             id = "barLamp" .. lamp, src = 0,
-            x = 656, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
+            x = 657, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
             w = 110, h = LAMP_HEIGHT
         })
         table.insert(skin.image, {
             id = "barLampRivalPlayer" .. lamp, src = 0,
-            x = 656, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
+            x = 657, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
             w = 110, h = LAMP_HEIGHT / 2
         })
         table.insert(skin.image, {
             id = "barLampRivalTarget" .. lamp, src = 0,
-            x = 656, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1) + LAMP_HEIGHT / 2,
+            x = 657, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1) + LAMP_HEIGHT / 2,
             w = 110, h = LAMP_HEIGHT / 2
         })
     end
@@ -1267,7 +1284,7 @@ local function main()
 
     if isDefaultLampGraphColor() then
         skin.graph = {
-            {id = "lampGraph", src = 0, x = 607, y = PARTS_OFFSET + 22, w = 11, h = 16, divx = 11, divy = 2, cycle = 16.6*4, type = -1}
+            {id = "lampGraph", src = 0, x = 607, y = PARTS_OFFSET, w = 11, h = 16, divx = 11, divy = 2, cycle = 16.6*4, type = -1}
         }
     else
         skin.graph = {
@@ -1577,9 +1594,29 @@ local function main()
     skin.songlist.label = {
         {
             id = "barLn", dst = {
-                {x = 78, y = 11, w = 30, h = 22}
+                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
             }
-        }
+        },
+        {
+            id = "barRandom", dst = {
+                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
+            }
+        },
+        {
+            id = "barBomb", dst = {
+                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
+            }
+        },
+        {
+            id = "barCn", dst = {
+                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
+            }
+        },
+        {
+            id = "barHcn", dst = {
+                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
+            }
+        },
     }
 
     -- skin.songlist.trophy = {
@@ -1716,13 +1753,7 @@ local function main()
                 {x = 0, y = 0, w = WIDTH, h = HEIGHT}
             }
         },
-        -- noステージファイル背景
-        {
-            id = "black", op = {190, 2}, dst = {
-                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = 64}
-            }
-        },
-        -- ステージファイル背景(アス比固定機能がないため見えない)
+        -- ステージファイル背景
         {
             id = "black", op = {191, 2}, dst = {
                 {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = 255}
@@ -1740,15 +1771,21 @@ local function main()
                 {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y = STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2}
             }
         },
+        -- noステージファイル背景
+        {
+            id = "noImage", op = {190, 2}, stretch = 1, dst = {
+                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
+            }
+        },
         -- ステージファイル
         {
-            id = -100, op = {2}, filter = 1, dst = {
+            id = -100, op = {2}, filter = 1, stretch = 1, dst = {
                 {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
             }
         },
         -- ステージファイルマスク
         {
-            id = "black", op = {191, 2}, timer = 11, loop = 300, dst = {
+            id = "black", op = {{190, 191}, 2}, timer = 11, loop = 300, dst = {
                 {time = 0  , a = 128, x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H},
                 {time = 200, a = 128},
                 {time = 300, a = 0}
