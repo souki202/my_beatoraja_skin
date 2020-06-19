@@ -19,6 +19,8 @@
 
 require("define")
 
+local main_state = require("main_state")
+
 local PARTS_TEXTURE_SIZE = 2048
 
 local PARTS_OFFSET = HEIGHT + 32
@@ -37,8 +39,6 @@ local NORMAL_NUMBER_W = 15
 local NORMAL_NUMBER_H = 21
 local STATUS_NUMBER_W = 18
 local STATUS_NUMBER_H = 23
-local RANK_NUMBER_W = 18
-local RANK_NUMBER_H = 24
 
 -- 決定ボタン周り
 local DECIDE_BUTTON_W = 354
@@ -96,18 +96,150 @@ local UPPER_OPTION_W = 270
 local UPPER_OPTION_H = 56
 
 -- 上部のユーザ情報的な部分の各種
-local RANK_IMG_W = 106
-local RANK_IMG_H = 46
-local EXP_GAUGE_FRAME_W = 222
-local EXP_GAUGE_FRAME_H = 48
-local EXP_GAUGE_W = 196
-local EXP_GAUGE_H = 24
-local COIN_W = 46
-local COIN_H = 46
-local DIA_W = 54
-local DIA_H = 47
-local GAUGE_REFLECTION_W = 37
-local GAUGE_REFLECTION_H = 24
+local USER_DATA = {
+    WND = {
+        X = 72,
+        Y = 976,
+    },
+    SLASH = {
+        W = 5,
+        H = 12,
+    },
+    NUM = {
+        W = 10,
+        H = 12,
+    },
+}
+
+local RANK = {
+    OLD = {
+        NUM_W = 18,
+        NUM_H = 24,
+    },
+    NEW = {
+        NUM_W = 18,
+        NUM_H = 24,
+        X = 235, -- 影含まず
+        Y = 59,
+    },
+
+    IMG = {
+        W = 106,
+        H = 46,
+        X = 18,
+        Y = 48,
+    },
+}
+
+local EXP = {
+    FRAME = {
+        W = 222,
+        H = 48,
+        X = 18,
+        Y = 2,
+    },
+    GAUGE = {
+        X = 13,
+        Y = 12,
+        W = 196,
+        H = 24,
+    },
+    NUM = {
+        X = 190, -- gaugeからの差分
+        Y = 6,
+    },
+    SLASH = {
+        Y = 6,
+    },
+    REFLECTION = {
+        W = 37,
+        H = 24,
+    },
+}
+
+local STAMINA = { -- 座標はUSER_DATA.WNDからの差分
+    LABEL = {
+        X = 278,
+        Y = 64,
+        W = 106,
+        H = 30,
+    },
+    HEAL = {
+        PREFIX = {
+            W = 29,
+            H = 16,
+            X = 284,
+            Y = 50
+        },
+        TIME = {
+            RANK_W = 16,
+            RANK_H = 16,
+            MIN_X = 324,
+            MIN_Y = 50,
+            SEC_X = 361,
+            SEC_Y = 50,
+            NUM_X = 324,
+            NUM2_X = 361,
+            NUM_Y = 52,
+            NUM_W = 10,
+            NUM_H = 12,
+            MAX_X = 314,
+            MAX_Y = 50,
+            MAX_W = 33,
+            MAX_H = 16
+        },
+    },
+    GAUGE = {
+        FRAME = {
+            X = 388,
+            Y = 46,
+            W = 222,
+            H = 48,
+        },
+        GAUGE = {
+            X = 13,
+            Y = 12,
+            W = 196,
+            H = 24,
+        },
+        REFLECTION = {
+            W = 37,
+            H = 24,
+        },
+        NUM = {
+            X = 190, -- gaugeからの差分
+            Y = 6,
+        },
+        SLASH = {
+            Y = 6,
+        },
+    },
+}
+
+local MONEY = {
+    COIN = {
+        W = 33,
+        H = 33,
+        X = 285, -- USER_DATA.WNDからの差分
+        Y = 5,
+        NUM_X = 156, -- xからの差分
+        NUM_Y = 8
+    },
+    DIA = {
+        W = 40,
+        H = 34,
+        X = 451,
+        Y = 5,
+        NUM_X = 156, -- xからの差分
+        NUM_Y = 8
+    },
+    NUM = {
+        X = 156, -- 各xからの差分
+        Y = 8,
+        W = 13,
+        H = 18,
+    },
+}
 
 -- Music bar
 local MUSIC_BAR = {
@@ -295,6 +427,22 @@ local OPTION_INFO = {
     ANIMATION_TIME = 150,
 }
 
+local SELECT_OPTION = {
+    BUTTON = {
+        X = 720,
+        UPPER_Y = 1022,
+    },
+    KEYS = {
+        X = 6, -- buttonからの差分
+    },
+    SORT = {
+        X = 6
+    },
+    LN = {
+        X = 135
+    },
+}
+
 local SMALL_KEY_W = 20
 local SMALL_KEY_H = 24
 local HELP_WND_W = 672
@@ -361,40 +509,43 @@ local FOV = 90
 
 local header = {
     type = 5,
-    name = "Social Skin dev",
+    name = "Social Skin" .. (DEBUG and " dev" or ""),
     w = WIDTH,
     h = HEIGHT,
     fadeout = 500,
     scene = 3000,
     input = INPUT_WAIT,
-    -- 使用済みリスト 910 915 920 925 930 935 940 945
+    -- 使用済みリスト 910 915 920 925 930 935 940 945 950
     property = {
         {
-            name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}, def = "画像(png)"}
+            name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}, def = "画像(png)"
         },
         {
-            name = "密度グラフ表示", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}, def = "ON"}
+            name = "密度グラフ表示", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}, def = "ON"
         },
         {
-            name = "フォルダのランプグラフ", item = {{name = "ON", op = 925}, {name = "OFF", op = 926}, def = "ON"}
+            name = "フォルダのランプグラフ", item = {{name = "ON", op = 925}, {name = "OFF", op = 926}}, def = "ON"
         },
         {
-            name = "フォルダのランプグラフの色", item = {{name = "デフォルト", op = 927}, {name = "独自仕様", op = 928}, def = "独自仕様"}
+            name = "フォルダのランプグラフの色", item = {{name = "デフォルト", op = 927}, {name = "独自仕様", op = 928}}, def = "独自仕様"
         },
         {
-            name = "ステージファイル枠の種類", item = {{name = "枠", op = 945}, {name = "影1(ボケ)", op = 946}, {name = "影2", op = 947}, {name = "無し", op = 949}, def = "影2"},
+            name = "ステージファイル枠の種類", item = {{name = "枠", op = 945}, {name = "影1(ボケ)", op = 946}, {name = "影2", op = 947}, {name = "無し", op = 949}}, def = "影2"
         },
         {
-            name = "曲情報表示形式", item = {{name = "難易度リスト", op = 935}, {name = "密度", op = 936}, def = "密度"}
+            name = "曲情報表示形式", item = {{name = "難易度リスト", op = 935}, {name = "密度", op = 936}}, def = "密度"
         },
         {
-            name = "密度の標準桁数", item = {{name = "1桁", op = 938}, {name = "2桁", op = 939}, def = "1桁"}
+            name = "密度の標準桁数", item = {{name = "1桁", op = 938}, {name = "2桁", op = 939}}, def = "1桁"
         },
         {
-            name = "オプションのスコア目標表示", item = {{name = "非表示", op = 940}, {name = "表示", op = 941}, def = "非表示"}
+            name = "オプションのスコア目標表示", item = {{name = "非表示", op = 940}, {name = "表示", op = 941}}, def = "非表示"
         },
         {
-            name = "開幕アニメーション種類", item = {{name = "無し", op = 930}, {name = "流星", op = 931}, {name = "タイル", op = 932}, def = "無し"}
+            name = "開幕アニメーション種類", item = {{name = "無し", op = 930}, {name = "流星", op = 931}, {name = "タイル", op = 932}}, def = "無し"
+        },
+        {
+            name = "上部プレイヤー情報仕様", item = {{name = "旧仕様(プレイ時間とプレイ回数等)", op = 950}, {name = "リザルト連携版", op = 951}}, def = "旧仕様(プレイ時間とプレイ回数等)"
         },
         {
             name = "タイルアニメーション設定------------------------", item = {{name = "-"}}
@@ -929,17 +1080,55 @@ local function initialize()
     if v.w ~= 0 then REVERSE_ANIM_INFO.COLOR.b = v.w end
 end
 
-local function main()
-    initialize()
+function calcStamina()
+    local tn = main_state.number(74)
+    -- if tn > 0 then
+    --     switchVisibleNumber("useStamina", true)
+    --     setValue("useStamina", userData.calcUseStamina(tn))
+    -- else
+    --     switchVisibleNumber("useStamina", false)
+    -- end
+end
 
+function updateStamina()
+    userData.updateRemainingStamina()
+    -- print("max: " .. userData.stamina.now)
+    if userData.getIsMaxStamina() then
+        -- 全快していればMAXを表示
+        main_state.set_timer(10004, main_state.timer_off_value)
+        switchVisibleNumber("nextStaminaHealMinute", false)
+        switchVisibleNumber("nextStaminaHealSecond", false)
+        main_state.set_timer(10005, 1)
+    else
+        -- 回復までの残り時間
+        local minute, second = userData.getNextHealStaminaRemainTime()
+        main_state.set_timer(10004, 1)
+        main_state.set_timer(10005, main_state.timer_off_value)
+        setValue("nextStaminaHealMinute", minute)
+        setValue("nextStaminaHealSecond", second)
+    end
+    setValue("staminaNowValue", userData.stamina.now)
+end
+
+function updateStaminaGauge()
+    local p = userData.stamina.now / userData.stamina.tbl[userData.rank.rank]
+    p = math.max(0, math.min(p, 1))
+    return main_state.time() - p * 20 * 1000 * 100
+end
+
+local function main()
 	local skin = {}
 	-- ヘッダ情報をスキン本体にコピー
 	for k, v in pairs(header) do
 		skin[k] = v
     end
 
+    globalInitialize(skin)
+    initialize()
+
     skin.source = {
         {id = 0, path = "../select/parts/parts.png"},
+        {id = 8, path = "../select/parts/parts2.png"},
         {id = 1, path = "../select/background/*.png"},
         {id = 101, path = "../select/background/*.mp4"},
         {id = 2, path = "../select/parts/option.png"},
@@ -950,6 +1139,12 @@ local function main()
         {id = 7, path = "../select/noimage/*.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
+
+    table.insert(skin.customTimers, {id = 10002, timer = "calcStamina"})
+    table.insert(skin.customTimers, {id = 14993, timer = "updateStamina"})
+    table.insert(skin.customTimers, {id = 10004}) -- スタミナ回復までの時間表示用タイマー
+    table.insert(skin.customTimers, {id = 10005}) -- スタミナMAX時の表示用タイマー
+    table.insert(skin.customTimers, {id = 10006, timer = "updateStaminaGauge"}) -- スタミナゲージ表示用タイマー
 
     skin.image = {
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
@@ -1095,11 +1290,18 @@ local function main()
         -- ランキング用スラッシュ(同じ)
         {id = "slashForRanking"  , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W * 11, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
         -- 上部プレイヤー情報 expゲージの背景とゲージ本体は汎用カラー
-        {id = "rankTextImg", src = 0, x = 1298, y = PARTS_OFFSET + 267, w = RANK_IMG_W, h = RANK_IMG_H},
-        {id = "coin", src = 0, x = 1298 + 108, y = PARTS_OFFSET + 266, w = COIN_W, h = COIN_H},
-        {id = "dia", src = 0, x = 1298 + 108 + 47, y = PARTS_OFFSET + 264, w = DIA_W, h = DIA_H},
-        {id = "expGaugeFrame", src = 0, x = 1298, y = PARTS_OFFSET + 313, w = EXP_GAUGE_FRAME_W, h = EXP_GAUGE_FRAME_H},
-        {id = "gaugeReflection", src = 0, x = 1520, y = PARTS_OFFSET + 313, w = GAUGE_REFLECTION_W, h = GAUGE_REFLECTION_H},
+        {id = "rankTextImg", src = 0, x = 1298, y = PARTS_OFFSET + 267, w = RANK.IMG.W, h = RANK.IMG.H},
+        {id = "coin", src = 0, x = 1410, y = PARTS_OFFSET + 263, w = MONEY.COIN.W, h = MONEY.COIN.H},
+        {id = "dia", src = 0, x = 1410 + MONEY.COIN.W, y = PARTS_OFFSET + 263, w = MONEY.DIA.W, h = MONEY.DIA.H},
+        {id = "expGaugeFrame", src = 0, x = 1298, y = PARTS_OFFSET + 313, w = EXP.FRAME.W, h = EXP.FRAME.H},
+        {id = "expGaugeNew", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET + 1, w = 1, h = 1},
+        {id = "gaugeReflection", src = 0, x = 1520, y = PARTS_OFFSET + 313, w = EXP.REFLECTION.W, h = EXP.REFLECTION.H},
+        {id = "staminaTextImg", src = 0, x = 1434, y = PARTS_OFFSET + 361, w = STAMINA.LABEL.W, h = STAMINA.LABEL.H},
+        {id = "staminaRemainPrefix", src = 0, x = 1557, y = PARTS_OFFSET + 311, w = STAMINA.HEAL.PREFIX.W, h = STAMINA.HEAL.PREFIX.H},
+        {id = "staminaMinuteText", src = 0, x = 1557 + STAMINA.HEAL.PREFIX.W, y = PARTS_OFFSET + 311, w = STAMINA.HEAL.TIME.RANK_W, h = STAMINA.HEAL.TIME.RANK_H},
+        {id = "staminaSecondText", src = 0, x = 1557 + STAMINA.HEAL.PREFIX.W + STAMINA.HEAL.TIME.RANK_W, y = PARTS_OFFSET + 311, w = STAMINA.HEAL.TIME.RANK_W, h = STAMINA.HEAL.TIME.RANK_H},
+        {id = "staminaMaxText", src = 0, x = 1557 + STAMINA.HEAL.PREFIX.W + STAMINA.HEAL.TIME.RANK_W + STAMINA.HEAL.TIME.RANK_W, y = PARTS_OFFSET + 311, w = STAMINA.HEAL.TIME.MAX_W, h = STAMINA.HEAL.TIME.MAX_H},
+        {id = "userStatusValueSlash", src = 0, x = 1534, y = PARTS_OFFSET + 391, w = USER_DATA.SLASH.W, h = USER_DATA.SLASH.H},
         -- BPM用チルダ
         {id = "bpmTilda", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + 68, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
         -- 判定難易度
@@ -1270,6 +1472,10 @@ local function main()
         })
     end
 
+    -- ランク部分の数字の読み込み
+    loadNumbers(skin, "rankCoop", 0, NORMAL_NUMBER_SRC_X, PARTS_OFFSET + NORMAL_NUMBER_H + STATUS_NUMBER_H, RANK.NEW.NUM_W * 10, RANK.NEW.NUM_H, 10, 1)
+    -- スタミナの数字読み込み
+    loadNumbers(skin, "userDataSmallNumber", 0, 1434, PARTS_OFFSET + 391, USER_DATA.NUM.W * 10, USER_DATA.NUM.H, 10, 1)
 
     -- 密度グラフ
     skin.judgegraph = {
@@ -1443,9 +1649,9 @@ local function main()
         {id = "irRanking"         , src = 0, x = NORMAL_NUMBER_SRC_X, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W*10, h = NORMAL_NUMBER_H, divx = 10, digit = 5, ref = 179, align = 0},
         {id = "irPlayerForRanking", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, digit = 5, ref = 200, align = 0},
         -- 上部プレイヤー情報
-        {id = "numOfCoin", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 8, ref = 33, align = 0},
-        {id = "numOfDia", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 8, ref = 30, align = 0},
-        {id = "rankValue", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H + STATUS_NUMBER_H, w = RANK_NUMBER_W * 10, h = RANK_NUMBER_H, divx = 10, digit = 4, ref = 17, align = 0},
+        {id = "numOfCoin", src = 0, x = 1434, y = PARTS_OFFSET + 403, w = MONEY.NUM.W * 10, h = MONEY.NUM.H, divx = 10, digit = 8, ref = 33, align = 0},
+        {id = "numOfDia", src = 0, x = 1434, y = PARTS_OFFSET + 403, w = MONEY.NUM.W * 10, h = MONEY.NUM.H, divx = 10, digit = 8, ref = 30, align = 0},
+        {id = "rankValue", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H + STATUS_NUMBER_H, w = RANK.OLD.NUM_W * 10, h = RANK.OLD.NUM_H, divx = 10, digit = 4, ref = 17, align = 0},
         {id = "expGauge", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET, w = 10, h = 10, divy = 10, digit = 1, ref = 31, align = 1},
         {id = "expGaugeRemnant", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET + 10, w = 10, h = 10, divy = 10, digit = 1, ref = 31, align = 1},
         -- ノーツ数
@@ -1997,104 +2203,69 @@ local function main()
         -- RANK
         {
             id = "rankTextImg", dst = {
-                {x = 150, y = 1024, w = RANK_IMG_W, h = RANK_IMG_H}
+                {x = USER_DATA.WND.X + RANK.IMG.X, y = USER_DATA.WND.Y + RANK.IMG.Y, w = RANK.IMG.W, h = RANK.IMG.H}
             }
         },
-        {
-            id = "black", dst = {
-                {x = 163, y = 990, w = EXP_GAUGE_W, h = EXP_GAUGE_H, a = 64}
-            }
-        },
-        -- 経験値ゲージ
-        {
-            id = "expGauge", dst = {
-                {x = 163, y = 990, w = EXP_GAUGE_W, h = EXP_GAUGE_H}
-            }
-        },
-        {
-            id = "gaugeReflection", loop = 0, dst = {
-                {time = 0, x = 155, y = 990, w = 8, h = GAUGE_REFLECTION_H, a = 196},
-                {time = 6000},
-                {time = 6070, w = GAUGE_REFLECTION_W * 1.5},
-                {time = 6680, x = 330},
-                {time = 6750, x = 359, w = 8},
-            }
-        },
-        {
-            id = "expGaugeRemnant", dst = {
-                {x = 163, y = 990, w = EXP_GAUGE_W, h = EXP_GAUGE_H}
-            }
-        },
-        -- 経験値フレーム
-        {
-            id = "expGaugeFrame", dst = {
-                {x = 150, y = 978, w = EXP_GAUGE_FRAME_W, h = EXP_GAUGE_FRAME_H}
-            }
-        },
+        -- 経験値は下に
         -- コイン
         {
             id = "coin", dst = {
-                {x = 410, y = 1024, w = COIN_W, h = COIN_H}
+                {x = USER_DATA.WND.X + MONEY.COIN.X, y = USER_DATA.WND.Y + MONEY.COIN.Y, w = MONEY.COIN.W, h = MONEY.COIN.H}
             }
         },
         -- ダイヤ
         {
             id = "dia", dst = {
-                {x = 405, y = 980, w = DIA_W, h = DIA_H}
+                {x = USER_DATA.WND.X + MONEY.DIA.X, y = USER_DATA.WND.Y + MONEY.DIA.Y, w = MONEY.DIA.W, h = MONEY.DIA.H}
             }
         },
-        -- RANK値
-        {
-            id = "rankValue", dst = {
-                {x = 359 - RANK_NUMBER_W * 4, y = 1035, w = RANK_NUMBER_W, h = RANK_NUMBER_H}
-            }
-        },
+        -- RANK値は下
         -- コイン数
         {
             id = "numOfCoin", dst = {
-                {x = 608 - STATUS_NUMBER_W * 8, y = 1035, w = STATUS_NUMBER_W, h = STATUS_NUMBER_H}
+                {x = USER_DATA.WND.X + MONEY.COIN.X + MONEY.NUM.X - MONEY.NUM.W * 8, y = USER_DATA.WND.Y + MONEY.COIN.Y + MONEY.NUM.Y, w = MONEY.NUM.W, h = MONEY.NUM.H}
             }
         },
         -- ダイヤ数
         {
             id = "numOfDia", dst = {
-                {x = 608 - STATUS_NUMBER_W * 8, y = 994, w = STATUS_NUMBER_W, h = STATUS_NUMBER_H}
+                {x = USER_DATA.WND.X + MONEY.DIA.X + MONEY.NUM.X - MONEY.NUM.W * 8, y = USER_DATA.WND.Y + MONEY.DIA.Y + MONEY.NUM.Y, w = MONEY.NUM.W, h = MONEY.NUM.H}
             }
         },
 
         -- 上部オプション
         {
             id = "upperOptionButtonBg", dst = {
-                {x = 674, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H - 1, w = 270, h = OPTION_INFO.SWITCH_BUTTON_H}
+                {x = SELECT_OPTION.BUTTON.X, y = SELECT_OPTION.BUTTON.UPPER_Y, w = 270, h = OPTION_INFO.SWITCH_BUTTON_H}
             }
         },
         -- 上部オプションの上のやつの区切り
         {
             id = "white", dst = {
-                {x = 680 + 129, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H + 6 - 1, w = 1, h = OPTION_INFO.ITEM_H, r = 102, g = 102, b = 102}
+                {x = SELECT_OPTION.BUTTON.X + 135, y = SELECT_OPTION.BUTTON.UPPER_Y + 6, w = 1, h = OPTION_INFO.ITEM_H, r = 102, g = 102, b = 102}
             }
         },
         {
             id = "upperOptionButtonBg", dst = {
-                {x = 674, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H - 54, w = 270, h = OPTION_INFO.SWITCH_BUTTON_H}
+                {x = SELECT_OPTION.BUTTON.X, y = SELECT_OPTION.BUTTON.UPPER_Y - 53, w = 270, h = OPTION_INFO.SWITCH_BUTTON_H}
             }
         },
         -- keys
         {
             id = "keysSet", dst = {
-                {x = 680, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H + 6 - 1, w = 129, h = OPTION_INFO.ITEM_H}
+                {x = SELECT_OPTION.BUTTON.X + SELECT_OPTION.KEYS.X, y = SELECT_OPTION.BUTTON.UPPER_Y + 6, w = 129, h = OPTION_INFO.ITEM_H}
             }
         },
         -- LN
         {
             id = "lnModeSet", dst = {
-                {x = 809, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H + 6 - 1, w = 129, h = OPTION_INFO.ITEM_H}
+                {x = SELECT_OPTION.BUTTON.X + SELECT_OPTION.LN.X, y = SELECT_OPTION.BUTTON.UPPER_Y + 6, w = 129, h = OPTION_INFO.ITEM_H}
             }
         },
         -- ソート
         {
             id = "sortModeSet", dst = {
-                {x = 680, y = BASE_HEIGHT - OPTION_INFO.SWITCH_BUTTON_H - 54 + 6, w = 258, h = OPTION_INFO.ITEM_H}
+                {x = SELECT_OPTION.BUTTON.X + SELECT_OPTION.SORT.X, y = SELECT_OPTION.BUTTON.UPPER_Y - 53 + 6, w = 258, h = OPTION_INFO.ITEM_H}
             }
         },
 
@@ -2271,6 +2442,193 @@ local function main()
         -- 各ノーツ数は下のfor
     }
 
+    -- プレイヤーのランク出力
+    if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
+        table.insert(skin.destination, {
+            id = "rankValue", dst = {
+                {x = USER_DATA.WND.X + RANK.NEW.X - RANK.OLD.NUM_W * 4, y = USER_DATA.WND.Y + RANK.NEW.Y, w = RANK.OLD.NUM_W, h = RANK.OLD.NUM_H}
+            }
+        })
+    elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 951) == 951 then
+        local dst = {{x = USER_DATA.WND.X + RANK.NEW.X, y = USER_DATA.WND.Y + RANK.NEW.Y, w = RANK.NEW.NUM_W, h = RANK.NEW.NUM_H}}
+        preDrawStaticNumbers(skin, "rankCoop", "rankCoop", 0, false, dst, userData.rank.rank, {}, -1, 0)
+    end
+
+    -- 経験値バー出力
+    do
+        local frameX = USER_DATA.WND.X + EXP.FRAME.X
+        local frameY = USER_DATA.WND.Y + EXP.FRAME.Y
+        local gaugeX = frameX + EXP.GAUGE.X
+        local gaugeY = frameY + EXP.GAUGE.Y
+        table.insert(skin.destination, {
+            id = "white", dst = {
+                {x = gaugeX , y = gaugeY, w = EXP.GAUGE.W, h = EXP.GAUGE.H}
+            }
+        })
+        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
+            table.insert(skin.destination, {
+                id = "expGauge", dst = {
+                    {x = gaugeX, y = gaugeY, w = EXP.GAUGE.W, h = EXP.GAUGE.H}
+                }
+            })
+        elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 951) == 951 then
+            local now = userData.rank.getSumExp(userData.rank.rank - 1)
+            local next = userData.rank.getSumExp(userData.rank.rank)
+            local p = (userData.rank.exp - now) / (next - now)
+            myPrint("現在レベルの累計経験値: " .. now)
+            myPrint("次レベルの必要累計経験値: " .. next)
+            myPrint("次レベルまでの経験値の進行度: " .. p)
+            p = math.max(0, math.min(p, 1))
+            table.insert(skin.destination, {
+                id = "expGaugeNew", dst = {
+                    {x = gaugeX, y = gaugeY, w = EXP.GAUGE.W * p, h = EXP.GAUGE.H}
+                }
+            })
+        end
+        table.insert(skin.destination, {
+            id = "gaugeReflection", loop = 0, dst = {
+                {time = 0, x = gaugeX - 8, y = gaugeY, w = 8, h = EXP.REFLECTION.H, a = 196},
+                {time = 4000},
+                {time = 4070, w = EXP.REFLECTION.W * 1.5},
+                {time = 4680, x = gaugeX + EXP.GAUGE.W - EXP.REFLECTION.W * 1.5},
+                {time = 4750, x = gaugeX + EXP.GAUGE.W, w = 8},
+            }
+        })
+        table.insert(skin.destination, {
+            id = "expGaugeFrame", dst = {
+                {x = frameX, y = frameY, w = EXP.FRAME.W, h = EXP.FRAME.H}
+            }
+        })
+
+        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 951) == 951 then
+            local sub = 20
+            local now = userData.rank.exp
+
+            if userData.rank.rank > 1 then
+                sub = userData.rank.tbl[userData.rank.rank] - userData.rank.tbl[userData.rank.rank - 1]
+                now = userData.rank.exp - userData.rank.tbl[userData.rank.rank - 1]
+            end
+
+            -- 次レベルの, 現在レベルとの相対経験値を表示
+            local dst = {{x = gaugeX + EXP.NUM.X, y = gaugeY + EXP.NUM.Y, w = USER_DATA.NUM.W, h = USER_DATA.NUM.H}}
+            preDrawStaticNumbers(skin, "userDataSmallNumber", "expNextValue", 0, 0, dst, sub, {}, -1, 0)
+
+            -- スラッシュ
+            local offsetX = calcValueDigit(sub, false) * USER_DATA.NUM.W + 2
+            myPrint("経験値の数値表示オフセット: " .. offsetX)
+            table.insert(skin.destination, {
+                id = "userStatusValueSlash", dst = {
+                    {x = gaugeX + EXP.NUM.X - offsetX - USER_DATA.SLASH.W, y = gaugeY + EXP.SLASH.Y, w = USER_DATA.SLASH.W, h = USER_DATA.SLASH.H}
+                }
+            })
+
+            -- 現在値
+            local dst = {{x = gaugeX + EXP.NUM.X - offsetX - USER_DATA.SLASH.W - 1, y = gaugeY + EXP.NUM.Y, w = USER_DATA.NUM.W, h = USER_DATA.NUM.H}}
+            preDrawStaticNumbers(skin, "userDataSmallNumber", "expNowValue", 0, 0, dst, now, {}, -1, 0)
+        end
+    end
+
+    -- スタミナ表示
+    do
+        -- ラベル部分
+        table.insert(skin.destination, {
+            id = "staminaTextImg", dst = {
+                {x = USER_DATA.WND.X + STAMINA.LABEL.X, y = USER_DATA.WND.Y + STAMINA.LABEL.Y, w = STAMINA.LABEL.W, h = STAMINA.LABEL.H}
+            }
+        })
+        -- "あと"の文字
+        table.insert(skin.destination, {
+            id = "staminaRemainPrefix", timer = 10004, dst = {
+                {x = USER_DATA.WND.X + STAMINA.HEAL.PREFIX.X, y = USER_DATA.WND.Y + STAMINA.HEAL.PREFIX.Y, w = STAMINA.HEAL.PREFIX.W, h = STAMINA.HEAL.PREFIX.H}
+            }
+        })
+        -- 分の値
+        preDrawDynamicNumbers(
+            skin, "userDataSmallNumber", "nextStaminaHealMinute",
+            USER_DATA.WND.X + STAMINA.HEAL.TIME.NUM_X, USER_DATA.WND.Y + STAMINA.HEAL.TIME.NUM_Y,
+            USER_DATA.NUM.W, USER_DATA.NUM.H, 0, false, {})
+        setValue("nextStaminaHealMinute", 0)
+        -- 分の文字
+        table.insert(skin.destination, {
+            id = "staminaMinuteText", timer = 10004, dst = {
+                {x = USER_DATA.WND.X + STAMINA.HEAL.TIME.MIN_X, y = USER_DATA.WND.Y + STAMINA.HEAL.TIME.MIN_Y, w = STAMINA.HEAL.TIME.RANK_W, h = STAMINA.HEAL.TIME.RANK_H}
+            }
+        })
+        -- 秒の値
+        preDrawDynamicNumbers(
+            skin, "userDataSmallNumber", "nextStaminaHealSecond",
+            USER_DATA.WND.X + STAMINA.HEAL.TIME.NUM2_X, USER_DATA.WND.Y + STAMINA.HEAL.TIME.NUM_Y,
+            USER_DATA.NUM.W, USER_DATA.NUM.H, 0, false, {})
+        setValue("nextStaminaHealSecond", 0)
+        -- 秒の文字
+        table.insert(skin.destination, {
+            id = "staminaSecondText", timer = 10004, dst = {
+                {x = USER_DATA.WND.X + STAMINA.HEAL.TIME.SEC_X, y = USER_DATA.WND.Y + STAMINA.HEAL.TIME.SEC_Y, w = STAMINA.HEAL.TIME.RANK_W, h = STAMINA.HEAL.TIME.RANK_H}
+            }
+        })
+        -- MAXの文字
+        table.insert(skin.destination, {
+            id = "staminaMaxText", timer = 10005, dst = {
+                {x = USER_DATA.WND.X + STAMINA.HEAL.TIME.MAX_X, y = USER_DATA.WND.Y + STAMINA.HEAL.TIME.MAX_Y, w = STAMINA.HEAL.TIME.MAX_W, h = STAMINA.HEAL.TIME.MAX_H}
+            }
+        })
+
+        -- スタミナのゲージ
+        local frameX = USER_DATA.WND.X + STAMINA.GAUGE.FRAME.X
+        local frameY = USER_DATA.WND.Y + STAMINA.GAUGE.FRAME.Y
+        local gaugeX = frameX + STAMINA.GAUGE.GAUGE.X
+        local gaugeY = frameY + STAMINA.GAUGE.GAUGE.Y
+        table.insert(skin.destination, {
+            id = "white", dst = {
+                {x = gaugeX , y = gaugeY, w = STAMINA.GAUGE.GAUGE.W, h = STAMINA.GAUGE.GAUGE.H}
+            }
+        })
+        -- スタミナ本体
+        local p = userData.stamina.now / userData.stamina.tbl[userData.rank.rank]
+        table.insert(skin.destination, {
+            id = "white", timer = 10006, dst = {
+                {time = 0, x = gaugeX, y = gaugeY, w = 0, h = EXP.GAUGE.H, r = 255, g = 227, b = 98},
+                {time = 2000, x = gaugeX, y = gaugeY, w = STAMINA.GAUGE.GAUGE.W, h = STAMINA.GAUGE.GAUGE.H},
+                {time = 10000}
+            }
+        })
+        -- フレームと反射
+        table.insert(skin.destination, {
+            id = "gaugeReflection", loop = 0, dst = {
+                {time = 0, x = gaugeX - 8, y = gaugeY, w = 8, h = STAMINA.GAUGE.REFLECTION.H, a = 196},
+                {time = 4000},
+                {time = 4070, w = STAMINA.GAUGE.REFLECTION.W * 1.5},
+                {time = 4680, x = gaugeX + STAMINA.GAUGE.GAUGE.W - STAMINA.GAUGE.REFLECTION.W * 1.5},
+                {time = 4750, x = gaugeX + STAMINA.GAUGE.GAUGE.W, w = 8},
+            }
+        })
+        table.insert(skin.destination, {
+            id = "expGaugeFrame", dst = {
+                {x = frameX, y = frameY, w = STAMINA.GAUGE.FRAME.W, h = STAMINA.GAUGE.FRAME.H}
+            }
+        })
+
+        -- スタミナ数値表示
+        -- 最大値
+        local dst = {{x = gaugeX + STAMINA.GAUGE.NUM.X, y = gaugeY + STAMINA.GAUGE.NUM.Y, w = USER_DATA.NUM.W, h = USER_DATA.NUM.H}}
+        preDrawStaticNumbers(skin, "userDataSmallNumber", "staminaMaxValue", 0, 0, dst, userData.stamina.tbl[userData.rank.rank], {}, -1, 0)
+
+        -- 最大値の桁数分だけずらす
+        local offsetX = calcValueDigit(userData.stamina.tbl[userData.rank.rank], false) * USER_DATA.NUM.W + 2
+        myPrint("スタミナの数値表示オフセット: " .. offsetX)
+        -- スラッシュ
+        table.insert(skin.destination, {
+            id = "userStatusValueSlash", dst = {
+                {x = gaugeX + STAMINA.GAUGE.NUM.X - offsetX - USER_DATA.SLASH.W, y = gaugeY + STAMINA.GAUGE.SLASH.Y, w = USER_DATA.SLASH.W, h = USER_DATA.SLASH.H}
+            }
+        })
+        -- 現在値
+        preDrawDynamicNumbers(
+            skin, "userDataSmallNumber", "staminaNowValue",
+            gaugeX + STAMINA.GAUGE.NUM.X - offsetX - USER_DATA.SLASH.W - 1, gaugeY + STAMINA.GAUGE.NUM.Y,
+            USER_DATA.NUM.W, USER_DATA.NUM.H, 0, false, {})
+        setValue("staminaNowValue", 0)
+    end
     -- コースの曲一覧
     for i = 1, 5 do
         local y = COURSE.BASE_Y - COURSE.INTERVAL_Y * (i - 1) -- 14は上下の影
