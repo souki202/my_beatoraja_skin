@@ -443,6 +443,39 @@ local SELECT_OPTION = {
     },
 }
 
+local GRAPH = {
+    WND = {
+        OLD = {
+            X = 1126, -- 影含まない
+            Y = 72,
+            W = 638, -- 影含む
+            H = 178,
+            SHADOW = 7,
+        },
+        NEW = {
+            X = 1126, -- 影含まない
+            Y = 47,
+            W = 638, -- 影含む
+            H = 203,
+            SHADOW = 7,
+        },
+    },
+    STAMINA = {
+        LABEL = {
+            X = 27, -- WNDからの差分
+            Y = 5,
+            W = 120,
+            H = 20,
+        },
+        NUM = {
+            X = 167, -- STAMINAからの差分
+            Y = 1,
+            W = 14,
+            H = 18,
+        },
+    },
+}
+
 local SMALL_KEY_W = 20
 local SMALL_KEY_H = 24
 local HELP_WND_W = 672
@@ -545,7 +578,7 @@ local header = {
             name = "開幕アニメーション種類", item = {{name = "無し", op = 930}, {name = "流星", op = 931}, {name = "タイル", op = 932}}, def = "無し"
         },
         {
-            name = "上部プレイヤー情報仕様", item = {{name = "旧仕様(プレイ時間とプレイ回数等)", op = 950}, {name = "リザルト連携版", op = 951}}, def = "旧仕様(プレイ時間とプレイ回数等)"
+            name = "上部プレイヤー情報仕様", item = {{name = "リザルト連携版", op = 950}, {name = "旧仕様(プレイ時間とプレイ回数等)", op = 951}}, def = "リザルト連携版"
         },
         {
             name = "タイルアニメーション設定------------------------", item = {{name = "-"}}
@@ -1082,17 +1115,16 @@ end
 
 function calcStamina()
     local tn = main_state.number(74)
-    -- if tn > 0 then
-    --     switchVisibleNumber("useStamina", true)
-    --     setValue("useStamina", userData.calcUseStamina(tn))
-    -- else
-    --     switchVisibleNumber("useStamina", false)
-    -- end
+    if tn > 0 then
+        switchVisibleNumber("useStaminaValue", true)
+        setValue("useStaminaValue", userData.calcUseStamina(tn))
+    else
+        switchVisibleNumber("useStaminaValue", false)
+    end
 end
 
 function updateStamina()
     userData.updateRemainingStamina()
-    -- print("max: " .. userData.stamina.now)
     if userData.getIsMaxStamina() then
         -- 全快していればMAXを表示
         main_state.set_timer(10004, main_state.timer_off_value)
@@ -1114,6 +1146,17 @@ function updateStaminaGauge()
     local p = userData.stamina.now / userData.stamina.tbl[userData.rank.rank]
     p = math.max(0, math.min(p, 1))
     return main_state.time() - p * 20 * 1000 * 100
+end
+
+function updateUseStamina()
+    local tn = main_state.number(106)
+    if tn > 0 then
+        local requireStamina = userData.calcUseStamina(tn)
+        setValue("useStaminaValue", requireStamina)
+        switchVisibleNumber("useStaminaValue", true)
+    else
+        switchVisibleNumber("useStaminaValue", false)
+    end
 end
 
 local function main()
@@ -1141,10 +1184,11 @@ local function main()
     }
 
     table.insert(skin.customTimers, {id = 10002, timer = "calcStamina"})
-    table.insert(skin.customTimers, {id = 14993, timer = "updateStamina"})
+    table.insert(skin.customTimers, {id = 10003, timer = "updateStamina"})
     table.insert(skin.customTimers, {id = 10004}) -- スタミナ回復までの時間表示用タイマー
     table.insert(skin.customTimers, {id = 10005}) -- スタミナMAX時の表示用タイマー
     table.insert(skin.customTimers, {id = 10006, timer = "updateStaminaGauge"}) -- スタミナゲージ表示用タイマー
+    table.insert(skin.customTimers, {id = 10007, timer = "updateUseStamina"}) -- スタミナ使用量更新用タイマー
 
     skin.image = {
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
@@ -1398,11 +1442,12 @@ local function main()
 
         -- 密度グラフ用
         {id = "notesGraphFrame", src = 0, x = 965, y = PARTS_OFFSET + 593, w = 638, h = 178},
+        {id = "notesGraphFrame2", src = 8, x = 0, y = 0, w = GRAPH.WND.NEW.W, h = GRAPH.WND.NEW.H},
         {id = "numOfNormalNotesIcon" , src = 0, x = 945 + NOTES_ICON_SIZE*0, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
         {id = "numOfScratchNotesIcon", src = 0, x = 945 + NOTES_ICON_SIZE*1, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
         {id = "numOfLnNotesIcon"     , src = 0, x = 945 + NOTES_ICON_SIZE*2, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
         {id = "numOfBssNotesIcon"    , src = 0, x = 945 + NOTES_ICON_SIZE*3, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
-
+        {id = "useStaminaTextImg", src = 0, x = 1298, y = PARTS_OFFSET + 471, w = GRAPH.STAMINA.LABEL.W, h = GRAPH.STAMINA.LABEL.H},
         -- 開幕アニメーション用
         {id = "forOpeningSquare", src = 1, x = PARTS_TEXTURE_SIZE - 3, y = PARTS_TEXTURE_SIZE - 3, w = 3, h = 3},
         {id = "meteorBody", src = 5, x = 0, y = 0, w = 256, h = 256},
@@ -1476,6 +1521,8 @@ local function main()
     loadNumbers(skin, "rankCoop", 0, NORMAL_NUMBER_SRC_X, PARTS_OFFSET + NORMAL_NUMBER_H + STATUS_NUMBER_H, RANK.NEW.NUM_W * 10, RANK.NEW.NUM_H, 10, 1)
     -- スタミナの数字読み込み
     loadNumbers(skin, "userDataSmallNumber", 0, 1434, PARTS_OFFSET + 391, USER_DATA.NUM.W * 10, USER_DATA.NUM.H, 10, 1)
+    -- 消費スタミナの数字読み込み
+    loadNumbers(skin, "useStaminaNumber", 0, 1434, PARTS_OFFSET + 421, GRAPH.STAMINA.NUM.W * 10, GRAPH.STAMINA.NUM.H, 10, 1)
 
     -- 密度グラフ
     skin.judgegraph = {
@@ -1662,6 +1709,9 @@ local function main()
         -- オプション
         {id = "notesDisplayTime", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H, w = OPTION_INFO.NUMBER_W * 10, h = OPTION_INFO.NUMBER_H, divx = 10, digit = 4, ref = 312},
         {id = "judgeTiming", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H * 2, w = OPTION_INFO.NUMBER_W * 12, h = OPTION_INFO.NUMBER_H * 2, divx = 12, divy = 2, digit = 4, ref = 12},
+
+        -- stamina
+        {id = "staminaMaxValue", src = 0, x = 1434, y = PARTS_OFFSET + 391, w = USER_DATA.NUM.W * 10, h = USER_DATA.NUM.H, divx = 10, divy = 1, digit = 3, value = userData.stamina.tbl[userData.rank.rank]},
     }
     -- IR irTextsに対応する値を入れていく
     -- {人数, percentage, afterdot} で, irTextsに対応するrefsを入れる
@@ -2418,7 +2468,7 @@ local function main()
                 {x = 48, y = 12, w = 970, h = 24}
             }
         },
-        -- 密度グラフ
+        -- 密度グラフ共通部分
         {
             id = "black", op = {910}, dst = {
                 {x = 1138, y = 124, w = 600, h = 100, a = 192}
@@ -2434,22 +2484,17 @@ local function main()
                 {x = 1138, y = 124, w = 600, h = 100}
             }
         },
-        {
-            id = "notesGraphFrame", op = {910}, dst = {
-                {x = 1119, y = 65, w = 638, h = 178}
-            }
-        },
         -- 各ノーツ数は下のfor
     }
 
     -- プレイヤーのランク出力
-    if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
+    if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 951 then
         table.insert(skin.destination, {
             id = "rankValue", dst = {
                 {x = USER_DATA.WND.X + RANK.NEW.X - RANK.OLD.NUM_W * 4, y = USER_DATA.WND.Y + RANK.NEW.Y, w = RANK.OLD.NUM_W, h = RANK.OLD.NUM_H}
             }
         })
-    elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 951) == 951 then
+    elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
         local dst = {{x = USER_DATA.WND.X + RANK.NEW.X, y = USER_DATA.WND.Y + RANK.NEW.Y, w = RANK.NEW.NUM_W, h = RANK.NEW.NUM_H}}
         preDrawStaticNumbers(skin, "rankCoop", "rankCoop", 0, false, dst, userData.rank.rank, {}, -1, 0)
     end
@@ -2465,13 +2510,13 @@ local function main()
                 {x = gaugeX , y = gaugeY, w = EXP.GAUGE.W, h = EXP.GAUGE.H}
             }
         })
-        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
+        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 951 then
             table.insert(skin.destination, {
                 id = "expGauge", dst = {
                     {x = gaugeX, y = gaugeY, w = EXP.GAUGE.W, h = EXP.GAUGE.H}
                 }
             })
-        elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 951) == 951 then
+        elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
             local now = userData.rank.getSumExp(userData.rank.rank - 1)
             local next = userData.rank.getSumExp(userData.rank.rank)
             local p = (userData.rank.exp - now) / (next - now)
@@ -2500,7 +2545,7 @@ local function main()
             }
         })
 
-        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 951) == 951 then
+        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
             local sub = 20
             local now = userData.rank.exp
 
@@ -2679,18 +2724,54 @@ local function main()
     end
 
     -- 密度グラフ
-    local noteTypes = {"Normal", "Scratch", "Ln", "Bss"}
-    for i = 1, 4 do
-        table.insert(skin.destination, {
-            id = "numOf" .. noteTypes[i] .. "NotesIcon", op = {910}, dst = {
-                {x = 1152 + 150 * (i - 1), y = 77, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE}
-            }
-        })
-        table.insert(skin.destination, {
-            id = "numOf" .. noteTypes[i] .. "Notes", op = {910}, dst = {
-                {x = 1152 + 58 + 150 * (i - 1), y = 77 + 10, w = STATUS_NUMBER_W, h = STATUS_NUMBER_H}
-            }
-        })
+    if getTableValue(skin_config.option, "密度グラフ表示", 910) == 910 then
+        -- フレーム表示
+        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 951 then
+            table.insert(skin.destination, {
+                id = "notesGraphFrame", op = {910}, dst = {
+                    {x = GRAPH.WND.OLD.X - GRAPH.WND.OLD.SHADOW, y = GRAPH.WND.OLD.Y - GRAPH.WND.OLD.SHADOW, w = GRAPH.WND.OLD.W, h = GRAPH.WND.OLD.H}
+                }
+            })
+        elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
+            table.insert(skin.destination, {
+                id = "notesGraphFrame2", op = {910}, dst = {
+                    {x = GRAPH.WND.NEW.X - GRAPH.WND.OLD.SHADOW, y = GRAPH.WND.NEW.Y - GRAPH.WND.OLD.SHADOW, w = GRAPH.WND.NEW.W, h = GRAPH.WND.NEW.H}
+                }
+            })
+        end
+        local noteTypes = {"Normal", "Scratch", "Ln", "Bss"}
+        for i = 1, 4 do
+            table.insert(skin.destination, {
+                id = "numOf" .. noteTypes[i] .. "NotesIcon", op = {910}, dst = {
+                    {x = 1152 + 150 * (i - 1), y = 77, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE}
+                }
+            })
+            table.insert(skin.destination, {
+                id = "numOf" .. noteTypes[i] .. "Notes", op = {910}, dst = {
+                    {x = 1152 + 58 + 150 * (i - 1), y = 77 + 10, w = STATUS_NUMBER_W, h = STATUS_NUMBER_H}
+                }
+            })
+        end
+
+        -- 消費スタミナ
+        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
+            local staminaX = GRAPH.WND.NEW.X + GRAPH.STAMINA.LABEL.X
+            local staminaY = GRAPH.WND.NEW.Y + GRAPH.STAMINA.LABEL.Y
+            -- ラベル
+            table.insert(skin.destination, {
+                id = "useStaminaTextImg", op = {910}, dst = {
+                    {x = staminaX, y = staminaY, w = GRAPH.STAMINA.LABEL.W, h = GRAPH.STAMINA.LABEL.H}
+                }
+            })
+            -- スタミナ出力
+            -- 現在値
+            preDrawDynamicNumbers(
+                skin, "useStaminaNumber", "useStaminaValue",
+                staminaX + GRAPH.STAMINA.NUM.X, staminaY + GRAPH.STAMINA.NUM.Y,
+                GRAPH.STAMINA.NUM.W, GRAPH.STAMINA.NUM.H, 0, false, {})
+
+            setValue("useStaminaValue", 0)
+        end
     end
 
 

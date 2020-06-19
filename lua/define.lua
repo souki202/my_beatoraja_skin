@@ -25,10 +25,9 @@ local lastTime = 0
 local deltaTime = -1
 
 function updateTime()
-    deltaTime = main_state.time() - lastTime
+    elapsedTime = main_state.time()
+    deltaTime = elapsedTime - lastTime
     lastTime = lastTime + deltaTime
-    elapsedTime = elapsedTime + deltaTime
-    -- updateDrawNumbers()
 end
 
 function getDeltaTime()
@@ -40,8 +39,11 @@ function getElapsedTime()
 end
 
 userData = {
+    name = "",
+    escapedName = "",
     wasLoaded = false,
     filePath = "",
+    backupPath = "",
     version = 0,
 
     rank = {
@@ -69,7 +71,8 @@ local myNumber = {
     },
     MAX_DIGIT = 10, -- 1つは符号なので数値は9桁
     INVALID_VALUE = 10000000000,
-    TIMER_START = 15000,
+    -- TIMER_START = 11000, --14200はセーフ, 14300はクラッシュ
+    TIMER_START = 19000,
 
     didInitStaticNumberTimer = false,
 
@@ -125,8 +128,14 @@ function createRankAndStaminaTable()
 end
 
 function globalInitialize(skin)
-    myPrint("プレイヤー名: " .. main_state.text(2))
-    userData.filePath = skin_config.get_path("../userdata/data") .. "_" .. main_state.text(2)
+    userData.name = main_state.text(2)
+    userData.escapedName = string.gsub(userData.name, "([\\/:*?\"<>|])", "_")
+
+    myPrint("プレイヤー名: " .. userData.name)
+    myPrint("使用不能文字置換後: " .. userData.escapedName)
+
+    userData.filePath = skin_config.get_path("../userdata/data") .. "_" .. userData.escapedName
+    userData.backupPath = skin_config.get_path("../userdata/backup/data") .. "_" .. userData.escapedName .. string.format("%10d", os.time())
     userData.load()
     createRankAndStaminaTable()
 
@@ -134,6 +143,12 @@ function globalInitialize(skin)
         {id = 10000, timer = "updateTime"},
         {id = 10001, timer = "updateDrawNumbers"},
     }
+
+    -- IntMapバグ回避のため. 本当に回避できているかは不明
+    -- 先にTimerを連番で登録しておく
+    for i = myNumber.TIMER_START, myNumber.TIMER_START + myNumber.MAX_DIGIT * 10 do
+        table.insert(skin.customTimers, {id = i})
+    end
 end
 
 function getTableValue(tbl, key, defaultValue)
@@ -143,6 +158,19 @@ function getTableValue(tbl, key, defaultValue)
         end
     end
     return defaultValue
+end
+
+-- xは右端の座標
+function dstNumberRightJustify(skin, id, x, y, w, h, digit)
+    table.insert(skin.destination, {
+        id = id, dst = {
+            {
+                x = x - w * digit,
+                y = y,
+                w = w, h = h
+            }
+        }
+    })
 end
 
 userData.initData = function()
@@ -197,24 +225,30 @@ userData.load = function()
     userData.wasLoaded = true
 end
 
+userData.writeUserData = function(fileHandle)
+    -- version
+    fileHandle:write(1 .. "\n")
+    -- rank
+    fileHandle:write(userData.rank.rank .. "\n")
+    -- exp
+    fileHandle:write(userData.rank.exp .. "\n")
+    -- next heal stamina epoch second
+    fileHandle:write(userData.stamina.nextHealEpochSecond .. "\n")
+    -- now stamina
+    fileHandle:write(userData.stamina.now .. "\n")
+
+end
+
 userData.save = function()
     if userData.wasLoaded == false then
         return
     end
 
     local f = io.open(userData.filePath, "w")
-
-    -- version
-    f:write(1 .. "\n")
-    -- rank
-    f:write(userData.rank.rank .. "\n")
-    -- exp
-    f:write(userData.rank.exp .. "\n")
-    -- next heal stamina epoch second
-    f:write(userData.stamina.nextHealEpochSecond .. "\n")
-    -- now stamina
-    f:write(userData.stamina.now .. "\n")
-
+    userData.writeUserData(f)
+    f:close()
+    f = io.open(userData.backupPath, "w")
+    userData.writeUserData(f)
     f:close()
 
     print("ユーザ情報保存完了")
@@ -312,7 +346,6 @@ userData.updateRemainingStamina = function()
         local healValue = math.ceil(excess / userData.stamina.healInterval)
         myPrint("スタミナ回復: " .. healValue)
         userData.stamina.nextHealEpochSecond = userData.stamina.nextHealEpochSecond + healValue * userData.stamina.healInterval
-        myPrint("あまり")
         userData.stamina.now = math.min(userData.stamina.now + healValue, userData.stamina.tbl[userData.rank.rank])
         myPrint("次の回復: " .. userData.getNextHealStaminaDateString())
         userData.save()
@@ -335,7 +368,7 @@ function loadNumbers(skin, idPrefix, srcNumber, srcX, srcY, w, h, divX, divY)
     local suffix = myNumber.SUFFIX
 
     myPrint("数字読み込み開始 " .. idPrefix)
-    myPrint((suffix and "符号あり" or "符号なし"))
+    myPrint((signed and "符号あり" or "符号なし"))
     myPrint((d ~= 10 and "裏0あり" or "裏0なし"))
 
     if w % divX ~= 0 or h % divY ~= 0 then
@@ -361,7 +394,7 @@ function loadNumbers(skin, idPrefix, srcNumber, srcX, srcY, w, h, divX, divY)
     end
 end
 
-local function preDrawNumbersCommon(idPrefix, dstId, align, drawBackZero, startTimerId)
+local function preDrawNumbersCommon(skin, idPrefix, dstId, align, drawBackZero, startTimerId)
     -- とりあえず突っ込んでおく
     myNumber.values[dstId] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     myNumber.aligns[dstId] = align
@@ -384,6 +417,8 @@ local function getNextNumberTimerId()
     return startTimerId
 end
 
+-- 各桁のmyNumber.SUFFIXに対応するインデックスリストを作成する
+-- @return array インデックスのリスト
 local function createSuffixIndexArray(value, align, drawBackZero, drawSign)
     local numbers = {}
     local wasSetSign = false
@@ -431,9 +466,12 @@ end
 -- @param  drawBackZero 裏0を表示するかどうか
 -- @param  op
 function preDrawDynamicNumbers(skin, idPrefix, dstId, x, y, w, h, align, drawBackZero, op)
-    local startTimerId = getNextNumberTimerId()
+    myPrint("数字出力準備: ", idPrefix, dstId, x, y, w, h, align, drawBackZero)
 
-    preDrawNumbersCommon(idPrefix, dstId, align, drawBackZero, startTimerId)
+    local startTimerId = getNextNumberTimerId()
+    myPrint("タイマー開始値: " .. startTimerId)
+
+    preDrawNumbersCommon(skin, idPrefix, dstId, align, drawBackZero, startTimerId)
 
     local offsetX = align == 0 and -w or 0
     myNumber.isStatic[dstId] = false
@@ -479,9 +517,10 @@ end
 -- @param  timer 使用するタイマー -1場合は独自の表示の切り替えができるタイマー
 -- @param  loop
 function preDrawStaticNumbers(skin, idPrefix, dstId, align, drawBackZero, baseDst, drawValue, op, timer, loop)
+    myPrint("数字出力準備: ", idPrefix, dstId, align, drawBackZero, baseDst, drawValue)
     local timerId = getNextNumberTimerId()
 
-    preDrawNumbersCommon(idPrefix, dstId, align, drawBackZero, timerId)
+    preDrawNumbersCommon(skin, idPrefix, dstId, align, drawBackZero, timerId)
 
     myNumber.isStatic[dstId] = true
     myNumber.values[dstId] = createSuffixIndexArray(drawValue, align, myNumber.drawBackZero[dstId], myNumber.drawSign[dstId])
@@ -489,6 +528,7 @@ function preDrawStaticNumbers(skin, idPrefix, dstId, align, drawBackZero, baseDs
     if timer ~= -1 then
         timerId = timer
     end
+    myPrint("タイマー値: " .. timerId)
 
     local function copyDst(t)
         local t2 = {}
@@ -575,13 +615,13 @@ function setValue(dstId, value)
     myNumber.values[dstId] = createSuffixIndexArray(value, align, myNumber.drawBackZero[dstId], myNumber.drawSign[dstId])
     myNumber.isVisible[dstId] = true
 
-    if DEBUG then
-        local s = myNumber.values[dstId][1]
-        for i = 2, myNumber.MAX_DIGIT do
-            s = s .. "," .. myNumber.values[dstId][i]
-        end
-        -- myPrint("描画配列: " .. s)
-    end
+    -- if DEBUG then
+    --     local s = myNumber.values[dstId][1]
+    --     for i = 2, myNumber.MAX_DIGIT do
+    --         s = s .. "," .. myNumber.values[dstId][i]
+    --     end
+    --     myPrint("描画配列: " .. s)
+    -- end
 end
 
 -- 指定したdstIdの表示非表示を切り替える. timerを指定した静的な値は変更できない
@@ -592,8 +632,12 @@ function switchVisibleNumber(dstId, isVisible)
     myPrint("Visible変更 dstId: " .. dstId .. " 変更後状態: " .. (isVisible and "表示" or "非表示"))
     if isVisible == false then
         local startTimer = myNumber.timerIds[dstId]
-        for i = 1, myNumber.MAX_DIGIT do
-            main_state.set_timer(startTimer + (i - 1), main_state.timer_off_value)
+        if startTimer ~= nil then
+            for i = 1, myNumber.MAX_DIGIT do
+                main_state.set_timer(startTimer + (i - 1), main_state.timer_off_value)
+            end
+        else
+            print("startTimerがありません 未登録のdstIdの可能性があります: " .. dstId)
         end
     end
 end

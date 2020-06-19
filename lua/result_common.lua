@@ -772,19 +772,6 @@ local function destinationWindow(skin, x, y, w, h)
     })
 end
 
--- xは右端の座標
-local function dstNumberRightJustify(skin, id, x, y, w, h, digit)
-    table.insert(skin.destination, {
-        id = id, dst = {
-            {
-                x = x - w * digit,
-                y = y,
-                w = w, h = h
-            }
-        }
-    })
-end
-
 local function main()
     local skin = {}
 	-- ヘッダ情報をスキン本体にコピー
@@ -834,8 +821,10 @@ local function main()
                 print("MAXのため, 経験値5倍")
                 exp = exp * 5
             end
+            exp = math.floor(exp)
+            userData.updateRemainingStamina()
             userData.useStamina(requireStamina)
-            userData.addExp(exp*10)
+            userData.addExp(exp)
             userData.save()
         end
     end

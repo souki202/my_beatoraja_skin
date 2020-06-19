@@ -505,7 +505,7 @@ end
 
 local header = {
     type = 7,
-    name = "Social Skin Simple dev result",
+    name = "Social Skin Simple" .. (DEBUG and " dev result" or ""),
     w = WIDTH,
     h = HEIGHT,
     fadeout = 500,
@@ -681,23 +681,6 @@ local function destinationWindow(skin, x, y, w, h)
     })
 end
 
--- xは右端の座標
-local function dstNumberRightJustify(skin, id, x, y, w, h, digit)
-    table.insert(skin.destination, {
-        id = id, dst = {
-            {
-                x = x - w * digit,
-                y = y,
-                w = w, h = h
-            }
-        }
-    })
-end
-
-local function examineIsCourse()
-    return main_state.option(1008) == true
-end
-
 local function main()
     local skin = {}
 	-- ヘッダ情報をスキン本体にコピー
@@ -705,15 +688,55 @@ local function main()
         skin[k] = v
     end
 
+    globalInitialize(skin)
+
     CLEAR_TYPE = main_state.number(370)
     if CLEAR_TYPE == LAMPS.NO_PLAY then
-        print(examineIsCourse())
-        print(isCourseResult)
         -- コース途中のリザルトならクリアかfailedしか無い
         if main_state.option(90) then
             CLEAR_TYPE = LAMPS.NORMAL
         else
             CLEAR_TYPE = LAMPS.FAILED
+        end
+    elseif CLEAR_TYPE > LAMPS.NO_PLAY then
+        local requireStamina = userData.calcUseStamina(main_state.number(106))
+        myPrint("スタミナ要求量: " .. requireStamina)
+        if userData.getIsUsableStamina(requireStamina) then
+            -- ランプがあって(単体, コースリザルト, フルコン以上)クリアなら経験値を更新
+            local exp = math.ceil(math.pow(main_state.number(362) * main_state.number(71), 0.75))
+            print("獲得経験値: ceil((" .. main_state.number(71) .. " * " .. main_state.number(362) .. ") ^ 0.75) = " .. exp)
+
+            if CLEAR_TYPE == LAMPS.FAILED then
+                print("FAILEDのため, 経験値0倍")
+                exp = 0
+            elseif CLEAR_TYPE <= LAMPS.LA_EASY then
+                print("LIGHT ASSIST EASY以下のため, 経験値0.25倍")
+                exp = exp * 0.25
+            elseif CLEAR_TYPE == LAMPS.EASY then
+                print("EASYのため, 経験値0.8倍")
+                exp = exp * 0.8
+            elseif CLEAR_TYPE <= LAMPS.HARD then
+                print("NORMAL, HARDのため, 経験値変化なし")
+            elseif CLEAR_TYPE == LAMPS.EX_HARD then
+                print("EX-HARDのため, 経験値1.2倍")
+                exp = exp * 1.2
+            elseif CLEAR_TYPE == LAMPS.FULLCOMBO then
+                print("FULLCOMBOのため, 経験値1.4倍")
+                exp = exp * 1.4
+            elseif CLEAR_TYPE == LAMPS.PERFECT then
+                print("FULLCOMBOのため, 経験値1.5倍")
+                exp = exp * 1.5
+            elseif CLEAR_TYPE == LAMPS.MAX then
+                print("MAXのため, 経験値5倍")
+                exp = exp * 5
+            end
+            exp = math.floor(exp)
+            userData.updateRemainingStamina()
+            userData.useStamina(requireStamina)
+            userData.addExp(exp)
+            userData.save()
+        else
+            print("スタミナ不足のため, 経験値なし")
         end
     end
 
