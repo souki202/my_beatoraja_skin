@@ -1,6 +1,6 @@
 
 local main_state = require("main_state")
-
+local http = require("socket.http")
 function table.in_key (tbl, key)
     for k, v in pairs (tbl) do
         if k==key then return true end
@@ -23,11 +23,13 @@ local isInputStarted = false
 local elapsedTime = 0
 local lastTime = 0
 local deltaTime = -1
+local frame = 0
 
 function updateTime()
     elapsedTime = main_state.time()
     deltaTime = elapsedTime - lastTime
     lastTime = lastTime + deltaTime
+    frame = frame + 1
 end
 
 function getDeltaTime()
@@ -36,6 +38,10 @@ end
 
 function getElapsedTime()
     return elapsedTime
+end
+
+function getFrame()
+    return frame
 end
 
 userData = {
@@ -99,22 +105,26 @@ end
 
 function createRankAndStaminaTable()
     local sum = 0
+    local sumStamina = 9
 
     local f1 = function(i) return 20 + (i - 1) * 60 end
     local f2 = function(i) return f1(10) + (i - 10) * 250 end
-    local f3 = function(i) return f2(100) + (i - 100) * 150 end
-    local f4 = function(i) return f3(300) + (i - 300) * 50 end
-    local f5 = function(i) return 70000 end
+    local f3 = function(i) return f2(100) + (i - 100) * 350 end
+    local f4 = function(i) return f3(300) + (i - 300) * 200 end
+    local f5 = function(i) return 150000 end
 
     for i = 1, userData.rank.maxRank do
         local next = 0
         if i <= 10 then
             next = f1(i)
+            sumStamina = sumStamina + 1
         elseif i <= 100 then
             next = f2(i)
+            sumStamina = sumStamina + 0.6
         elseif i <= 300 then
             next = f3(i)
-        elseif i <= 500 then
+            sumStamina = sumStamina + 0.3
+        elseif i < 500 then
             next = f4(i)
         else
             next = f5(i)
@@ -123,7 +133,7 @@ function createRankAndStaminaTable()
         -- ランクごとの累計経験値テーブルに入れる
         sum = sum + next
         table.insert(userData.rank.tbl, sum)
-        table.insert(userData.stamina.tbl, math.floor(10 + i / 5))
+        table.insert(userData.stamina.tbl, math.floor(sumStamina))
     end
 end
 

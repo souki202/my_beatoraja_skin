@@ -1124,38 +1124,42 @@ function calcStamina()
 end
 
 function updateStamina()
-    userData.updateRemainingStamina()
-    if userData.getIsMaxStamina() then
-        -- 全快していればMAXを表示
-        main_state.set_timer(10004, main_state.timer_off_value)
-        switchVisibleNumber("nextStaminaHealMinute", false)
-        switchVisibleNumber("nextStaminaHealSecond", false)
-        main_state.set_timer(10005, 1)
-    else
-        -- 回復までの残り時間
-        local minute, second = userData.getNextHealStaminaRemainTime()
-        main_state.set_timer(10004, 1)
-        main_state.set_timer(10005, main_state.timer_off_value)
-        setValue("nextStaminaHealMinute", minute)
-        setValue("nextStaminaHealSecond", second)
+    if getFrame() % 60 == 0 then -- 単なる負荷軽減
+        userData.updateRemainingStamina()
+        if userData.getIsMaxStamina() then
+            -- 全快していればMAXを表示
+            main_state.set_timer(10004, main_state.timer_off_value)
+            switchVisibleNumber("nextStaminaHealMinute", false)
+            switchVisibleNumber("nextStaminaHealSecond", false)
+            main_state.set_timer(10005, 1)
+        else
+            -- 回復までの残り時間
+            local minute, second = userData.getNextHealStaminaRemainTime()
+            main_state.set_timer(10004, 1)
+            main_state.set_timer(10005, main_state.timer_off_value)
+            setValue("nextStaminaHealMinute", minute)
+            setValue("nextStaminaHealSecond", second)
+        end
+        setValue("staminaNowValue", userData.stamina.now)
     end
-    setValue("staminaNowValue", userData.stamina.now)
 end
 
 function updateStaminaGauge()
     local p = userData.stamina.now / userData.stamina.tbl[userData.rank.rank]
     p = math.max(0, math.min(p, 1))
-    return main_state.time() - p * 20 * 1000 * 100
+    return main_state.time() - p * 20 * 1000 * 1000
 end
 
 function updateUseStamina()
-    local tn = main_state.number(106)
-    if tn > 0 then
-        local requireStamina = userData.calcUseStamina(tn)
-        setValue("useStaminaValue", requireStamina)
-        switchVisibleNumber("useStaminaValue", true)
-    else
-        switchVisibleNumber("useStaminaValue", false)
+    if getFrame() % 20 == 0 then -- 単なる負荷軽減
+        local tn = main_state.number(106)
+        if tn > 0 then
+            local requireStamina = userData.calcUseStamina(tn)
+            setValue("useStaminaValue", requireStamina)
+            switchVisibleNumber("useStaminaValue", true)
+        else
+            switchVisibleNumber("useStaminaValue", false)
+        end
     end
 end
 
@@ -2568,7 +2572,7 @@ local function main()
             })
 
             -- 現在値
-            local dst = {{x = gaugeX + EXP.NUM.X - offsetX - USER_DATA.SLASH.W - 1, y = gaugeY + EXP.NUM.Y, w = USER_DATA.NUM.W, h = USER_DATA.NUM.H}}
+            dst = {{x = gaugeX + EXP.NUM.X - offsetX - USER_DATA.SLASH.W - 1, y = gaugeY + EXP.NUM.Y, w = USER_DATA.NUM.W, h = USER_DATA.NUM.H}}
             preDrawStaticNumbers(skin, "userDataSmallNumber", "expNowValue", 0, 0, dst, now, {}, -1, 0)
         end
     end
@@ -2633,8 +2637,8 @@ local function main()
         table.insert(skin.destination, {
             id = "white", timer = 10006, dst = {
                 {time = 0, x = gaugeX, y = gaugeY, w = 0, h = EXP.GAUGE.H, r = 255, g = 227, b = 98},
-                {time = 2000, x = gaugeX, y = gaugeY, w = STAMINA.GAUGE.GAUGE.W, h = STAMINA.GAUGE.GAUGE.H},
-                {time = 10000}
+                {time = 20000, x = gaugeX, y = gaugeY, w = STAMINA.GAUGE.GAUGE.W, h = STAMINA.GAUGE.GAUGE.H},
+                {time = 100000}
             }
         })
         -- フレームと反射
