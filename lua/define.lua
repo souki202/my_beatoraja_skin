@@ -11,7 +11,7 @@ end
 DEBUG = true
 
 SKIN_INFO = {
-    SELECT_VRESION = "2.00",
+    SELECT_VRESION = "2.01",
     RESULT_VERSION = "1.20",
 }
 
