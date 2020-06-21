@@ -143,10 +143,6 @@ function createRankAndStaminaTable()
 end
 
 function globalInitialize(skin)
-    -- バージョンチェック
-    local newSelect, newResult = skinVersionCheck(SKIN_INFO.SELECT_VRESION, SKIN_INFO.RESULT_VERSION)
-    SKIN_INFO.existNewVersion = newSelect or newResult
-
     -- ユーザ情報周り
     userData.name = main_state.text(2)
     userData.escapedName = string.gsub(userData.name, "([\\/:*?\"<>|])", "_")

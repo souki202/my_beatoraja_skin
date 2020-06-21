@@ -2109,7 +2109,7 @@ local function main()
 
         {id = "playerName", font = 0, size = RIVAL.FONT_SIZE, align = 0, ref = 2, overflow = 1},
         {id = "rivalName" , font = 0, size = RIVAL.FONT_SIZE, align = 0, ref = 1, overflow = 1},
-        {id = "newVersion" , font = 0, size = 24, align = 0, overflow = 1, constantText = "新しいバージョンがあります"},
+        {id = "newVersion" , font = 0, size = 24, align = 0, overflow = 1, constantText = "スキンに更新があります"},
     }
 
     -- 選曲バー設定

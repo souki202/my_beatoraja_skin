@@ -5,7 +5,7 @@ local function httpConnection(url)
     local url2 = luajava.newInstance("java.net.URL", url);
     local urlConn = url2:openConnection()
     urlConn:setRequestMethod("GET")
-    urlConn:setConnectTimeout(200)
+    urlConn:setConnectTimeout(200) -- バージョンチェックは失敗しても良いので, タイムアウトが早くても問題ない
     if pcall(function() urlConn:connect() end) then
         local status = urlConn:getResponseCode()
         if status == 200 then
