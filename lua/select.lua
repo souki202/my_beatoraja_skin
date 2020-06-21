@@ -17,13 +17,33 @@
 -- 背景画像 花のイラストなら「百花繚乱」 - 無料で使えるフリー素材 https://flowerillust.com/
 -- フォント Source Han Sans Adobe Systems Incorporated
 
+
 require("define")
+require("http")
 
 local main_state = require("main_state")
+
+local existNewVersion = false
 
 local PARTS_TEXTURE_SIZE = 2048
 
 local PARTS_OFFSET = HEIGHT + 32
+
+local BASE_WINDOW = {
+    SHADOW_LEN = 7,
+    EDGE_SIZE = 10,
+    ID = {
+       UPPER_LEFT   = "baseWindowUpperLeft",
+       UPPER_RIGHT  = "baseWindowUpperRight",
+       BOTTOM_RIGHT = "baseWindowBottomRight",
+       BOTTOM_LEFT  = "baseWindowBottomLeft",
+       TOP    = "baseWindowTopEdge",
+       LEFT   = "baseWindowLeftEdge",
+       BOTTOM = "baseWindowBottomEdge",
+       RIGHT  = "baseWindowRightEdge",
+       BODY = "baseWindowBody",
+    }
+}
 
 local ARTIST_FONT_SIZE = 24
 local SUBARTIST_FONT_SIZE = 18
@@ -476,6 +496,28 @@ local GRAPH = {
     },
 }
 
+local ATTENSION_SIZE = 62
+
+local NEW_VERSION_MSG = {
+    WND = {
+        START_X = WIDTH + 14,
+        X = 1516,
+        Y = 1012,
+        W = 396,
+        H = 60,
+    },
+
+    ICON = {
+        X = 5,
+        Y = -1,
+    },
+
+    TEXT = {
+        X = 74,
+        Y = 14,
+    }
+}
+
 local SMALL_KEY_W = 20
 local SMALL_KEY_H = 24
 local HELP_WND_W = 672
@@ -586,6 +628,9 @@ local header = {
         {
             name = "タイルの回転方向", item = {{name = "縦", op = 920}, {name = "縦(反転)", op = 921}, {name = "横", op = 922}, {name = "横(反転)", op = "縦"}}
         },
+        {
+            name = "新バージョン確認", item = {{name = "する", op = 998}, {name = "しない", op = 999}, def = "する"},
+        },
     },
     filepath = {
         {name = "背景選択-----------------------------------------", path="../dummy/*"},
@@ -641,8 +686,246 @@ local function isDefaultLampGraphColor()
     return getTableValue(skin_config.option, "フォルダのランプグラフの色", 927) == 927
 end
 
+local function isCheckNewVersion()
+    return getTableValue(skin_config.option, "新バージョン確認", 998) == 998
+end
+
 local function calcComplementValueByTime(startValue, endValue, nowTime, overallTime)
     return startValue + (endValue - startValue) * nowTime / overallTime
+end
+
+local function loadBaseWindow(skin, x, y)
+    local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN
+    -- 四隅
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.UPPER_LEFT, src = 0, x = x, y = y,
+        w = sumEdgeSize, h = sumEdgeSize
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.UPPER_RIGHT, src = 0, x = x + sumEdgeSize + 1, y = y,
+        w = sumEdgeSize, h = sumEdgeSize
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.BOTTOM_RIGHT, src = 0, x = x + sumEdgeSize + 1, y = y + sumEdgeSize + 1,
+        w = sumEdgeSize, h = sumEdgeSize
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.BOTTOM_LEFT, src = 0, x = x, y = y + sumEdgeSize + 1,
+        w = sumEdgeSize, h = sumEdgeSize
+    })
+
+    -- 各辺
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.TOP, src = 0, x = x + sumEdgeSize, y = y,
+        w = 1, h = sumEdgeSize
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.LEFT, src = 0, x = x + sumEdgeSize + 1, y = y + sumEdgeSize,
+        w = sumEdgeSize, h = 1
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.BOTTOM, src = 0, x = x + sumEdgeSize, y = y + sumEdgeSize + 1,
+        w = 1, h = sumEdgeSize
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.RIGHT, src = 0, x = x, y = y + sumEdgeSize,
+        w = sumEdgeSize, h = 1
+    })
+
+    -- 本体
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.BODY, src = 0, x = x + sumEdgeSize, y = y + sumEdgeSize,
+        w = 1, h = 1
+    })
+end
+
+-- それぞれ影を除いた座標
+local function destinationWindow(skin, x, y, w, h, op)
+    local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN
+
+    -- 四隅
+    table.insert(skin.destination, {
+        id = BASE_WINDOW.ID.UPPER_LEFT, op = op, dst = {
+            {x = x - BASE_WINDOW.SHADOW_LEN, y = y + h - BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = sumEdgeSize}
+        }
+    })
+    table.insert(skin.destination, {
+        id = BASE_WINDOW.ID.UPPER_RIGHT, op = op, dst = {
+            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y + h - BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = sumEdgeSize}
+        }
+    })
+    table.insert(skin.destination, {
+        id = BASE_WINDOW.ID.BOTTOM_RIGHT, op = op, dst = {
+            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y - BASE_WINDOW.SHADOW_LEN, w = sumEdgeSize, h = sumEdgeSize}
+        }
+    })
+    table.insert(skin.destination, {
+        id = BASE_WINDOW.ID.BOTTOM_LEFT, op = op, dst = {
+            {x = x - BASE_WINDOW.SHADOW_LEN, y = y - BASE_WINDOW.SHADOW_LEN, w = sumEdgeSize, h = sumEdgeSize}
+        }
+    })
+
+    -- 各辺
+    table.insert(skin.destination, {
+        id = BASE_WINDOW.ID.TOP, op = op, dst = {
+            {x = x + BASE_WINDOW.EDGE_SIZE, y = y + h - BASE_WINDOW.EDGE_SIZE, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = sumEdgeSize}
+        }
+    })
+    table.insert(skin.destination, {
+        id = BASE_WINDOW.ID.LEFT, op = op, dst = {
+            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y + BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = h - BASE_WINDOW.EDGE_SIZE * 2}
+        }
+    })
+    table.insert(skin.destination, {
+        id = BASE_WINDOW.ID.BOTTOM, op = op, dst = {
+            {x = x + BASE_WINDOW.EDGE_SIZE, y = y - BASE_WINDOW.SHADOW_LEN, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = sumEdgeSize}
+        }
+    })
+    table.insert(skin.destination, {
+        id = BASE_WINDOW.ID.RIGHT, op = op, dst = {
+            {x = x - BASE_WINDOW.SHADOW_LEN, y = y + BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = h - BASE_WINDOW.EDGE_SIZE * 2}
+        }
+    })
+
+    -- 本体
+    table.insert(skin.destination, {
+        id = BASE_WINDOW.ID.BODY, op = op, dst = {
+            {x = x + BASE_WINDOW.EDGE_SIZE, y = y + BASE_WINDOW.EDGE_SIZE, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = h - BASE_WINDOW.EDGE_SIZE * 2}
+        }
+    })
+end
+
+-- 数値描画の基準座標におけるdstの中身. それぞれで, x,yが定義されていれば各桁に適した座標に修正する.
+-- x, yは影を除くウィンドウ左下座標
+-- w, hは影を除くウィンドウ全体の大きさを指定する
+local function destinationWindowWithTimer(skin, op, timer, loop, baseDst)
+    local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN
+    local ids = {
+        BASE_WINDOW.ID.UPPER_LEFT,
+        BASE_WINDOW.ID.UPPER_RIGHT,
+        BASE_WINDOW.ID.BOTTOM_RIGHT,
+        BASE_WINDOW.ID.BOTTOM_LEFT,
+        BASE_WINDOW.ID.TOP,
+        BASE_WINDOW.ID.LEFT,
+        BASE_WINDOW.ID.BOTTOM,
+        BASE_WINDOW.ID.RIGHT,
+        BASE_WINDOW.ID.BODY,
+    }
+    local dx = {
+        - BASE_WINDOW.SHADOW_LEN,
+        - BASE_WINDOW.EDGE_SIZE,
+        - BASE_WINDOW.EDGE_SIZE,
+        - BASE_WINDOW.SHADOW_LEN,
+        BASE_WINDOW.EDGE_SIZE,
+        - BASE_WINDOW.EDGE_SIZE,
+        BASE_WINDOW.EDGE_SIZE,
+        - BASE_WINDOW.SHADOW_LEN,
+        BASE_WINDOW.EDGE_SIZE,
+    }
+
+    local dy = {
+        - BASE_WINDOW.EDGE_SIZE,
+        - BASE_WINDOW.EDGE_SIZE,
+        - BASE_WINDOW.SHADOW_LEN,
+        - BASE_WINDOW.SHADOW_LEN,
+        - BASE_WINDOW.EDGE_SIZE,
+        BASE_WINDOW.EDGE_SIZE,
+        - BASE_WINDOW.SHADOW_LEN,
+        BASE_WINDOW.EDGE_SIZE,
+        BASE_WINDOW.EDGE_SIZE,
+    }
+
+    local isAddW = {
+        false,
+        true,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+    }
+    local isAddH = {
+        true,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+    }
+    local doUseSumEdgeSizeW = {
+        true, true, true, true, false, true, false, true, false
+    }
+    local doUseSumEdgeSizeH = {
+        true, true, true, true, true, false, true, false, false
+    }
+
+    local function copyDst(t)
+        local t2 = {}
+        for k,v in pairs(t) do
+          t2[k] = v
+        end
+        return t2
+    end
+
+    -- それぞれのedgeについて
+    for i = 1, 9 do
+        -- dstを組み立てる
+        local newestW = 0
+        local newestH = 0
+        local newestX = 0
+        local newestY = 0
+        local dst = {}
+        for _, value in pairs(baseDst) do
+            -- 元の入ってきたものを破壊しないように複製
+            local newDst = copyDst(value)
+            if table.in_key(newDst, "w") then
+                newestW = newDst["w"]
+                -- w 書き換え
+                if doUseSumEdgeSizeW[i] then
+                    newDst["w"] = sumEdgeSize
+                else
+                    newDst["w"] = newestW - BASE_WINDOW.EDGE_SIZE * 2
+                end
+            end
+
+            if table.in_key(newDst, "h") then
+                newestH = newDst["h"]
+                -- h 書き換え
+                if doUseSumEdgeSizeH[i] then
+                    newDst["h"] = sumEdgeSize
+                else
+                    newDst["h"] = newestH - BASE_WINDOW.EDGE_SIZE * 2
+                end
+            end
+
+            if table.in_key(newDst, "x") then
+                newestX = newDst["x"]
+            end
+            newDst["x"] = newestX + dx[i]
+            if isAddW[i] then
+                newDst["x"] = newDst["x"] + newestW
+            end
+
+            if table.in_key(newDst, "y") then
+                newestY = newDst["y"]
+            end
+            newDst["y"] = newestY + dy[i]
+            if isAddH[i] then
+                newDst["y"] = newDst["y"] + newestH
+            end
+
+            table.insert(dst, newDst)
+        end
+        table.insert(skin.destination, {
+            id = ids[i],
+            op = op, timer = timer, loop = loop, dst = dst
+        })
+    end
 end
 
 local function hsvToRgb(h, s, v)
@@ -1173,6 +1456,12 @@ local function main()
     globalInitialize(skin)
     initialize()
 
+    -- バージョンチェック
+    if isCheckNewVersion() then
+        local sv, rv = skinVersionCheck(SKIN_INFO.SELECT_VRESION, SKIN_INFO.RESULT_VERSION)
+        existNewVersion = sv or rv
+    end
+
     skin.source = {
         {id = 0, path = "../select/parts/parts.png"},
         {id = 8, path = "../select/parts/parts2.png"},
@@ -1193,6 +1482,7 @@ local function main()
     table.insert(skin.customTimers, {id = 10005}) -- スタミナMAX時の表示用タイマー
     table.insert(skin.customTimers, {id = 10006, timer = "updateStaminaGauge"}) -- スタミナゲージ表示用タイマー
     table.insert(skin.customTimers, {id = 10007, timer = "updateUseStamina"}) -- スタミナ使用量更新用タイマー
+    table.insert(skin.customTimers, {id = 10008, timer = "newVersionAnimation"}) -- 新バージョンがある時の文字表示用
 
     skin.image = {
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
@@ -1472,6 +1762,9 @@ local function main()
         {id = "irLoadingWaitText", src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*5, y = PARTS_OFFSET + 771, w = IR.LOADING.WAITING_TEXT_W, h = IR.LOADING.WAITING_TEXT_H},
         {id = "irLoadingLoadText", src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*5, y = PARTS_OFFSET + 771 + IR.LOADING.WAITING_TEXT_H, w = IR.LOADING.LOADING_TEXT_W, h = IR.LOADING.LOADING_TEXT_H},
 
+        -- 注目アイコン
+        {id = "attensionIcon", src = 0, x = 1846, y = PARTS_OFFSET + 874, w = ATTENSION_SIZE, h = ATTENSION_SIZE},
+
         -- 検索ボックス
         {id = "searchBox", src = 0, x = 773, y = PARTS_TEXTURE_SIZE - 62, w = 1038, h = 62},
 
@@ -1484,6 +1777,13 @@ local function main()
         {id = "gray2", src = 999, x = 4, y = 1, w = 1, h = 1},
         {id = "pink", src = 999, x = 5, y = 0, w = 1, h = 1},
     }
+
+    -- ウィンドウ読み込み
+    loadBaseWindow(
+        skin,
+        PARTS_TEXTURE_SIZE - (BASE_WINDOW.EDGE_SIZE * 2 + BASE_WINDOW.SHADOW_LEN * 2 + 1) - 3,
+        PARTS_TEXTURE_SIZE - (BASE_WINDOW.EDGE_SIZE * 2 + BASE_WINDOW.SHADOW_LEN * 2 + 1)
+    )
 
     local c = getTableValue(skin_config.option, "背景形式", 915)
     if c == 915 then
@@ -1809,6 +2109,7 @@ local function main()
 
         {id = "playerName", font = 0, size = RIVAL.FONT_SIZE, align = 0, ref = 2, overflow = 1},
         {id = "rivalName" , font = 0, size = RIVAL.FONT_SIZE, align = 0, ref = 1, overflow = 1},
+        {id = "newVersion" , font = 0, size = 24, align = 0, overflow = 1, constantText = "新しいバージョンがあります"},
     }
 
     -- 選曲バー設定
@@ -3317,6 +3618,42 @@ local function main()
         destinationSmallKeysInHelp(skin, 1100 + 95, 469 - (i - 1) * 41, replayActiveKeys[i], 12000, 3500, 500, 16000);
     end
 
+    -- 新バージョン通知
+    if existNewVersion then
+    -- if true then
+        local dst = {
+            {time = 0, x = NEW_VERSION_MSG.WND.START_X, y = NEW_VERSION_MSG.WND.Y, w = NEW_VERSION_MSG.WND.W, h = NEW_VERSION_MSG.WND.H, acc = 2},
+            {time = 2000},
+            {time = 2300, x = NEW_VERSION_MSG.WND.X},
+            {time = 6300},
+            {time = 6600, x = NEW_VERSION_MSG.WND.START_X},
+        }
+        destinationWindowWithTimer(skin, {}, 10008, -1, dst)
+
+        -- attensionアイコン
+        table.insert(skin.destination, {
+            id = "attensionIcon", timer = 10008, loop = -1, dst = {
+                {time = 0, x = NEW_VERSION_MSG.WND.START_X + NEW_VERSION_MSG.ICON.X, y = NEW_VERSION_MSG.WND.Y + NEW_VERSION_MSG.ICON.Y, w = ATTENSION_SIZE, h = ATTENSION_SIZE, acc = 2},
+                {time = 2000},
+                {time = 2300, x = NEW_VERSION_MSG.WND.X + NEW_VERSION_MSG.ICON.X},
+                {time = 6300},
+                {time = 6600, x = NEW_VERSION_MSG.WND.START_X + NEW_VERSION_MSG.ICON.X},
+            }
+        })
+
+        -- 文字
+        table.insert(skin.destination, {
+            id = "newVersion", timer = 10008, loop = -1, dst = {
+                {time = 0, x = NEW_VERSION_MSG.WND.START_X + NEW_VERSION_MSG.TEXT.X, y = NEW_VERSION_MSG.WND.Y + NEW_VERSION_MSG.TEXT.Y, w = 310, h = 24, r = 0, g = 0, b = 0, acc = 2},
+                {time = 2000},
+                {time = 2300, x = NEW_VERSION_MSG.WND.X + NEW_VERSION_MSG.TEXT.X},
+                {time = 6300},
+                {time = 6600, x = NEW_VERSION_MSG.WND.START_X + NEW_VERSION_MSG.TEXT.X},
+            }
+        })
+
+    end
+    
     -- 選曲画面突入時アニメーション
     if getTableValue(skin_config.option, "開幕アニメーション種類", 930) == 931 then
         -- 背景
@@ -3577,7 +3914,7 @@ local function main()
             end
         end
     end
-    
+
     return skin
 end
 

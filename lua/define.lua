@@ -1,6 +1,6 @@
 
 local main_state = require("main_state")
-local http = require("socket.http")
+
 function table.in_key (tbl, key)
     for k, v in pairs (tbl) do
         if k==key then return true end
@@ -9,6 +9,11 @@ function table.in_key (tbl, key)
 end
 
 DEBUG = true
+
+SKIN_INFO = {
+    SELECT_VRESION = "2.00",
+    RESULT_VERSION = "1.20",
+}
 
 BASE_WIDTH = 1920
 BASE_HEIGHT = 1080
@@ -138,6 +143,11 @@ function createRankAndStaminaTable()
 end
 
 function globalInitialize(skin)
+    -- バージョンチェック
+    local newSelect, newResult = skinVersionCheck(SKIN_INFO.SELECT_VRESION, SKIN_INFO.RESULT_VERSION)
+    SKIN_INFO.existNewVersion = newSelect or newResult
+
+    -- ユーザ情報周り
     userData.name = main_state.text(2)
     userData.escapedName = string.gsub(userData.name, "([\\/:*?\"<>|])", "_")
 
