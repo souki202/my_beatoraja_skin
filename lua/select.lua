@@ -20,6 +20,7 @@
 
 require("define")
 require("http")
+require("keyevent")
 
 local main_state = require("main_state")
 
@@ -687,7 +688,7 @@ local function isDefaultLampGraphColor()
 end
 
 local function isCheckNewVersion()
-    return getTableValue(skin_config.option, "新バージョン確認", 998) == 998
+    return getTableValue(skin_config.option, "新バージョン確認", 998) == 998 and userData.nextVersionCheckDate <= os.time()
 end
 
 local function calcComplementValueByTime(startValue, endValue, nowTime, overallTime)
@@ -1460,6 +1461,7 @@ local function main()
     if isCheckNewVersion() then
         local sv, rv = skinVersionCheck(SKIN_INFO.SELECT_VRESION, SKIN_INFO.RESULT_VERSION)
         existNewVersion = sv or rv
+        userData.updateNextVersionCheckDate()
     end
 
     skin.source = {
@@ -1483,6 +1485,7 @@ local function main()
     table.insert(skin.customTimers, {id = 10006, timer = "updateStaminaGauge"}) -- スタミナゲージ表示用タイマー
     table.insert(skin.customTimers, {id = 10007, timer = "updateUseStamina"}) -- スタミナ使用量更新用タイマー
     table.insert(skin.customTimers, {id = 10008, timer = "newVersionAnimation"}) -- 新バージョンがある時の文字表示用
+    table.insert(skin.customTimers, {id = 10008, timer = "keyInput"}) -- 新バージョンがある時の文字表示用
 
     skin.image = {
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},

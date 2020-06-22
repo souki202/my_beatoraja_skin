@@ -31,7 +31,8 @@ local function httpConnection(url)
 end
 
 -- 各スキンのバージョンを確認する
--- @param  string nowVersion 現在のバージョンの文字列
+-- @param  number selectVersion 現在のバージョンの文字列
+-- @param  number resultVersion
 -- @return boolean, boolean 新しいバージョンがあればtrue, ないか, 接続失敗すればfalse 1個目はセレクト, 2個目はresult
 function skinVersionCheck(selectVersion, resultVersion)
     local err, v = pcall(httpConnection, "https://tori-blog.net/wp-content/uploads/skin/version")

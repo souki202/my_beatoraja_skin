@@ -59,7 +59,7 @@ userData = {
 
     rank = {
         maxRank = 999,
-        rank = 0,
+        rank = 1,
         exp = 0, -- math.pow(EXSCORE * math.min(1, END_DENSITY), 3 / 4.0)
         tbl = {},
         calcNext = nil, -- function
@@ -71,6 +71,8 @@ userData = {
         now = 0,
         tbl = {},
     },
+
+    nextVersionCheckDate = 0
 }
 
 -- 自作の任意の数値を表示させるための色々
@@ -189,6 +191,7 @@ function dstNumberRightJustify(skin, id, x, y, w, h, digit)
     })
 end
 
+-- ユーザデータIO周り
 userData.initData = function()
     local f = io.open(userData.filePath, "w")
     print("Social Skin ユーザ作成")
@@ -203,6 +206,8 @@ userData.initData = function()
     f:write(string.format("%12d", os.time()) .. "\n")
     -- now stamina
     f:write("10\n")
+    -- バージョン確認日
+    f:write(string.format("%10d", os.time()) .. "\n")
 
     f:close()
 end
@@ -229,6 +234,8 @@ userData.load = function()
             userData.stamina.nextHealEpochSecond = tonumber(line)
         elseif cnt == 4 then
             userData.stamina.now = tonumber(line)
+        elseif cnt == 5 then
+            userData.nextVersionCheckDate = tonumber(line)
         end
         cnt = cnt + 1
     end
@@ -249,10 +256,11 @@ userData.writeUserData = function(fileHandle)
     -- exp
     fileHandle:write(userData.rank.exp .. "\n")
     -- next heal stamina epoch second
-    fileHandle:write(userData.stamina.nextHealEpochSecond .. "\n")
+    fileHandle:write(string.format("%10d", userData.stamina.nextHealEpochSecond) .. "\n")
     -- now stamina
     fileHandle:write(userData.stamina.now .. "\n")
-
+    -- バージョン確認日
+    fileHandle:write(string.format("%10d", userData.nextVersionCheckDate) .. "\n")
 end
 
 userData.save = function()
@@ -366,6 +374,12 @@ userData.updateRemainingStamina = function()
         myPrint("次の回復: " .. userData.getNextHealStaminaDateString())
         userData.save()
     end
+end
+
+userData.updateNextVersionCheckDate = function()
+    -- 1週間後
+    userData.nextVersionCheckDate = os.time() + 60*60*24*7
+    userData.save()
 end
 
 -- 数字の画像を読み込む

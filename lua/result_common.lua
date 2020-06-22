@@ -829,7 +829,6 @@ local function main()
         end
     end
 
-
     skin.source = {
         {id = 0, path = "../result/parts/parts.png"},
         {id = 1, path = "../result/parts/shine.png"},
