@@ -20,7 +20,8 @@
 
 require("define")
 require("http")
-require("keyevent")
+require("my_window")
+local help = require("help")
 
 local main_state = require("main_state")
 
@@ -695,240 +696,6 @@ local function calcComplementValueByTime(startValue, endValue, nowTime, overallT
     return startValue + (endValue - startValue) * nowTime / overallTime
 end
 
-local function loadBaseWindow(skin, x, y)
-    local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN
-    -- 四隅
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.UPPER_LEFT, src = 0, x = x, y = y,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.UPPER_RIGHT, src = 0, x = x + sumEdgeSize + 1, y = y,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BOTTOM_RIGHT, src = 0, x = x + sumEdgeSize + 1, y = y + sumEdgeSize + 1,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BOTTOM_LEFT, src = 0, x = x, y = y + sumEdgeSize + 1,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-
-    -- 各辺
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.TOP, src = 0, x = x + sumEdgeSize, y = y,
-        w = 1, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.LEFT, src = 0, x = x + sumEdgeSize + 1, y = y + sumEdgeSize,
-        w = sumEdgeSize, h = 1
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BOTTOM, src = 0, x = x + sumEdgeSize, y = y + sumEdgeSize + 1,
-        w = 1, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.RIGHT, src = 0, x = x, y = y + sumEdgeSize,
-        w = sumEdgeSize, h = 1
-    })
-
-    -- 本体
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BODY, src = 0, x = x + sumEdgeSize, y = y + sumEdgeSize,
-        w = 1, h = 1
-    })
-end
-
--- それぞれ影を除いた座標
-local function destinationWindow(skin, x, y, w, h, op)
-    local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN
-
-    -- 四隅
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.UPPER_LEFT, op = op, dst = {
-            {x = x - BASE_WINDOW.SHADOW_LEN, y = y + h - BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.UPPER_RIGHT, op = op, dst = {
-            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y + h - BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BOTTOM_RIGHT, op = op, dst = {
-            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y - BASE_WINDOW.SHADOW_LEN, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BOTTOM_LEFT, op = op, dst = {
-            {x = x - BASE_WINDOW.SHADOW_LEN, y = y - BASE_WINDOW.SHADOW_LEN, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-
-    -- 各辺
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.TOP, op = op, dst = {
-            {x = x + BASE_WINDOW.EDGE_SIZE, y = y + h - BASE_WINDOW.EDGE_SIZE, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.LEFT, op = op, dst = {
-            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y + BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = h - BASE_WINDOW.EDGE_SIZE * 2}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BOTTOM, op = op, dst = {
-            {x = x + BASE_WINDOW.EDGE_SIZE, y = y - BASE_WINDOW.SHADOW_LEN, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.RIGHT, op = op, dst = {
-            {x = x - BASE_WINDOW.SHADOW_LEN, y = y + BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = h - BASE_WINDOW.EDGE_SIZE * 2}
-        }
-    })
-
-    -- 本体
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BODY, op = op, dst = {
-            {x = x + BASE_WINDOW.EDGE_SIZE, y = y + BASE_WINDOW.EDGE_SIZE, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = h - BASE_WINDOW.EDGE_SIZE * 2}
-        }
-    })
-end
-
--- 数値描画の基準座標におけるdstの中身. それぞれで, x,yが定義されていれば各桁に適した座標に修正する.
--- x, yは影を除くウィンドウ左下座標
--- w, hは影を除くウィンドウ全体の大きさを指定する
-local function destinationWindowWithTimer(skin, op, timer, loop, baseDst)
-    local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN
-    local ids = {
-        BASE_WINDOW.ID.UPPER_LEFT,
-        BASE_WINDOW.ID.UPPER_RIGHT,
-        BASE_WINDOW.ID.BOTTOM_RIGHT,
-        BASE_WINDOW.ID.BOTTOM_LEFT,
-        BASE_WINDOW.ID.TOP,
-        BASE_WINDOW.ID.LEFT,
-        BASE_WINDOW.ID.BOTTOM,
-        BASE_WINDOW.ID.RIGHT,
-        BASE_WINDOW.ID.BODY,
-    }
-    local dx = {
-        - BASE_WINDOW.SHADOW_LEN,
-        - BASE_WINDOW.EDGE_SIZE,
-        - BASE_WINDOW.EDGE_SIZE,
-        - BASE_WINDOW.SHADOW_LEN,
-        BASE_WINDOW.EDGE_SIZE,
-        - BASE_WINDOW.EDGE_SIZE,
-        BASE_WINDOW.EDGE_SIZE,
-        - BASE_WINDOW.SHADOW_LEN,
-        BASE_WINDOW.EDGE_SIZE,
-    }
-
-    local dy = {
-        - BASE_WINDOW.EDGE_SIZE,
-        - BASE_WINDOW.EDGE_SIZE,
-        - BASE_WINDOW.SHADOW_LEN,
-        - BASE_WINDOW.SHADOW_LEN,
-        - BASE_WINDOW.EDGE_SIZE,
-        BASE_WINDOW.EDGE_SIZE,
-        - BASE_WINDOW.SHADOW_LEN,
-        BASE_WINDOW.EDGE_SIZE,
-        BASE_WINDOW.EDGE_SIZE,
-    }
-
-    local isAddW = {
-        false,
-        true,
-        true,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false
-    }
-    local isAddH = {
-        true,
-        true,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-    }
-    local doUseSumEdgeSizeW = {
-        true, true, true, true, false, true, false, true, false
-    }
-    local doUseSumEdgeSizeH = {
-        true, true, true, true, true, false, true, false, false
-    }
-
-    local function copyDst(t)
-        local t2 = {}
-        for k,v in pairs(t) do
-          t2[k] = v
-        end
-        return t2
-    end
-
-    -- それぞれのedgeについて
-    for i = 1, 9 do
-        -- dstを組み立てる
-        local newestW = 0
-        local newestH = 0
-        local newestX = 0
-        local newestY = 0
-        local dst = {}
-        for _, value in pairs(baseDst) do
-            -- 元の入ってきたものを破壊しないように複製
-            local newDst = copyDst(value)
-            if table.in_key(newDst, "w") then
-                newestW = newDst["w"]
-                -- w 書き換え
-                if doUseSumEdgeSizeW[i] then
-                    newDst["w"] = sumEdgeSize
-                else
-                    newDst["w"] = newestW - BASE_WINDOW.EDGE_SIZE * 2
-                end
-            end
-
-            if table.in_key(newDst, "h") then
-                newestH = newDst["h"]
-                -- h 書き換え
-                if doUseSumEdgeSizeH[i] then
-                    newDst["h"] = sumEdgeSize
-                else
-                    newDst["h"] = newestH - BASE_WINDOW.EDGE_SIZE * 2
-                end
-            end
-
-            if table.in_key(newDst, "x") then
-                newestX = newDst["x"]
-            end
-            newDst["x"] = newestX + dx[i]
-            if isAddW[i] then
-                newDst["x"] = newDst["x"] + newestW
-            end
-
-            if table.in_key(newDst, "y") then
-                newestY = newDst["y"]
-            end
-            newDst["y"] = newestY + dy[i]
-            if isAddH[i] then
-                newDst["y"] = newDst["y"] + newestH
-            end
-
-            table.insert(dst, newDst)
-        end
-        table.insert(skin.destination, {
-            id = ids[i],
-            op = op, timer = timer, loop = loop, dst = dst
-        })
-    end
-end
-
 local function hsvToRgb(h, s, v)
     h = h % 360
     local c = v * s * 1.0
@@ -1485,7 +1252,11 @@ local function main()
     table.insert(skin.customTimers, {id = 10006, timer = "updateStaminaGauge"}) -- スタミナゲージ表示用タイマー
     table.insert(skin.customTimers, {id = 10007, timer = "updateUseStamina"}) -- スタミナ使用量更新用タイマー
     table.insert(skin.customTimers, {id = 10008, timer = "newVersionAnimation"}) -- 新バージョンがある時の文字表示用
-    table.insert(skin.customTimers, {id = 10008, timer = "keyInput"}) -- 新バージョンがある時の文字表示用
+    table.insert(skin.customTimers, {id = 10009, timer = "helpTimer"}) -- ヘルプ画面全体のタイマー
+    for i = 1, 191 do
+        table.insert(skin.customTimers, {id = 10010 + (i - 1)}) -- 10010~10200までヘルプ用で予約 増えるかもしれないので500くらい余裕見ておく
+    end
+    skin.customEvents = {} -- 1000~未定はヘルプ
 
     skin.image = {
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
@@ -1768,6 +1539,9 @@ local function main()
         -- 注目アイコン
         {id = "attensionIcon", src = 0, x = 1846, y = PARTS_OFFSET + 874, w = ATTENSION_SIZE, h = ATTENSION_SIZE},
 
+        -- ヘルプウィンドウ周り
+        -- {id = "helpHeaderBgLeft", src = 0, x = 1591, y = },
+
         -- 検索ボックス
         {id = "searchBox", src = 0, x = 773, y = PARTS_TEXTURE_SIZE - 62, w = 1038, h = 62},
 
@@ -1784,8 +1558,10 @@ local function main()
     -- ウィンドウ読み込み
     loadBaseWindow(
         skin,
+        BASE_WINDOW.ID,
         PARTS_TEXTURE_SIZE - (BASE_WINDOW.EDGE_SIZE * 2 + BASE_WINDOW.SHADOW_LEN * 2 + 1) - 3,
-        PARTS_TEXTURE_SIZE - (BASE_WINDOW.EDGE_SIZE * 2 + BASE_WINDOW.SHADOW_LEN * 2 + 1)
+        PARTS_TEXTURE_SIZE - (BASE_WINDOW.EDGE_SIZE * 2 + BASE_WINDOW.SHADOW_LEN * 2 + 1),
+        BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN
     )
 
     local c = getTableValue(skin_config.option, "背景形式", 915)
@@ -2113,7 +1889,11 @@ local function main()
         {id = "playerName", font = 0, size = RIVAL.FONT_SIZE, align = 0, ref = 2, overflow = 1},
         {id = "rivalName" , font = 0, size = RIVAL.FONT_SIZE, align = 0, ref = 1, overflow = 1},
         {id = "newVersion" , font = 0, size = 24, align = 0, overflow = 1, constantText = "スキンに更新があります"},
+        {id = "helpText", font = 0, size = 30, align = 0, constantText = "ヘルプ"},
     }
+
+    -- ヘルプの読み込み
+    help.loadHelpItem(skin)
 
     -- 選曲バー設定
     skin.songlist = {
@@ -3448,6 +3228,12 @@ local function main()
         })
     end
 
+    -- ヘルプボタン
+    help.destinationOpenButton(skin)
+    -- ヘルプウィンドウ
+    help.setWindowDestination(skin)
+    help.setListDestination(skin)
+
     -- プレイオプション
     -- 背景部分
     for i = 1, 3 do
@@ -3631,7 +3417,7 @@ local function main()
             {time = 6300},
             {time = 6600, x = NEW_VERSION_MSG.WND.START_X},
         }
-        destinationWindowWithTimer(skin, {}, 10008, -1, dst)
+        destinationWindowWithTimer(skin, BASE_WINDOW.ID, BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN, {}, 10008, -1, dst)
 
         -- attensionアイコン
         table.insert(skin.destination, {

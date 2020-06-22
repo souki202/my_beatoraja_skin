@@ -117,8 +117,8 @@ function createRankAndStaminaTable()
     local f1 = function(i) return 20 + (i - 1) * 60 end
     local f2 = function(i) return f1(10) + (i - 10) * 250 end
     local f3 = function(i) return f2(100) + (i - 100) * 350 end
-    local f4 = function(i) return f3(300) + (i - 300) * 200 end
-    local f5 = function(i) return 150000 end
+    local f4 = function(i) return f3(300) + (i - 300) * 400 end
+    local f5 = function(i) return 250000 end
 
     for i = 1, userData.rank.maxRank do
         local next = 0
