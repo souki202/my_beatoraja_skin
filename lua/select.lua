@@ -3233,6 +3233,7 @@ local function main()
     -- ヘルプウィンドウ
     help.setWindowDestination(skin)
     help.setListDestination(skin)
+    help.setWindowDestination2(skin)
 
     -- プレイオプション
     -- 背景部分
@@ -3488,7 +3489,7 @@ local function main()
         })
 
         -- 流星
-        -- ひたすら座標計算超カオス
+        -- ひたすら座標計算
         local hue = 0.0
         local deltaHue = 360.0 / METEOR_INFO.QUANTITY
         local startdustDst = {destination = {}}

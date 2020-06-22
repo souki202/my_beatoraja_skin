@@ -23,8 +23,16 @@ function isLeftClicking()
     return gdx.input:isButtonPressed(input.Buttons.LEFT)
 end
 
+function isRightClicking()
+    return gdx.input:isButtonPressed(input.Buttons.RIGHT)
+end
+
 function getDeltaY()
     return gdx.input:getDeltaY()
+end
+
+function getDeltaX()
+    return gdx.input:getDeltaX()
 end
 
 function getMousePos()
