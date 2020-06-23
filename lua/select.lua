@@ -3234,6 +3234,7 @@ local function main()
     help.setWindowDestination(skin)
     help.setListDestination(skin)
     help.setWindowDestination2(skin)
+    help.setDestinationDescription(skin)
 
     -- プレイオプション
     -- 背景部分

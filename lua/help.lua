@@ -136,143 +136,39 @@ local help = {
             isOpen = false,
             openAnimationTime = 0
         },
-        {
-            HEADER = "テスト2",
-            item = {
-                {
-                    TEXT = "プレイ開始2",
-                    timerId = 0,
-                    description = {
-                        TEXT = "221鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
-                        timerId = 0,
-                    },
-                },
-                {
-                    TEXT = "プラクティス2",
-                    description = {
-                        TEXT = "223鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
-                    },
-                },
-                {
-                    TEXT = "オートプレイ2",
-                    description = {
-                        TEXT = "225鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
-                    },
-                },
-                {
-                    TEXT = "リプレイ2",
-                    description = {
-                        TEXT = "226鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
-                    },
-                },
-            },
-        },
-        {
-            HEADER = "テスト23",
-            item = {
-                {
-                    TEXT = "プレイ開始3",
-                    timerId = 0,
-                    description = {
-                        TEXT = "331鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
-                        timerId = 0,
-                    },
-                },
-                {
-                    TEXT = "プラクティス3",
-                    description = {
-                        TEXT = "333鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
-                    },
-                },
-                {
-                    TEXT = "オートプレイ3",
-                    description = {
-                        TEXT = "335鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
-                    },
-                },
-                {
-                    TEXT = "リプレイ3",
-                    description = {
-                        TEXT = "336鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
-                    },
-                },
-            },
-        },
-        {
-            HEADER = "テスト23",
-            item = {
-                {
-                    TEXT = "プレイ開始3",
-                    timerId = 0,
-                    description = {
-                        TEXT = "331鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
-                        timerId = 0,
-                    },
-                },
-                {
-                    TEXT = "プラクティス3",
-                    description = {
-                        TEXT = "333鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
-                    },
-                },
-                {
-                    TEXT = "オートプレイ3",
-                    description = {
-                        TEXT = "335鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
-                    },
-                },
-                {
-                    TEXT = "リプレイ3",
-                    description = {
-                        TEXT = "336鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
-                    },
-                },
-            },
-        },
-        {
-            HEADER = "テスト23",
-            item = {
-                {
-                    TEXT = "プレイ開始3",
-                    timerId = 0,
-                    description = {
-                        TEXT = "331鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
-                        timerId = 0,
-                    },
-                },
-                {
-                    TEXT = "プラクティス3",
-                    description = {
-                        TEXT = "333鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
-                    },
-                },
-                {
-                    TEXT = "オートプレイ3",
-                    description = {
-                        TEXT = "335鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
-                    },
-                },
-                {
-                    TEXT = "リプレイ3",
-                    description = {
-                        TEXT = "336鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
-                    },
-                },
-            },
-        },
     },
 
-    DETAIL = {
+    detail = {
         timerId = 0,
+        descriptionTimerId = 0,
         HEADER = {
             X = 118,
             Y = 768,
-            W = 16, -- OPTION_INFO.HEADER2_EDGE_BG_W
+            W = 1450,
+            EDGE_W = 16, -- OPTION_INFO.HEADER2_EDGE_BG_W
             H = 42, -- OPTION_INFO.HEADER2_EDGE_BG_H
+            TEXT = {
+                X = 30,
+                Y = 6,
+                SIZE = 24,
+            },
+        },
+        BODY = {
+            X = 0, -- headerに対する相対座標
+            Y = -45,
+            W = 1450,
+            SIZE = 20,
+        },
+        BUTTON = {
+            X = 46, -- WNDに対する相対座標
+            Y = 758,
+            W = 62,
+            H = 62,
         },
     },
 
     isOpenDescription = false,
+    maxTimerId = 0,
 
     FUNCTIONS = {},
 }
@@ -295,7 +191,11 @@ function itemListOperation()
         myPrint("ヘルプ操作領域クリック")
         operationState.isClicking = true
     elseif isRightClicking() == true then
-        closeHelpList()
+        if help.isOpenDescription then
+            help.FUNCTIONS.closeDetail()
+        else
+            closeHelpList()
+        end
     end
 end
 
@@ -346,8 +246,8 @@ help.FUNCTIONS.updateOperationArea = function()
                     help.TEXTS[h].isOpen = not help.TEXTS[h].isOpen
                 elseif h > 0 and i > 0 then
                     -- 小項目をクリックしたら詳細表示
-                    help.isOpenDescription = true
-
+                    myPrint("詳細表示: " .. help.TEXTS[h].item[i].TEXT, "timer: " .. help.TEXTS[h].item[i].description.timerId)
+                    help.FUNCTIONS.openDetail(help.TEXTS[h].item[i].description.timerId)
                 end
             end
 
@@ -411,7 +311,7 @@ local function helpMainLogic()
 
             for j, item2 in pairs(item.item) do
                 if item2.timerId ~= nil and item2.timerId >= 10000 then
-                    local offset = -6
+                    local offset = -7
                     if item.openAnimationTime  ~= 0 then
                         offset = j * help.ITEM.BG.ITEM.INTERVAL * item.openAnimationTime / help.ITEM.BG.ITEM.APPEAR_ANIMATION_TIME
                     end
@@ -421,7 +321,6 @@ local function helpMainLogic()
                     -- 各項目部分
                     local iy = item.y + 0.25 - help.scrollY - offset - sumOpenMenuGap
                     time = help.FUNCTIONS.yToTime(iy) * 1000
-                    
 
                     if help.FUNCTIONS.examineOutOfArea(iy, help.ITEM.BG.ITEM.H) then
                         -- 外に出ていたら表示しない
@@ -453,10 +352,11 @@ function helpTimer()
         end
     elseif help.isClosing then
         help.closeTime = help.closeTime - getDeltaTime()
-        help.FUNCTIONS.setAllTimer(getElapsedTime() - help.closeTime)
+        help.FUNCTIONS.setAllTimerWithoutDescription(getElapsedTime() - help.closeTime)
+        help.FUNCTIONS.setTimeDescription(getElapsedTime())
         -- 閉じきったら後処理
         if help.closeTime <= 0 then
-            -- myPrint("閉じきった: " .. main_state.time() - main_state.timer(help.WINDOW_TIMER))
+            myPrint("閉じきった: " .. main_state.time() - main_state.timer(help.WINDOW_TIMER))
             help.FUNCTIONS.allClose()
             help.isClosing = false
         end
@@ -487,7 +387,41 @@ function closeHelpList()
     end
 end
 
-help.FUNCTIONS.setAllTimer = function(time)
+help.FUNCTIONS.openDetail = function(descriptionTimerId)
+    if help.isOpenDescription == false then
+        main_state.set_timer(help.detail.timerId, 0)
+        main_state.set_timer(descriptionTimerId, 0)
+        help.detail.descriptionTimerId = descriptionTimerId
+        help.isOpenDescription = true
+    end
+end
+
+help.FUNCTIONS.closeDescription = function()
+    myPrint("詳細閉じる")
+    help.FUNCTIONS.setTimeDescription(main_state.timer_off_value)
+    help.isOpenDescription = false
+    help.detail.descriptionTimerId = 0
+end
+
+help.FUNCTIONS.setTimeDescription = function(time)
+    if help.detail.descriptionTimerId ~= nil and help.detail.timerId ~= nil and help.detail.descriptionTimerId > 10000 then
+        main_state.set_timer(help.detail.timerId, time)
+        main_state.set_timer(help.detail.descriptionTimerId, time)
+    end
+end
+
+function closeDescriptionRightClickEvent()
+    if isRightClicking() == true then
+        help.FUNCTIONS.closeDescription()
+    end
+end
+
+function closeDescriptionClickEvent()
+    help.FUNCTIONS.closeDescription()
+end
+
+-- description以外
+help.FUNCTIONS.setAllTimerWithoutDescription = function(time)
     main_state.set_timer(help.WINDOW_TIMER, time)
     for _, item in pairs(help.TEXTS) do
         if item.timerId ~= nil and item.timerId >= 10000 then
@@ -502,11 +436,12 @@ help.FUNCTIONS.setAllTimer = function(time)
 end
 
 help.FUNCTIONS.allClose = function()
-    help.FUNCTIONS.setAllTimer(main_state.timer_off_value)
+    help.FUNCTIONS.closeDescription()
+    help.FUNCTIONS.setAllTimerWithoutDescription(main_state.timer_off_value)
 end
 
 help.FUNCTIONS.activateAllTimer = function()
-    help.FUNCTIONS.setAllTimer(main_state.time())
+    help.FUNCTIONS.setAllTimerWithoutDescription(main_state.time())
 end
 
 -- カスタムタイマ, カスタムアクション, textの後に配置すること
@@ -523,6 +458,8 @@ help.FUNCTIONS.loadHelpItem = function(skin)
     table.insert(skin.customEvents, {id = 1000, action = "openHelpList()"})
     table.insert(skin.customEvents, {id = 1001, action = "closeHelpList()"})
     table.insert(skin.customEvents, {id = 1002, action = "itemListOperation()"})
+    table.insert(skin.customEvents, {id = 1003, action = "closeDescriptionRightClickEvent()"})
+    table.insert(skin.customEvents, {id = 1004, action = "closeDescriptionClickEvent()"})
 
     table.insert(skin.image, {
         id = "helpOpenButton", src = 0, x = 1415, y = PARTS_OFFSET + 771, w = help.BUTTON.W, h = help.BUTTON.H, act = 1000
@@ -551,6 +488,15 @@ help.FUNCTIONS.loadHelpItem = function(skin)
         id = "whiteMask", src = 999, x = 2, y = 0, w = 1, h = 1, act = 0
     })
 
+    table.insert(skin.image, {
+        id = "whiteDetailBg", src = 999, x = 2, y = 0, w = 1, h = 1, act = 1003
+    })
+
+    -- 詳細の戻るボタン
+    table.insert(skin.image, {
+        id = "closeDescriptionButton", src = 0, x = 1699, y = PARTS_OFFSET + 771, w = help.detail.BUTTON.W, h = help.detail.BUTTON.H, act = 1004
+    })
+
     -- 各ヘッダー項目
     table.insert(skin.image, {
         id = "helpHeaderBgLeft", src = 2, x = 1591, y = TEXTURE_SIZE - help.ITEM.BG.HEADER.H, w = help.ITEM.BG.HEADER.EDGE_W, h = help.ITEM.BG.HEADER.H
@@ -569,17 +515,17 @@ help.FUNCTIONS.loadHelpItem = function(skin)
             id = item.HEADER, font = 0, size = 24, overflow = 1, constantText = item.HEADER
         })
         -- 各項目
-        for _, item2 in pairs(item.item) do
+        for j, item2 in pairs(item.item) do
             -- 各項目文字
             table.insert(skin.text, {
                 id = item2.TEXT, font = 0, size = 20, overflow = 1, constantText = item2.TEXT
             })
             table.insert(skin.text, {
-                id = item2.TEXT .. "Detail", font = 0, size = 24, overflow = 1, constantText = item2.TEXT
+                id = item2.TEXT .. "Detail" .. j, font = 0, size = help.detail.HEADER.TEXT.SIZE, overflow = 1, constantText = item2.TEXT
             })
-            -- 詳細テキスト
+            -- 詳細テキスト 1.5倍はアンチエイリアス
             table.insert(skin.text, {
-                id = item2.description.TEXT, font = 0, size = 16, wrapping = true, constantText = item2.description.TEXT
+                id = item2.description.TEXT .. j, font = 0, size = help.detail.BODY.SIZE*1.5, wrapping = true, constantText = item2.description.TEXT
             })
         end
     end
@@ -613,7 +559,7 @@ help.FUNCTIONS.setWindowDestination = function(skin)
     -- 操作用オブジェクト出力
     table.insert(skin.destination, {
         id = "blankHelpOperation", timer = help.WINDOW_TIMER, loop = help.ANIMATION_TIME, dst = {
-            initial,
+            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0, a = 0},
             {time = help.ANIMATION_TIME - 1},
             {time = help.ANIMATION_TIME, x = help.WND.X + help.ITEM.AREA.X, y = help.WND.Y + help.ITEM.AREA.Y, w = help.ITEM.AREA.W, h = help.ITEM.AREA.H}
         }
@@ -714,8 +660,6 @@ help.FUNCTIONS.setListDestination = function(skin)
                 }
             })
             item2.timerId = timer
-            timer = timer + 1
-            item2.description.timerId = timer
         end
 
         timer = timer + 1
@@ -760,28 +704,79 @@ help.FUNCTIONS.setListDestination = function(skin)
         item.openAnimationTime = 0
     end
 
+    help.maxTimerId = timer
+end
+
+help.FUNCTIONS.setDestinationDescription = function(skin)
+    local viewTime = help.ANIMATION_TIME + help.ITEM.BG.HEADER.VIEW_DELAY
+    local timer = help.maxTimerId
     -- 詳細項目の出力
     -- 項目背景(オプションのを使いまわし)
-    timer = timer + 1
-    table.insert(skin.destination, {
-        id = "optionHeader2LeftBg", timer = timer, loop = -1, dst = {
-            -- 開幕の登場する部分
-            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1, a = 0},
-            {time = viewTime, x = help.WND.X + help.DETAIL.HEADER.X},
-        }
-    })
+    do
+        timer = timer + 1
+        myPrint("descriptionヘッダータイマ: " .. timer)
+        help.detail.timerId = timer
+        local init = {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1}
+        local headerX = help.WND.X + help.detail.HEADER.X
+        local headerY = help.WND.Y + help.detail.HEADER.Y
+        table.insert(skin.destination, {
+            id = "whiteDetailBg", timer = timer, loop = viewTime, dst = {
+                init,
+                {time = viewTime, x = help.WND.X + help.ITEM.AREA.X, y = help.WND.Y + help.ITEM.AREA.Y, w = help.ITEM.AREA.W, h = help.ITEM.AREA.H, a = 255}
+            }
+        })
+        table.insert(skin.destination, {
+            id = "optionHeader2LeftBg", timer = timer, loop = viewTime, dst = {
+                init,
+                {time = viewTime, x = headerX, y = headerY, w = help.detail.HEADER.EDGE_W, h = help.detail.HEADER.H, a = 255},
+            }
+        })
+        table.insert(skin.destination, {
+            id = "white", timer = timer, loop = viewTime, dst = {
+                init,
+                {
+                    time = viewTime,
+                    x = headerX + help.detail.HEADER.EDGE_W,
+                    y = headerY,
+                    w = help.detail.HEADER.W - help.detail.HEADER.EDGE_W * 2,
+                    h = help.detail.HEADER.H, a = 255, r = 64, g = 64, b = 64},
+            }
+        })
+        table.insert(skin.destination, {
+            id = "optionHeader2RightBg", timer = timer, loop = viewTime, dst = {
+                init,
+                {time = viewTime, x = headerX + help.detail.HEADER.W - help.detail.HEADER.EDGE_W, y = headerY, w = help.detail.HEADER.EDGE_W, h = help.detail.HEADER.H, a = 255},
+            }
+        })
+        -- ボタン出力
+        table.insert(skin.destination, {
+            id = "closeDescriptionButton", timer = timer, loop = viewTime, dst = {
+                init,
+                {time = viewTime, x = help.WND.X + help.detail.BUTTON.X, y = help.WND.Y + help.detail.BUTTON.Y, w = help.detail.BUTTON.W, h = help.detail.BUTTON.H, a = 255},
+            }
+        })
 
-    for i, item in pairs(help.TEXTS) do
-        -- 各項目の出力
-        for j, item2 in pairs(item.item) do
-            timer = timer + 1
-            table.insert(skin.destination, {
-                id = item2.TEXT .. "Detail", timer = timer, loop = -1, dst = {
-                    -- 開幕の登場する部分
-                    {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1, a = 0},
-                    {time = viewTime},
-                }
-            })
+        for _, item in pairs(help.TEXTS) do
+            -- 各項目の出力
+            for j, item2 in pairs(item.item) do
+                timer = timer + 1
+                table.insert(skin.destination, {
+                    id = item2.TEXT .. "Detail" .. j, timer = timer, loop = viewTime, dst = {
+                        -- 開幕の登場する部分
+                        {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1, a = 0},
+                        {time = viewTime, x = headerX + help.detail.HEADER.TEXT.X, y = headerY + help.detail.HEADER.TEXT.Y, w = 9999, h = help.detail.HEADER.TEXT.SIZE, a = 255},
+                    }
+                })
+                table.insert(skin.destination, {
+                    id = item2.description.TEXT .. j, timer = timer, loop = viewTime, filter = 1, dst = {
+                        -- 開幕の登場する部分
+                        {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1, a = 0},
+                        {time = viewTime, x = headerX + help.detail.BODY.X, y = headerY + help.detail.BODY.Y, w = help.detail.BODY.W, h = help.detail.BODY.SIZE, r = 0, g = 0, b = 0, a = 255},
+                    }
+                })
+                item2.description.timerId = timer
+                print(item2.TEXT .. "Detail" .. j)
+            end
         end
     end
 end
