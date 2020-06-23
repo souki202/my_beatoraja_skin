@@ -263,6 +263,12 @@ local help = {
                         TEXT = "F12を押すと, スキンセレクト画面に入ります."
                     }
                 },
+                {
+                    TEXT = "キーコンフィグ",
+                    description = {
+                        TEXT = "数字キーの6を押すと, キーコンフィグ画面に入ります.\nキーコンフィグでは, 変更したい項目に矢印キーで移動し, エンターキー押した後, 設定したいキーを押すことで設定できます. 数字キー, Fnキー等, 一部beatorajaのシステムで利用されているキーは設定できません."
+                    }
+                },
             }
         },
         {
@@ -404,7 +410,7 @@ local help = {
                 {
                     TEXT = "著作権",
                     description = {
-                        TEXT = "本スキンの改変や再配布は, 申告無しで自由に行って良いですが, https://tori-blog.net/ へのリンクをお願いします.\n本スキンでは, 一部フリー素材を利用しています. 各フリー素材に関しては, その配布元に従ってください."
+                        TEXT = "本スキンの改変や再配布は, 申告無しで自由に行って良いですが, https://tori-blog.net/bms/1392/ へのリンクをお願いします.\n本スキンでは, 一部フリー素材を利用しています. 各フリー素材に関しては, その配布元に従ってください."
                     },
                 },
                 {
@@ -1058,7 +1064,7 @@ help.FUNCTIONS.setDestinationDescription = function(skin)
                     }
                 })
                 item2.description.timerId = timer
-                print(item2.TEXT .. "Detail" .. j)
+                myPrint(item2.TEXT .. "Detail" .. j)
             end
         end
     end
