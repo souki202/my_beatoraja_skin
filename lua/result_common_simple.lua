@@ -734,7 +734,7 @@ local function main()
             userData.updateRemainingStamina()
             userData.useStamina(requireStamina)
             userData.addExp(exp)
-            userData.save()
+            pcall(userData.save)
         else
             print("スタミナ不足のため, 経験値なし")
         end

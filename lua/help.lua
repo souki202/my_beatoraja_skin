@@ -100,13 +100,48 @@ local help = {
     START_TIME = 10000000,
     TEXTS = {
         { -- これが全要素持っているやつ
-            HEADER = "選曲画面操作",
+            HEADER = "基本",
+            item = {
+                {
+                    TEXT = "プレイにあたって",
+                    timerId = 0,
+                    description = {
+                        TEXT = "BMSは, 各個人が節度を持ってプレイすることが重要です. 本家譜面及び曲の流用や, その他版権等違法性のあるBMSはプレイしないようにしましょう. BMSは, 各プレイヤーや製作者の良識や節度をもって存続しています.",
+                        timerId = 0,
+                    },
+                },
+                {
+                    TEXT = "鍵",
+                    timerId = 0,
+                    description = {
+                        TEXT = "専用コントローラにおいて, 左のボタンから順番に1鍵, 2鍵...7鍵となります. そのため白色はそれぞれ左から1357鍵, 青色は246鍵となります.\nキーボードでは, 初期設定の場合, 1鍵から順にzsxdcfvが対応しています.",
+                        timerId = 0,
+                    },
+                },
+                {
+                    TEXT = "皿",
+                    timerId = 0,
+                    description = {
+                        TEXT = "専用コントローラにおいて, 左端または右端に配置されている円盤(ターンテーブル)のことです. 他項目では, 便宜上「皿」と表現します.",
+                        timerId = 0,
+                    },
+                },
+            },
+            timerId = 0,
+            time = 0,
+            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
+            nowY = 0, -- 各項目の最新座標
+            isOpen = false,
+            openAnimationTime = 0
+        },
+        {
+            HEADER = "選曲",
             item = {
                 {
                     TEXT = "プレイ開始",
                     timerId = 0,
                     description = {
-                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
+                        TEXT = "1鍵, エンターキー, 方向キー右, 決定ボタンのいずれかでプレイを開始することができます.",
                         timerId = 0,
                     },
                 },
@@ -128,236 +163,258 @@ local help = {
                         TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
                     },
                 },
+                {
+                    TEXT = "曲リスト移動",
+                    description = {
+                        TEXT = "皿を回転させる, またはキーボードの矢印キーの上下で曲リストを上下移動できます."
+                    }
+                },
+                {
+                    TEXT = "フォルダ, テーブル選択",
+                    description = {
+                        TEXT = "1鍵, エンターキー, 方向キー右, 決定ボタンのいずれかでフォルダ及びテーブル内に移動できます. 2,4鍵, 右クリック(アクティブな曲バー上), 方向キー左で親フォルダに戻ることができます."
+                    }
+                },
+                {
+                    TEXT = "ランダムセレクト",
+                    description = {
+                        TEXT = "ランダムセレクトを選択すると, そのフォルダ内にある全ての譜面からランダムに1つが選択され, プレイが開始します."
+                    }
+                },
+                {
+                    TEXT = "同楽曲の譜面表示",
+                    description = {
+                        TEXT = "数字キーの8を押すと, 同じ楽曲の譜面一覧を表示できます."
+                    }
+                },
             },
-            timerId = 0,
-            time = 0,
-            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
-            nowY = 0, -- 各項目の最新座標
-            isOpen = false,
-            openAnimationTime = 0
         },
-        { -- これが全要素持っているやつ
-            HEADER = "選曲画面操作2",
+        {
+            HEADER = "各画面共通の操作",
             item = {
                 {
-                    TEXT = "プレイ開始",
-                    timerId = 0,
+                    TEXT = "フレームレート表示",
                     description = {
-                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
-                        timerId = 0,
-                    },
+                        TEXT = "F1を押すと, フレームレートを表示できます."
+                    }
                 },
                 {
-                    TEXT = "プラクティス",
+                    TEXT = "スクリーンショット",
                     description = {
-                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
-                    },
+                        TEXT = "F6を押すと, スクリーンショットを保存できます. スクリーンショットはbeatoraja内のscreenshotディレクトリに保存されます."
+                    }
                 },
-                {
-                    TEXT = "オートプレイ",
-                    description = {
-                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
-                    },
-                },
-                {
-                    TEXT = "リプレイ",
-                    description = {
-                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
-                    },
-                },
-            },
-            timerId = 0,
-            time = 0,
-            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
-            nowY = 0, -- 各項目の最新座標
-            isOpen = false,
-            openAnimationTime = 0
+            }
         },
-        { -- これが全要素持っているやつ
-            HEADER = "選曲画面操作3",
+        {
+            HEADER = "その他の選曲画面の設定や操作",
             item = {
                 {
-                    TEXT = "プレイ開始",
-                    timerId = 0,
+                    TEXT = "鍵盤数フィルター",
                     description = {
-                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
-                        timerId = 0,
-                    },
+                        TEXT = "数字キーの1を押すと, 5鍵, 7鍵等の鍵盤数で絞り込むことができます."
+                    }
                 },
                 {
-                    TEXT = "プラクティス",
+                    TEXT = "ソート",
                     description = {
-                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
-                    },
+                        TEXT = "数字キーの2を押すと, 楽曲の並び順を変更できます. また, ルートディレクトリで2,4鍵, 右クリック(アクティブな曲バー上), 方向キー左でも変更できます."
+                    }
                 },
                 {
-                    TEXT = "オートプレイ",
+                    TEXT = "LN種類切り替え",
                     description = {
-                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
-                    },
+                        TEXT = "数字キーの3を押すと, LN, CN, HCNを切り替えることができます."
+                    }
                 },
                 {
-                    TEXT = "リプレイ",
+                    TEXT = "ライバル変更",
                     description = {
-                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
-                    },
+                        TEXT = "数字キーの7を押すと, ライバルを切り替えることができます. ライバル未選択状態にも変更可能です."
+                    }
                 },
-            },
-            timerId = 0,
-            time = 0,
-            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
-            nowY = 0, -- 各項目の最新座標
-            isOpen = false,
-            openAnimationTime = 0
+                {
+                    TEXT = "リロード",
+                    description = {
+                        TEXT = "F2を押すと, 楽曲リストのリロードを実行できます."
+                    }
+                },
+                {
+                    TEXT = "フォルダ検索",
+                    description = {
+                        TEXT = "F3を押すと, 選択中の曲が入っているフォルダをエクスプローラで開きます."
+                    }
+                },
+                {
+                    TEXT = "お気に入り",
+                    description = {
+                        TEXT = "F8キーを押すと, その楽曲の全譜面をお気に入りに追加します. F9キーの場合, 譜面単体をお気に入りに追加します."
+                    }
+                },
+                {
+                    TEXT = "IR表示",
+                    description = {
+                        TEXT = "F11キーを押すと, 該当のIRページをブラウザで開きます."
+                    }
+                },
+                {
+                    TEXT = "スキンセレクト",
+                    description = {
+                        TEXT = "F12を押すと, スキンセレクト画面に入ります."
+                    }
+                },
+            }
         },
-        { -- これが全要素持っているやつ
-            HEADER = "選曲画面操作",
+        {
+            HEADER = "プレイコンフィグ",
             item = {
                 {
-                    TEXT = "プレイ開始",
-                    timerId = 0,
+                    TEXT = "設定方法",
                     description = {
-                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
-                        timerId = 0,
-                    },
+                        TEXT = "STARTボタンを押している間, 対応する鍵盤を入力すると変更できます. 対応する鍵盤は, オプション内の各項目名の左に記載しています. キーボードの場合, 初期設定はQキーです."
+                    }
                 },
                 {
-                    TEXT = "プラクティス",
+                    TEXT = "譜面オプション",
                     description = {
-                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
-                    },
+                        TEXT = "MIRROR: 鍵盤部分の左右が逆転します.\nRANDOM: 鍵盤部分がレーン毎にランダムで入れ替わります.\nR-RANDOM: 鍵盤部分のレーンがランダムにローテーションします. 1234567->5671234のように順番に移動したもの, またはそれのMIRRORになります.\nS-RANDOM: 鍵盤部分がノート毎にランダムで配置されます.\nSPIRAL: \nH-RANDOM: 縦連が発生しないS-RANDOMです.\nALL-SCR: ノートがある部分すべてが皿に配置されます. 同時押しの場合, ランダムな1つが選ばれます.\nRANDOM-EX(RANDOM+): 皿も入れ替わるRANDOMです.\nS-RANDOM-EX(S-RANDOM+): 皿も入れ替わるS-RANDOMです."
+                    }
                 },
                 {
-                    TEXT = "オートプレイ",
+                    TEXT = "ゲージの種類",
                     description = {
-                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
-                    },
+                        TEXT = "EASY: NORMALより減りにくいゲージです. 80%を超えた状態で曲を終えるとクリアです.\nGROOVE(NORMAL): 普通のゲージです. 80%を超えた状態で曲を終えるとクリアです.\nHARD: ゲージが0になると強制終了します. 完奏できればクリアです.\nEX-HARD: HARDより少し増えにくく, 大きく減りやすいゲージです.\nHAZARD: コンボが切れた時点で失敗になります. \nASSISTED EASY: EASYより減りにくいゲージです. 60%を超えた状態で曲を終えるとクリアです."
+                    }
                 },
                 {
-                    TEXT = "リプレイ",
+                    TEXT = "ハイスピードの固定",
                     description = {
-                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
-                    },
+                        TEXT = "START BPM: スクロール速度が曲開始時点のもので統一されます.\nMAX BPM: スクロール速度がその曲の最高BPMで統一されます.\nMAIN BPM: スクロール速度がその曲の主なBPMで統一されます.\nMIN BPM: スクロール速度がその曲の最小BPMで統一されます."
+                    }
                 },
-            },
-            timerId = 0,
-            time = 0,
-            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
-            nowY = 0, -- 各項目の最新座標
-            isOpen = false,
-            openAnimationTime = 0
+                {
+                    TEXT = "ターゲット設定",
+                    description = {
+                        TEXT = "プレイコンフィグを開いている状態で皿を回すと, 目標とするスコアを設定できます. 本スキンでは, スキンコンフィグでターゲットオプションの表示をONにしている場合のみ表示されます."
+                    }
+                },
+            }
         },
-        { -- これが全要素持っているやつ
-            HEADER = "選曲画面操作",
+        {
+            HEADER = "アシストオプション",
             item = {
                 {
-                    TEXT = "プレイ開始",
-                    timerId = 0,
+                    TEXT = "設定方法",
                     description = {
-                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
-                        timerId = 0,
-                    },
-                },
-                {
-                    TEXT = "プラクティス",
-                    description = {
-                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
-                    },
-                },
-                {
-                    TEXT = "オートプレイ",
-                    description = {
-                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
-                    },
-                },
-                {
-                    TEXT = "リプレイ",
-                    description = {
-                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
-                    },
+                        TEXT = "SELECTボタンを押している間, 対応する鍵盤を入力すると変更できます. 対応する鍵盤は, オプション内の各項目名の左に記載しています. キーボードの場合, 初期設定はWキーです.\nこれらのオプションを1つでも有効にした状態でクリアすると, ASSIST EASY CLEAR扱いになります. (ASSISTED EASYゲージより下の扱いです.)\n各項目については, オプション画面を開いて確認してください."
+                    }
                 },
             },
-            timerId = 0,
-            time = 0,
-            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
-            nowY = 0, -- 各項目の最新座標
-            isOpen = false,
-            openAnimationTime = 0
         },
-        { -- これが全要素持っているやつ
-            HEADER = "選曲画面操作",
+        {
+            HEADER = "その他オプション",
             item = {
                 {
-                    TEXT = "プレイ開始",
-                    timerId = 0,
+                    TEXT = "設定方法",
                     description = {
-                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
-                        timerId = 0,
-                    },
+                        TEXT = "START+SELECTボタンを押している間, 対応する鍵盤を入力すると変更できます. 対応する鍵盤は, オプション内の各項目名の左に記載しています. キーボードの場合, 初期設定はQ+Wキーです."
+                    }
                 },
                 {
-                    TEXT = "プラクティス",
+                    TEXT = "ゲージオートシフト",
                     description = {
-                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
-                    },
+                        TEXT = "CONTINUE: ハードゲージ以上の場合, 0%になっても曲を続行できます. 0%になっている場合はFAILED扱いです.\nHARD TO GROOVE: ハードゲージ以上で0%になった場合, NORMALゲージに移行します.\nBEST CLEAR: その時点でクリア状態にあるゲージの中で最も良いゲージが選択されます.\nSELECT TO UNDER: 選択したゲージより下のゲージで, クリア状態になる中で最も良いゲージが選択されます."
+                    }
                 },
                 {
-                    TEXT = "オートプレイ",
+                    TEXT = "BGA表示",
                     description = {
-                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
-                    },
-                },
-                {
-                    TEXT = "リプレイ",
-                    description = {
-                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
-                    },
+                        TEXT = "AUTOを選択すると, オートプレイでのみBGAが表示されるようになります."
+                    }
                 },
             },
-            timerId = 0,
-            time = 0,
-            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
-            nowY = 0, -- 各項目の最新座標
-            isOpen = false,
-            openAnimationTime = 0
         },
-        { -- これが全要素持っているやつ
-            HEADER = "選曲画面操作",
+        {
+            HEADER = "プレイ",
             item = {
                 {
-                    TEXT = "プレイ開始",
-                    timerId = 0,
+                    TEXT = "EXSCORE",
                     description = {
-                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
-                        timerId = 0,
+                        TEXT = "BMSにおいて, 一般的に使用されるスコアです. PERFECT*2+GREATがスコアになります."
+                    }
+                },
+                {
+                    TEXT = "空プア",
+                    description = {
+                        TEXT = "各レーンにおいて, ノーツがある程度近くにある状態で押すと, ノートが消えずにPOOR判定が発生しゲージが少し減少します. 空プアではコンボは途切れません."
+                    }
+                },
+                {
+                    TEXT = "ロングノート(LN)",
+                    description = {
+                        TEXT = "長押しをすることで成功になります. CN, HCNの場合は終点をタイミングよく離す必要があります"
+                    }
+                },
+                {
+                    TEXT = "ハイスピード(スクロール速度)",
+                    description = {
+                        TEXT = "STARTを押しながら青鍵を押すとスクロール速度が早くなり, 白鍵を押すと遅くなります. 速度変更の間隔は, beatoraja起動時のプレイオプションタブから変更できます.\nまた, SELECTキーを押しながら皿を回すと細かく調整できます."
                     },
                 },
                 {
-                    TEXT = "プラクティス",
+                    TEXT = "レーンカバー",
                     description = {
-                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
+                        TEXT = "STARTボタンを押しながら皿を回すことで, 譜面部分の上を隠すことができます. 常用する場合は, beatoraja起動時のプレイコンフィグタブで, レーンカバーにチェックを入れましょう."
                     },
                 },
                 {
-                    TEXT = "オートプレイ",
+                    TEXT = "リフト",
                     description = {
-                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
+                        TEXT = "判定位置を上にずらすことができます. beatoraja起動時のプレイコンフィグタブで設定できます."
+                    },
+                },
+            }
+        },
+        {
+            HEADER = "本スキン独自仕様",
+            item = {
+                {
+                    TEXT = "プレイヤーランク",
+                    description = {
+                        TEXT = "本スキンでは, プレイを重ねて経験値を貯めるとランクが上昇します(リザルトスキン併用時のみ). ランクと同時に実力も上げていきましょう!"
                     },
                 },
                 {
-                    TEXT = "リプレイ",
+                    TEXT = "スタミナ",
                     description = {
-                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
+                        TEXT = "譜面をプレイをするとスタミナを消費します. スタミナが不足している場合, 経験値を入手することができません."
                     },
                 },
             },
-            timerId = 0,
-            time = 0,
-            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
-            nowY = 0, -- 各項目の最新座標
-            isOpen = false,
-            openAnimationTime = 0
         },
+        {
+            HEADER = "その他",
+            item = {
+                {
+                    TEXT = "バージョン",
+                    description = {
+                        TEXT = "選曲スキン: " .. string.format( "%2.3f", SKIN_INFO.SELECT_VRESION) .. "\nリザルトスキン: " .. string.format( "%.2f", SKIN_INFO.RESULT_VERSION)
+                    },
+                },
+                {
+                    TEXT = "著作権",
+                    description = {
+                        TEXT = "本スキンの改変や再配布は, 申告無しで自由に行って良いですが, https://tori-blog.net/ へのリンクをお願いします.\n本スキンでは, 一部フリー素材を利用しています. 各フリー素材に関しては, その配布元に従ってください."
+                    },
+                },
+                {
+                    TEXT = "クレジット",
+                    description = {
+                        TEXT = "背景画像: 花のイラストなら「百花繚乱」 – 無料で使えるフリー素材\nフォント: Source Han Sans\n一部アイコン: ICOOON MONO"
+                    },
+                },
+            }
+        }
     },
 
     detail = {
@@ -419,6 +476,11 @@ function itemListOperation()
             closeHelpList()
         end
     end
+end
+
+-- yは操作領域最上部項目の座標からの相対座標
+local function yToTime(y)
+    return help.START_TIME + y * help.TIME_PER_Y
 end
 
 -- @return number, number HEADERのインデックス, 項目のインデックス (非選択なら0)
@@ -489,12 +551,14 @@ help.FUNCTIONS.updateOperationArea = function()
 end
 
 -- yは1項目目に対する相対座標
-help.FUNCTIONS.examineOutOfArea = function(y, h)
+local upperY = help.WND.Y + help.ITEM.AREA.Y + help.ITEM.AREA.H
+local bottomY = help.WND.Y + help.ITEM.AREA.Y
+local function examineOutOfArea(y, h)
     y = y + help.WND.Y + help.ITEM.AREA.START_Y
     -- 上側に出ている
-    if help.WND.Y + help.ITEM.AREA.Y + help.ITEM.AREA.H <= y then return true end
+    if upperY <= y then return true end
     -- 下側に出ている
-    if y + h <= help.WND.Y + help.ITEM.AREA.Y then return true end
+    if y + h <= bottomY then return true end
     return false
 end
 
@@ -514,9 +578,9 @@ local function helpMainLogic()
             -- ヘッダー部分
             -- 現在のy座標に対応するtimeを求める 間違いなく震えるので少し動かす
             item.nowY = item.y + 0.25 - help.scrollY - sumOpenMenuGap
-            time = help.FUNCTIONS.yToTime(item.nowY) * 1000
+            time = yToTime(item.nowY) * 1000
 
-            if help.FUNCTIONS.examineOutOfArea(item.nowY, help.ITEM.BG.HEADER.H) then
+            if examineOutOfArea(item.nowY, help.ITEM.BG.HEADER.H) then
                 -- 外に出ていたら表示しない
                 main_state.set_timer(item.timerId, main_state.timer_off_value)
             else
@@ -544,9 +608,9 @@ local function helpMainLogic()
 
                     -- 各項目部分
                     local iy = item.y + 0.25 - help.scrollY - offset - sumOpenMenuGap
-                    time = help.FUNCTIONS.yToTime(iy) * 1000
+                    time = yToTime(iy) * 1000
 
-                    if help.FUNCTIONS.examineOutOfArea(iy, help.ITEM.BG.ITEM.H) then
+                    if examineOutOfArea(iy, help.ITEM.BG.ITEM.H) then
                         -- 外に出ていたら表示しない
                         main_state.set_timer(item2.timerId, main_state.timer_off_value)
                     else
@@ -585,7 +649,7 @@ function helpTimer()
             help.isClosing = false
         end
     elseif help.hasOpened then -- ここがメインロジック
-        helpMainLogic()
+        pcall(helpMainLogic)
     end
 end
 
@@ -841,11 +905,6 @@ help.FUNCTIONS.setWindowDestination2 = function(skin)
     })
 end
 
--- yは操作領域最上部項目の座標からの相対座標
-help.FUNCTIONS.yToTime = function(y)
-    return help.START_TIME + y * help.TIME_PER_Y
-end
-
 help.FUNCTIONS.setListDestination = function(skin)
     local timer = help.TIMER_START
     local viewTime = help.ANIMATION_TIME + help.ITEM.BG.HEADER.VIEW_DELAY
@@ -864,8 +923,8 @@ help.FUNCTIONS.setListDestination = function(skin)
                     {time = viewTime, x = help.WND.X + help.ITEM.BG.ITEM.X, y = help.WND.Y + help.ITEM.AREA.START_Y, w = help.ITEM.BG.ITEM.W, h = help.ITEM.BG.ITEM.H, a = 255},
 
                     -- 動く部分
-                    {time = help.FUNCTIONS.yToTime(-3000), y = help.WND.Y + help.ITEM.AREA.START_Y - 3000},
-                    {time = help.FUNCTIONS.yToTime(3000), y = help.WND.Y + help.ITEM.AREA.START_Y + 3000},
+                    {time = yToTime(-3000), y = help.WND.Y + help.ITEM.AREA.START_Y - 3000},
+                    {time = yToTime(3000), y = help.WND.Y + help.ITEM.AREA.START_Y + 3000},
                     {time = 99999999},
                 }
             })
@@ -878,8 +937,8 @@ help.FUNCTIONS.setListDestination = function(skin)
                     {time = viewTime, x = help.WND.X + help.ITEM.TEXT.X, y = help.WND.Y + help.ITEM.AREA.START_Y, w = help.ITEM.BG.ITEM.W, h = help.ITEM.TEXT.ITEM_H, a = 255},
 
                     -- 動く部分
-                    {time = help.FUNCTIONS.yToTime(-3000), y = help.WND.Y + help.ITEM.AREA.START_Y - 3000 + 6},
-                    {time = help.FUNCTIONS.yToTime(3000), y = help.WND.Y + help.ITEM.AREA.START_Y + 3000 + 6},
+                    {time = yToTime(-3000), y = help.WND.Y + help.ITEM.AREA.START_Y - 3000 + 6},
+                    {time = yToTime(3000), y = help.WND.Y + help.ITEM.AREA.START_Y + 3000 + 6},
                     {time = 99999999},
                 }
             })
@@ -913,8 +972,8 @@ help.FUNCTIONS.setListDestination = function(skin)
                     {time = viewTime, x = allX[j], y = help.WND.Y + help.ITEM.AREA.START_Y, w = allW[j], h = allH[j], a = 255},
 
                     -- 動く部分
-                    {time = help.FUNCTIONS.yToTime(-3000), y = help.WND.Y + help.ITEM.AREA.START_Y - 3000 + offsetY[j]},
-                    {time = help.FUNCTIONS.yToTime(3000), y = help.WND.Y + help.ITEM.AREA.START_Y + 3000 + offsetY[j]},
+                    {time = yToTime(-3000), y = help.WND.Y + help.ITEM.AREA.START_Y - 3000 + offsetY[j]},
+                    {time = yToTime(3000), y = help.WND.Y + help.ITEM.AREA.START_Y + 3000 + offsetY[j]},
                     {time = 99999999},
                 }
             })

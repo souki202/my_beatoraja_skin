@@ -125,6 +125,21 @@ local TITLE_BAR = {
     }
 }
 
+local DIR_BAR = {
+    WND = {
+        X = 1184,
+        Y = 46,
+        W = 672,
+        H = 48,
+    },
+    TEXT = {
+        X = 18,
+        Y = 8,
+        SIZE = 24,
+        W = 672 - 18*2
+    },
+}
+
 -- 灰色背景の項目
 local GRAY_ITEM = {
     W = 120,
@@ -825,7 +840,7 @@ local function main()
             userData.updateRemainingStamina()
             userData.useStamina(requireStamina)
             userData.addExp(exp)
-            userData.save()
+            pcall(userData.save)
         end
     end
 
@@ -1053,6 +1068,7 @@ local function main()
         {id = "title", font = 0, size = TITLE_BAR.TITLE.FONT_SIZE, ref = 12, align = 1},
 		{id = "artist", font = 0, size = TITLE_BAR.ARTIST.FONT_SIZE, ref = 14, align = 1, overflow = 1},
         {id = "subArtist", font = 0, size = TITLE_BAR.ARTIST.FONT_SIZE, ref = 15, align = 1, overflow = 1},
+        {id = "tableName", font = 0, size = DIR_BAR.TEXT.SIZE, ref = 1003, align = 0, overflow = 1},
     }
 
     skin.destination = {
@@ -1169,10 +1185,22 @@ local function main()
             {
                 x = TITLE_BAR.WND.X + TITLE_BAR.DEVIDING_LINE.X,
                 y = TITLE_BAR.WND.Y + TITLE_BAR.DEVIDING_LINE.Y,
-                w = TITLE_BAR.DEVIDING_LINE.W, h = DEVIDING_LINE_BASE.H
+                w = TITLE_BAR.DEVIDING_LINE.W, h = DEVIDING_LINE_BASE.H,
             }
         }
     })
+    -- フォルダ名
+    destinationWindow(skin, DIR_BAR.WND.X, DIR_BAR.WND.Y, DIR_BAR.WND.W, DIR_BAR.WND.H)
+    table.insert(skin.destination, {
+        id = "tableName", dst = {
+            {
+                x = DIR_BAR.WND.X + DIR_BAR.TEXT.X, y = DIR_BAR.WND.Y + DIR_BAR.TEXT.Y,
+                w = DIR_BAR.TEXT.W, h = DIR_BAR.TEXT.SIZE,
+                r = 0, g = 0, b = 0
+            }
+        }
+    })
+
 
     -- 難易度, ノーツ数部分
     destinationWindow(skin, DIFFICULTY_INFO.WND.X, DIFFICULTY_INFO.WND.Y, DIFFICULTY_INFO.WND.W, DIFFICULTY_INFO.WND.H)

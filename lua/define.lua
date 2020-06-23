@@ -11,8 +11,8 @@ end
 DEBUG = true
 
 SKIN_INFO = {
-    SELECT_VRESION = "2.01",
-    RESULT_VERSION = "1.20",
+    SELECT_VRESION = "2.0",
+    RESULT_VERSION = "1.25",
 }
 
 BASE_WIDTH = 1920
@@ -68,10 +68,11 @@ userData = {
     stamina = {
         nextHealEpochSecond = 0,
         healInterval = 240, -- 秒
-        now = 0,
+        now = 10,
         tbl = {},
     },
 
+    isSuccessedInitial = true,
     nextVersionCheckDate = 0
 }
 
@@ -147,14 +148,17 @@ end
 function globalInitialize(skin)
     -- ユーザ情報周り
     userData.name = main_state.text(2)
-    userData.escapedName = string.gsub(userData.name, "([\\/:*?\"<>|])", "_")
 
+    print("ユーザデータ読み込み")
+    userData.escapedName = string.gsub(userData.name, "([\\/:*?\"<>|])", "_")
     myPrint("プレイヤー名: " .. userData.name)
     myPrint("使用不能文字置換後: " .. userData.escapedName)
-
     userData.filePath = skin_config.get_path("../userdata/data") .. "_" .. userData.escapedName
     userData.backupPath = skin_config.get_path("../userdata/backup/data") .. "_" .. userData.escapedName .. string.format("%10d", os.time())
-    userData.load()
+    print("使用ファイルパス: " .. userData.filePath)
+    -- 読み込み
+    pcall(userData.load)
+
     createRankAndStaminaTable()
 
     skin.customTimers = {
@@ -194,6 +198,11 @@ end
 -- ユーザデータIO周り
 userData.initData = function()
     local f = io.open(userData.filePath, "w")
+    if f == nil then
+        print("ユーザデータの新規作成に失敗しました: " .. userData.filePath)
+        userData.isSuccessedInitial = false
+        return
+    end
     print("Social Skin ユーザ作成")
 
     -- version
@@ -220,6 +229,11 @@ userData.load = function()
     if f == nil then
         userData.initData()
         f = io.open(userData.filePath, "r")
+    end
+
+    if userData.isSuccessedInitial == false or f == nil then
+        print("ユーザデータの読み込みに失敗しました: " .. userData.filePath)
+        return
     end
 
     -- ファイルから読み込む
@@ -249,6 +263,10 @@ userData.load = function()
 end
 
 userData.writeUserData = function(fileHandle)
+    if fileHandle == nil then
+        print("ファイルオープンに失敗しました: " .. "userData.writeUserData", userData.filePath)
+        return
+    end
     -- version
     fileHandle:write(1 .. "\n")
     -- rank
@@ -275,11 +293,11 @@ userData.save = function()
     userData.writeUserData(f)
     f:close()
 
-    print("ユーザ情報保存完了")
+    print("ユーザ情報保存処理終了")
 end
 
 userData.rank.getSumExp = function(rank)
-    if rank == 0 then
+    if rank <= 0 then
         return 0
     end
 
@@ -372,7 +390,7 @@ userData.updateRemainingStamina = function()
         userData.stamina.nextHealEpochSecond = userData.stamina.nextHealEpochSecond + healValue * userData.stamina.healInterval
         userData.stamina.now = math.min(userData.stamina.now + healValue, userData.stamina.tbl[userData.rank.rank])
         myPrint("次の回復: " .. userData.getNextHealStaminaDateString())
-        userData.save()
+        pcall(userData.save)
     end
 end
 
