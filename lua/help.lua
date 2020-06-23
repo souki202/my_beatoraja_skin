@@ -136,6 +136,228 @@ local help = {
             isOpen = false,
             openAnimationTime = 0
         },
+        { -- これが全要素持っているやつ
+            HEADER = "選曲画面操作2",
+            item = {
+                {
+                    TEXT = "プレイ開始",
+                    timerId = 0,
+                    description = {
+                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
+                        timerId = 0,
+                    },
+                },
+                {
+                    TEXT = "プラクティス",
+                    description = {
+                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
+                    },
+                },
+                {
+                    TEXT = "オートプレイ",
+                    description = {
+                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
+                    },
+                },
+                {
+                    TEXT = "リプレイ",
+                    description = {
+                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
+                    },
+                },
+            },
+            timerId = 0,
+            time = 0,
+            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
+            nowY = 0, -- 各項目の最新座標
+            isOpen = false,
+            openAnimationTime = 0
+        },
+        { -- これが全要素持っているやつ
+            HEADER = "選曲画面操作3",
+            item = {
+                {
+                    TEXT = "プレイ開始",
+                    timerId = 0,
+                    description = {
+                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
+                        timerId = 0,
+                    },
+                },
+                {
+                    TEXT = "プラクティス",
+                    description = {
+                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
+                    },
+                },
+                {
+                    TEXT = "オートプレイ",
+                    description = {
+                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
+                    },
+                },
+                {
+                    TEXT = "リプレイ",
+                    description = {
+                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
+                    },
+                },
+            },
+            timerId = 0,
+            time = 0,
+            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
+            nowY = 0, -- 各項目の最新座標
+            isOpen = false,
+            openAnimationTime = 0
+        },
+        { -- これが全要素持っているやつ
+            HEADER = "選曲画面操作",
+            item = {
+                {
+                    TEXT = "プレイ開始",
+                    timerId = 0,
+                    description = {
+                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
+                        timerId = 0,
+                    },
+                },
+                {
+                    TEXT = "プラクティス",
+                    description = {
+                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
+                    },
+                },
+                {
+                    TEXT = "オートプレイ",
+                    description = {
+                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
+                    },
+                },
+                {
+                    TEXT = "リプレイ",
+                    description = {
+                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
+                    },
+                },
+            },
+            timerId = 0,
+            time = 0,
+            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
+            nowY = 0, -- 各項目の最新座標
+            isOpen = false,
+            openAnimationTime = 0
+        },
+        { -- これが全要素持っているやつ
+            HEADER = "選曲画面操作",
+            item = {
+                {
+                    TEXT = "プレイ開始",
+                    timerId = 0,
+                    description = {
+                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
+                        timerId = 0,
+                    },
+                },
+                {
+                    TEXT = "プラクティス",
+                    description = {
+                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
+                    },
+                },
+                {
+                    TEXT = "オートプレイ",
+                    description = {
+                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
+                    },
+                },
+                {
+                    TEXT = "リプレイ",
+                    description = {
+                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
+                    },
+                },
+            },
+            timerId = 0,
+            time = 0,
+            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
+            nowY = 0, -- 各項目の最新座標
+            isOpen = false,
+            openAnimationTime = 0
+        },
+        { -- これが全要素持っているやつ
+            HEADER = "選曲画面操作",
+            item = {
+                {
+                    TEXT = "プレイ開始",
+                    timerId = 0,
+                    description = {
+                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
+                        timerId = 0,
+                    },
+                },
+                {
+                    TEXT = "プラクティス",
+                    description = {
+                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
+                    },
+                },
+                {
+                    TEXT = "オートプレイ",
+                    description = {
+                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
+                    },
+                },
+                {
+                    TEXT = "リプレイ",
+                    description = {
+                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
+                    },
+                },
+            },
+            timerId = 0,
+            time = 0,
+            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
+            nowY = 0, -- 各項目の最新座標
+            isOpen = false,
+            openAnimationTime = 0
+        },
+        { -- これが全要素持っているやつ
+            HEADER = "選曲画面操作",
+            item = {
+                {
+                    TEXT = "プレイ開始",
+                    timerId = 0,
+                    description = {
+                        TEXT = "1鍵, エンターキー, 決定ボタンのいずれかでプレイを開始することができます.",
+                        timerId = 0,
+                    },
+                },
+                {
+                    TEXT = "プラクティス",
+                    description = {
+                        TEXT = "3鍵を押すと, プラクティスモードでプレイできます.\nプラクティスでは, 開始, 終了位置の変更や, 各種オプション, TOTAL値等を設定しながら練習することが可能です.",
+                    },
+                },
+                {
+                    TEXT = "オートプレイ",
+                    description = {
+                        TEXT = "5鍵を押すか, AUTOボタンでオートプレイを鑑賞できます.",
+                    },
+                },
+                {
+                    TEXT = "リプレイ",
+                    description = {
+                        TEXT = "6鍵で再生するリプレイを変更でき, 7鍵で再生できます. 各リプレイの保存条件はbeatoraja起動時のプレイオプションタブから設定可能です.",
+                    },
+                },
+            },
+            timerId = 0,
+            time = 0,
+            y = 0, -- 1項目目の初期座標に対する, すべての項目が閉じているときの相対座標
+            nowY = 0, -- 各項目の最新座標
+            isOpen = false,
+            openAnimationTime = 0
+        },
     },
 
     detail = {
@@ -270,12 +492,9 @@ end
 help.FUNCTIONS.examineOutOfArea = function(y, h)
     y = y + help.WND.Y + help.ITEM.AREA.START_Y
     -- 上側に出ている
-    local upperY = help.WND.Y + help.ITEM.AREA.Y + help.ITEM.AREA.H
-    if upperY <= y then return true end
-
+    if help.WND.Y + help.ITEM.AREA.Y + help.ITEM.AREA.H <= y then return true end
     -- 下側に出ている
-    local bottomY = help.WND.Y + help.ITEM.AREA.Y
-    if y + h <= bottomY then return true end
+    if y + h <= help.WND.Y + help.ITEM.AREA.Y then return true end
     return false
 end
 
@@ -284,13 +503,18 @@ local function helpMainLogic()
 
     local now = main_state.time()
     local sumOpenMenuGap = 0
+    local time = 0
+    local maxGap = 0
+    local item = nil
+    local item2 = nil
 
-    for _, item in pairs(help.TEXTS) do
+    for i = 1, #help.TEXTS do
+        item = help.TEXTS[i]
         if item.timerId ~= nil and item.timerId >= 10000 then
             -- ヘッダー部分
             -- 現在のy座標に対応するtimeを求める 間違いなく震えるので少し動かす
             item.nowY = item.y + 0.25 - help.scrollY - sumOpenMenuGap
-            local time = help.FUNCTIONS.yToTime(item.nowY) * 1000
+            time = help.FUNCTIONS.yToTime(item.nowY) * 1000
 
             if help.FUNCTIONS.examineOutOfArea(item.nowY, help.ITEM.BG.HEADER.H) then
                 -- 外に出ていたら表示しない
@@ -307,9 +531,9 @@ local function helpMainLogic()
             end
             item.openAnimationTime = math.max(0, math.min(item.openAnimationTime, help.ITEM.BG.ITEM.APPEAR_ANIMATION_TIME))
 
-            local maxGap = 0
-
-            for j, item2 in pairs(item.item) do
+            maxGap = 0
+            for j = 1, #item.item do
+                item2 = item.item[j]
                 if item2.timerId ~= nil and item2.timerId >= 10000 then
                     local offset = -7
                     if item.openAnimationTime  ~= 0 then
