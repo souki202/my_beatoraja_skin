@@ -3616,7 +3616,7 @@ local function main()
                 local centerY = math.floor((nextPosY + posY) / 2)
                 local length = (REVERSE_ANIM_INFO.STARTING_X - centerX) ^ 2 + (REVERSE_ANIM_INFO.STARTING_Y - centerY) ^ 2
                 length = math.sqrt(length)
-                table.insert(squareInfo, {x = posX, y = posY, w = w, h = h, centerX = centerX, centerY = centerY, length = length, deltaTime = math.floor(math.random(0, REVERSE_ANIM_INFO.VARIATION_TIME) / 2)})
+                squareInfo[#squareInfo+1] = {x = posX, y = posY, w = w, h = h, centerX = centerX, centerY = centerY, length = length, deltaTime = math.floor(math.random(0, REVERSE_ANIM_INFO.VARIATION_TIME) / 2)}
                 minLength = math.min(minLength, length)
             end
         end
