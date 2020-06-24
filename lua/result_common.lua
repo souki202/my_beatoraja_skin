@@ -477,6 +477,16 @@ local GRAPH = {
     PREFIX = {"notes", "judges", "el"}
 }
 
+local OPTIONS = {
+    IMG = {
+        X = 1201,
+        Y = 516,
+        W = 152,
+        H = 22,
+        -- OPS= {126, 127, 128, 129, 130, 131, 1128, 1129, 1130, 1131},
+    }
+}
+
 GRAPH.GROOVE_NUM.DOT = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.DOT
 GRAPH.GROOVE_NUM.AF_X = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.AF_X
 GRAPH.GROOVE_NUM.SYMBOL_X = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.SYMBOL_X
@@ -994,6 +1004,13 @@ local function main()
         })
     end
 
+    -- オプション読み込み
+    -- for i, op in pairs(OPTIONS.IMG.OPS) do
+    --     table.insert(skin.image, {
+    --         id = "option" .. op, src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 566 + (i - 1) * OPTIONS.IMG.H, w = OPTIONS.IMG.W, h = OPTIONS.IMG.H
+    --     })
+    -- end
+
     -- 各種グラフ
     skin.gaugegraph = {
 		{id = "grooveGaugeGraph", assistClearBGColor = "440044cc", assistAndEasyFailBGColor = "004444cc", grooveFailBGColor = "004400cc", grooveClearAndHardBGColor = "440000cc", exHardBGColor = "444400cc", hazardBGColor = "444444cc", borderColor = "440000cc"}
@@ -1129,6 +1146,14 @@ local function main()
             }
         }
     })
+    -- オプション出力
+    -- for i, op in pairs(OPTIONS.IMG.OPS) do
+    --     table.insert(skin.destination, {
+    --         id = "option" .. op, op = {op}, dst = {
+    --             {x = OPTIONS.IMG.X, y = OPTIONS.IMG.Y, w = OPTIONS.IMG.W, h = OPTIONS.IMG.H}
+    --         }
+    --     })
+    -- end
 
     -- グラフ出力
     for i, text in ipairs(GRAPH.PREFIX) do

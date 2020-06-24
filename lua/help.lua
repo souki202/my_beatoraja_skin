@@ -1064,7 +1064,6 @@ help.FUNCTIONS.setDestinationDescription = function(skin)
                     }
                 })
                 item2.description.timerId = timer
-                myPrint(item2.TEXT .. "Detail" .. j)
             end
         end
     end
