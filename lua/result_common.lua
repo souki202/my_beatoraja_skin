@@ -1,4 +1,5 @@
 require("define")
+require("numbers")
 local main_state = require("main_state")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
@@ -696,7 +697,7 @@ local function loadBackground(skin)
     end
 end
 
-local function loadBaseWindow (skin, x, y)
+local function loadBaseWindow(skin, x, y)
     local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN
     -- 四隅
     table.insert(skin.image, {

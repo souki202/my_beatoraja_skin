@@ -6,22 +6,6 @@ require("input")
 local TEXTURE_SIZE = 2048
 local PARTS_OFFSET = HEIGHT + 32
 
-local POPUP_WINDOW = {
-    SHADOW_LEN = 0,
-    EDGE_SIZE = 32,
-    ID = {
-        UPPER_LEFT   = "popUpWindowUpperLeft",
-        UPPER_RIGHT  = "popUpWindowUpperRight",
-        BOTTOM_RIGHT = "popUpWindowBottomRight",
-        BOTTOM_LEFT  = "popUpWindowBottomLeft",
-        TOP          = "popUpWindowTopEdge",
-        LEFT         = "popUpWindowLeftEdge",
-        BOTTOM       = "popUpWindowBottomEdge",
-        RIGHT        = "popUpWindowRightEdge",
-        BODY         = "popUpWindowBody",
-    }
-}
-
 local help = {
     WND = {
         X = 160,
@@ -32,8 +16,6 @@ local help = {
     BUTTON = {
         X = 728,
         Y = 12,
-        W = 142,
-        H = 62,
     },
     H1 = {
         X = 62,
@@ -80,7 +62,7 @@ local help = {
         }
     },
     ANIMATION_TIME = 150,
-    closeTime = 0;
+    closeTime = 0,
 
     isOpening = false, -- 開いている最中かどうか
     isClosing = false, -- 閉じている最中かどうか
@@ -106,7 +88,7 @@ local help = {
                     TEXT = "プレイにあたって",
                     timerId = 0,
                     description = {
-                        TEXT = "BMSは, 各個人が節度を持ってプレイすることが重要です. 本家譜面及び曲の流用や, その他版権等違法性のあるBMSはプレイしないようにしましょう. BMSは, 各プレイヤーや製作者の良識や節度をもって存続しています.",
+                        TEXT = "BMSは, 各個人が良識を持ってプレイすることが重要です. 本家譜面及び曲の流用や, その他版権等違法性のあるBMSはプレイしないようにしましょう. BMSは, 各プレイヤーや製作者の良識をもって存続しています.",
                         timerId = 0,
                     },
                 },
@@ -379,6 +361,35 @@ local help = {
                         TEXT = "判定位置を上にずらすことができます. beatoraja起動時のプレイコンフィグタブで設定できます."
                     },
                 },
+                {
+                    TEXT = "プレイの中断",
+                    description = {
+                        TEXT = "START+SELECTキー, またはESCキーでプレイを中断することができます. この場合, 譜面が終了している場合を除きFAILEDとなります."
+                    },
+                },
+            }
+        },
+        {
+            HEADER = "リザルト操作",
+            item = {
+                {
+                    TEXT = "選曲画面に戻る",
+                    description = {
+                        TEXT = "1または3鍵で選曲画面に戻ることができます."
+                    }
+                },
+                {
+                    TEXT = "再プレイ",
+                    description = {
+                        TEXT = "5鍵で, ランダム等の配置を維持せずに再プレイできます.\n7鍵で, ランダム等の配置を維持して再プレイできます."
+                    }
+                },
+                {
+                    TEXT = "他の種類のゲージの結果を見る",
+                    description = {
+                        TEXT = "6鍵で, 別の種類のゲージの推移を見ることができます.\nより上位のゲージでクリアできていたか, 下位のゲージならクリアできていたかを確認してクリアランプの更新を目指しやすくなります."
+                    }
+                },
             }
         },
         {
@@ -455,7 +466,7 @@ local help = {
     isOpenDescription = false,
     maxTimerId = 0,
 
-    FUNCTIONS = {},
+    functions = {},
 }
 
 local operationState = {
@@ -477,7 +488,7 @@ function itemListOperation()
         operationState.isClicking = true
     elseif isRightClicking() == true then
         if help.isOpenDescription then
-            help.FUNCTIONS.closeDetail()
+            help.functions.closeDetail()
         else
             closeHelpList()
         end
@@ -490,7 +501,7 @@ local function yToTime(y)
 end
 
 -- @return number, number HEADERのインデックス, 項目のインデックス (非選択なら0)
-help.FUNCTIONS.selectItem = function()
+help.functions.selectItem = function()
     local x, y = getMousePos()
     -- 操作領域右上になるようになおす
     x = x - (help.WND.X + help.ITEM.AREA.X)
@@ -522,13 +533,13 @@ help.FUNCTIONS.selectItem = function()
     return 0, 0
 end
 
-help.FUNCTIONS.updateOperationArea = function()
+help.functions.updateOperationArea = function()
     if operationState.isClicking then
         if isLeftClicking() == false then
             operationState.isClicking = false
             if operationState.numAbsMove <= 20 then
                 -- メニューを選択する(あれば)
-                local h, i = help.FUNCTIONS.selectItem()
+                local h, i = help.functions.selectItem()
                 myPrint("選択情報", "header: " .. h, "item: " .. i)
 
                 -- openする
@@ -537,7 +548,7 @@ help.FUNCTIONS.updateOperationArea = function()
                 elseif h > 0 and i > 0 then
                     -- 小項目をクリックしたら詳細表示
                     myPrint("詳細表示: " .. help.TEXTS[h].item[i].TEXT, "timer: " .. help.TEXTS[h].item[i].description.timerId)
-                    help.FUNCTIONS.openDetail(help.TEXTS[h].item[i].description.timerId)
+                    help.functions.openDetail(help.TEXTS[h].item[i].description.timerId)
                 end
             end
 
@@ -569,7 +580,7 @@ local function examineOutOfArea(y, h)
 end
 
 local function helpMainLogic()
-    help.FUNCTIONS.updateOperationArea()
+    help.functions.updateOperationArea()
 
     local now = main_state.time()
     local sumOpenMenuGap = 0
@@ -599,6 +610,8 @@ local function helpMainLogic()
             else
                 item.openAnimationTime = item.openAnimationTime - getDeltaTime()
             end
+
+            -- minmax重いらしいので変えるかも
             item.openAnimationTime = math.max(0, math.min(item.openAnimationTime, help.ITEM.BG.ITEM.APPEAR_ANIMATION_TIME))
 
             maxGap = 0
@@ -635,7 +648,7 @@ end
 
 function helpTimer()
     if help.hasAllClosed and help.didProcessAllClose == false then
-        help.FUNCTIONS.allClose()
+        help.functions.allClose()
         help.didProcessAllClose = true
     elseif help.isOpening then
         -- 開ききったらstateを変える
@@ -646,12 +659,12 @@ function helpTimer()
         end
     elseif help.isClosing then
         help.closeTime = help.closeTime - getDeltaTime()
-        help.FUNCTIONS.setAllTimerWithoutDescription(getElapsedTime() - help.closeTime)
-        help.FUNCTIONS.setTimeDescription(getElapsedTime())
+        help.functions.setAllTimerWithoutDescription(getElapsedTime() - help.closeTime)
+        help.functions.setTimeDescription(getElapsedTime())
         -- 閉じきったら後処理
         if help.closeTime <= 0 then
             myPrint("閉じきった: " .. main_state.time() - main_state.timer(help.WINDOW_TIMER))
-            help.FUNCTIONS.allClose()
+            help.functions.allClose()
             help.isClosing = false
         end
     elseif help.hasOpened then -- ここがメインロジック
@@ -681,7 +694,7 @@ function closeHelpList()
     end
 end
 
-help.FUNCTIONS.openDetail = function(descriptionTimerId)
+help.functions.openDetail = function(descriptionTimerId)
     if help.isOpenDescription == false then
         main_state.set_timer(help.detail.timerId, 0)
         main_state.set_timer(descriptionTimerId, 0)
@@ -690,14 +703,14 @@ help.FUNCTIONS.openDetail = function(descriptionTimerId)
     end
 end
 
-help.FUNCTIONS.closeDescription = function()
+help.functions.closeDescription = function()
     myPrint("詳細閉じる")
-    help.FUNCTIONS.setTimeDescription(main_state.timer_off_value)
+    help.functions.setTimeDescription(main_state.timer_off_value)
     help.isOpenDescription = false
     help.detail.descriptionTimerId = 0
 end
 
-help.FUNCTIONS.setTimeDescription = function(time)
+help.functions.setTimeDescription = function(time)
     if help.detail.descriptionTimerId ~= nil and help.detail.timerId ~= nil and help.detail.descriptionTimerId > 10000 then
         main_state.set_timer(help.detail.timerId, time)
         main_state.set_timer(help.detail.descriptionTimerId, time)
@@ -706,16 +719,16 @@ end
 
 function closeDescriptionRightClickEvent()
     if isRightClicking() == true then
-        help.FUNCTIONS.closeDescription()
+        help.functions.closeDescription()
     end
 end
 
 function closeDescriptionClickEvent()
-    help.FUNCTIONS.closeDescription()
+    help.functions.closeDescription()
 end
 
 -- description以外
-help.FUNCTIONS.setAllTimerWithoutDescription = function(time)
+help.functions.setAllTimerWithoutDescription = function(time)
     main_state.set_timer(help.WINDOW_TIMER, time)
     for _, item in pairs(help.TEXTS) do
         if item.timerId ~= nil and item.timerId >= 10000 then
@@ -729,23 +742,23 @@ help.FUNCTIONS.setAllTimerWithoutDescription = function(time)
     end
 end
 
-help.FUNCTIONS.allClose = function()
-    help.FUNCTIONS.closeDescription()
-    help.FUNCTIONS.setAllTimerWithoutDescription(main_state.timer_off_value)
+help.functions.allClose = function()
+    help.functions.closeDescription()
+    help.functions.setAllTimerWithoutDescription(main_state.timer_off_value)
 end
 
-help.FUNCTIONS.activateAllTimer = function()
-    help.FUNCTIONS.setAllTimerWithoutDescription(main_state.time())
+help.functions.activateAllTimer = function()
+    help.functions.setAllTimerWithoutDescription(main_state.time())
 end
 
 -- カスタムタイマ, カスタムアクション, textの後に配置すること
-help.FUNCTIONS.loadHelpItem = function(skin)
+help.functions.loadHelpItem = function(skin)
     loadBaseWindow(
         skin,
-        POPUP_WINDOW.ID,
-        1908,
-        TEXTURE_SIZE - (POPUP_WINDOW.EDGE_SIZE * 2 + POPUP_WINDOW.SHADOW_LEN * 2 + 1),
-        POPUP_WINDOW.EDGE_SIZE, POPUP_WINDOW.SHADOW_LEN
+        POPUP_WINDOW_SELECT.ID,
+        POPUP_WINDOW_SELECT.SRC_X,
+        POPUP_WINDOW_SELECT.SRC_Y,
+        POPUP_WINDOW_SELECT.EDGE_SIZE, POPUP_WINDOW_SELECT.SHADOW_LEN
     )
 
     -- ボタン
@@ -756,11 +769,9 @@ help.FUNCTIONS.loadHelpItem = function(skin)
     table.insert(skin.customEvents, {id = 1004, action = "closeDescriptionClickEvent()"})
 
     table.insert(skin.image, {
-        id = "helpOpenButton", src = 0, x = 1415, y = PARTS_OFFSET + 771, w = help.BUTTON.W, h = help.BUTTON.H, act = 1000
+        id = "helpOpenButton", src = 0, x = 1415, y = PARTS_OFFSET + 771, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H, act = 1000
     })
-    table.insert(skin.image, {
-        id = "helpCloseButton", src = 0, x = 1415 + help.BUTTON.W, y = PARTS_OFFSET + 771, w = help.BUTTON.W, h = help.BUTTON.H, act = 1001
-    })
+    loadCloseButtonSelect(skin, "helpCloseButton", 1001)
 
     -- 背景は閉じるボタン
     table.insert(skin.image, {
@@ -825,15 +836,15 @@ help.FUNCTIONS.loadHelpItem = function(skin)
     end
 end
 
-help.FUNCTIONS.destinationOpenButton = function(skin)
+help.functions.destinationOpenButton = function(skin)
     table.insert(skin.destination, {
         id = "helpOpenButton", dst = {
-            {x = 1768, y = 0, w = help.BUTTON.W, h = help.BUTTON.H}
+            {x = 1768, y = 0, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H}
         }
     })
 end
 
-help.FUNCTIONS.setWindowDestination = function(skin)
+help.functions.setWindowDestination = function(skin)
     -- 背景
     table.insert(skin.destination, {
         id = "blackHelpClose", timer = help.WINDOW_TIMER, loop = help.ANIMATION_TIME, dst = {
@@ -848,7 +859,7 @@ help.FUNCTIONS.setWindowDestination = function(skin)
         initial,
         {time = help.ANIMATION_TIME, x = help.WND.X, y = help.WND.Y, w = help.WND.W, h = help.WND.H},
     }
-    destinationWindowWithTimer(skin, POPUP_WINDOW.ID, POPUP_WINDOW.EDGE_SIZE, POPUP_WINDOW.SHADOW_LEN, {}, help.WINDOW_TIMER, help.ANIMATION_TIME, dst)
+    destinationWindowWithTimer(skin, POPUP_WINDOW_SELECT.ID, POPUP_WINDOW_SELECT.EDGE_SIZE, POPUP_WINDOW_SELECT.SHADOW_LEN, {}, help.WINDOW_TIMER, help.ANIMATION_TIME, dst)
 
     -- 操作用オブジェクト出力
     table.insert(skin.destination, {
@@ -861,7 +872,7 @@ help.FUNCTIONS.setWindowDestination = function(skin)
 end
 
 -- 項目の上に乗せる出力
-help.FUNCTIONS.setWindowDestination2 = function(skin)
+help.functions.setWindowDestination2 = function(skin)
     local initial = {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0}
 
     -- 上部マスク
@@ -884,7 +895,7 @@ help.FUNCTIONS.setWindowDestination2 = function(skin)
     table.insert(skin.destination, {
         id = "helpCloseButton", timer = help.WINDOW_TIMER, loop = help.ANIMATION_TIME, dst = {
             initial,
-            {time = help.ANIMATION_TIME, x = help.WND.X + help.BUTTON.X, y = help.WND.Y + help.BUTTON.Y, w = help.BUTTON.W, h = help.BUTTON.H}
+            {time = help.ANIMATION_TIME, x = help.WND.X + help.BUTTON.X, y = help.WND.Y + help.BUTTON.Y, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H}
         }
     })
 
@@ -911,7 +922,7 @@ help.FUNCTIONS.setWindowDestination2 = function(skin)
     })
 end
 
-help.FUNCTIONS.setListDestination = function(skin)
+help.functions.setListDestination = function(skin)
     local timer = help.TIMER_START
     local viewTime = help.ANIMATION_TIME + help.ITEM.BG.HEADER.VIEW_DELAY
 
@@ -996,7 +1007,7 @@ help.FUNCTIONS.setListDestination = function(skin)
     help.maxTimerId = timer
 end
 
-help.FUNCTIONS.setDestinationDescription = function(skin)
+help.functions.setDestinationDescription = function(skin)
     local viewTime = help.ANIMATION_TIME + help.ITEM.BG.HEADER.VIEW_DELAY
     local timer = help.maxTimerId
     -- 詳細項目の出力
@@ -1069,4 +1080,4 @@ help.FUNCTIONS.setDestinationDescription = function(skin)
     end
 end
 
-return help.FUNCTIONS
+return help.functions

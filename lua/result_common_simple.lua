@@ -1,4 +1,5 @@
 require("define")
+require("numbers")
 local main_state = require("main_state")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間

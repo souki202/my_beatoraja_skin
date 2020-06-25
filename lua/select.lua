@@ -21,7 +21,9 @@
 require("define")
 require("http")
 require("my_window")
+require("numbers")
 local help = require("help")
+local statistics = require("statistics")
 
 local main_state = require("main_state")
 
@@ -30,22 +32,6 @@ local existNewVersion = false
 local PARTS_TEXTURE_SIZE = 2048
 
 local PARTS_OFFSET = HEIGHT + 32
-
-local BASE_WINDOW = {
-    SHADOW_LEN = 7,
-    EDGE_SIZE = 10,
-    ID = {
-       UPPER_LEFT   = "baseWindowUpperLeft",
-       UPPER_RIGHT  = "baseWindowUpperRight",
-       BOTTOM_RIGHT = "baseWindowBottomRight",
-       BOTTOM_LEFT  = "baseWindowBottomLeft",
-       TOP    = "baseWindowTopEdge",
-       LEFT   = "baseWindowLeftEdge",
-       BOTTOM = "baseWindowBottomEdge",
-       RIGHT  = "baseWindowRightEdge",
-       BODY = "baseWindowBody",
-    }
-}
 
 local ARTIST_FONT_SIZE = 24
 local SUBARTIST_FONT_SIZE = 18
@@ -70,6 +56,11 @@ local AUTO_BUTTON_H = 62
 local REPLAY_BUTTON_SIZE = 62
 local REPLAY_TEXT_W = 17
 local REPLAY_TEXT_H = 22
+
+local NUMBERS_24PX = {
+    W = 14,
+    H = 18,
+}
 
 -- コース表示
 local COURSE = {
@@ -1253,9 +1244,11 @@ local function main()
     table.insert(skin.customTimers, {id = 10007, timer = "updateUseStamina"}) -- スタミナ使用量更新用タイマー
     table.insert(skin.customTimers, {id = 10008, timer = "newVersionAnimation"}) -- 新バージョンがある時の文字表示用
     table.insert(skin.customTimers, {id = 10009, timer = "helpTimer"}) -- ヘルプ画面全体のタイマー
-    for i = 1, 191 do
-        table.insert(skin.customTimers, {id = 10010 + (i - 1)}) -- 10010~10200までヘルプ用で予約 増えるかもしれないので500くらい余裕見ておく
+    for i = 1, 490 do
+        table.insert(skin.customTimers, {id = 10010 + (i - 1)}) -- 10010~10499までヘルプ用で予約 増えるかもしれないので500くらい余裕見ておく
     end
+    table.insert(skin.customTimers, {id = statistics.getWindowTimerId(), timer = "statisticsTimer"}) -- 統計画面全体のタイマー
+
     skin.customEvents = {} -- 1000~未定はヘルプ
 
     skin.image = {
@@ -1555,14 +1548,8 @@ local function main()
         {id = "pink", src = 999, x = 5, y = 0, w = 1, h = 1},
     }
 
-    -- ウィンドウ読み込み
-    loadBaseWindow(
-        skin,
-        BASE_WINDOW.ID,
-        PARTS_TEXTURE_SIZE - (BASE_WINDOW.EDGE_SIZE * 2 + BASE_WINDOW.SHADOW_LEN * 2 + 1) - 3,
-        PARTS_TEXTURE_SIZE - (BASE_WINDOW.EDGE_SIZE * 2 + BASE_WINDOW.SHADOW_LEN * 2 + 1),
-        BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN
-    )
+    loadBaseWindowSelect(skin)
+    loadPopupWindowSelect(skin)
 
     local c = getTableValue(skin_config.option, "背景形式", 915)
     if c == 915 then
@@ -1604,8 +1591,9 @@ local function main()
     loadNumbers(skin, "rankCoop", 0, NORMAL_NUMBER_SRC_X, PARTS_OFFSET + NORMAL_NUMBER_H + STATUS_NUMBER_H, RANK.NEW.NUM_W * 10, RANK.NEW.NUM_H, 10, 1)
     -- スタミナの数字読み込み
     loadNumbers(skin, "userDataSmallNumber", 0, 1434, PARTS_OFFSET + 391, USER_DATA.NUM.W * 10, USER_DATA.NUM.H, 10, 1)
-    -- 消費スタミナの数字読み込み
-    loadNumbers(skin, "useStaminaNumber", 0, 1434, PARTS_OFFSET + 421, GRAPH.STAMINA.NUM.W * 10, GRAPH.STAMINA.NUM.H, 10, 1)
+    -- 汎用的な24px数値
+    loadNumbers(skin, "24pxNumbers", 0, 1434, PARTS_OFFSET + 421, NUMBERS_24PX.W * 10, NUMBERS_24PX.H, 10, 1)
+
 
     -- 密度グラフ
     skin.judgegraph = {
@@ -1890,10 +1878,14 @@ local function main()
         {id = "rivalName" , font = 0, size = RIVAL.FONT_SIZE, align = 0, ref = 1, overflow = 1},
         {id = "newVersion" , font = 0, size = 24, align = 0, overflow = 1, constantText = "スキンに更新があります"},
         {id = "helpText", font = 0, size = 30, align = 0, constantText = "ヘルプ    ※マウスで操作し, スクロールはドラッグで操作してください."},
+        {id = "24:", font = 0, size = 24, align = 0, constantText = ":"},
+        {id = "countText", font = 0, size = 24, align = 0, constantText = "回"},
     }
 
     -- ヘルプの読み込み
     help.loadHelpItem(skin)
+    -- 統計の読み込み
+    statistics.load(skin)
 
     -- 選曲バー設定
     skin.songlist = {
@@ -2854,9 +2846,9 @@ local function main()
             -- スタミナ出力
             -- 現在値
             preDrawDynamicNumbers(
-                skin, "useStaminaNumber", "useStaminaValue",
+                skin, "24pxNumbers", "useStaminaValue",
                 staminaX + GRAPH.STAMINA.NUM.X, staminaY + GRAPH.STAMINA.NUM.Y,
-                GRAPH.STAMINA.NUM.W, GRAPH.STAMINA.NUM.H, 0, false, {})
+                NUMBERS_24PX.W, NUMBERS_24PX.H, 0, false, {})
 
             setValue("useStaminaValue", 0)
         end
@@ -3228,13 +3220,17 @@ local function main()
         })
     end
 
-    -- ヘルプボタン
+    -- ボタン
     help.destinationOpenButton(skin)
+    statistics.destinationOpenButton(skin)
     -- ヘルプウィンドウ
     help.setWindowDestination(skin)
     help.setListDestination(skin)
     help.setWindowDestination2(skin)
     help.setDestinationDescription(skin)
+
+    -- 統計ウィンドウ
+    statistics.destinationWindow(skin)
 
     -- プレイオプション
     -- 背景部分

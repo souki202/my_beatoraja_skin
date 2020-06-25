@@ -1,3 +1,56 @@
+require("define")
+local TEXTURE_SIZE = 2048
+local PARTS_OFFSET = HEIGHT + 32
+
+SIMPLE_WND_AREA = {
+    X = 160,
+    Y = 90,
+    W = 1600,
+    H = 900
+}
+
+POPUP_WINDOW_SELECT = {
+    SHADOW_LEN = 0,
+    EDGE_SIZE = 32,
+    ID = {
+        UPPER_LEFT   = "popUpWindowUpperLeft",
+        UPPER_RIGHT  = "popUpWindowUpperRight",
+        BOTTOM_RIGHT = "popUpWindowBottomRight",
+        BOTTOM_LEFT  = "popUpWindowBottomLeft",
+        TOP          = "popUpWindowTopEdge",
+        LEFT         = "popUpWindowLeftEdge",
+        BOTTOM       = "popUpWindowBottomEdge",
+        RIGHT        = "popUpWindowRightEdge",
+        BODY         = "popUpWindowBody",
+    },
+    SRC_X = 1908,
+    SRC_Y = TEXTURE_SIZE - (32 * 2 + 0 * 2 + 1),
+}
+
+BASE_WINDOW = {
+    SHADOW_LEN = 7,
+    EDGE_SIZE = 10,
+    ID = {
+       UPPER_LEFT   = "baseWindowUpperLeft",
+       UPPER_RIGHT  = "baseWindowUpperRight",
+       BOTTOM_RIGHT = "baseWindowBottomRight",
+       BOTTOM_LEFT  = "baseWindowBottomLeft",
+       TOP    = "baseWindowTopEdge",
+       LEFT   = "baseWindowLeftEdge",
+       BOTTOM = "baseWindowBottomEdge",
+       RIGHT  = "baseWindowRightEdge",
+       BODY = "baseWindowBody",
+    }
+}
+
+CLOSE_BUTTON = {
+    SRC_X = 1557,
+    SRC_Y = PARTS_OFFSET + 771,
+    W = 142,
+    H = 62,
+    Y = 12,
+}
+
 -- idsの中身はすべてこれにする
 -- {
 --     UPPER_LEFT,
@@ -10,6 +63,32 @@
 --     RIGHT,
 --     BODY,
 -- }
+
+function loadPopupWindowSelect(skin)
+    loadBaseWindow(
+        skin,
+        POPUP_WINDOW_SELECT.ID,
+        POPUP_WINDOW_SELECT.SRC_X,
+        POPUP_WINDOW_SELECT.SRC_Y,
+        POPUP_WINDOW_SELECT.EDGE_SIZE, POPUP_WINDOW_SELECT.SHADOW_LEN
+    )
+end
+
+function loadBaseWindowSelect(skin)
+    loadBaseWindow(
+        skin,
+        BASE_WINDOW.ID,
+        TEXTURE_SIZE - (BASE_WINDOW.EDGE_SIZE * 2 + BASE_WINDOW.SHADOW_LEN * 2 + 1) - 3,
+        TEXTURE_SIZE - (BASE_WINDOW.EDGE_SIZE * 2 + BASE_WINDOW.SHADOW_LEN * 2 + 1),
+        BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN
+    )
+end
+
+function loadCloseButtonSelect(skin, id, act)
+    table.insert(skin.image, {
+        id = id, src = 0, x = CLOSE_BUTTON.SRC_X, y = CLOSE_BUTTON.SRC_Y, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H, act = act
+    })
+end
 
 function loadBaseWindow(skin, ids, x, y, edgeSize, shadow)
     local sumEdgeSize = edgeSize + shadow
@@ -118,6 +197,33 @@ function destinationStaticWindowBg(skin, ids, x, y, w, h, edgeSize, shadow, op)
     table.insert(skin.destination, {
         id = ids.BODY, op = op, dst = {
             {x = x + edgeSize, y = y + edgeSize, w = w - edgeSize * 2, h = h - edgeSize * 2}
+        }
+    })
+end
+
+function dstSimplePopUpWindowSelect(skin, bgCloseAreaId, timer, animationTime)
+    -- 背景
+    table.insert(skin.destination, {
+        id = bgCloseAreaId, timer = timer, loop = animationTime, dst = {
+            {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 0},
+            {time = animationTime, a = 64},
+        }
+    })
+
+    local initial = {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0}
+    local dst = {
+        initial,
+        {time = animationTime, x = SIMPLE_WND_AREA.X, y = SIMPLE_WND_AREA.Y, w = SIMPLE_WND_AREA.W, h = SIMPLE_WND_AREA.H},
+    }
+    destinationWindowWithTimer(skin, POPUP_WINDOW_SELECT.ID, POPUP_WINDOW_SELECT.EDGE_SIZE, POPUP_WINDOW_SELECT.SHADOW_LEN, {}, timer, animationTime, dst)
+end
+
+function dstCloseButton(skin, closeButtonId, timer, animationTime)
+    -- closeボタン
+    table.insert(skin.destination, {
+        id = closeButtonId, timer = timer, loop = animationTime, dst = {
+            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0},
+            {time = animationTime, x = SIMPLE_WND_AREA.X + (SIMPLE_WND_AREA.W - CLOSE_BUTTON.W) / 2, y = SIMPLE_WND_AREA.Y + CLOSE_BUTTON.Y, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H}
         }
     })
 end
