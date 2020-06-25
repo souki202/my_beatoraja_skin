@@ -899,27 +899,7 @@ help.functions.setWindowDestination2 = function(skin)
         }
     })
 
-    -- 大ヘッダー
-    table.insert(skin.destination, {
-        id = "optionHeaderLeft", timer = help.WINDOW_TIMER, loop = help.ANIMATION_TIME, dst = {
-            initial,
-            {time = help.ANIMATION_TIME, x = 192, y = 932, w = 16, h = 42} -- 古いところからコピペ
-        }
-    })
-    -- 下線
-    table.insert(skin.destination, {
-        id = "purpleRed", timer = help.WINDOW_TIMER, loop = help.ANIMATION_TIME, dst = {
-            initial,
-            {time = help.ANIMATION_TIME, x = 212, y = 932, w = 1516, h = 2} -- 古いところからコピペ
-        }
-    })
-    -- 文字
-    table.insert(skin.destination, {
-        id = "helpText", timer = help.WINDOW_TIMER, loop = help.ANIMATION_TIME, dst = {
-            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1, r = 0, g = 0, b = 0}, -- w = 0でないのはバグ対策
-            {time = help.ANIMATION_TIME, x = help.WND.X + help.H1.X, y = help.WND.Y + help.H1.Y, w = 999, h = help.H1.H}
-        }
-    })
+    dstHeaderSelect(skin, {}, help.WINDOW_TIMER, help.ANIMATION_TIME, "helpText")
 end
 
 help.functions.setListDestination = function(skin)
@@ -1025,29 +1005,10 @@ help.functions.setDestinationDescription = function(skin)
                 {time = viewTime, x = help.WND.X + help.ITEM.AREA.X, y = help.WND.Y + help.ITEM.AREA.Y, w = help.ITEM.AREA.W, h = help.ITEM.AREA.H, a = 255}
             }
         })
-        table.insert(skin.destination, {
-            id = "optionHeader2LeftBg", timer = timer, loop = viewTime, dst = {
-                init,
-                {time = viewTime, x = headerX, y = headerY, w = help.detail.HEADER.EDGE_W, h = help.detail.HEADER.H, a = 255},
-            }
-        })
-        table.insert(skin.destination, {
-            id = "white", timer = timer, loop = viewTime, dst = {
-                init,
-                {
-                    time = viewTime,
-                    x = headerX + help.detail.HEADER.EDGE_W,
-                    y = headerY,
-                    w = help.detail.HEADER.W - help.detail.HEADER.EDGE_W * 2,
-                    h = help.detail.HEADER.H, a = 255, r = 64, g = 64, b = 64},
-            }
-        })
-        table.insert(skin.destination, {
-            id = "optionHeader2RightBg", timer = timer, loop = viewTime, dst = {
-                init,
-                {time = viewTime, x = headerX + help.detail.HEADER.W - help.detail.HEADER.EDGE_W, y = headerY, w = help.detail.HEADER.EDGE_W, h = help.detail.HEADER.H, a = 255},
-            }
-        })
+
+        -- 詳細の暗い背景ヘッダー背景
+        dstSubHeaderSelect(skin, headerX, headerY, help.detail.HEADER.W, {}, timer, viewTime, nil)
+        
         -- ボタン出力
         table.insert(skin.destination, {
             id = "closeDescriptionButton", timer = timer, loop = viewTime, dst = {

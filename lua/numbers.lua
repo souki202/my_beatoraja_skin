@@ -1,6 +1,15 @@
+local main_state = require("main_state")
+require("timer")
+
+NUMBERS_24PX = {
+    W = 14,
+    H = 18,
+    ID = "24pxNumbers",
+}
+
 -- 自作の任意の数値を表示させるための色々
 -- 力技なので重い上に複雑です
-myNumber = {
+local myNumber = {
     SUFFIX = {
         "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "pb0", "p",
         "m0", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "mb0", "m",
@@ -39,6 +48,33 @@ function dstNumberRightJustify(skin, id, x, y, w, h, digit)
                 w = w, h = h
             }
         }
+    })
+end
+
+
+function dstNumberRightJustifyByDst(skin, id, op, timer, loop, baseSst, digit)
+    local dst = {}
+    local function copyDst(t)
+        local t2 = {}
+        for k,v in pairs(t) do
+          t2[k] = v
+        end
+        return t2
+    end
+
+    local lastW = 0
+    for i, value in pairs(baseSst) do
+        local newDst = copyDst(value)
+        if table.in_key(newDst, "w") then
+            lastW = newDst["w"]
+        end
+        if table.in_key(newDst, "x") then
+            newDst["x"] = newDst["x"] - lastW * digit
+        end
+        dst[#dst + 1] = newDst
+    end
+    table.insert(skin.destination, {
+        id = id, op = op, timer = timer, loop = loop, dst = dst
     })
 end
 
@@ -83,8 +119,6 @@ function loadNumbers(skin, idPrefix, srcNumber, srcX, srcY, w, h, divX, divY)
         })
     end
 end
-
-
 
 local function preDrawNumbersCommon(skin, idPrefix, dstId, align, drawBackZero, startTimerId)
     -- とりあえず突っ込んでおく
@@ -272,7 +306,7 @@ function updateDrawNumbers()
     if myNumber.didInitStaticNumberTimer == false then
         for dstId, timer in pairs(myNumber.timerIds) do
             if myNumber.isStatic[dstId] == true then
-                main_state.set_timer(timer, elapsedTime)
+                main_state.set_timer(timer, getElapsedTime())
             end
         end
     end
@@ -284,7 +318,7 @@ function updateDrawNumbers()
             for i = 1, myNumber.MAX_DIGIT do
                 local suffixIndex = myNumber.values[dstId][i]
                 if suffixIndex > 0 then
-                    main_state.set_timer(startTimer + (i - 1), elapsedTime - suffixIndex * 1000000 - 5000)
+                    main_state.set_timer(startTimer + (i - 1), getElapsedTime() - suffixIndex * 1000000 - 5000)
                 else
                     -- index 0は描画無し
                     main_state.set_timer(startTimer + (i - 1), main_state.timer_off_value)
@@ -336,4 +370,12 @@ function switchVisibleNumber(dstId, isVisible)
             print("startTimerがありません 未登録のdstIdの可能性があります: " .. dstId)
         end
     end
+end
+
+function getTimerStart()
+    return myNumber.TIMER_START
+end
+
+function getMaxDigit()
+    return myNumber.MAX_DIGIT
 end

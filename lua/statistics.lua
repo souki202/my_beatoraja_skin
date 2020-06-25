@@ -1,4 +1,5 @@
 require("my_window")
+require("numbers")
 local main_state = require("main_state")
 
 local TEXTURE_SIZE = 2048
@@ -24,6 +25,15 @@ local statistics = {
             START_Y = 760, -- WNDからの相対
             H = 724,
         },
+
+        INTERVAL_Y = 42,
+        TEXT = {
+            X = 72,
+        },
+        NUM = {
+            X = 464
+        },
+        NEXT_HEADER_Y = 60,
     },
 
     HEADER = {
@@ -40,9 +50,23 @@ local statistics = {
     closeTime = 0,
     openTime = 0,
 
+    ID_PREFIX = "statistics",
+
+    USER = {
+        VALUES = {0, 0, 0},
+        TEXTS = {"ランク", "所持コイン", "所持ダイヤ"},
+    },
+
     PLAYTIME = {
-        IDS = {"totalPlayHour", "totalPlayMinute", "totalPlaySecond", "totalOperateHour", "totalOperateMinute", "totalOperateSecond"},
+        IDS = {"TotalPlayHour", "TotalPlayMinute", "TotalPlaySecond", "TotalOperateHour", "TotalOperateMinute", "TotalOperateSecond"},
         REFS = {17, 18, 19, 27, 28, 29},
+        TEXTS = {"起動時間", "プレイ時間"},
+    },
+
+    PLAY = {
+        IDS = {"PlayCount", "ClearCount", "Perfect", "Great", "Good", "Bad", "Poor", "TotalNotes"},
+        REFS = {31, 32, 33, 34, 35, 36, 37, 333},
+        TEXTS = {"プレイ回数", "クリア回数", "PERFECT", "GREAT", "GOOD", "BAD", "POOR", "TOTAL NOTES"},
     },
 
     functions = {}
@@ -103,7 +127,7 @@ statistics.functions.load = function(skin)
     loadCloseButtonSelect(skin, "statisticCloseButton", 1011)
 
     table.insert(skin.image, {
-        id = "whiteDetailBg", src = 999, x = 2, y = 0, w = 1, h = 1, act = 1003
+        id = "whiteStatisticBg", src = 999, x = 2, y = 0, w = 1, h = 1, act = 1012
     })
 
     -- 統計ボタン
@@ -112,15 +136,43 @@ statistics.functions.load = function(skin)
     })
 
     -- 各種数値
-    -- 数値の画像自体は読み込み済み, ランク, ダイヤ, コインは略
+    -- 数値の画像自体は読み込み済み
     local numSrcX = 1434
     local numSrcY = PARTS_OFFSET + 421
+
+    local values = skin.value
+    local texts = skin.text
+
+    -- タイトルヘッダー
+    texts[#texts + 1] = {id = "ユーザ情報", font = 0, size = HEADER.TEXT.FONT_SIZE, align = 0, constantText = "ユーザ情報"}
+
+    -- 時間周り
     for i = 1, #statistics.PLAYTIME.IDS do
-        table.insert(skin.value, {
-            id = statistics.PLAYTIME.IDS[i], src = 0, x = numSrcX, y = numSrcY, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H
-        })
+        local digit = 2
+        local padding = 1
+        if i % 3 == 1 then
+            digit = 5
+            padding = 0
+        end
+        
+        values[#values + 1] = {id = statistics.ID_PREFIX .. statistics.PLAYTIME.IDS[i], src = 0, x = numSrcX, y = numSrcY, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = digit, align = 0, ref = statistics.PLAYTIME.REFS[i], padding = padding}
+        texts[#texts + 1] = {id = statistics.PLAYTIME.TEXTS[i], font = 0, size = statistics.FONT_SIZE, align = 0, constantText = statistics.PLAYTIME.TEXTS[i]}
     end
-    
+
+    -- プレイ周り
+    for i = 1, #statistics.PLAY.IDS do
+        values[#values + 1] = {id = statistics.ID_PREFIX .. statistics.PLAY.IDS[i], src = 0, x = numSrcX, y = numSrcY, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = 9, align = 0, ref = statistics.PLAY.REFS[i]}
+        texts[#texts + 1] = {id = statistics.PLAY.TEXTS[i], font = 0, size = statistics.FONT_SIZE, align = 0, constantText = statistics.PLAY.TEXTS[i]}
+    end
+
+    texts[#texts + 1] = {id = "ユーザ", font = 0, size = statistics.FONT_SIZE, align = 0, constantText = "ユーザ"}
+    texts[#texts + 1] = {id = "時間", font = 0, size = statistics.FONT_SIZE, align = 0, constantText = "時間"}
+    texts[#texts + 1] = {id = "プレイ情報", font = 0, size = statistics.FONT_SIZE, align = 0, constantText = "プレイ情報"}
+
+    -- ユーザ情報数値はdstで
+    for i = 1, #statistics.USER.VALUES do
+        texts[#texts + 1] = {id = statistics.USER.TEXTS[i], font = 0, size = statistics.FONT_SIZE, align = 0, constantText = statistics.USER.TEXTS[i]}
+    end
 end
 
 statistics.functions.destinationOpenButton = function(skin)
@@ -133,17 +185,99 @@ end
 
 statistics.functions.destinationWindow = function(skin)
     local timer = statistics.functions.getWindowTimerId()
-    dstSimplePopUpWindowSelect(skin, "blackStatisticsClose", timer, statistics.ANIMATION_TIME)
-    dstCloseButton(skin, "statisticCloseButton", timer, statistics.ANIMATION_TIME)
+    local atime = statistics.ANIMATION_TIME
+    dstSimplePopUpWindowSelect(skin, "blackStatisticsClose", timer, atime)
+    dstCloseButton(skin, "statisticCloseButton", timer, atime)
 
-    local init = {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1}
+    local init = {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0}
+    local initText = {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1, r = 0, g = 0, b = 0}
     table.insert(skin.destination, {
-        id = "whiteDetailBg", timer = timer, loop = statistics.ANIMATION_TIME, dst = {
+        id = "whiteStatisticBg", timer = timer, loop = atime, dst = {
             init,
-            {time = statistics.ANIMATION_TIME, x = SIMPLE_WND_AREA.X + statistics.ITEM.AREA.X, y = SIMPLE_WND_AREA.Y + statistics.ITEM.AREA.Y, w = statistics.ITEM.AREA.W, h = statistics.ITEM.AREA.H, a = 255}
+            {time = atime, x = SIMPLE_WND_AREA.X + statistics.ITEM.AREA.X, y = SIMPLE_WND_AREA.Y + statistics.ITEM.AREA.Y, w = statistics.ITEM.AREA.W, h = statistics.ITEM.AREA.H, a = 255}
         }
     })
+    dstHeaderSelect(skin, {}, timer, atime, "ユーザ情報")
 
+    -- データ列挙
+    local interval = statistics.ITEM.INTERVAL_Y
+    local textX1 = SIMPLE_WND_AREA.X + statistics.ITEM.TEXT.X
+    local numX1 = SIMPLE_WND_AREA.X + statistics.ITEM.NUM.X
+    local nowY = SIMPLE_WND_AREA.Y + 788
+    local numOffset = 5
+    local next = statistics.ITEM.NEXT_HEADER_Y
+
+    -- プレイヤーデータ
+    dstSubHeaderSelect(skin, SIMPLE_WND_AREA.X + statistics.HEADER.X1, nowY, statistics.HEADER.W, {}, statistics.functions.getWindowTimerId(), atime, "ユーザ")
+    statistics.USER.VALUES = {userData.rank.rank, userData.tokens.coin, userData.tokens.dia}
+    nowY = nowY - interval
+    for i = 1, #statistics.USER.VALUES do
+        -- 文字
+        table.insert(skin.destination, {
+            id = statistics.USER.TEXTS[i], timer = timer, loop = atime, dst = {
+                initText,
+                {time = atime, x = textX1, y = nowY, w = 999, h = statistics.FONT_SIZE}
+            }
+        })
+
+        -- 数値
+        local dst = {
+            init,
+            {time = atime, x = numX1, y = nowY + numOffset, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+        }
+        preDrawStaticNumbers(skin, NUMBERS_24PX.ID, statistics.ID_PREFIX .. "rank", 0, false, dst, statistics.USER.VALUES[i], {}, timer, atime)
+
+        nowY = nowY - interval
+    end
+    nowY = nowY - next
+
+    -- 時間
+    dstSubHeaderSelect(skin, SIMPLE_WND_AREA.X + statistics.HEADER.X1, nowY, statistics.HEADER.W, {}, statistics.functions.getWindowTimerId(), atime, "時間")
+    nowY = nowY - interval
+    for i = 1, #statistics.PLAYTIME.TEXTS do
+        local ni = i == 1 and 1 or 4
+        -- 文字
+        table.insert(skin.destination, {
+            id = statistics.PLAYTIME.TEXTS[i], timer = timer, loop = atime, dst = {
+                initText,
+                {time = atime, x = textX1, y = nowY, w = 999, h = statistics.FONT_SIZE}
+            }
+        })
+
+        -- 秒
+        local dst = {
+            init,
+            {time = atime, x = numX1, y = nowY + numOffset, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+        }
+        dstNumberRightJustifyByDst(skin, statistics.ID_PREFIX .. statistics.PLAYTIME.IDS[ni+2], {}, timer, atime, dst, 2)
+        -- コロン
+        table.insert(skin.destination, {
+            id = "24:", timer = timer, loop = atime, dst = {
+                initText,
+                {time = atime, x = numX1 - 32, y = nowY, w = 999, h = statistics.FONT_SIZE}
+            }
+        })
+        -- 分
+        dst = {
+            init,
+            {time = atime, x = numX1 - 35, y = nowY + numOffset, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+        }
+        dstNumberRightJustifyByDst(skin, statistics.ID_PREFIX .. statistics.PLAYTIME.IDS[ni+1], {}, timer, atime, dst, 2)
+        -- コロン
+        table.insert(skin.destination, {
+            id = "24:", timer = timer, loop = atime, dst = {
+                initText,
+                {time = atime, x = numX1 - 67, y = nowY, w = 999, h = statistics.FONT_SIZE}
+            }
+        })
+        -- 時
+        dst = {
+            init,
+            {time = atime, x = numX1 - 69, y = nowY + numOffset, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+        }
+        dstNumberRightJustifyByDst(skin, statistics.ID_PREFIX .. statistics.PLAYTIME.IDS[ni], {}, timer, atime, dst, 5)
+        nowY = nowY - interval
+    end
 end
 
 statistics.functions.getWindowTimerId = function() return 10500 end

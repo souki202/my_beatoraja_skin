@@ -1,5 +1,7 @@
 local main_state = require("main_state")
 require("userdata")
+require("numbers")
+require("timer")
 
 function table.in_key (tbl, key)
     for k, v in pairs (tbl) do
@@ -24,37 +26,6 @@ NORMAL_TEXT_SIZE = 32
 LARGE_TITLE_TEXT_SIZE = NORMAL_TEXT_SIZE * 2
 NORMAL_DESCENDER_LINE = 3 -- フォントサイズ64
 
-local isInputStarted = false
-local elapsedTime = 0
-local lastTime = 0
-local deltaTime = -1
-local frame = 0
-
-function updateTime()
-    elapsedTime = main_state.time()
-    deltaTime = elapsedTime - lastTime
-    lastTime = lastTime + deltaTime
-    frame = frame + 1
-end
-
-function getDeltaTime()
-    return deltaTime
-end
-
-function getElapsedTime()
-    return elapsedTime
-end
-
-function getFrame()
-    return frame
-end
-
-function myPrint(...)
-    if DEBUG then
-        print(...)
-    end
-end
-
 function globalInitialize(skin)
     -- ユーザ情報周り
     userData.name = main_state.text(2)
@@ -78,7 +49,7 @@ function globalInitialize(skin)
 
     -- IntMapバグ回避のため. 本当に回避できているかは不明
     -- 先にTimerを連番で登録しておく
-    for i = myNumber.TIMER_START, myNumber.TIMER_START + myNumber.MAX_DIGIT * 10 do
+    for i = getTimerStart(), getTimerStart() + getMaxDigit() * 10 do
         table.insert(skin.customTimers, {id = i})
     end
 end

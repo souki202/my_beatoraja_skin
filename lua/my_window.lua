@@ -43,6 +43,37 @@ BASE_WINDOW = {
     }
 }
 
+HEADER = {
+    MARKER = {
+        X = 32,
+        Y = 842,
+        W = 16,
+        H = 42,
+    },
+    UNDERBAR = {
+        X = 52,
+        Y = 842,
+        W = 1516,
+        H = 2,
+    },
+    TEXT = {
+        X = 62,
+        Y = 844,
+        W = 1516,
+        FONT_SIZE = 30,
+    }
+}
+
+SUB_HEADER = {
+    EDGE = { -- 本体は計算する
+        W = 16,
+        H = 42,
+        LEFT_ID = "subHeaderLeft",
+        RIGHT_ID = "subHeaderRight",
+    },
+    FONT_SIZE = 24,
+}
+
 CLOSE_BUTTON = {
     SRC_X = 1557,
     SRC_Y = PARTS_OFFSET + 771,
@@ -88,6 +119,28 @@ function loadCloseButtonSelect(skin, id, act)
     table.insert(skin.image, {
         id = id, src = 0, x = CLOSE_BUTTON.SRC_X, y = CLOSE_BUTTON.SRC_Y, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H, act = act
     })
+end
+
+function loadHeaderSelect(skin)
+    table.insert(skin.image, {
+        id = "popUpWindowHeaderLeft", src = 2, x = 392, y = TEXTURE_SIZE - HEADER.MARKER.H, w = HEADER.MARKER.W, h = HEADER.MARKER.H
+    })
+end
+
+function loadSubHeaderSelect(skin)
+    table.insert(skin.image, {
+        id = SUB_HEADER.EDGE.LEFT_ID, src = 2, x = 0, y = 1966, w = SUB_HEADER.EDGE.W, h = SUB_HEADER.EDGE.H
+    })
+    table.insert(skin.image, {
+        id = SUB_HEADER.EDGE.RIGHT_ID, src = 2, x = SUB_HEADER.EDGE.W, y = 1966, w = SUB_HEADER.EDGE.W, h = SUB_HEADER.EDGE.H
+    })
+end
+
+function loadBaseSelect(skin)
+    loadPopupWindowSelect(skin)
+    loadBaseWindowSelect(skin)
+    loadSubHeaderSelect(skin)
+    loadHeaderSelect(skin)
 end
 
 function loadBaseWindow(skin, ids, x, y, edgeSize, shadow)
@@ -358,6 +411,68 @@ function destinationWindowWithTimer(skin, ids, edgeSize, shadow, op, timer, loop
         table.insert(skin.destination, {
             id = ids2[i],
             op = op, timer = timer, loop = loop, dst = dst
+        })
+    end
+end
+
+-- フォントサイズは30
+function dstHeaderSelect(skin, op, timer, animationTime, textId)
+    -- 左の斜線部分
+    table.insert(skin.destination, {
+        id = "popUpWindowHeaderLeft", timer = timer, loop = animationTime, op = op, dst = {
+            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0},
+            {time = animationTime, x = SIMPLE_WND_AREA.X + HEADER.MARKER.X, y = SIMPLE_WND_AREA.Y + HEADER.MARKER.Y, w = HEADER.MARKER.W, h = HEADER.MARKER.H}
+        }
+    })
+    -- header下線
+    table.insert(skin.destination, {
+        id = "purpleRed", timer = timer, loop = animationTime, op = op, dst = {
+            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0},
+            {time = animationTime, x = SIMPLE_WND_AREA.X + HEADER.UNDERBAR.X, y = SIMPLE_WND_AREA.Y + HEADER.UNDERBAR.Y, w = HEADER.UNDERBAR.W, h = HEADER.UNDERBAR.H}
+        }
+    })
+
+    table.insert(skin.destination, {
+        id = textId, timer = timer, loop = animationTime, op = op, dst = {
+            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1, a = 0, r = 0, g = 0, b = 0},
+            {time = 1, a = 255}, -- w, hを0にするとエラーが出る場合があることの対処
+            {time = animationTime, x = SIMPLE_WND_AREA.X + HEADER.TEXT.X, y = SIMPLE_WND_AREA.Y + HEADER.TEXT.Y, w = HEADER.TEXT.W, h = HEADER.TEXT.FONT_SIZE, a = 255}
+        }
+    })
+end
+
+-- x, yは絶対座標
+-- フォントサイズは24
+function dstSubHeaderSelect(skin, x, y, w, op, timer, animationTime, textId)
+    -- 左
+    table.insert(skin.destination, {
+        id = SUB_HEADER.EDGE.LEFT_ID, timer = timer, loop = animationTime, op = op, dst = {
+            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0},
+            {time = animationTime, x = x, y = y, w = SUB_HEADER.EDGE.W, h = SUB_HEADER.EDGE.H}
+        }
+    })
+    -- 中央
+    table.insert(skin.destination, {
+        id = "white", timer = timer, loop = animationTime, op = op, dst = {
+            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0, r = 64, g = 64, b = 64},
+            {time = animationTime, x = x + SUB_HEADER.EDGE.W, y = y, w = w - SUB_HEADER.EDGE.W * 2, h = SUB_HEADER.EDGE.H}
+        }
+    })
+    -- 右
+    table.insert(skin.destination, {
+        id = SUB_HEADER.EDGE.RIGHT_ID, timer = timer, loop = animationTime, op = op, dst = {
+            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0},
+            {time = animationTime, x = x + w - SUB_HEADER.EDGE.W, y = y, w = SUB_HEADER.EDGE.W, h = SUB_HEADER.EDGE.H}
+        }
+    })
+    -- 文字
+    if textId ~= nil then
+        table.insert(skin.destination, {
+            id = textId, timer = timer, loop = animationTime, op = op, dst = {
+                {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1, a = 0},
+                {time = 1, a = 255}, -- w, hを0にするとエラーが出る場合があることの対処
+                {time = animationTime, x = x + 20, y = y + 7, w = w, h = SUB_HEADER.FONT_SIZE, a = 255}
+            }
         })
     end
 end

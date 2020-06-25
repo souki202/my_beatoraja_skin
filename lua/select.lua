@@ -57,11 +57,6 @@ local REPLAY_BUTTON_SIZE = 62
 local REPLAY_TEXT_W = 17
 local REPLAY_TEXT_H = 22
 
-local NUMBERS_24PX = {
-    W = 14,
-    H = 18,
-}
-
 -- コース表示
 local COURSE = {
     BG_W = 772,
@@ -899,9 +894,9 @@ local function destinationOptionHeader2(skin, baseX, baseY, width, titleTextId, 
     local keyOffset = 16
 
     -- 各オプションヘッダBG出力
-    insertOptionAnimationTable(skin, "optionHeader2LeftBg", op, baseX, baseY, OPTION_INFO.HEADER2_EDGE_BG_W, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
-    insertOptionAnimationTable(skin, "optionHeader2RightBg", op, baseX + width - OPTION_INFO.HEADER2_EDGE_BG_W, baseY, OPTION_INFO.HEADER2_EDGE_BG_W, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
-    insertOptionAnimationTable(skin, "gray2", op, baseX + OPTION_INFO.HEADER2_EDGE_BG_W, baseY, width - OPTION_INFO.HEADER2_EDGE_BG_W * 2, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
+    insertOptionAnimationTable(skin, SUB_HEADER.EDGE.LEFT_ID, op, baseX, baseY, SUB_HEADER.EDGE.W, SUB_HEADER.EDGE.H, 0)
+    insertOptionAnimationTable(skin, SUB_HEADER.EDGE.RIGHT_ID, op, baseX + width - SUB_HEADER.EDGE.W, baseY, SUB_HEADER.EDGE.W, SUB_HEADER.EDGE.H, 0)
+    insertOptionAnimationTable(skin, "gray2", op, baseX + SUB_HEADER.EDGE.W, baseY, width - SUB_HEADER.EDGE.W * 2, SUB_HEADER.EDGE.H, 0)
 
     -- オプションヘッダテキスト出力
     insertOptionAnimationTable(skin, titleTextId, op, baseX + 20, baseY, OPTION_INFO.HEADER2_TEXT_W, OPTION_INFO.HEADER2_TEXT_H, 0)
@@ -969,7 +964,7 @@ local function destinationNumberOption(skin, baseX, baseY, titleTextId, optionId
     local optionOffsetY = 5
 
     -- ヘッダ出力
-    destinationOptionHeader2(skin, baseX, baseY + height - OPTION_INFO.HEADER_H, width, titleTextId, activeKeys, op)
+    destinationOptionHeader2(skin, baseX, baseY + height - HEADER.MARKER.H, width, titleTextId, activeKeys, op)
 
     -- オプション背景
     insertOptionAnimationTable(skin, "optionNumberBg", op, baseX + optionBoxOffsetX, baseY + optionOffsetY, OPTION_INFO.NUMBER_BG_W, OPTION_INFO.NUMBER_BG_H, 0)
@@ -1418,21 +1413,16 @@ local function main()
         {id = "activeOptionFrame", src = 2, x = 0, y = PARTS_TEXTURE_SIZE - OPTION_INFO.ACTIVE_FRAME_H, w = OPTION_INFO.ACTIVE_FRAME_W, h = OPTION_INFO.ACTIVE_FRAME_H},
         -- オプション画面の端
         {id = "optionWndEdge", src = 2, x = 360, y = PARTS_TEXTURE_SIZE - OPTION_INFO.WND_EDGE_SIZE, w = OPTION_INFO.WND_EDGE_SIZE, h = OPTION_INFO.WND_EDGE_SIZE},
-        -- オプションのヘッダ
-        {id = "optionHeaderLeft", src = 2, x = 392, y = PARTS_TEXTURE_SIZE - OPTION_INFO.HEADER_H, w = 16, h = OPTION_INFO.HEADER_H},
         -- オプションのヘッダテキスト
-        {id = "optionHeaderPlayOption", src = 2, x = 1441, y = 0, w = OPTION_INFO.HEADER_TEXT_W, h = OPTION_INFO.HEADER_H},
-        {id = "optionHeaderAssistOption", src = 2, x = 1441, y = OPTION_INFO.HEADER_H, w = OPTION_INFO.HEADER_TEXT_W, h = OPTION_INFO.HEADER_H},
-        {id = "optionHeaderOtherOption", src = 2, x = 1441, y = OPTION_INFO.HEADER_H * 2, w = OPTION_INFO.HEADER_TEXT_W, h = OPTION_INFO.HEADER_H},
+        {id = "optionHeaderPlayOption", src = 2, x = 1441, y = 0, w = OPTION_INFO.HEADER_TEXT_W, h = HEADER.MARKER.H},
+        {id = "optionHeaderAssistOption", src = 2, x = 1441, y = HEADER.MARKER.H, w = OPTION_INFO.HEADER_TEXT_W, h = HEADER.MARKER.H},
+        {id = "optionHeaderOtherOption", src = 2, x = 1441, y = HEADER.MARKER.H * 2, w = OPTION_INFO.HEADER_TEXT_W, h = HEADER.MARKER.H},
         -- オプション用キー
         {id = "optionSmallKeyActive", src = 2, x = 673, y = PARTS_TEXTURE_SIZE - SMALL_KEY_H * 2, w = SMALL_KEY_W, h = SMALL_KEY_H},
         {id = "optionSmallKeyNonActive", src = 2, x = 673, y = PARTS_TEXTURE_SIZE - SMALL_KEY_H, w = SMALL_KEY_W, h = SMALL_KEY_H},
         -- 各オプション選択部分背景
         {id = "optionSelectBg", src = 2, x = 0, y = 1568, w = OPTION_INFO.ITEM_W, h = OPTION_INFO.BG_H},
         {id = "optionNumberBg", src = 2, x = 0, y = 1788, w = OPTION_INFO.NUMBER_BG_W, h = OPTION_INFO.NUMBER_BG_H},
-        -- 各オプションヘッダBG
-        {id = "optionHeader2LeftBg", src = 2, x = 0, y = 1966, w = OPTION_INFO.HEADER2_EDGE_BG_W, h = OPTION_INFO.HEADER2_EDGE_BG_H},
-        {id = "optionHeader2RightBg", src = 2, x = OPTION_INFO.HEADER2_EDGE_BG_W, y = 1966, w = OPTION_INFO.HEADER2_EDGE_BG_W, h = OPTION_INFO.HEADER2_EDGE_BG_H},
         -- 各オプションヘッダテキスト
         {id = "optionHeader2NotesOrder1"     , src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = 0, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
         {id = "optionHeader2NotesOrder2"     , src = 2, x = OPTION_INFO.HEADER2_TEXT_SRC_X, y = OPTION_INFO.HEADER2_TEXT_H * 1, w = OPTION_INFO.HEADER2_TEXT_W, h = OPTION_INFO.HEADER2_TEXT_H},
@@ -1548,8 +1538,9 @@ local function main()
         {id = "pink", src = 999, x = 5, y = 0, w = 1, h = 1},
     }
 
-    loadBaseWindowSelect(skin)
-    loadPopupWindowSelect(skin)
+    -- オプション画面等のポップアップウィンドウ共通パーツ読み込み
+    -- オプションはrefactorしたいけどtimerの都合上リファクタリングはしんどい
+    loadBaseSelect(skin)
 
     local c = getTableValue(skin_config.option, "背景形式", 915)
     if c == 915 then
@@ -1592,7 +1583,7 @@ local function main()
     -- スタミナの数字読み込み
     loadNumbers(skin, "userDataSmallNumber", 0, 1434, PARTS_OFFSET + 391, USER_DATA.NUM.W * 10, USER_DATA.NUM.H, 10, 1)
     -- 汎用的な24px数値
-    loadNumbers(skin, "24pxNumbers", 0, 1434, PARTS_OFFSET + 421, NUMBERS_24PX.W * 10, NUMBERS_24PX.H, 10, 1)
+    loadNumbers(skin, NUMBERS_24PX.ID, 0, 1434, PARTS_OFFSET + 421, NUMBERS_24PX.W * 10, NUMBERS_24PX.H, 10, 1)
 
 
     -- 密度グラフ
@@ -1712,14 +1703,14 @@ local function main()
         -- assist名
         table.insert(skin.image, {
             id = assistText .. "TextImg", src = 2,
-            x = OPTION_INFO.ITEM_W * 4, y = OPTION_INFO.HEADER_H * (3 + i),
-            w = OPTION_INFO.HEADER_TEXT_W, h = OPTION_INFO.HEADER_H
+            x = OPTION_INFO.ITEM_W * 4, y = HEADER.MARKER.H * (3 + i),
+            w = OPTION_INFO.HEADER_TEXT_W, h = HEADER.MARKER.H
         })
         -- 説明
         table.insert(skin.image, {
             id = assistText .. "DescriptionTextImg", src = 2,
-            x = OPTION_INFO.ITEM_W * 4, y = OPTION_INFO.HEADER_H * (3 + 7 + i),
-            w = OPTION_INFO.HEADER_TEXT_W * 2, h = OPTION_INFO.HEADER_H
+            x = OPTION_INFO.ITEM_W * 4, y = HEADER.MARKER.H * (3 + 7 + i),
+            w = OPTION_INFO.HEADER_TEXT_W * 2, h = HEADER.MARKER.H
         })
         -- ON/OFF
         table.insert(skin.image, {
@@ -3253,13 +3244,13 @@ local function main()
         insertOptionAnimationTable(skin, "optionWndEdge", op, OPTION_INFO.WND_OFFSET_X, OPTION_INFO.WND_OFFSET_Y + OPTION_INFO.WND_H - OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_EDGE_SIZE, OPTION_INFO.WND_EDGE_SIZE, 0)
 
         -- オプションのヘッダ部分
-        insertOptionAnimationTable(skin, "optionHeaderLeft", op, 192, 932, 16, OPTION_INFO.HEADER_H, 0)
-        insertOptionAnimationTable(skin, "purpleRed", op, 212, 932, 1516, 2, 0)
+        insertOptionAnimationTable(skin, "popUpWindowHeaderLeft", op, SIMPLE_WND_AREA.X + HEADER.MARKER.X, SIMPLE_WND_AREA.Y + HEADER.MARKER.Y, HEADER.MARKER.W, HEADER.MARKER.H, 0)
+        insertOptionAnimationTable(skin, "purpleRed", op, SIMPLE_WND_AREA.X + HEADER.UNDERBAR.X, SIMPLE_WND_AREA.X + HEADER.UNDERBAR.Y, HEADER.UNDERBAR.W, HEADER.UNDERBAR.H, 0)
     end
     -- オプションのヘッダテキスト
     local optionTypes = {"optionHeaderPlayOption", "optionHeaderAssistOption", "optionHeaderOtherOption"}
     for i, v in ipairs(optionTypes) do
-        insertOptionAnimationTable(skin, v, 21 + (i - 1), 220, 932, OPTION_INFO.HEADER_TEXT_W, OPTION_INFO.HEADER_H, 0)
+        insertOptionAnimationTable(skin, v, 21 + (i - 1), 220, 932, OPTION_INFO.HEADER_TEXT_W, HEADER.MARKER.H, 0)
     end
 
     -- プレイプション
@@ -3281,9 +3272,9 @@ local function main()
     for i, assistText in ipairs(assistTexts) do
         local baseY = 865 - 109 * (i - 1)
         -- 小さいキーの背景
-        insertOptionAnimationTable(skin, "optionHeader2LeftBg", 22, 192, baseY, OPTION_INFO.HEADER2_EDGE_BG_W, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
-        insertOptionAnimationTable(skin, "optionHeader2RightBg", 22, 192 + 96 - OPTION_INFO.HEADER2_EDGE_BG_W, baseY, OPTION_INFO.HEADER2_EDGE_BG_W, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
-        insertOptionAnimationTable(skin, "gray2", 22, 192 + OPTION_INFO.HEADER2_EDGE_BG_W, baseY, 96 - OPTION_INFO.HEADER2_EDGE_BG_W * 2, OPTION_INFO.HEADER2_EDGE_BG_H, 0)
+        insertOptionAnimationTable(skin, SUB_HEADER.EDGE.LEFT_ID, 22, 192, baseY, SUB_HEADER.EDGE.W, SUB_HEADER.EDGE.H, 0)
+        insertOptionAnimationTable(skin, SUB_HEADER.EDGE.RIGHT_ID, 22, 192 + 96 - SUB_HEADER.EDGE.W, baseY, SUB_HEADER.EDGE.W, SUB_HEADER.EDGE.H, 0)
+        insertOptionAnimationTable(skin, "gray2", 22, 192 + SUB_HEADER.EDGE.W, baseY, 96 - SUB_HEADER.EDGE.W * 2, SUB_HEADER.EDGE.H, 0)
 
         -- 小さいキー
         for j = 1, 7 do
@@ -3310,11 +3301,11 @@ local function main()
         end
 
         -- 文字
-        insertOptionAnimationTable(skin, assistText .. "TextImg", 22, 314, baseY, OPTION_INFO.HEADER_TEXT_W, OPTION_INFO.HEADER_H, 0)
-        insertOptionAnimationTable(skin, assistText .. "DescriptionTextImg", 22, 672, baseY, OPTION_INFO.HEADER_TEXT_W * 2, OPTION_INFO.HEADER_H, 0)
+        insertOptionAnimationTable(skin, assistText .. "TextImg", 22, 314, baseY, OPTION_INFO.HEADER_TEXT_W, HEADER.MARKER.H, 0)
+        insertOptionAnimationTable(skin, assistText .. "DescriptionTextImg", 22, 672, baseY, OPTION_INFO.HEADER_TEXT_W * 2, HEADER.MARKER.H, 0)
 
         -- ボタン
-        insertOptionAnimationTable(skin, assistText .. "ButtonImgset", 22, 1426, baseY - (OPTION_INFO.SWITCH_BUTTON_H - OPTION_INFO.HEADER_H) / 2, OPTION_INFO.SWITCH_BUTTON_W, OPTION_INFO.SWITCH_BUTTON_H, 0)
+        insertOptionAnimationTable(skin, assistText .. "ButtonImgset", 22, 1426, baseY - (OPTION_INFO.SWITCH_BUTTON_H - HEADER.MARKER.H) / 2, OPTION_INFO.SWITCH_BUTTON_W, OPTION_INFO.SWITCH_BUTTON_H, 0)
     end
 
     -- その他オプション
