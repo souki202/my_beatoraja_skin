@@ -13,7 +13,7 @@ end
 DEBUG = true
 
 SKIN_INFO = {
-    SELECT_VRESION = "2.0",
+    SELECT_VRESION = "2.15",
     RESULT_VERSION = "1.25",
 }
 
@@ -27,7 +27,7 @@ LARGE_TITLE_TEXT_SIZE = NORMAL_TEXT_SIZE * 2
 NORMAL_DESCENDER_LINE = 3 -- フォントサイズ64
 
 function globalInitialize(skin)
-    -- ユーザ情報周り
+    -- 統計情報周り
     userData.name = main_state.text(2)
 
     print("ユーザデータ読み込み")

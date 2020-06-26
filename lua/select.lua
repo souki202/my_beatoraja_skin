@@ -103,7 +103,7 @@ local STAGE_FILE = {
 local UPPER_OPTION_W = 270
 local UPPER_OPTION_H = 56
 
--- 上部のユーザ情報的な部分の各種
+-- 上部の統計情報的な部分の各種
 local USER_DATA = {
     WND = {
         X = 72,
@@ -578,7 +578,7 @@ local header = {
     fadeout = 500,
     scene = 3000,
     input = INPUT_WAIT,
-    -- 使用済みリスト 910 915 920 925 930 935 940 945 950
+    -- 使用済みリスト 910 915 920 925 930 935 940 945 950 955
     property = {
         {
             name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}, def = "画像(png)"
@@ -594,6 +594,9 @@ local header = {
         },
         {
             name = "ステージファイル枠の種類", item = {{name = "枠", op = 945}, {name = "影1(ボケ)", op = 946}, {name = "影2", op = 947}, {name = "無し", op = 949}}, def = "影2"
+        },
+        {
+            name = "バナー表示", item = {{name = "ON", op = 955}, {name = "OFF", op = 956}}, def = "ON"
         },
         {
             name = "曲情報表示形式", item = {{name = "難易度リスト", op = 935}, {name = "密度", op = 936}}, def = "密度"
@@ -676,6 +679,10 @@ end
 
 local function isCheckNewVersion()
     return getTableValue(skin_config.option, "新バージョン確認", 998) == 998 and userData.nextVersionCheckDate <= os.time()
+end
+
+local function isShowBanner()
+    return getTableValue(skin_config.option, "バナー表示", 955) == 955
 end
 
 local function calcComplementValueByTime(startValue, endValue, nowTime, overallTime)
@@ -1870,7 +1877,7 @@ local function main()
         {id = "newVersion" , font = 0, size = 24, align = 0, overflow = 1, constantText = "スキンに更新があります"},
         {id = "helpText", font = 0, size = 30, align = 0, constantText = "ヘルプ    ※マウスで操作し, スクロールはドラッグで操作してください."},
         {id = "24:", font = 0, size = 24, align = 0, constantText = ":"},
-        {id = "countText", font = 0, size = 24, align = 0, constantText = "回"},
+        {id = "countText", font = 0, size = 24, align = 2, constantText = "回"},
     }
 
     -- ヘルプの読み込み
@@ -2065,12 +2072,6 @@ local function main()
             id = "background",
             dst = {
                 {x = 0, y = 0, w = WIDTH, h = HEIGHT}
-            }
-        },
-        -- バナー
-        {
-            id = -102, dst = {
-                {x = 800, y = 784, w = 300, h = 80, filter = 1}
             }
         },
         -- フレーム
@@ -2557,6 +2558,15 @@ local function main()
         },
         -- 各ノーツ数は下のfor
     }
+
+    -- バナー表示
+    if isShowBanner() then
+        table.insert(skin.destination, {
+            id = -102, dst = {
+                {x = 800, y = 784, w = 300, h = 80, filter = 1}
+            }
+        })
+    end
 
     -- プレイヤーのランク出力
     if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 951 then
@@ -3245,7 +3255,7 @@ local function main()
 
         -- オプションのヘッダ部分
         insertOptionAnimationTable(skin, "popUpWindowHeaderLeft", op, SIMPLE_WND_AREA.X + HEADER.MARKER.X, SIMPLE_WND_AREA.Y + HEADER.MARKER.Y, HEADER.MARKER.W, HEADER.MARKER.H, 0)
-        insertOptionAnimationTable(skin, "purpleRed", op, SIMPLE_WND_AREA.X + HEADER.UNDERBAR.X, SIMPLE_WND_AREA.X + HEADER.UNDERBAR.Y, HEADER.UNDERBAR.W, HEADER.UNDERBAR.H, 0)
+        insertOptionAnimationTable(skin, "purpleRed", op, SIMPLE_WND_AREA.X + HEADER.UNDERBAR.X, SIMPLE_WND_AREA.Y + HEADER.UNDERBAR.Y, HEADER.UNDERBAR.W, HEADER.UNDERBAR.H, 0)
     end
     -- オプションのヘッダテキスト
     local optionTypes = {"optionHeaderPlayOption", "optionHeaderAssistOption", "optionHeaderOtherOption"}

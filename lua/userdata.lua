@@ -122,7 +122,7 @@ userData.load = function()
         cnt = cnt + 1
     end
 
-    print("SocialSkinユーザ情報読み込み完了")
+    print("SocialSkin統計情報読み込み完了")
     print("ランク: " .. userData.rank.rank)
     print("累積経験値: " .. userData.rank.exp)
     print("スタミナ回復時刻: ")
@@ -148,6 +148,11 @@ userData.writeUserData = function(fileHandle)
     fileHandle:write(userData.stamina.now .. "\n")
     -- バージョン確認日
     fileHandle:write(string.format("%10d", userData.nextVersionCheckDate) .. "\n")
+    -- コイン
+    fileHandle:write(string.format("%11d", userData.tokens.coin) .. "\n")
+    -- ダイヤ
+    fileHandle:write(userData.tokens.dia .. "\n")
+
 end
 
 userData.save = function()
@@ -162,7 +167,7 @@ userData.save = function()
     userData.writeUserData(f)
     f:close()
 
-    print("ユーザ情報保存処理終了")
+    print("統計情報保存処理終了")
 end
 
 userData.rank.getSumExp = function(rank)
