@@ -4,7 +4,7 @@ local gdx = luajava.bindClass("com.badlogic.gdx.Gdx")
 local input = luajava.bindClass("com.badlogic.gdx.Input")
 
 function keyInput()
-    -- print(gdx.input:getX())
+    
 end
 
 function isKeyPressed(keyCode)

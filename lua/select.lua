@@ -1246,6 +1246,7 @@ local function main()
     table.insert(skin.customTimers, {id = 10007, timer = "updateUseStamina"}) -- スタミナ使用量更新用タイマー
     table.insert(skin.customTimers, {id = 10008, timer = "newVersionAnimation"}) -- 新バージョンがある時の文字表示用
     table.insert(skin.customTimers, {id = 10009, timer = "helpTimer"}) -- ヘルプ画面全体のタイマー
+    table.insert(skin.customTimers, {id = 13009, timer = "keyInput"}) -- ヘルプ画面全体のタイマー
     for i = 1, 490 do
         table.insert(skin.customTimers, {id = 10010 + (i - 1)}) -- 10010~10499までヘルプ用で予約 増えるかもしれないので500くらい余裕見ておく
     end

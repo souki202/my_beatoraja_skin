@@ -14,7 +14,7 @@ DEBUG = true
 
 SKIN_INFO = {
     SELECT_VRESION = "2.15",
-    RESULT_VERSION = "1.25",
+    RESULT_VERSION = "1.30",
 }
 
 BASE_WIDTH = 1920

@@ -6,6 +6,10 @@ local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048
 local BG_ID = "background"
 
+local LEFT_X = 64
+local RIGHT_X = 1206
+local WND_WIDTH = 650
+
 local CLEAR_TYPE = 0 -- 後で初期化
 -- local CLEAR_TYPE = 6
 
@@ -128,16 +132,16 @@ local TITLE_BAR = {
 
 local DIR_BAR = {
     WND = {
-        X = 1184,
+        X = RIGHT_X,
         Y = 46,
-        W = 672,
+        W = WND_WIDTH,
         H = 48,
     },
     TEXT = {
         X = 18,
         Y = 8,
         SIZE = 24,
-        W = 672 - 18*2
+        W = WND_WIDTH - 18*2
     },
 }
 
@@ -179,7 +183,7 @@ local DIFFICULTY_INFO = {
 
 local SCORE = {
     WND = {
-        X = 80,
+        X = LEFT_X,
         Y = 654,
         W = 650,
         H = 160,
@@ -237,7 +241,7 @@ SCORE.EXSCORE.P.SYMBOL_X = SCORE.EXSCORE.P.DECIMAL_X + SCORE.EXSCORE.P.SYMBOL_X
 
 local COMBO = {
     WND = {
-        X = 80,
+        X = LEFT_X,
         Y = 474,
         W = 650,
         H = 160,
@@ -268,7 +272,7 @@ local COMBO = {
 
 local JUDGE = {
     WND = {
-        X = 80,
+        X = LEFT_X,
         Y = 116,
         W = 650,
         H = 336,
@@ -312,7 +316,7 @@ local JUDGE = {
 
 local IR = {
     WND = {
-        X = 750,
+        X = 734,
         Y = 744,
         W = 290,
         H = 70,
@@ -356,7 +360,7 @@ local IR = {
 
 local LAMP = {
     WND = {
-        X = 750,
+        X = 734,
         Y = 654,
         W = 290,
         H = 70,
@@ -388,7 +392,7 @@ local LAMP = {
 
 local TIMING = {
     WND = {
-        X = 750,
+        X = 734,
         Y = 382,
         W = 290,
         H = 70,
@@ -414,17 +418,17 @@ TIMING.NUM_AFTER_DOT.X = TIMING.DOT_X + TIMING.NUM_AFTER_DOT.X
 
 local GRAPH = {
     WND_GAUGE = {
-        X = 1184,
+        X = RIGHT_X,
         Y = 474,
-        W = 672,
+        W = WND_WIDTH,
         H = 340,
         EDGE = 10,
         SHADOW = 15,
     },
     WND_JUDGE = {
-        X = 1184,
+        X = RIGHT_X,
         Y = 116,
-        W = 672,
+        W = WND_WIDTH,
         H = 336,
         EDGE = 10,
         SHADOW = 15,
@@ -433,7 +437,7 @@ local GRAPH = {
     GAUGE = {
         X = 10,
         Y = 10,
-        W = 652,
+        W = WND_WIDTH - 20, -- 20はEDGE * 2
         H = 320,
         EDGE = 25,
     },
@@ -453,7 +457,7 @@ local GRAPH = {
     },
 
     GROOVE_NUM = {
-        X = 608, -- グラフエリアからの値
+        X = 586, -- グラフエリアからの値
         Y = 295,
         DOT = 1, -- x からの差分 あとでグラフからの差分に再計算
         AF_X = 20, -- x からの差分 あとでグラフからの差分に再計算
@@ -464,12 +468,12 @@ local GRAPH = {
         X = 10,
         Y = 224,
         INTERVAL_Y = -107,
-        W = 664,
+        W = WND_WIDTH - 20,
         H = 102,
     },
 
     DESCRIPTION = {
-        X = 426, -- 各グラフからの差分
+        X = 404, -- 各グラフからの差分
         Y = 83, -- 各グラフからの差分
         W = 219,
         H = 12,
@@ -543,7 +547,7 @@ local LARGE_LAMP = {
 }
 
 local RANKS = {
-    X = 571,
+    X = SCORE.WND.X + 491,
     Y = 704,
     W = 150,
     H = 63,
@@ -584,7 +588,7 @@ local NEW_RECORD = {
     H = 35,
 
     SCORE = {
-        X = 390,
+        X = SCORE.WND.X + 310,
         Y = 796,
         OP = 330,
     },
@@ -630,10 +634,17 @@ local header = {
     input = INPUT_WAIT,
     property = {
         {
-            name = "背景の分類", item = {{name = "クリアかどうか", op = 910}, {name = "ランク毎", op = 911}, {name = "クリアランプ毎", op = 912}}
+            name = "背景の分類", item = {{name = "クリアかどうか", op = 910}, {name = "ランク毎", op = 911}, {name = "クリアランプ毎", op = 912}}, def = "クリアかどうか"
+        },
+        {
+            name = "レイアウト", item = {{name = "1", op = 915}, {name = "2", op = 916}}, def = "1"
+        },
+        {
+            name = "スコア位置", item = {{name = "左", op = 920}, {name = "右", op = 921}}, def = "左"
         },
     },
     filepath = {
+        {name = "NoImage画像(png)", path = "../result/noimage/*.png", def = "default"},
         {name = "背景選択-----------------------------------------", path="../dummy/*"},
         {name = "CLEAR背景(png)", path = "../result/background/isclear/clear/*.png"},
         {name = "FAILED背景(png)", path = "../result/background/isclear/failed/*.png"},
@@ -658,7 +669,15 @@ local header = {
         {name = "PERFECT背景(png)"        , path = "../result/background/lamps/perfect/*.png"},
     },
 
+
 }
+
+local function isOldLayout()
+    return getTableValue(skin_config.option, "レイアウト", 915) == 915
+end
+local function is2P()
+    return getTableValue(skin_config.option, "スコア位置", 920) == 921
+end
 
 local function easeOut(t, s, e, d)
     local c = e - s
@@ -798,6 +817,32 @@ local function destinationWindow(skin, x, y, w, h)
     })
 end
 
+local function initialize(skin)
+    if isOldLayout() == false then
+        IR.WND.X = LEFT_X
+        IR.WND.Y = 564
+        LAMP.WND.X = LEFT_X + 360
+        LAMP.WND.Y = 564
+        COMBO.WND.Y = 384
+        JUDGE.WND.Y = 26
+        TIMING.WND.Y = 26
+    end
+    if is2P() then
+        SCORE.WND.X = RIGHT_X
+        COMBO.WND.X = RIGHT_X
+        JUDGE.WND.X = RIGHT_X
+        GRAPH.WND_GAUGE.X = LEFT_X
+        GRAPH.WND_JUDGE.X = LEFT_X
+        DIR_BAR.WND.X = LEFT_X
+        RANKS.X = SCORE.WND.X + 491
+        NEW_RECORD.SCORE.X = SCORE.WND.X + 310
+        -- ranking, lampは左右反転
+        IR.WND.X = WIDTH - IR.WND.X - IR.WND.W
+        LAMP.WND.X = WIDTH - LAMP.WND.X - LAMP.WND.W
+        TIMING.WND.X = WIDTH - TIMING.WND.X - TIMING.WND.W
+    end
+end
+
 local function main()
     local skin = {}
 	-- ヘッダ情報をスキン本体にコピー
@@ -806,6 +851,7 @@ local function main()
     end
 
     globalInitialize(skin)
+    initialize(skin)
 
     CLEAR_TYPE = main_state.number(370)
     if CLEAR_TYPE == LAMPS.NO_PLAY then
@@ -859,6 +905,7 @@ local function main()
         {id = 0, path = "../result/parts/parts.png"},
         {id = 1, path = "../result/parts/shine.png"},
         {id = 2, path = "../result/parts/shine_circle.png"},
+        {id = 20, path = "../result/noimage/*.png"},
         {id = 100, path = "../result/background/isclear/clear/*.png"},
         {id = 101, path = "../result/background/isclear/failed/*.png"},
         -- AAAからランク毎
@@ -888,6 +935,8 @@ local function main()
     })
 
     skin.image = {
+        {id = "noImage", src = 20, x = 0, y = 0, w = -1, h = -1},
+
         {id = "grayItemBg", src = 0, x = 529, y = 0, w = GRAY_ITEM.W, h = GRAY_ITEM.H},
         {id = "percentageFor24Px", src = 0, x = 1848, y = 40, w = NUM_24PX.PERCENT.W, h = NUM_24PX.PERCENT.H},
         {id = "percentageFor24PxWhite", src = 0, x = 1848, y = 189, w = NUM_24PX.PERCENT.W, h = NUM_24PX.PERCENT.H},
@@ -1096,9 +1145,21 @@ local function main()
                 {x = 0, y = 0, w = WIDTH, h = HEIGHT}
             }
         },
-        -- カバー画像
+        -- ステージファイル背景
+        -- {
+        --     id = "black", op = {191}, dst = {
+        --         {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = 255}
+        --     }
+        -- },
+        -- noimage
         {
-            id = -100, filter = 1, dst = {
+            id = "noImage", op = {190}, stretch = 1, dst = {
+                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
+            }
+        },
+        -- ジャケット画像
+        {
+            id = -100, op = {191}, filter = 1, stretch = 1, dst = {
                 {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
             }
         },
