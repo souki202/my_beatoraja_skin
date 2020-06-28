@@ -668,13 +668,12 @@ local header = {
         {name = "FULLCOMBO背景(png)"      , path = "../result/background/lamps/fullcombo/*.png"},
         {name = "PERFECT背景(png)"        , path = "../result/background/lamps/perfect/*.png"},
     },
-
-
 }
 
 local function isOldLayout()
     return getTableValue(skin_config.option, "レイアウト", 915) == 915
 end
+
 local function is2P()
     return getTableValue(skin_config.option, "スコア位置", 920) == 921
 end

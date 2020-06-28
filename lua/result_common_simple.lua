@@ -9,6 +9,9 @@ local BG_ID = "background"
 local CLEAR_TYPE = 0 -- 後で初期化
 -- local CLEAR_TYPE = 6
 
+local LEFT_X = 80
+local RIGHT_X = 1190
+
 local LAMPS = {
     NO_PLAY = 0,
     FAILED = 1,
@@ -151,7 +154,7 @@ local GRAY_ITEM = {
 
 local SCORE = {
     WND = {
-        X = 80,
+        X = LEFT_X,
         Y = 654,
         W = 650,
         H = 160,
@@ -210,7 +213,7 @@ SCORE.EXSCORE.P.SYMBOL_X = SCORE.EXSCORE.P.DECIMAL_X + SCORE.EXSCORE.P.SYMBOL_X
 
 local JUDGE = {
     WND = {
-        X = 80,
+        X = LEFT_X,
         Y = 322,
         W = 650,
         H = 312,
@@ -338,7 +341,7 @@ TIMING.NUM_AFTER_DOT.X = TIMING.DOT_X + TIMING.NUM_AFTER_DOT.X
 
 local GRAPH = {
     WND_GAUGE = {
-        X = 80,
+        X = LEFT_X,
         Y = 20,
         W = 650,
         H = 282,
@@ -516,8 +519,12 @@ local header = {
         {
             name = "背景の分類", item = {{name = "クリアかどうか", op = 910}, {name = "ランク毎", op = 911}, {name = "クリアランプ毎", op = 912}}
         },
+        {
+            name = "スコア位置", item = {{name = "左", op = 920}, {name = "右", op = 921}}, def = "左"
+        },
     },
     filepath = {
+        {name = "NoImage画像(png)", path = "../result/noimage/*.png", def = "default"},
         {name = "背景選択-----------------------------------------", path="../dummy/*"},
         {name = "CLEAR背景(png)", path = "../result/background/isclear/clear/*.png"},
         {name = "FAILED背景(png)", path = "../result/background/isclear/failed/*.png"},
@@ -541,8 +548,11 @@ local header = {
         {name = "FULLCOMBO背景(png)"      , path = "../result/background/lamps/fullcombo/*.png"},
         {name = "PERFECT背景(png)"        , path = "../result/background/lamps/perfect/*.png"},
     },
-
 }
+
+local function is2P()
+    return getTableValue(skin_config.option, "スコア位置", 920) == 921
+end
 
 local function easeOut(t, s, e, d)
     local c = e - s
@@ -682,6 +692,17 @@ local function destinationWindow(skin, x, y, w, h)
     })
 end
 
+local function initialize(skin)
+    if is2P() then
+        STAGE_FILE.X = 1584
+        SCORE.WND.X = RIGHT_X
+        JUDGE.WND.X = RIGHT_X
+        GRAPH.WND_GAUGE.X = RIGHT_X
+        RANKS.X = SCORE.WND.X + 491
+        NEW_RECORD.SCORE.X = SCORE.WND.X + 310
+    end
+end
+
 local function main()
     local skin = {}
 	-- ヘッダ情報をスキン本体にコピー
@@ -690,6 +711,7 @@ local function main()
     end
 
     globalInitialize(skin)
+    initialize(skin)
 
     CLEAR_TYPE = main_state.number(370)
     if CLEAR_TYPE == LAMPS.NO_PLAY then
@@ -745,6 +767,7 @@ local function main()
         {id = 0, path = "../result/parts/parts.png"},
         {id = 1, path = "../result/parts/shine.png"},
         {id = 2, path = "../result/parts/shine_circle.png"},
+        {id = 20, path = "../result/noimage/*.png"},
         {id = 100, path = "../result/background/isclear/clear/*.png"},
         {id = 101, path = "../result/background/isclear/failed/*.png"},
         -- AAAからランク毎
@@ -774,6 +797,8 @@ local function main()
     })
 
     skin.image = {
+        {id = "noImage", src = 20, x = 0, y = 0, w = -1, h = -1},
+
         {id = "grayItemBg", src = 0, x = 529, y = 0, w = GRAY_ITEM.W, h = GRAY_ITEM.H},
         {id = "percentageFor24Px", src = 0, x = 1848, y = 40, w = NUM_24PX.PERCENT.W, h = NUM_24PX.PERCENT.H},
         {id = "percentageFor24PxWhite", src = 0, x = 1848, y = 189, w = NUM_24PX.PERCENT.W, h = NUM_24PX.PERCENT.H},
@@ -941,9 +966,15 @@ local function main()
                 {x = 0, y = 0, w = WIDTH, h = HEIGHT}
             }
         },
-        -- カバー画像
+        -- noimage
         {
-            id = -100, filter = 1, dst = {
+            id = "noImage", op = {190}, stretch = 1, dst = {
+                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
+            }
+        },
+        -- ジャケット画像
+        {
+            id = -100, op = {191}, filter = 1, stretch = 1, dst = {
                 {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
             }
         },
