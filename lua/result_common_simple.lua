@@ -1,6 +1,7 @@
 require("define")
 require("numbers")
 local main_state = require("main_state")
+local resultObtained = require("result_obtained")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048
@@ -712,6 +713,7 @@ local function main()
 
     globalInitialize(skin)
     initialize(skin)
+    resultObtained.init(skin)
 
     CLEAR_TYPE = main_state.number(370)
     if CLEAR_TYPE == LAMPS.NO_PLAY then
@@ -762,6 +764,8 @@ local function main()
             print("スタミナ不足のため, 経験値なし")
         end
     end
+
+    skin.customEvents = {}
 
     skin.source = {
         {id = 0, path = "../result/parts/parts.png"},
@@ -958,6 +962,8 @@ local function main()
     skin.text = {
         {id = "title", font = 0, size = TITLE_BAR.TITLE.FONT_SIZE, ref = 12, align = 1},
     }
+
+    resultObtained.load(skin)
 
     skin.destination = {
         -- 背景
@@ -1160,7 +1166,7 @@ local function main()
             }
         })
         -- 判定合計値
-        dstNumberRightJustify(skin, text .. "Value", x + JUDGE.NUM.X, y, NUM_36PX.W, NUM_36PX.H, JUDGE.NUM.DIGIT)
+        dstNumberRightJustifyWithColor(skin, text .. "Value", x + JUDGE.NUM.X, y, NUM_36PX.W, NUM_36PX.H, JUDGE.NUM.DIGIT, 0, 0, 0)
 
         -- 区切り線
         table.insert(skin.destination, {
@@ -1480,6 +1486,8 @@ local function main()
             })
         end
     end
+
+    resultObtained.dst(skin)
 
     -- 大きいクリアランプ
     local nowLLTextX = 0

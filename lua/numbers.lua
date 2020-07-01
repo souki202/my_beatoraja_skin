@@ -51,6 +51,18 @@ function dstNumberRightJustify(skin, id, x, y, w, h, digit)
     })
 end
 
+function dstNumberRightJustifyWithColor(skin, id, x, y, w, h, digit, r, g, b)
+    table.insert(skin.destination, {
+        id = id, dst = {
+            {
+                x = x - w * digit,
+                y = y,
+                w = w, h = h,
+                r = r, g = g, b = b,
+            }
+        }
+    })
+end
 
 function dstNumberRightJustifyByDst(skin, id, op, timer, loop, baseSst, digit)
     local dst = {}
@@ -244,7 +256,8 @@ end
 -- @param  op
 -- @param  timer 使用するタイマー -1場合は独自の表示の切り替えができるタイマー
 -- @param  loop
-function preDrawStaticNumbers(skin, idPrefix, dstId, align, drawBackZero, baseDst, drawValue, op, timer, loop)
+-- @param  complession 何px幅を詰めるか
+function preDrawStaticNumbers(skin, idPrefix, dstId, align, drawBackZero, baseDst, drawValue, op, timer, loop, complession)
     myPrint("数字出力準備: ", idPrefix, dstId, align, drawBackZero, baseDst, drawValue)
     local timerId = getNextNumberTimerId()
 

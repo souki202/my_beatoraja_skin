@@ -1,5 +1,6 @@
 local main_state = require("main_state")
 
+-- expでのランクアップの境界は, exp >= tbl[rank]で比較すること
 userData = {
     name = "",
     escapedName = "",
@@ -170,6 +171,7 @@ userData.save = function()
     print("統計情報保存処理終了")
 end
 
+-- 次のランクに上がるのに必要な累計経験値を取得
 userData.rank.getSumExp = function(rank)
     if rank <= 0 then
         return 0
@@ -182,6 +184,7 @@ userData.rank.getSumExp = function(rank)
     return userData.rank.tbl[rank]
 end
 
+-- ランクアップに必要な残りの経験値を取得する
 userData.rank.calcNext = function(rank, exp)
     -- 最大ランクはnext無し
     if userData.rank.maxRank <= rank then
@@ -189,6 +192,20 @@ userData.rank.calcNext = function(rank, exp)
     end
 
     return userData.rank.tbl[rank] - exp
+end
+
+-- 現在のランクと次のランクの経験値の差を取得する
+userData.rank.getNext = function(rank)
+    -- 最大ランクはnext無し
+    if userData.rank.maxRank <= rank then
+        return userData.rank.tbl[userData.rank.maxRank]
+    end
+    if rank == 1 then
+        return userData.rank.tbl[rank]
+    elseif rank <= 0 then
+        return 0
+    end
+    return userData.rank.tbl[rank] - userData.rank.tbl[rank - 1]
 end
 
 -- 経験値を加算し, ランクをそれにあわせる
@@ -209,9 +226,19 @@ userData.addExp = function(exp)
     end
 end
 
+userData.rank.getNowRankExp = function(exp, rank)
+    if rank > 1 then
+        return exp - userData.rank.tbl[rank-1]
+    elseif rank == userData.rank.maxRank then
+        return 0
+    end
+    return exp
+end
+
 userData.calcUseStamina = function(totalNotes)
     return math.ceil(math.pow(totalNotes, 0.5) / 5)
 end
+
 
 userData.getNextHealStaminaDateString = function()
     return os.date("%Y-%m-%d %H:%M:%S", userData.stamina.nextHealEpochSecond)

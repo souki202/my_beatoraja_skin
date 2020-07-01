@@ -1,6 +1,7 @@
 require("define")
 require("numbers")
 local main_state = require("main_state")
+local resultObtained = require("result_obtained")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048
@@ -642,6 +643,9 @@ local header = {
         {
             name = "スコア位置", item = {{name = "左", op = 920}, {name = "右", op = 921}}, def = "左"
         },
+        {
+            name = "経験値等画面遷移", item = {{name = "右キー", op = 925}, {name = "左キー", op = 926}, {name = "決定ボタン(一定時間表示)", op = 927}, {name = "無し", op = 928}}, def = "右キー"
+        },
     },
     filepath = {
         {name = "NoImage画像(png)", path = "../result/noimage/*.png", def = "default"},
@@ -667,6 +671,9 @@ local header = {
         {name = "EXHARD背景(png)"         , path = "../result/background/lamps/exhard/*.png"},
         {name = "FULLCOMBO背景(png)"      , path = "../result/background/lamps/fullcombo/*.png"},
         {name = "PERFECT背景(png)"        , path = "../result/background/lamps/perfect/*.png"},
+    },
+    offset = {
+        {name = "経験値等画面表示秒数 (決定キーの場合, 最小1秒)", x = 0},
     },
 }
 
@@ -851,6 +858,7 @@ local function main()
 
     globalInitialize(skin)
     initialize(skin)
+    resultObtained.init(skin)
 
     CLEAR_TYPE = main_state.number(370)
     if CLEAR_TYPE == LAMPS.NO_PLAY then
@@ -894,11 +902,14 @@ local function main()
             end
             exp = math.floor(exp)
             userData.updateRemainingStamina()
-            userData.useStamina(requireStamina)
-            userData.addExp(exp)
+            -- userData.useStamina(requireStamina)
+            -- userData.addExp(exp)
+            userData.addExp(10000)
             pcall(userData.save)
         end
     end
+
+    skin.customEvents = {} -- カスタムタイマはglobalInitializeで初期化済み
 
     skin.source = {
         {id = 0, path = "../result/parts/parts.png"},
@@ -1136,6 +1147,8 @@ local function main()
         {id = "subArtist", font = 0, size = TITLE_BAR.ARTIST.FONT_SIZE, ref = 15, align = 1, overflow = 1},
         {id = "tableName", font = 0, size = DIR_BAR.TEXT.SIZE, ref = 1003, align = 0, overflow = 1},
     }
+
+    resultObtained.load(skin)
 
     skin.destination = {
         -- 背景
@@ -1452,12 +1465,12 @@ local function main()
             }
         })
         -- 今回の値
-        dstNumberRightJustify(skin, text .. "Value", x + COMBO.NOW_NUM.X, y, NUM_36PX.W, NUM_36PX.H, COMBO.DIGIT)
+        dstNumberRightJustifyWithColor(skin, text .. "Value", x + COMBO.NOW_NUM.X, y, NUM_36PX.W, NUM_36PX.H, COMBO.DIGIT, 0, 0, 0)
 
         -- 古い数値と差分
         if text ~= "comboBreak" then
             -- 古い値
-            dstNumberRightJustify(skin, text .. "OldValue", x + COMBO.OLD_NUM.X, y, NUM_24PX.W, NUM_24PX.H, COMBO.DIGIT)
+            dstNumberRightJustifyWithColor(skin, text .. "OldValue", x + COMBO.OLD_NUM.X, y, NUM_24PX.W, NUM_24PX.H, COMBO.DIGIT, 0, 0, 0)
             -- 矢印
             table.insert(skin.destination, {
                 id = "changeArrow", dst = {
@@ -1504,7 +1517,7 @@ local function main()
             }
         })
         -- 判定合計値
-        dstNumberRightJustify(skin, text .. "Value", x + JUDGE.NUM.X, y, NUM_36PX.W, NUM_36PX.H, JUDGE.NUM.DIGIT)
+        dstNumberRightJustifyWithColor(skin, text .. "Value", x + JUDGE.NUM.X, y, NUM_36PX.W, NUM_36PX.H, JUDGE.NUM.DIGIT, 0, 0, 0)
         -- early late
         dstNumberRightJustify(skin, text .. "EarlyValue", x + JUDGE.NUM.EARLY_X, y, NUM_24PX.W, NUM_24PX.H, JUDGE.NUM.DIGIT)
         dstNumberRightJustify(skin, text .. "LateValue" , x + JUDGE.NUM.LATE_X , y, NUM_24PX.W, NUM_24PX.H, JUDGE.NUM.DIGIT)
@@ -1887,6 +1900,8 @@ local function main()
             })
         end
     end
+
+    resultObtained.dst(skin)
 
     -- 大きいクリアランプ
     local nowLLTextX = 0

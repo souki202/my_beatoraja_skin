@@ -3,15 +3,11 @@ local luajava = require("luajava")
 local gdx = luajava.bindClass("com.badlogic.gdx.Gdx")
 local input = luajava.bindClass("com.badlogic.gdx.Input")
 
-function keyInput()
-    
-end
-
 function isKeyPressed(keyCode)
     return gdx.input:isKeyPressed(keyCode)
 end
 
-function isPressedEnter(keyCode)
+function isPressedEnter()
     return gdx.input:isKeyPressed(input.Keys.Enter)
 end
 

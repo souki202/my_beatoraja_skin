@@ -226,7 +226,7 @@ statistics.functions.destinationWindow = function(skin)
             init,
             {time = atime, x = numX1, y = nowY + numOffsetY, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
         }
-        preDrawStaticNumbers(skin, NUMBERS_24PX.ID, statistics.ID_PREFIX .. "rank", 0, false, dst, statistics.USER.VALUES[i], {}, timer, atime)
+        preDrawStaticNumbers(skin, NUMBERS_24PX.ID, statistics.ID_PREFIX .. "rank", 0, false, dst, statistics.USER.VALUES[i], {}, timer, atime, 0)
 
         nowY = nowY - interval
     end

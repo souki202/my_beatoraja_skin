@@ -1251,6 +1251,7 @@ local function main()
         table.insert(skin.customTimers, {id = 10010 + (i - 1)}) -- 10010~10499までヘルプ用で予約 増えるかもしれないので500くらい余裕見ておく
     end
     table.insert(skin.customTimers, {id = statistics.getWindowTimerId(), timer = "statisticsTimer"}) -- 統計画面全体のタイマー
+    table.insert(skin.customTimers, {id = 13000, timer = "update"})
 
     skin.customEvents = {} -- 1000~未定はヘルプ
 
@@ -2578,7 +2579,7 @@ local function main()
         })
     elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
         local dst = {{x = USER_DATA.WND.X + RANK.NEW.X, y = USER_DATA.WND.Y + RANK.NEW.Y, w = RANK.NEW.NUM_W, h = RANK.NEW.NUM_H}}
-        preDrawStaticNumbers(skin, "rankCoop", "rankCoop", 0, false, dst, userData.rank.rank, {}, -1, 0)
+        preDrawStaticNumbers(skin, "rankCoop", "rankCoop", 0, false, dst, userData.rank.rank, {}, -1, 0, 0)
     end
 
     -- 経験値バー出力
@@ -2638,7 +2639,7 @@ local function main()
 
             -- 次レベルの, 現在レベルとの相対経験値を表示
             local dst = {{x = gaugeX + EXP.NUM.X, y = gaugeY + EXP.NUM.Y, w = USER_DATA.NUM.W, h = USER_DATA.NUM.H}}
-            preDrawStaticNumbers(skin, "userDataSmallNumber", "expNextValue", 0, 0, dst, sub, {}, -1, 0)
+            preDrawStaticNumbers(skin, "userDataSmallNumber", "expNextValue", 0, 0, dst, sub, {}, -1, 0, 0)
 
             -- スラッシュ
             local offsetX = calcValueDigit(sub, false) * USER_DATA.NUM.W + 2
@@ -2651,7 +2652,7 @@ local function main()
 
             -- 現在値
             dst = {{x = gaugeX + EXP.NUM.X - offsetX - USER_DATA.SLASH.W - 1, y = gaugeY + EXP.NUM.Y, w = USER_DATA.NUM.W, h = USER_DATA.NUM.H}}
-            preDrawStaticNumbers(skin, "userDataSmallNumber", "expNowValue", 0, 0, dst, now, {}, -1, 0)
+            preDrawStaticNumbers(skin, "userDataSmallNumber", "expNowValue", 0, 0, dst, now, {}, -1, 0, 0)
         end
     end
 
@@ -2738,7 +2739,7 @@ local function main()
         -- スタミナ数値表示
         -- 最大値
         local dst = {{x = gaugeX + STAMINA.GAUGE.NUM.X, y = gaugeY + STAMINA.GAUGE.NUM.Y, w = USER_DATA.NUM.W, h = USER_DATA.NUM.H}}
-        preDrawStaticNumbers(skin, "userDataSmallNumber", "staminaMaxValue", 0, 0, dst, userData.stamina.tbl[userData.rank.rank], {}, -1, 0)
+        preDrawStaticNumbers(skin, "userDataSmallNumber", "staminaMaxValue", 0, 0, dst, userData.stamina.tbl[userData.rank.rank], {}, -1, 0, 0)
 
         -- 最大値の桁数分だけずらす
         local offsetX = calcValueDigit(userData.stamina.tbl[userData.rank.rank], false) * USER_DATA.NUM.W + 2
@@ -3442,7 +3443,7 @@ local function main()
         })
 
     end
-    
+
     -- 選曲画面突入時アニメーション
     if getTableValue(skin_config.option, "開幕アニメーション種類", 930) == 931 then
         -- 背景
