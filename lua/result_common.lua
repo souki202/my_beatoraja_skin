@@ -1,5 +1,6 @@
 require("define")
 require("numbers")
+require("my_window")
 local main_state = require("main_state")
 local resultObtained = require("result_obtained")
 
@@ -722,107 +723,6 @@ local function loadBackground(skin)
     end
 end
 
-local function loadBaseWindow(skin, x, y)
-    local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN
-    -- 四隅
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.UPPER_LEFT, src = 0, x = x, y = y,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.UPPER_RIGHT, src = 0, x = x + sumEdgeSize + 1, y = y,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BOTTOM_RIGHT, src = 0, x = x + sumEdgeSize + 1, y = y + sumEdgeSize + 1,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BOTTOM_LEFT, src = 0, x = x, y = y + sumEdgeSize + 1,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-
-    -- 各辺
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.TOP, src = 0, x = x + sumEdgeSize, y = y,
-        w = 1, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.LEFT, src = 0, x = x + sumEdgeSize + 1, y = y + sumEdgeSize,
-        w = sumEdgeSize, h = 1
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BOTTOM, src = 0, x = x + sumEdgeSize, y = y + sumEdgeSize + 1,
-        w = 1, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.RIGHT, src = 0, x = x, y = y + sumEdgeSize,
-        w = sumEdgeSize, h = 1
-    })
-
-    -- 本体
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BODY, src = 0, x = x + sumEdgeSize, y = y + sumEdgeSize,
-        w = 1, h = 1
-    })
-end
-
--- それぞれ影を除いた座標
-local function destinationWindow(skin, x, y, w, h)
-    local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN
-
-    -- 四隅
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.UPPER_LEFT, dst = {
-            {x = x - BASE_WINDOW.SHADOW_LEN, y = y + h - BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.UPPER_RIGHT, dst = {
-            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y + h - BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BOTTOM_RIGHT, dst = {
-            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y - BASE_WINDOW.SHADOW_LEN, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BOTTOM_LEFT, dst = {
-            {x = x - BASE_WINDOW.SHADOW_LEN, y = y - BASE_WINDOW.SHADOW_LEN, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-
-    -- 各辺
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.TOP, dst = {
-            {x = x + BASE_WINDOW.EDGE_SIZE, y = y + h - BASE_WINDOW.EDGE_SIZE, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.LEFT, dst = {
-            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y + BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = h - BASE_WINDOW.EDGE_SIZE * 2}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BOTTOM, dst = {
-            {x = x + BASE_WINDOW.EDGE_SIZE, y = y - BASE_WINDOW.SHADOW_LEN, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.RIGHT, dst = {
-            {x = x - BASE_WINDOW.SHADOW_LEN, y = y + BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = h - BASE_WINDOW.EDGE_SIZE * 2}
-        }
-    })
-
-    -- 本体
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BODY, dst = {
-            {x = x + BASE_WINDOW.EDGE_SIZE, y = y + BASE_WINDOW.EDGE_SIZE, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = h - BASE_WINDOW.EDGE_SIZE * 2}
-        }
-    })
-end
-
 local function initialize(skin)
     if isOldLayout() == false then
         IR.WND.X = LEFT_X
@@ -861,6 +761,8 @@ local function main()
     resultObtained.init(skin)
 
     CLEAR_TYPE = main_state.number(370)
+    resultObtained.setRampAndUpdateFadeTime(skin, CLEAR_TYPE)
+
     if CLEAR_TYPE == LAMPS.NO_PLAY then
         -- コース途中のリザルトならクリアかfailedしか無い
         if main_state.option(90) then
@@ -902,9 +804,8 @@ local function main()
             end
             exp = math.floor(exp)
             userData.updateRemainingStamina()
-            -- userData.useStamina(requireStamina)
-            -- userData.addExp(exp)
-            userData.addExp(10000)
+            userData.useStamina(requireStamina)
+            userData.addExp(exp)
             pcall(userData.save)
         end
     end
@@ -1013,7 +914,7 @@ local function main()
     -- 背景読み込み
     loadBackground(skin)
     -- ウィンドウ読み込み
-    loadBaseWindow(skin, 0, 0)
+    loadBaseWindowResult(skin)
 
     -- 大クリアランプ読み込み
     for i = 1, LARGE_LAMP.LEN[CLEAR_TYPE] do
@@ -1263,7 +1164,7 @@ local function main()
     })
 
     -- タイトル部分
-    destinationWindow(skin, TITLE_BAR.WND.X, TITLE_BAR.WND.Y, TITLE_BAR.WND.W, TITLE_BAR.WND.H)
+    destinationStaticBaseWindow(skin, TITLE_BAR.WND.X, TITLE_BAR.WND.Y, TITLE_BAR.WND.W, TITLE_BAR.WND.H)
     table.insert(skin.destination, {
         id = "title", filter = 1, dst = {
             {x = TITLE_BAR.WND.X + TITLE_BAR.WND.W / 2, y = TITLE_BAR.WND.Y + TITLE_BAR.TITLE.Y, w = TITLE_BAR.TITLE.W, h = TITLE_BAR.TITLE.FONT_SIZE, r = 0, g = 0, b = 0}
@@ -1289,7 +1190,7 @@ local function main()
         }
     })
     -- フォルダ名
-    destinationWindow(skin, DIR_BAR.WND.X, DIR_BAR.WND.Y, DIR_BAR.WND.W, DIR_BAR.WND.H)
+    destinationStaticBaseWindow(skin, DIR_BAR.WND.X, DIR_BAR.WND.Y, DIR_BAR.WND.W, DIR_BAR.WND.H)
     table.insert(skin.destination, {
         id = "tableName", dst = {
             {
@@ -1302,7 +1203,7 @@ local function main()
 
 
     -- 難易度, ノーツ数部分
-    destinationWindow(skin, DIFFICULTY_INFO.WND.X, DIFFICULTY_INFO.WND.Y, DIFFICULTY_INFO.WND.W, DIFFICULTY_INFO.WND.H)
+    destinationStaticBaseWindow(skin, DIFFICULTY_INFO.WND.X, DIFFICULTY_INFO.WND.Y, DIFFICULTY_INFO.WND.W, DIFFICULTY_INFO.WND.H)
     -- 難易度
     local difficultyTextX = DIFFICULTY_INFO.WND.X + DIFFICULTY_INFO.DIFFICULTY.X
     local difficultyTextY = DIFFICULTY_INFO.WND.Y + DIFFICULTY_INFO.DIFFICULTY.Y
@@ -1369,7 +1270,7 @@ local function main()
     end
 
     -- スコア部分
-    destinationWindow(skin, SCORE.WND.X, SCORE.WND.Y, SCORE.WND.W, SCORE.WND.H)
+    destinationStaticBaseWindow(skin, SCORE.WND.X, SCORE.WND.Y, SCORE.WND.W, SCORE.WND.H)
     local scoreTextX = SCORE.WND.X + SCORE.RELATIVE_X
     local scoreTextY = SCORE.WND.Y + SCORE.EXSCORE.RELATIVE_Y
     -- EXSCORE
@@ -1452,7 +1353,7 @@ local function main()
     })
 
     -- BP等
-    destinationWindow(skin, COMBO.WND.X, COMBO.WND.Y, COMBO.WND.W, COMBO.WND.H)
+    destinationStaticBaseWindow(skin, COMBO.WND.X, COMBO.WND.Y, COMBO.WND.W, COMBO.WND.H)
     for i, text in ipairs(COMBO.PREFIX) do
         local x = COMBO.WND.X + COMBO.TEXT.X
         local y = COMBO.WND.Y + COMBO.TEXT.Y + COMBO.TEXT.INTERVAL_Y * (i - 1)
@@ -1495,7 +1396,7 @@ local function main()
     end
 
     -- 各種判定
-    destinationWindow(skin, JUDGE.WND.X, JUDGE.WND.Y, JUDGE.WND.W, JUDGE.WND.H)
+    destinationStaticBaseWindow(skin, JUDGE.WND.X, JUDGE.WND.Y, JUDGE.WND.W, JUDGE.WND.H)
     -- early lateの文字
     table.insert(skin.destination, {
         id = "earlyText", dst = {
@@ -1545,7 +1446,7 @@ local function main()
 
 
     -- IR
-    destinationWindow(skin, IR.WND.X, IR.WND.Y, IR.WND.W, IR.WND.H)
+    destinationStaticBaseWindow(skin, IR.WND.X, IR.WND.Y, IR.WND.W, IR.WND.H)
     table.insert(skin.destination, {
         id = "irText", dst = {
             {x = IR.WND.X + IR.TEXT.X, y = IR.WND.Y + IR.TEXT.Y, w = IR.TEXT.W, h = IR.TEXT.H}
@@ -1570,7 +1471,7 @@ local function main()
     })
 
     -- lamp
-    destinationWindow(skin, LAMP.WND.X, LAMP.WND.Y, LAMP.WND.W, LAMP.WND.H)
+    destinationStaticBaseWindow(skin, LAMP.WND.X, LAMP.WND.Y, LAMP.WND.W, LAMP.WND.H)
     table.insert(skin.destination, {
         id = "lampText", dst = {
             {x = LAMP.WND.X + LAMP.TEXT.X, y = LAMP.WND.Y + LAMP.TEXT.Y, w = LAMP.TEXT.W, h = LAMP.TEXT.H}
@@ -1593,7 +1494,7 @@ local function main()
     })
 
     -- タイミング部分
-    destinationWindow(skin, TIMING.WND.X, TIMING.WND.Y, TIMING.WND.W, TIMING.WND.H)
+    destinationStaticBaseWindow(skin, TIMING.WND.X, TIMING.WND.Y, TIMING.WND.W, TIMING.WND.H)
     local stdX = TIMING.WND.X + TIMING.TEXT_X
     local stdY = TIMING.WND.Y + TIMING.STD_Y
     -- 標準偏差

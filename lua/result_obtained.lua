@@ -1,6 +1,8 @@
 require("define")
 require("userdata")
 require("input")
+require("sound")
+require("my_window")
 local main_state = require("main_state")
 local luajava = require("luajava")
 local input = luajava.bindClass("com.badlogic.gdx.Input")
@@ -109,28 +111,38 @@ local RANK = {
 
 local DROPS = {
     WND = {
-        X = 295,
-        Y = 197,
+        X = function() return 295 end,
+        Y = function() return 197 end,
         W = 574,
         H = 86
     },
     COIN = {
-        X = function(self) return self.WND.X + 20 end,
-        Y = function(self) return self.WND.Y + 11 end,
+        X = function(drops) return drops.WND.X() + 20 end,
+        Y = function(drops) return drops.WND.Y() + 11 end,
         SIZE = 64,
         NUM = {
-            X = function(self) return self.COIN.X(RANK) + 346 end,
-            Y = function(self) return self.COIN.Y(RANK) - 3 end,
+            X = function(drops) return drops.COIN.X(drops) + 346 end,
+            Y = function(drops) return drops.COIN.Y(drops) + 3 end,
             SIZE = 48,
         },
         ADD_NUM = {
-            PLUS = {
-                X = function(self) return self.COIN.X(RANK) + 387 end,
-                Y = function(self) return self.COIN.Y(RANK) + 17 end,
-            },
-            X = function(self) return self.PLUS.X(RANK) + 21 end,
-            Y = function(self) return self.PLUS.Y(RANK) end,
+            X = function(drops) return drops.COIN.X(drops) + 393 end,
+            Y = function(drops) return drops.COIN.Y(drops) + 17 end,
         },
+    },
+}
+
+local NO_DROP = {
+    WND = {
+        X = function() return 295 end,
+        Y = function() return 66 end,
+        W = 1330,
+        H = 64,
+    },
+    TEXT = {
+        X = function(noDrop) return noDrop.WND.X() + noDrop.WND.W / 2 end,
+        Y = function(noDrop) return noDrop.WND.Y() + 14 end,
+        SIZE = 30,
     },
 }
 
@@ -145,6 +157,7 @@ local resultObtained = {
         add = {},
         after = {},
         addExpPerMs = 0,
+        addCoinPerMs = 0,
     },
 
     activateTime = 0,
@@ -152,8 +165,14 @@ local resultObtained = {
     TIMER_ID = 10010,
     RANKUP_TIMER = 10012,
     APPEAR_TIME = 300,
-    WAIT_TIME = 600,
+    BEFORE_WAIT_TIME = 500,
+    AFTER_WAIT_TIME = 600,
     ANIMATION_TIME = 700,
+
+    didPlayExpSe = false,
+    didDispose = false,
+
+    ramp = 0,
 
     functions = {},
 }
@@ -184,28 +203,63 @@ local function isTransitionByDecide()
     return transitionMode == 927
 end
 
+local function canGetDrops()
+    return resultObtained.ramp > 1
+end
+
+local function acquisitionExp(animVals)
+    if resultObtained.didPlayExpSe == false then
+        -- 経験値入手効果音
+        Sound.play(RANK.EXP_SE, 0.6)
+        resultObtained.didPlayExpSe = true
+    end
+    animVals.exp = animVals.exp + resultObtained.val.addExpPerMs * getDeltaTime() / 1000
+    if animVals.exp >= resultObtained.val.after.exp then
+        animVals.exp = resultObtained.val.after.exp
+    end
+    if animVals.exp >= userData.rank.getSumExp(animVals.rank) then
+        -- rankup
+        main_state.set_timer(resultObtained.RANKUP_TIMER, main_state.time())
+        animVals.rank = animVals.rank + 1
+        Sound.play(RANK.RANKUP_SE, 1.0)
+    end
+end
+
+local function acquisitionCoin(animVals)
+    animVals.coin = animVals.coin + resultObtained.val.addCoinPerMs * getDeltaTime() / 1000
+    if animVals.coin >= resultObtained.val.after.coin then
+        animVals.coin = resultObtained.val.after.coin
+    end
+end
+
 function obtainedTimer()
     -- 起動するアクション周り
     if resultObtained.activateTime == main_state.timer_off_value then
         if getElapsedTime() > 2000*1000
             and (isTransitionByRight() and isKeyPressed(input.Keys.RIGHT)
             or isTransitionByLeft() and isKeyPressed(input.Keys.LEFT)
-            or isTransitionByDecide() and main_state.timer(2) >= 0) then
+            or isTransitionByDecide() and main_state.timer(2) >= 0 and canGetDrops()) then
 
             resultObtained.activateTime = main_state.time()
         end
-    elseif resultObtained.activateTime ~= main_state.timer_off_value then
+    elseif resultObtained.activateTime ~= main_state.timer_off_value and canGetDrops() then
         local animVals = resultObtained.val.anim
         -- 表示中のロジック
-        if (main_state.time() - resultObtained.activateTime) / 1000 > resultObtained.APPEAR_TIME + resultObtained.WAIT_TIME  then
-            animVals.exp = animVals.exp + resultObtained.val.addExpPerMs * getDeltaTime() / 1000
-            -- if animVals.exp >= resultObtained.val.after.exp then
-            --     animVals.exp = resultObtained.val.after.exp
-            -- end
-            if animVals.exp >= userData.rank.getSumExp(animVals.rank) then
-                -- rankup
-                main_state.set_timer(resultObtained.RANKUP_TIMER, main_state.time())
-                animVals.rank = animVals.rank + 1
+        if (main_state.time() - resultObtained.activateTime) / 1000 > resultObtained.APPEAR_TIME + resultObtained.BEFORE_WAIT_TIME  then
+            -- 各種入手周り
+            acquisitionExp(animVals)
+            acquisitionCoin(animVals)
+
+            -- 経験値入手音とランクアップ音が終了したらdispose
+            -- ゲームを起動してから終了するまでAudioDriverのインスタンスは維持されるぽいので, disposeしなくても別にリークしない(メモリのリソースが再利用されるだけ)
+            local isEndSe = (main_state.time() - resultObtained.activateTime) / 1000 > resultObtained.APPEAR_TIME + resultObtained.BEFORE_WAIT_TIME + 500
+            if isEndSe and resultObtained.didDispose == false then
+                myPrint("効果音をメモリから解放")
+                Sound.stop(RANK.EXP_SE)
+                Sound.stop(RANK.RANKUP_SE)
+                Sound.dispose(RANK.EXP_SE)
+                Sound.dispose(RANK.RANKUP_SE)
+                resultObtained.didDispose = true
             end
         end
     end
@@ -213,7 +267,18 @@ function obtainedTimer()
     return resultObtained.activateTime
 end
 
+resultObtained.functions.setRampAndUpdateFadeTime = function(skin, ramp)
+    resultObtained.ramp = ramp
+    -- 決定キー(自動遷移版)なら, 画面を出すときのみfadeを弄る
+    if isTransitionByDecide() and ramp > 1 then
+        local fade = math.max(getTableValue(skin_config.offset, "経験値等画面表示秒数 (決定キーの場合, 最小1秒)", {x = 1}).x, 1) * 1000
+        skin.fadeout = fade + resultObtained.APPEAR_TIME + resultObtained.BEFORE_WAIT_TIME + resultObtained.AFTER_WAIT_TIME
+    end
+end
+
 resultObtained.functions.init = function(skin)
+    Sound.init()
+
     -- exp入手前のuserdataを入れておく
     resultObtained.val.before.rank = userData.rank.rank
     resultObtained.val.before.exp = userData.rank.exp
@@ -227,10 +292,8 @@ resultObtained.functions.init = function(skin)
 
     resultObtained.activateTime = main_state.timer_off_value
 
-    if isTransitionByDecide() then
-        local fade = math.max(getTableValue(skin_config.offset, "経験値等画面表示秒数 (決定キーの場合, 最小1秒)", {x = 1}), 1) * 1000
-        skin.fadeout = fade + resultObtained.APPEAR_TIME + resultObtained.WAIT_TIME
-    end
+    RANK.EXP_SE = skin_config.get_path("../sounds/expget.wav")
+    RANK.RANKUP_SE = skin_config.get_path("../sounds/rankup.wav")
 end
 
 -- userdata更新後, image, value, text後に呼び出す
@@ -243,8 +306,9 @@ resultObtained.functions.load = function(skin)
     values.add.rank = values.after.rank - values.before.rank
     values.add.exp = values.after.exp - values.before.exp
     values.add.coin = values.after.coin - values.before.coin
-    
+
     values.addExpPerMs = values.add.exp / resultObtained.ANIMATION_TIME
+    values.addCoinPerMs = values.add.coin / resultObtained.ANIMATION_TIME
 
     table.insert(skin.customTimers, {id = resultObtained.TIMER_ID, timer = "obtainedTimer"})
     -- table.insert(skin.customTimers, {id = resultObtained.TIMER_ID+1, timer = "resultRankGaugeTimer"})
@@ -308,13 +372,19 @@ resultObtained.functions.load = function(skin)
         id = "coin", src = 0, x = 715, y = 204, w = DROPS.COIN.SIZE, h = DROPS.COIN.SIZE
     })
     table.insert(skin.text, {
-        id = "coinValue", src = 0, size = DROPS.COIN.NUM.SIZE, align = 2,
+        id = "coinValue", font = 0, size = DROPS.COIN.NUM.SIZE, align = 2,
         value = function() return values.anim.coin end
     })
     -- 獲得量
     table.insert(skin.value, {
-        id = "addCoinValue", src = NUM_36PX.SRC, x = 1784, y = 301, w = NUM_36PX_RICH.W * 12, H = NUM_36PX_RICH.H * 2, divx = 12, divy = 2, digit = 7, space = -2,
+        id = "addCoinValue", src = NUM_36PX.SRC, x = 1784, y = 301, w = NUM_36PX_RICH.W * 12, h = NUM_36PX_RICH.H * 2, divx = 12, divy = 2, digit = 7, align = 1,
         value = function() return values.add.coin end
+    })
+
+    -- NO DROPS
+    table.insert(skin.text, {
+        id = "noDropMessageText", font = 0, size = NO_DROP.TEXT.SIZE, align = 1,
+        constantText = "FAILED, またはコース等かつFULLCOMBO未満の場合は報酬を獲得できません."
     })
 end
 
@@ -365,7 +435,7 @@ resultObtained.functions.dst = function (skin)
     -- RANK部分背景
     dst[#dst+1] = { -- 出現前
         id = "rankCircle", timer = resultObtained.TIMER_ID, loop = atime+1, dst = {
-            {time = 0, x = RANK.CIRCLE.X(RANK) + WIDTH, y = RANK.CIRCLE.Y(RANK), w = RANK.CIRCLE.SIZE, h = RANK.CIRCLE.SIZE, a = 0},
+            {time = 0, x = RANK.CIRCLE.X(RANK) + WIDTH, y = RANK.CIRCLE.Y(RANK), w = RANK.CIRCLE.SIZE, h = RANK.CIRCLE.SIZE, a = 0, acc = 2},
             {time = atime, x = RANK.CIRCLE.X(RANK)},
             {time = atime+1, a = 0},
         }
@@ -380,7 +450,7 @@ resultObtained.functions.dst = function (skin)
     }
     dst[#dst+1] = {
         id = "rankCircle2", timer = resultObtained.TIMER_ID, loop = atime, dst = {
-            {time = 0, x = RANK.CIRCLE.X(RANK) + WIDTH + 6, y = RANK.CIRCLE.Y(RANK) + 6, w = RANK.CIRCLE.SIZE_S, h = RANK.CIRCLE.SIZE_S},
+            {time = 0, x = RANK.CIRCLE.X(RANK) + WIDTH + 6, y = RANK.CIRCLE.Y(RANK) + 6, w = RANK.CIRCLE.SIZE_S, h = RANK.CIRCLE.SIZE_S, acc = 2},
             {time = atime, x = RANK.CIRCLE.X(RANK) + 6},
         }
     }
@@ -408,7 +478,7 @@ resultObtained.functions.dst = function (skin)
     -- 獲得量
     dst[#dst+1] = {
         id = "addExpValue", timer = resultObtained.TIMER_ID, loop = atime + 400, dst = {
-            {time = 0, x = RANK.NUM.ADD.X(RANK), y = RANK.NUM.ADD.Y(RANK) - 100, w = NUM_36PX_RICH.W, h = NUM_36PX_RICH.H, a = 0},
+            {time = 0, x = RANK.NUM.ADD.X(RANK), y = RANK.NUM.ADD.Y(RANK) - 30, w = NUM_36PX_RICH.W, h = NUM_36PX_RICH.H, a = 0},
             {time = atime},
             {time = atime + 400, y = RANK.NUM.ADD.Y(RANK), a = 255},
         }
@@ -434,6 +504,49 @@ resultObtained.functions.dst = function (skin)
         }
     }
 
+    -- 入手物周り
+    local wndDst = {
+        {time = 0, x = DROPS.WND.X() + WIDTH, y = DROPS.WND.Y(), w = DROPS.WND.W, h = DROPS.WND.H, acc = 2},
+        {time = atime, x = DROPS.WND.X()}
+    }
+    destinationWindowWithTimer(skin, BASE_WINDOW.ID, BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN, {}, resultObtained.TIMER_ID, atime, wndDst)
+    -- コイン
+    dst[#dst+1] = {
+        id = "coin", timer = resultObtained.TIMER_ID, loop = atime, dst = {
+            {time = 0, x = DROPS.COIN.X(DROPS) + WIDTH, y = DROPS.COIN.Y(DROPS), w = DROPS.COIN.SIZE, h = DROPS.COIN.SIZE, acc = 2},
+            {time = atime, x = DROPS.COIN.X(DROPS)}
+        }
+    }
+    -- 現在値
+    dst[#dst+1] = {
+        id = "coinValue", timer = resultObtained.TIMER_ID, loop = atime, dst = {
+            {time = 0, x = DROPS.COIN.NUM.X(DROPS) + WIDTH, y = DROPS.COIN.NUM.Y(DROPS), w = 999, h = DROPS.COIN.NUM.SIZE, acc = 2, r = 42, g = 42, b = 42},
+            {time = atime, x = DROPS.COIN.NUM.X(DROPS)}
+        }
+    }
+    -- 獲得量
+    dst[#dst+1] = {
+        id = "addCoinValue", timer = resultObtained.TIMER_ID, loop = atime + 400, dst = {
+            {time = 0, x = DROPS.COIN.ADD_NUM.X(DROPS), y = DROPS.COIN.ADD_NUM.Y(DROPS) - 30, w = NUM_36PX_RICH.W, h = NUM_36PX_RICH.H, a = 0},
+            {time = atime},
+            {time = atime + 400, y = DROPS.COIN.ADD_NUM.Y(DROPS), a = 255}
+        }
+    }
+
+    -- no drop
+    if canGetDrops() == false then
+        wndDst = {
+            {time = 0, x = NO_DROP.WND.X() + WIDTH, y = NO_DROP.WND.Y(), w = NO_DROP.WND.W, h = NO_DROP.WND.H, acc = 2},
+            {time = atime, x = NO_DROP.WND.X()}
+        }
+        destinationWindowWithTimer(skin, BASE_WINDOW.ID, BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN, {}, resultObtained.TIMER_ID, atime, wndDst)
+        dst[#dst+1] = {
+            id = "noDropMessageText", timer = resultObtained.TIMER_ID, loop = atime, dst = {
+                {time = 0, x = NO_DROP.TEXT.X(NO_DROP) + WIDTH, y = NO_DROP.TEXT.Y(NO_DROP), w = 1330, h = NO_DROP.TEXT.SIZE, acc = 2, r = 42, g = 42, b = 42},
+                {time = atime, x = NO_DROP.TEXT.X(NO_DROP)}
+            }
+        }
+    end
 end
 
 return resultObtained.functions

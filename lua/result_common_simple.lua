@@ -1,5 +1,6 @@
 require("define")
 require("numbers")
+require("my_window")
 local main_state = require("main_state")
 local resultObtained = require("result_obtained")
 
@@ -592,107 +593,6 @@ local function loadBackground(skin)
     end
 end
 
-local function loadBaseWindow (skin, x, y)
-    local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN
-    -- 四隅
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.UPPER_LEFT, src = 0, x = x, y = y,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.UPPER_RIGHT, src = 0, x = x + sumEdgeSize + 1, y = y,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BOTTOM_RIGHT, src = 0, x = x + sumEdgeSize + 1, y = y + sumEdgeSize + 1,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BOTTOM_LEFT, src = 0, x = x, y = y + sumEdgeSize + 1,
-        w = sumEdgeSize, h = sumEdgeSize
-    })
-
-    -- 各辺
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.TOP, src = 0, x = x + sumEdgeSize, y = y,
-        w = 1, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.LEFT, src = 0, x = x + sumEdgeSize + 1, y = y + sumEdgeSize,
-        w = sumEdgeSize, h = 1
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BOTTOM, src = 0, x = x + sumEdgeSize, y = y + sumEdgeSize + 1,
-        w = 1, h = sumEdgeSize
-    })
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.RIGHT, src = 0, x = x, y = y + sumEdgeSize,
-        w = sumEdgeSize, h = 1
-    })
-
-    -- 本体
-    table.insert(skin.image, {
-        id = BASE_WINDOW.ID.BODY, src = 0, x = x + sumEdgeSize, y = y + sumEdgeSize,
-        w = 1, h = 1
-    })
-end
-
--- それぞれ影を除いた座標
-local function destinationWindow(skin, x, y, w, h)
-    local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN
-
-    -- 四隅
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.UPPER_LEFT, dst = {
-            {x = x - BASE_WINDOW.SHADOW_LEN, y = y + h - BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.UPPER_RIGHT, dst = {
-            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y + h - BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BOTTOM_RIGHT, dst = {
-            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y - BASE_WINDOW.SHADOW_LEN, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BOTTOM_LEFT, dst = {
-            {x = x - BASE_WINDOW.SHADOW_LEN, y = y - BASE_WINDOW.SHADOW_LEN, w = sumEdgeSize, h = sumEdgeSize}
-        }
-    })
-
-    -- 各辺
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.TOP, dst = {
-            {x = x + BASE_WINDOW.EDGE_SIZE, y = y + h - BASE_WINDOW.EDGE_SIZE, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.LEFT, dst = {
-            {x = x + w - BASE_WINDOW.EDGE_SIZE, y = y + BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = h - BASE_WINDOW.EDGE_SIZE * 2}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BOTTOM, dst = {
-            {x = x + BASE_WINDOW.EDGE_SIZE, y = y - BASE_WINDOW.SHADOW_LEN, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = sumEdgeSize}
-        }
-    })
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.RIGHT, dst = {
-            {x = x - BASE_WINDOW.SHADOW_LEN, y = y + BASE_WINDOW.EDGE_SIZE, w = sumEdgeSize, h = h - BASE_WINDOW.EDGE_SIZE * 2}
-        }
-    })
-
-    -- 本体
-    table.insert(skin.destination, {
-        id = BASE_WINDOW.ID.BODY, dst = {
-            {x = x + BASE_WINDOW.EDGE_SIZE, y = y + BASE_WINDOW.EDGE_SIZE, w = w - BASE_WINDOW.EDGE_SIZE * 2, h = h - BASE_WINDOW.EDGE_SIZE * 2}
-        }
-    })
-end
-
 local function initialize(skin)
     if is2P() then
         STAGE_FILE.X = 1584
@@ -851,7 +751,7 @@ local function main()
     -- 背景読み込み
     loadBackground(skin)
     -- ウィンドウ読み込み
-    loadBaseWindow(skin, 0, 0)
+    loadBaseWindowResult(skin, 0, 0)
 
     -- 大クリアランプ読み込み
     for i = 1, LARGE_LAMP.LEN[CLEAR_TYPE] do
@@ -1021,7 +921,7 @@ local function main()
     })
 
     -- タイトル部分
-    destinationWindow(skin, TITLE_BAR.WND.X, TITLE_BAR.WND.Y, TITLE_BAR.WND.W, TITLE_BAR.WND.H)
+    destinationStaticBaseWindow(skin, TITLE_BAR.WND.X, TITLE_BAR.WND.Y, TITLE_BAR.WND.W, TITLE_BAR.WND.H)
     table.insert(skin.destination, {
         id = "title", filter = 1, dst = {
             {x = TITLE_BAR.WND.X + TITLE_BAR.TITLE.X, y = TITLE_BAR.WND.Y + TITLE_BAR.TITLE.Y, w = TITLE_BAR.TITLE.W, h = TITLE_BAR.TITLE.FONT_SIZE, r = 0, g = 0, b = 0}
@@ -1072,7 +972,7 @@ local function main()
     end
 
     -- スコア部分
-    destinationWindow(skin, SCORE.WND.X, SCORE.WND.Y, SCORE.WND.W, SCORE.WND.H)
+    destinationStaticBaseWindow(skin, SCORE.WND.X, SCORE.WND.Y, SCORE.WND.W, SCORE.WND.H)
     local scoreTextX = SCORE.WND.X + SCORE.RELATIVE_X
     local scoreTextY = SCORE.WND.Y + SCORE.EXSCORE.RELATIVE_Y
     -- EXSCORE
@@ -1155,7 +1055,7 @@ local function main()
     })
 
     -- 各種判定
-    destinationWindow(skin, JUDGE.WND.X, JUDGE.WND.Y, JUDGE.WND.W, JUDGE.WND.H)
+    destinationStaticBaseWindow(skin, JUDGE.WND.X, JUDGE.WND.Y, JUDGE.WND.W, JUDGE.WND.H)
     for i, text in ipairs(JUDGE.PREFIX) do
         local x = JUDGE.WND.X + JUDGE.TEXT.X
         local y = JUDGE.WND.Y + JUDGE.TEXT.Y + JUDGE.TEXT.INTERVAL_Y * (i - 1)

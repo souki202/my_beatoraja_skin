@@ -22,6 +22,7 @@ require("define")
 require("http")
 require("my_window")
 require("numbers")
+require("sound")
 local help = require("help")
 local statistics = require("statistics")
 

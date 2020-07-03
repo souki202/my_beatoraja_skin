@@ -96,7 +96,7 @@ CLOSE_BUTTON = {
 -- }
 
 function loadPopupWindowSelect(skin)
-    loadBaseWindow(
+    loadWindow(
         skin,
         POPUP_WINDOW_SELECT.ID,
         POPUP_WINDOW_SELECT.SRC_X,
@@ -106,13 +106,61 @@ function loadPopupWindowSelect(skin)
 end
 
 function loadBaseWindowSelect(skin)
-    loadBaseWindow(
+    loadWindow(
         skin,
         BASE_WINDOW.ID,
         TEXTURE_SIZE - (BASE_WINDOW.EDGE_SIZE * 2 + BASE_WINDOW.SHADOW_LEN * 2 + 1) - 3,
         TEXTURE_SIZE - (BASE_WINDOW.EDGE_SIZE * 2 + BASE_WINDOW.SHADOW_LEN * 2 + 1),
         BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN
     )
+end
+
+function loadBaseWindowResult(skin)
+    local x = 0
+    local y = 0
+    local sumEdgeSize = BASE_WINDOW.EDGE_SIZE + BASE_WINDOW.SHADOW_LEN * 2
+    -- 四隅
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.UPPER_LEFT, src = 0, x = x, y = y,
+        w = sumEdgeSize, h = sumEdgeSize
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.UPPER_RIGHT, src = 0, x = x + sumEdgeSize + 1, y = y,
+        w = sumEdgeSize, h = sumEdgeSize
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.BOTTOM_RIGHT, src = 0, x = x + sumEdgeSize + 1, y = y + sumEdgeSize + 1,
+        w = sumEdgeSize, h = sumEdgeSize
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.BOTTOM_LEFT, src = 0, x = x, y = y + sumEdgeSize + 1,
+        w = sumEdgeSize, h = sumEdgeSize
+    })
+
+    -- 各辺
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.TOP, src = 0, x = x + sumEdgeSize, y = y,
+        w = 1, h = sumEdgeSize
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.LEFT, src = 0, x = x + sumEdgeSize + 1, y = y + sumEdgeSize,
+        w = sumEdgeSize, h = 1
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.BOTTOM, src = 0, x = x + sumEdgeSize, y = y + sumEdgeSize + 1,
+        w = 1, h = sumEdgeSize
+    })
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.RIGHT, src = 0, x = x, y = y + sumEdgeSize,
+        w = sumEdgeSize, h = 1
+    })
+
+    -- 本体
+    table.insert(skin.image, {
+        id = BASE_WINDOW.ID.BODY, src = 0, x = x + sumEdgeSize, y = y + sumEdgeSize,
+        w = 1, h = 1
+    })
+
 end
 
 function loadCloseButtonSelect(skin, id, act)
@@ -143,7 +191,7 @@ function loadBaseSelect(skin)
     loadHeaderSelect(skin)
 end
 
-function loadBaseWindow(skin, ids, x, y, edgeSize, shadow)
+function loadWindow(skin, ids, x, y, edgeSize, shadow)
     local sumEdgeSize = edgeSize + shadow
     -- 四隅
     table.insert(skin.image, {
@@ -186,6 +234,10 @@ function loadBaseWindow(skin, ids, x, y, edgeSize, shadow)
         id = ids.BODY, src = 0, x = x + sumEdgeSize, y = y + sumEdgeSize,
         w = 1, h = 1, act = 0
     })
+end
+
+function destinationStaticBaseWindow(skin, x, y, w, h)
+    destinationStaticWindowBg(skin, BASE_WINDOW.ID, x, y, w, h, BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN * 2, {})
 end
 
 -- ウィンドウを描画

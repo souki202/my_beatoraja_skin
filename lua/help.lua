@@ -381,7 +381,7 @@ local help = {
                 {
                     TEXT = "再プレイ",
                     description = {
-                        TEXT = "5鍵で, ランダム等の配置を維持せずに再プレイできます.\n7鍵で, ランダム等の配置を維持して再プレイできます."
+                        TEXT = "5鍵長押しで, ランダム等の配置を維持せずに再プレイできます.\n7鍵長押しで, ランダム等の配置を維持して再プレイできます."
                     }
                 },
                 {
@@ -427,7 +427,7 @@ local help = {
                 {
                     TEXT = "クレジット",
                     description = {
-                        TEXT = "背景画像: 花のイラストなら「百花繚乱」 – 無料で使えるフリー素材\nフォント: Source Han Sans\n一部アイコン: ICOOON MONO"
+                        TEXT = "背景画像: 花のイラストなら「百花繚乱」 – 無料で使えるフリー素材\nフォント: Source Han Sans\n一部アイコン: ICOOON MONO\n一部効果音: 無料効果音で遊ぼう！, 魔王魂"
                     },
                 },
             }
@@ -753,13 +753,7 @@ end
 
 -- カスタムタイマ, カスタムアクション, textの後に配置すること
 help.functions.loadHelpItem = function(skin)
-    loadBaseWindow(
-        skin,
-        POPUP_WINDOW_SELECT.ID,
-        POPUP_WINDOW_SELECT.SRC_X,
-        POPUP_WINDOW_SELECT.SRC_Y,
-        POPUP_WINDOW_SELECT.EDGE_SIZE, POPUP_WINDOW_SELECT.SHADOW_LEN
-    )
+    loadPopupWindowSelect(skin)
 
     -- ボタン
     table.insert(skin.customEvents, {id = 1000, action = "openHelpList()"})
