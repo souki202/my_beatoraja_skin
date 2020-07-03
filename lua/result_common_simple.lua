@@ -524,6 +524,9 @@ local header = {
         {
             name = "スコア位置", item = {{name = "左", op = 920}, {name = "右", op = 921}}, def = "左"
         },
+        {
+            name = "経験値等画面遷移", item = {{name = "右キー", op = 925}, {name = "左キー", op = 926}, {name = "決定ボタン(一定時間表示)", op = 927}, {name = "無し", op = 928}}, def = "右キー"
+        },
     },
     filepath = {
         {name = "NoImage画像(png)", path = "../result/noimage/*.png", def = "default"},
@@ -613,9 +616,12 @@ local function main()
 
     globalInitialize(skin)
     initialize(skin)
-    resultObtained.init(skin)
+    resultObtained.init()
 
     CLEAR_TYPE = main_state.number(370)
+    local requireStamina = userData.calcUseStamina(main_state.number(106))
+    resultObtained.setRampAndUpdateFadeTime(skin, CLEAR_TYPE, not userData.getIsUsableStamina(requireStamina))
+
     if CLEAR_TYPE == LAMPS.NO_PLAY then
         -- コース途中のリザルトならクリアかfailedしか無い
         if main_state.option(90) then
@@ -624,7 +630,6 @@ local function main()
             CLEAR_TYPE = LAMPS.FAILED
         end
     elseif CLEAR_TYPE > LAMPS.NO_PLAY then
-        local requireStamina = userData.calcUseStamina(main_state.number(106))
         myPrint("スタミナ要求量: " .. requireStamina)
         if userData.getIsUsableStamina(requireStamina) then
             -- ランプがあって(単体, コースリザルト, フルコン以上)クリアなら経験値を更新
@@ -856,8 +861,9 @@ local function main()
     end
 
     skin.font = {
-		{id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
-    }
+		-- {id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
+		{id = 0, path = "../common/fonts/mplus-2p-regular.ttf"},
+	}
 
     skin.text = {
         {id = "title", font = 0, size = TITLE_BAR.TITLE.FONT_SIZE, ref = 12, align = 1},

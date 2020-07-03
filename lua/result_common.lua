@@ -758,10 +758,11 @@ local function main()
 
     globalInitialize(skin)
     initialize(skin)
-    resultObtained.init(skin)
+    resultObtained.init()
 
     CLEAR_TYPE = main_state.number(370)
-    resultObtained.setRampAndUpdateFadeTime(skin, CLEAR_TYPE)
+    local requireStamina = userData.calcUseStamina(main_state.number(106))
+    resultObtained.setRampAndUpdateFadeTime(skin, CLEAR_TYPE, not userData.getIsUsableStamina(requireStamina))
 
     if CLEAR_TYPE == LAMPS.NO_PLAY then
         -- コース途中のリザルトならクリアかfailedしか無い
@@ -771,7 +772,6 @@ local function main()
             CLEAR_TYPE = LAMPS.FAILED
         end
     elseif CLEAR_TYPE > LAMPS.NO_PLAY then
-        local requireStamina = userData.calcUseStamina(main_state.number(106))
         myPrint("スタミナ要求量: " .. requireStamina)
         if userData.getIsUsableStamina(requireStamina) then
             -- ランプがあって(単体, コースリザルト, フルコン以上)クリアなら経験値を更新
@@ -1039,8 +1039,9 @@ local function main()
     end
 
     skin.font = {
-		{id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
-    }
+		-- {id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
+		{id = 0, path = "../common/fonts/mplus-2p-regular.ttf"},
+	}
 
     skin.text = {
         {id = "title", font = 0, size = TITLE_BAR.TITLE.FONT_SIZE, ref = 12, align = 1},

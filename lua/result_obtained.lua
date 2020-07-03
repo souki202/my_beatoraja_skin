@@ -19,7 +19,7 @@ local NUM_36PX = {
 
 local NUM_36PX_RICH = {
     SRC = 0,
-    SRC_X = 1808,
+    SRC_X = 1784,
     SRC_Y = 54,
     W = 22,
     H = 30,
@@ -53,6 +53,11 @@ local RANK = {
             Y = function(rank) return rank.FRAME.Y() + 80 end,
             W = 55,
             H = 76,
+        },
+        SHINE = {
+            X = function(rank) return rank.CIRCLE.X(rank) + rank.CIRCLE.SIZE / 2 end,
+            Y = function(rank) return rank.CIRCLE.Y(rank) + rank.CIRCLE.SIZE / 2 end,
+            MAX_SIZE = 1280,
         },
     },
 
@@ -173,6 +178,7 @@ local resultObtained = {
     didDispose = false,
 
     ramp = 0,
+    isShortageStamina = false,
 
     functions = {},
 }
@@ -204,7 +210,7 @@ local function isTransitionByDecide()
 end
 
 local function canGetDrops()
-    return resultObtained.ramp > 1
+    return resultObtained.ramp > 1 and resultObtained.isShortageStamina == false
 end
 
 local function acquisitionExp(animVals)
@@ -267,8 +273,9 @@ function obtainedTimer()
     return resultObtained.activateTime
 end
 
-resultObtained.functions.setRampAndUpdateFadeTime = function(skin, ramp)
+resultObtained.functions.setRampAndUpdateFadeTime = function(skin, ramp, isShortageStamina)
     resultObtained.ramp = ramp
+    resultObtained.isShortageStamina = isShortageStamina
     -- 決定キー(自動遷移版)なら, 画面を出すときのみfadeを弄る
     if isTransitionByDecide() and ramp > 1 then
         local fade = math.max(getTableValue(skin_config.offset, "経験値等画面表示秒数 (決定キーの場合, 最小1秒)", {x = 1}).x, 1) * 1000
@@ -276,7 +283,7 @@ resultObtained.functions.setRampAndUpdateFadeTime = function(skin, ramp)
     end
 end
 
-resultObtained.functions.init = function(skin)
+resultObtained.functions.init = function()
     Sound.init()
 
     -- exp入手前のuserdataを入れておく
@@ -359,12 +366,12 @@ resultObtained.functions.load = function(skin)
         id = "nextRemaindExpText", src = 0, x = 649, y = 204, w = RANK.REMAIND.TEXT.W, h = RANK.REMAIND.TEXT.H
     })
     table.insert(skin.value, {
-        id = "nextRemaindExpValue", src = 0, x = 1784, y = 361, w = NUM_36PX_RICH.W * 10, H = NUM_36PX_RICH.H, divx = 10, digit = 6, space = -2,
+        id = "nextRemaindExpValue", src = 0, x = NUM_36PX_RICH.SRC_X, y = 362, w = NUM_36PX_RICH.W * 10, H = NUM_36PX_RICH.H, divx = 10, digit = 6, space = -2,
         value = function() return userData.rank.calcNext(values.anim.rank) end
     })
     -- 獲得量
     table.insert(skin.value, {
-        id = "addExpValue", src = NUM_36PX.SRC, x = 1784, y = 301, w = NUM_36PX_RICH.W * 12, h = NUM_36PX_RICH.H * 2, divx = 12, divy = 2, digit = 7, space = -2,
+        id = "addExpValue", src = NUM_36PX.SRC, x = NUM_36PX_RICH.SRC_X, y = 302, w = NUM_36PX_RICH.W * 12, h = NUM_36PX_RICH.H * 2, divx = 12, divy = 2, digit = 7, space = -2,
         value = function() return values.add.exp end
     })
     -- コイン
@@ -377,14 +384,18 @@ resultObtained.functions.load = function(skin)
     })
     -- 獲得量
     table.insert(skin.value, {
-        id = "addCoinValue", src = NUM_36PX.SRC, x = 1784, y = 301, w = NUM_36PX_RICH.W * 12, h = NUM_36PX_RICH.H * 2, divx = 12, divy = 2, digit = 7, align = 1,
+        id = "addCoinValue", src = NUM_36PX.SRC, x = NUM_36PX_RICH.SRC_X, y = 302, w = NUM_36PX_RICH.W * 12, h = NUM_36PX_RICH.H * 2, divx = 12, divy = 2, digit = 7, align = 1,
         value = function() return values.add.coin end
     })
 
     -- NO DROPS
+    local msg = "スタミナが不足しているため, 報酬を獲得できません."
+    if resultObtained.ramp <= 1 then
+        msg = "FAILED, またはコース等かつFULLCOMBO未満の場合は報酬を獲得できません."
+    end
     table.insert(skin.text, {
         id = "noDropMessageText", font = 0, size = NO_DROP.TEXT.SIZE, align = 1,
-        constantText = "FAILED, またはコース等かつFULLCOMBO未満の場合は報酬を獲得できません."
+        constantText = msg
     })
 end
 
@@ -547,6 +558,44 @@ resultObtained.functions.dst = function (skin)
             }
         }
     end
+
+    -- ランクアップ時のエフェクト
+    dst[#dst+1] = {
+        id = "rankShineCircle", timer = resultObtained.RANKUP_TIMER, loop = -1, blend = 2, dst = {
+            {time = 0, x = RANK.RANK.SHINE.X(RANK), y = RANK.RANK.SHINE.Y(RANK), w = 0, h = 0},
+            {
+                time = 400 * 0.5,
+                x = RANK.RANK.SHINE.X(RANK) - RANK.RANK.SHINE.MAX_SIZE / 2 * 0.75,
+                y = RANK.RANK.SHINE.Y(RANK) - RANK.RANK.SHINE.MAX_SIZE / 2 * 0.75,
+                w = RANK.RANK.SHINE.MAX_SIZE * 0.75, h = RANK.RANK.SHINE.MAX_SIZE * 0.75
+            },
+            {
+                time = 400,
+                x = RANK.RANK.SHINE.X(RANK) - RANK.RANK.SHINE.MAX_SIZE / 2,
+                y = RANK.RANK.SHINE.Y(RANK) - RANK.RANK.SHINE.MAX_SIZE / 2,
+                w = RANK.RANK.SHINE.MAX_SIZE, h = RANK.RANK.SHINE.MAX_SIZE,
+                a = 0
+            }
+        }
+    }
+    dst[#dst+1] = {
+        id = "rankShineCircle", timer = resultObtained.RANKUP_TIMER, loop = -1,  dst = {
+            {time = 0, x = RANK.RANK.SHINE.X(RANK), y = RANK.RANK.SHINE.Y(RANK), w = 0, h = 0, a = 64},
+            {
+                time = 400 * 0.5,
+                x = RANK.RANK.SHINE.X(RANK) - RANK.RANK.SHINE.MAX_SIZE / 2 * 0.75,
+                y = RANK.RANK.SHINE.Y(RANK) - RANK.RANK.SHINE.MAX_SIZE / 2 * 0.75,
+                w = RANK.RANK.SHINE.MAX_SIZE * 0.75, h = RANK.RANK.SHINE.MAX_SIZE * 0.75
+            },
+            {
+                time = 400,
+                x = RANK.RANK.SHINE.X(RANK) - RANK.RANK.SHINE.MAX_SIZE / 2,
+                y = RANK.RANK.SHINE.Y(RANK) - RANK.RANK.SHINE.MAX_SIZE / 2,
+                w = RANK.RANK.SHINE.MAX_SIZE, h = RANK.RANK.SHINE.MAX_SIZE,
+                a = 0
+            }
+        }
+    }
 end
 
 return resultObtained.functions
