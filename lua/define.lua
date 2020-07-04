@@ -14,7 +14,7 @@ DEBUG = true
 
 SKIN_INFO = {
     SELECT_VRESION = "2.15",
-    RESULT_VERSION = "2.00",
+    RESULT_VERSION = "2.01",
     DECIDE_VERSION = "1.00",
     PLAY_VERSION = "0.00",
 }

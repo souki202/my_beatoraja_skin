@@ -107,6 +107,7 @@ local CURTAIN = {
 		-- COLORED_DEL2 = 80,
 		-- COLORED_DEL_TIME = 30,
 		APPEAR_TIME = FADEOUT / 7,
+		RICH_APPEAR_TIME = FADEOUT / 30
 	},
 	FROM_X = -1000,
 	TO_X = WIDTH + 550,
@@ -246,8 +247,9 @@ local function init(skin)
 			CURTAIN.PARTICLE.FADEOUT_TIME = FADEOUT / 3
 			CURTAIN.PARTICLE.FADEOUT_TIME_VAR = FADEOUT / 7
 			CURTAIN.TEXT.COLORED_DELAY_TIME = FADEOUT / 10
-			CURTAIN.TEXT.APPEAR_TIME = FADEOUT / 7
+			CURTAIN.TEXT.APPEAR_TIME = FADEOUT / 15
 			CURTAIN.CLOSE_TIME = FADEOUT / 3
+			CURTAIN.TEXT.RICH_APPEAR_TIME = FADEOUT / 30
 			CURTAIN.REVERSE_TIME = FADEOUT * 0.9
 			CURTAIN.OVERALL_FADEOUT_START = FADEOUT * 0.85
 		end
@@ -565,6 +567,7 @@ local function main()
 			local h = CURTAIN.TEXT.H
 			local y = (HEIGHT - CURTAIN.TEXT.H) / 2
 			local appearTime = CURTAIN.TEXT.APPEAR_TIME
+			local richAppearTime = CURTAIN.TEXT.RICH_APPEAR_TIME
 			local coloredDelayTime = CURTAIN.TEXT.COLORED_DELAY_TIME
 			local coloredD1 = CURTAIN.TEXT.COLORED_DEL1
 			local coloredD2 = CURTAIN.TEXT.COLORED_DEL2
@@ -581,12 +584,12 @@ local function main()
 					}
 				}
 				dst[#dst+1] = {
-					id = "textColored" .. i, timer = 2, loop = delColoredTime + appearTime, dst = {
+					id = "textColored" .. i, timer = 2, loop = delColoredTime + richAppearTime, dst = {
 						{time = 0, x = textX, y = y, w = div, h = h, a = 0, r = r, g = g, b = b, acc = 0},
 						{time = time + coloredDelayTime},
 						{time = time + appearTime + coloredDelayTime, a = 255},
 						{time = delColoredTime},
-						{time = delColoredTime + appearTime, a = 0}
+						{time = delColoredTime + richAppearTime, a = 0}
 						-- {time = time + appearTime + coloredDelayTime + coloredD1-1, a = 0},
 						-- {time = time + appearTime + coloredDelayTime + coloredD1 + coloredDelTime - 1, a = 0},
 						-- {time = time + appearTime + coloredDelayTime + coloredD1 + coloredDelTime, a = 255},
@@ -603,19 +606,19 @@ local function main()
 				local textX = startX + i
 				local time = CURTAIN.CLOSE_TIME + easeOutTime(textX, shineStartX + CURTAIN.SHINE.W / 2, shineToX + CURTAIN.SHINE.W / 2, d)
 				dst[#dst+1] = {
-					id = "textRich" .. i, timer = 2, loop = time + appearTime, dst = {
+					id = "textRich" .. i, timer = 2, loop = time + richAppearTime, dst = {
 						{time = 0, x = textX, y = y, w = div, h = h, a = 0, r = r, g = g, b = b, acc = 0},
 						{time = time-1},
 						{time = time},
-						{time = time + appearTime, a = 255}
+						{time = time + richAppearTime, a = 255}
 					}
 				}
 				dst[#dst+1] = {
-					id = "textRich2" .. i, timer = 2, loop = time + appearTime, dst = {
+					id = "textRich2" .. i, timer = 2, loop = time + richAppearTime, dst = {
 						{time = 0, x = textX, y = y, w = div, h = h, a = 0, r = sr, g = sg, b = sb, acc = 0},
 						{time = time-1},
 						{time = time},
-						{time = time + appearTime, a = 255}
+						{time = time + richAppearTime, a = 255}
 					}
 				}
 			end

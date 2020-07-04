@@ -427,7 +427,7 @@ local help = {
                 {
                     TEXT = "クレジット",
                     description = {
-                        TEXT = "背景画像: 花のイラストなら「百花繚乱」 – 無料で使えるフリー素材\nフォント: Source Han Sans\n一部アイコン: ICOOON MONO\n一部効果音: 無料効果音で遊ぼう！, 魔王魂"
+                        TEXT = "背景画像: 花のイラストなら「百花繚乱」 – 無料で使えるフリー素材\nフォント: Source Han Sans, 小塚ゴシック\n一部アイコン: ICOOON MONO\n一部効果音: 無料効果音で遊ぼう！, 魔王魂"
                     },
                 },
             }
