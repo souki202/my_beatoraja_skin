@@ -23,6 +23,7 @@ require("http")
 require("my_window")
 require("numbers")
 require("sound")
+require("position")
 local help = require("help")
 local statistics = require("statistics")
 
@@ -719,32 +720,6 @@ local function hsvToRgb(h, s, v)
     return r, g, b
 end
 
-local function pivotEdgeToCenter(x, y)
-    x = x - BASE_WIDTH / 2
-    y = y - BASE_HEIGHT / 2
-    return x, y
-end
-
-local function pivotCenterToEdge(x, y)
-    x = x + BASE_WIDTH / 2
-    y = y + BASE_HEIGHT / 2
-    return x, y
-end
-
-local function linearRotation(x, y, radian)
-    local tx, ty = x, y
-    x = tx * math.cos(radian) + ty * -math.sin(radian)
-    y = tx * math.sin(radian) + ty * math.cos(radian)
-    return x, y
-end
-
--- 画面中央を中心に座標を回転 動くのは座標だけで画像自体は回転しない
-local function rotationByCenter(x, y, radian)
-    x, y = pivotEdgeToCenter(x, y)
-    x, y = linearRotation(x, y, radian)
-    return pivotCenterToEdge(x, y)
-end
-
 local function calcOpeningAnimationStartPosition(initX, initY, toX, toY, timeOffset)
     local x = initX + (toX - initX) * (1.0 * timeOffset / OPENING_ANIM_TIME)
     local y = initY + (toY - initY) * (1.0 * timeOffset / OPENING_ANIM_TIME)
@@ -758,32 +733,6 @@ local function has_value (tab, val)
         end
     end
     return false
-end
-
--- z, y, z座標(zはbeatorajaに対する相対座標)をbeatoraja画面上に透視投影した2D座標x, yに変換する
--- fovは度数法
--- 座標系は左手系
-local function perspectiveProjection(x, y, z, fov)
-    -- 受け付けないfov
-    if fov == 0 or fov < -1 or fov >= 180 then
-        return 0, 0
-    end
-    -- 0なら平行投影とする
-    if fov == -1 then
-        return x, y
-    end
-    -- 平行移動
-    x, y = pivotEdgeToCenter(x, y)
-
-    local radFov = math.rad(fov)
-    -- fovからカメラのzを求める
-    local r = BASE_WIDTH / 2 / math.tan(radFov / 2)
-
-    -- 変換
-    x = x / (1 + z / r)
-    y = y / (1 + z / r)
-
-    return pivotCenterToEdge(x, y)
 end
 
 local function drawStardust(meteorStartX, meteorToX, meteorStartY, meteorToY, quantity, skin)

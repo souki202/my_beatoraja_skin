@@ -1,33 +1,219 @@
 require("define")
--- local BASE_WIDTH = 1920
--- local BASE_HEIGHT = 1080
--- local WIDTH = 1920
--- local HEIGHT = 1080
+require("position")
+local main_state = require("main_state")
 
--- 定数郡
-local TITLE_FRAME_Y = 400
-local TITLE_FRAME_H = 96
-local GENRE_FRAME_H = TITLE_FRAME_H / 2
-local GENRE_FRAME_Y = TITLE_FRAME_Y + TITLE_FRAME_H + 8
-local ARTIST_FRAME_H = TITLE_FRAME_H / 2
-local ARTIST_FRAME_Y = TITLE_FRAME_Y - ARTIST_FRAME_H - 8
+local STAGE_FILE = {
+	X = 68,
+	Y = 300,
+	W = 640,
+	H = 480,
+}
+
+local TEXT_OFFSET = 708
+
+local ARTISTS = {
+	WND = {
+		Y = function() return 348 end,
+		H = 48,
+	},
+	MAIN = {
+		FONT_SIZE = 30,
+		X = function() return TEXT_OFFSET + 909 end,
+		Y = function(artists) return artists.WND.Y() + 8 end,
+		W = 560,
+	},
+	SUB = {
+		FONT_SIZE = 30,
+		X = function() return TEXT_OFFSET + 303 end,
+		Y = function(artists) return artists.WND.Y() + 8 end,
+		W = 560,
+	},
+}
+
+local TITLE = {
+	WND = {
+		Y = function() return 404 end,
+		H = 80,
+	},
+	FONT_SIZE = 56,
+	X = function() return TEXT_OFFSET + 606 end,
+	Y = function(title) return title.WND.Y() + 8 end,
+	W = 1180,
+}
+
+local GENRE = {
+	WND = {
+		Y = function() return 492 end,
+		H = 48,
+	},
+	FONT_SIZE = 30,
+	X = function() return TEXT_OFFSET + 606 end,
+	Y = function(genre) return genre.WND.Y() + 8 end,
+	W = 1180,
+}
+
+local WND_BAR = {
+	A = 192
+}
+
+local INTRO_ANIM = {
+	TIME = 1000
+}
+
+local CURTAIN = {
+	CIRCLE = {
+		SIZE = 1371
+	},
+	BOX = {
+		W = 5120,
+	},
+	SHINE = {
+		W = 1861,
+		H = 1078,
+	},
+	LINE = {
+		START_Y = 589,
+		INTERVAL_Y = 25
+	},
+	PARTICLE = {
+		N = 10000,
+		LOOP_TIME = 100,
+		ANGLE_VAR = 20, -- radian +-(ANGLE_VAR/2) だけばらつく
+
+		MOVE_X = 400, -- 飛んでからのxの移動量
+		FADEOUT_X = 300, -- 飛んでからこれだけのx移動するとフェードアウト開始
+		MOVE_X_VAR = 100, -- xの移動量のばらつき
+		FADEOUT_TIME = 800, -- 飛んでから消えるまでのms
+		FADEOUT_TIME_VAR = 300, -- 飛んでから消えるまでのmsのばらつき
+
+		MOVE_R = 500, -- 飛んでからx軸周りに移動するときの距離
+		MOVE_R_VAR = 1000, -- ばらつき
+		TIME_RES = 2, -- ms毎にパーティクルをばらまく
+		ALPHA = 128,
+		ALPHA_VAR = 48,
+
+		SIZE = 86,
+		SIZE_VAR = 20,
+	},
+	TEXT = {
+		DIV_W = 6, -- このpx毎に分割してsrc入れる 1404の約数で. 2x2x3x3x3x13
+		W = 1404,
+		H = 256,
+	},
+	FROM_X = -1000,
+	TO_X = WIDTH + 550,
+	CLOSE_TIME = 500,
+	REVERSE_TIME = 2000 -- fade開始からの経過時間
+}
+
+local FADEOUT = 2000
+local FOV = 90
+
+-- @param  int t アニメーション開始からの時間
+-- @param  int s 開始の値
+-- @param  int e 終了の値
+-- @param  int d アニメーション時間
+local function easeOut(t, s, e, d)
+    local c = e - s
+    local rate = t / d
+    rate = 1 - (rate - 1) * (rate - 1)
+    return c * rate + s
+end
+
+-- アニメーションの状態から, 対応する時刻を取得する
+-- @param  int n 現在の値
+-- @param  int s 開始の値
+-- @param  int e 終了の値
+-- @param  int d アニメーション時間
+local function easeOutTime(n, s, e, d)
+	local c = e - s
+	-- n = c * rate + s
+	-- n - s = c * rate
+	-- rate = (n - s) / c
+	local rate = d * (n - s) / c
+	-- r2 = 1-(r-1)^2
+	-- r2 = 1 - (r^2 - 2r + 1)
+	-- r2 = -r^2 + 2r
+	-- r^2 - 2r + r2 = 0
+	if rate > 1 then return d end
+	return 1 - math.sqrt(1 - rate)
+end
+
+local function dithering(v)
+	local v2 = v - math.floor(v)
+	return math.random() < v2 and math.ceil(v) or math.floor(v)
+end
+
+local function getDifficultyValueForColor()
+	local dif = 0
+	local op = getTableValue(skin_config.option, "難易度毎の色変化", 920)
+	if op == 920 then
+		for i = 150, 155 do
+			if main_state.option(i) then
+				dif = i - 149
+			end
+		end
+	end
+	for i = 921, 926 do
+		if op == i then
+			dif = i - 920
+		end
+	end
+	return dif
+end
+
+-- 難易度と設定に適した色を取得する
+-- @return int, int, int r, g, b
+local function getDifficultyColor()
+	local dif = getDifficultyValueForColor()
+	local colors = {{128, 128, 128}, {137, 204, 137}, {137, 204, 204}, {204, 164, 108}, {204, 104, 104}, {204, 102, 153}}
+	return colors[dif][1], colors[dif][2], colors[dif][3]
+end
+
+local function getCurtainShineColor()
+	local dif = getDifficultyValueForColor()
+	local colors = {{255, 255, 255}, {218, 255, 218}, {218, 255, 255}, {255, 218, 183}, {255, 218, 218}, {255, 31, 150}}
+	return colors[dif][1], colors[dif][2], colors[dif][3]
+end
+
+local function getTextColor()
+	local dif = getDifficultyValueForColor()
+	local colors = {{255, 255, 255}, {0, 255, 0}, {0, 255, 255}, {255, 218, 0}, {255, 0, 0}, {255, 31, 150}}
+	return colors[dif][1], colors[dif][2], colors[dif][3]
+end
 
 local header = {
     type = 6,
-    name = "Flat skin",
+    name = "Social Skin" .. (DEBUG and " decide dev" or ""),
     w = WIDTH,
     h = HEIGHT,
-	fadeout = 500,
+	fadeout = FADEOUT,
     scene = 3000,
-    input = 500,
-    filepath = {
-        {name = "背景", path = "../decide/background/*.png"},
+	input = 500,
+	property = {
+        {
+            name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}, def = "画像(png)"
+		},
+		{ -- 926まで使用
+			name = "難易度毎の色変化", item = {{name = "あり", op = 920}, {name = "灰固定", op = 921}, {name = "緑固定", op = 922}, {name = "青固定", op = 923}, {name = "橙固定", op = 924}, {name = "赤固定", op = 925}, {name = "紫固定", op = 926}}, def = "あり"
+		},
+        {
+            name = "ジャケット位置", item = {{name = "左", op = 930}, {name = "右", op = 931}}, def = "左"
+		},
 	},
-	offset = {
-		{name = "タイトル背景の透明度(-255で透明)", id = 40, a = 0},
-		{name = "曲情報の位置", id = 41, y = 0}
-	}
+    filepath = {
+        {name = "背景(png)", path = "../decide/background/*.png", def = "default"},
+		{name = "背景(mp4)", path = "../decide/background/*.mp4"},
+		{name = "NoImage画像", path = "../decide/noimage/*.png", def = "default"},
+	},
 }
+
+local function init()
+	if getTableValue(skin_config.option, "ジャケット位置", 930) == 931 then
+		TEXT_OFFSET = 0
+		STAGE_FILE.X = WIDTH - STAGE_FILE.X - STAGE_FILE.W
+	end
+end
 
 local function main()
 	local skin = {}
@@ -36,110 +222,302 @@ local function main()
 		skin[k] = v
 	end
 
+	init()
+
 	skin.source = {
-		{id = 0, path = "../decide/background/*.png"},
-		{id = 1, path = "../common/colors/difficulty.png"}
+        {id = 0, path = "../decide/parts/parts.png"},
+		{id = 1, path = "../decide/background/*.png"},
+		{id = 2, path = "../decide/background/*.png"},
+        {id = 3, path = "../decide/noimage/*.png"},
+        {id = 4, path = "../decide/parts/curtain.png"},
+        {id = 5, path = "../decide/parts/largeshine.png"},
+        {id = 6, path = "../decide/parts/text.png"},
+        {id = 999, path = "../common/colors/colors.png"}
 	}
 
 	skin.image = {
-		{id = "background", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
+		{id = "noImage", src = 3, x = 0, y = 0, w = -1, h = -1},
+		{id = "curtainEdge", src = 4, x = 0, y = 0, w = -1, h = -1},
+		{id = "largeShine", src = 5, x = 0, y = 0, w = -1, h = -1},
+		{id = "particle0", src = 0, x = 0, y = 0, w = CURTAIN.PARTICLE.SIZE, h = CURTAIN.PARTICLE.SIZE},
+		{id = "particle1", src = 0, x = CURTAIN.PARTICLE.SIZE, y = 0, w = CURTAIN.PARTICLE.SIZE, h = CURTAIN.PARTICLE.SIZE},
+		{id = "black", src = 999, x = 1, y = 0, w = 1, h = 1},
+        {id = "white", src = 999, x = 2, y = 0, w = 1, h = 1},
 	}
 
-	for i = 0, 4 do
-		table.insert(skin.image, {id = "baseColor" .. i, src = 1, x = i, y = 0, w = 1, h = 1})
+	-- 文字を読み込む
+	local img = skin.image
+	for i = 0, CURTAIN.TEXT.W, CURTAIN.TEXT.DIV_W do
+		img[#img+1] = {
+			id = "textRich" .. i, src = 6, x = i, y = 0, w = CURTAIN.TEXT.DIV_W, h = CURTAIN.TEXT.H
+		}
+		img[#img+1] = {
+			id = "textColored" .. i, src = 6, x = i, y = CURTAIN.TEXT.H, w = CURTAIN.TEXT.DIV_W, h = CURTAIN.TEXT.H
+		}
+		img[#img+1] = {
+			id = "textWhite" .. i, src = 6, x = i, y = CURTAIN.TEXT.H*2, w = CURTAIN.TEXT.DIV_W, h = CURTAIN.TEXT.H
+		}
 	end
 
+
+	local c = getTableValue(skin_config.option, "背景形式", 915)
+    if c == 915 then
+        table.insert(skin.image, {id = "background", src = 1, x = 0, y = 0, w = -1, h = -1})
+    elseif c == 916 then
+        table.insert(skin.image, {id = "background", src = 2, x = 0, y = 0, w = -1, h = -1})
+    end
+
 	skin.font = {
-		{id = 0, path = "../common/fonts/SourceHanSans-Light.otf"}
+		{id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"}
 	}
 
 	skin.text = {
-		{id = "genre", font = 0, size = CalcAdaptWidth(NORMAL_TEXT_SIZE), ref = 13, align = 1},
-		{id = "title", font = 0, size = CalcAdaptWidth(LARGE_TITLE_TEXT_SIZE), ref = 12, align = 1},
-		{id = "artist", font = 0, size = CalcAdaptWidth(NORMAL_TEXT_SIZE), ref = 14, align = 1},
+		{id = "genre", font = 0, size = GENRE.FONT_SIZE, ref = 13, align = 1, overflow = 1},
+        {id = "title", font = 0, size = TITLE.FONT_SIZE, ref = 12, align = 1, overflow = 1},
+		{id = "artist", font = 0, size = ARTISTS.MAIN.FONT_SIZE, ref = 14, align = 1, overflow = 1},
+        {id = "subArtist", font = 0, size = ARTISTS.SUB.FONT_SIZE, ref = 15, align = 1, overflow = 1},
 	}
 
 	skin.destination = {
-		-- カバー無し時の背景
-		{
-			id = "background",
-			dst = {
-				{x = 0, y = 0, w = WIDTH, h = HEIGHT}
-			}
-		},
-		-- カバー(あれば)
-		{
-			id = -100,
-			dst = {
-				{x = 0, y = 0, w = WIDTH, h = HEIGHT}
-			}
-		},
+        -- 背景
+        {
+            id = "background",
+            dst = {
+                {x = 0, y = 0, w = WIDTH, h = HEIGHT}
+            }
+        },
 	}
-
-	-- 背景(難易度毎の色に)
-	for i = 0, 4 do
-		table.insert(skin.destination, {
-			id = "baseColor" .. i, offsets = {40, 41}, op = {151 + i},
-			dst = {
-				{x = 0, y = CalcAdaptHeight(GENRE_FRAME_Y), w = WIDTH, h = CalcAdaptHeight(GENRE_FRAME_H), a = 255},
+	local dst = skin.destination
+	-- タイトル等の背景
+	do
+		local r, g, b = getDifficultyColor()
+		-- ジャンル
+		dst[#dst+1] = {
+			id = "white", loop = INTRO_ANIM.TIME, dst = {
+				{time = 0, x = WIDTH + 1000, y = GENRE.WND.Y(), w = WIDTH, h = GENRE.WND.H, acc = 2, r = r, g = g, b = b, a = WND_BAR.A},
+				{time = INTRO_ANIM.TIME, x = 0}
 			}
-		})
-		table.insert(skin.destination, {
-			id = "baseColor" .. i, offsets = {40, 41}, op = {151 + i},
-			dst = {
-				{x = 0, y = CalcAdaptHeight(TITLE_FRAME_Y), w = WIDTH, h = CalcAdaptHeight(TITLE_FRAME_H), a = 255},
+		}
+		dst[#dst+1] = {
+			id = "genre", loop = INTRO_ANIM.TIME, dst = {
+				{time = 0, x = WIDTH, y = GENRE.Y(GENRE), w = GENRE.W, h = GENRE.FONT_SIZE, acc = 2},
+				{time = INTRO_ANIM.TIME, x = GENRE.X()}
 			}
-		})
-		table.insert(skin.destination, {
-			id = "baseColor" .. i, offsets = {40, 41}, op = {151 + i},
-			dst = {
-				{x = 0, y = CalcAdaptHeight(ARTIST_FRAME_Y), w = WIDTH, h = CalcAdaptHeight(ARTIST_FRAME_H), a = 255},
+		}
+		-- タイトル
+		dst[#dst+1] = {
+			id = "white", loop = INTRO_ANIM.TIME, dst = {
+				{time = 0, x = WIDTH + 500, y = TITLE.WND.Y(), w = WIDTH, h = TITLE.WND.H, acc = 2, r = r, g = g, b = b, a = WND_BAR.A},
+				{time = INTRO_ANIM.TIME, x = 0}
 			}
-		})
+		}
+		dst[#dst+1] = {
+			id = "title", loop = INTRO_ANIM.TIME, dst = {
+				{time = 0, x = WIDTH, y = TITLE.Y(TITLE), w = TITLE.W, h = TITLE.FONT_SIZE, acc = 2},
+				{time = INTRO_ANIM.TIME, x = TITLE.X()}
+			}
+		}
+		-- アーティスト
+		dst[#dst+1] = {
+			id = "white", loop = INTRO_ANIM.TIME, dst = {
+				{time = 0, x = WIDTH, y = ARTISTS.WND.Y(), w = WIDTH, h = ARTISTS.WND.H, acc = 2, r = r, g = g, b = b, a = WND_BAR.A},
+				{time = INTRO_ANIM.TIME, x = 0}
+			}
+		}
+		dst[#dst+1] = {
+			id = "artist", loop = INTRO_ANIM.TIME, dst = {
+				{time = 0, x = WIDTH, y = ARTISTS.MAIN.Y(ARTISTS), w = ARTISTS.MAIN.W, h = ARTISTS.MAIN.FONT_SIZE, acc = 2},
+				{time = INTRO_ANIM.TIME, x = ARTISTS.MAIN.X()}
+			}
+		}
+		dst[#dst+1] = {
+			id = "subArtist", loop = INTRO_ANIM.TIME, dst = {
+				{time = 0, x = WIDTH, y = ARTISTS.SUB.Y(ARTISTS), w = ARTISTS.SUB.W, h = ARTISTS.SUB.FONT_SIZE, acc = 2},
+				{time = INTRO_ANIM.TIME, x = ARTISTS.SUB.X()}
+			}
+		}
 	end
 
-	-- ジャンル文字
-	table.insert(skin.destination, {
-		id = "genre", loop = 2000, offsets = {41},
-		dst = {
-			{
-				time = 0,
-				x = CalcAdaptWidth(WIDTH / 2 - 40),
-				y = CalcAdaptHeight(CalcTextVerticalMiddle(NORMAL_TEXT_SIZE, GENRE_FRAME_Y + GENRE_FRAME_H / 2)),
-				w = NORMAL_TEXT_SIZE,
-				h = NORMAL_TEXT_SIZE
-			},
-			{time = 2000, x = CalcAdaptWidth(WIDTH / 2 + 40)}
-		}
-	})
-
-	-- タイトル文字
-	table.insert(skin.destination, {
-		id = "title", offsets = {41},
-		dst = {
-			{
-				x = CalcAdaptWidth(960),
-				y = CalcAdaptHeight(CalcTextVerticalMiddle(LARGE_TITLE_TEXT_SIZE, TITLE_FRAME_Y + TITLE_FRAME_H / 2)),
-				w = LARGE_TITLE_TEXT_SIZE, h = LARGE_TITLE_TEXT_SIZE
+	do
+		-- stage file
+		-- ステージファイル背景
+		dst[#dst+1] = {
+			id = "black", op = {191}, loop = INTRO_ANIM.TIME, dst = {
+				{time = 0, x = -STAGE_FILE.W, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, acc = 2},
+                {time = INTRO_ANIM.TIME, x = STAGE_FILE.X}
 			}
 		}
-	})
-
-	-- アーティスト文字
-	table.insert(skin.destination, {
-		id = "artist", loop = 2000, offsets = {41},
-		dst = {
-			{
-				time = 0,
-				x = CalcAdaptWidth(WIDTH / 2 + 40),
-				y = CalcAdaptHeight(CalcTextVerticalMiddle(NORMAL_TEXT_SIZE, ARTIST_FRAME_Y + ARTIST_FRAME_H / 2)),
-				w = NORMAL_TEXT_SIZE,
-				h = NORMAL_TEXT_SIZE
-			},
-			{time = 2000, x = CalcAdaptWidth(WIDTH / 2 - 40)}
+        -- noステージファイル背景
+		dst[#dst+1] = {
+            id = "noImage", op = {190}, stretch = 1, loop = INTRO_ANIM.TIME, dst = {
+				{time = 0, x = -STAGE_FILE.W, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, acc = 2},
+                {time = INTRO_ANIM.TIME, x = STAGE_FILE.X}
+            }
 		}
-	})
+        -- ステージファイル
+		dst[#dst+1] = {
+            id = -100, op = {191}, filter = 1, stretch = 1, loop = INTRO_ANIM.TIME, dst = {
+				{time = 0, x = -STAGE_FILE.W, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, acc = 2},
+                {time = INTRO_ANIM.TIME, x = STAGE_FILE.X}
+            }
+        }
+	end
 
+	-- ここからfadeoutアニメーション
+	do
+		-- まずカーテンが閉まる
+		dst[#dst+1] = { -- カーテン上
+			id = "curtainEdge", timer = 2, loop = CURTAIN.CLOSE_TIME, dst = {
+				{time = 0, x = CURTAIN.FROM_X, y = HEIGHT / 2 - CURTAIN.CIRCLE.SIZE, w = CURTAIN.CIRCLE.SIZE, h = CURTAIN.CIRCLE.SIZE, acc = 2},
+				{time = CURTAIN.CLOSE_TIME, x = CURTAIN.TO_X}
+			}
+		}
+		dst[#dst+1] = { -- カーテン下
+			id = "curtainEdge", timer = 2, loop = CURTAIN.CLOSE_TIME, dst = {
+				{time = 0, x = CURTAIN.FROM_X, y = HEIGHT / 2 + CURTAIN.CIRCLE.SIZE, w = CURTAIN.CIRCLE.SIZE, h = -CURTAIN.CIRCLE.SIZE, acc = 2},
+				{time = CURTAIN.CLOSE_TIME, x = CURTAIN.TO_X}
+			}
+		}
+		dst[#dst+1] = { -- カーテン下
+			id = "black", timer = 2, loop = CURTAIN.CLOSE_TIME, dst = {
+				{time = 0, x = CURTAIN.FROM_X - CURTAIN.BOX.W, y = 0, w = CURTAIN.BOX.W, h = HEIGHT, acc = 2},
+				{time = CURTAIN.CLOSE_TIME, x = CURTAIN.TO_X - CURTAIN.BOX.W}
+			}
+		}
+
+		-- shine周りの座標定義 パーティクルにも
+		local shineStartX = CURTAIN.TO_X - CURTAIN.SHINE.W / 2 + 10
+		local shineToX = -CURTAIN.SHINE.W
+		local shineStartY = CURTAIN.LINE.START_Y - CURTAIN.LINE.INTERVAL_Y * 4 - CURTAIN.SHINE.H / 2
+
+		-- パーティクル
+		local frontParticleDsts = {}
+		local closeTime = CURTAIN.CLOSE_TIME
+		local d = CURTAIN.REVERSE_TIME - CURTAIN.CLOSE_TIME
+		local particlePerMs = CURTAIN.PARTICLE.N / d * CURTAIN.PARTICLE.TIME_RES
+		local particle = CURTAIN.PARTICLE
+		-- 各種先に記録して高速化
+		local fadeoutTime = particle.FADEOUT_TIME
+		local fadeoutTimeVar = math.ceil(particle.FADEOUT_TIME_VAR / 2)
+		local moveR = particle.MOVE_R
+		local moveRVar = math.ceil(particle.MOVE_R_VAR / 2)
+		local moveXVar = math.ceil(particle.MOVE_X_VAR / 2)
+		local angleVar = math.ceil(particle.ANGLE_VAR / 2)
+		local moveX = particle.MOVE_X
+		local fadeoutX = particle.FADEOUT_X
+		local size = particle.SIZE
+		local sizeVar = math.ceil(particle.SIZE_VAR / 2)
+		local alpha = particle.ALPHA
+		local alphaVar = math.ceil(particle.ALPHA_VAR / 2)
+		for i = 1, d, particle.TIME_RES do
+			-- 時刻iで飛ばすパーティクルの数を計算
+			local n = dithering(particlePerMs)
+			-- x軸周りに飛ばす方向の基本値を計算
+			local baseAngle = ((i % particle.LOOP_TIME) / particle.LOOP_TIME) * 2
+			-- 時刻iでの光球の位置を計算
+			local shineX = easeOut(i, shineStartX, shineToX, d) + CURTAIN.SHINE.W / 2
+			if shineX > -10 then
+				-- yは今のところ直線なので固定値
+				local particleStartY = CURTAIN.LINE.START_Y - CURTAIN.LINE.INTERVAL_Y * 4
+				-- パーティクルを飛ばす基点x とりあえずばらつきなし
+				local particleStartX = shineX
+				-- 飛ばす
+				for j = 1, n do
+					-- local particleImg = math.random(0, 1)
+					local particleImg = 0
+					-- フェードアウト周り
+					local eachFadeoutTime = fadeoutTime + math.random(-fadeoutTimeVar, fadeoutTimeVar)
+					local fadeoutP = fadeoutX / moveX
+					local fadeoutStartTime = eachFadeoutTime * fadeoutP
+					local eachSize = size + math.random(-sizeVar, sizeVar)
+
+					local eachAlpha = alpha + math.random(-alphaVar, alphaVar)
+
+					-- 飛ばす方向
+					local a = (baseAngle + (math.random(-angleVar, angleVar) / 180)) * math.pi
+					-- 飛ばす距離(中間座標と最終座標)
+					local xVar = math.random(-moveXVar, moveXVar)
+					local particleFadeStartX = particleStartX + fadeoutP * xVar
+					local toX = particleStartX + xVar
+					-- y, zの飛ぶ距離
+					local len = moveR + math.random(-moveRVar, moveRVar)
+					local toY = particleStartY + len * math.sin(a)
+					local toZ = len * math.cos(a)
+					local fadeoutStartY = particleStartY + len * math.sin(a) * fadeoutP
+					local fadeoutStartZ = fadeoutP * toZ
+
+					local fx, fy = perspectiveProjection(particleFadeStartX, fadeoutStartY, fadeoutStartZ, FOV)
+					local tx, ty = perspectiveProjection(toX, toY, toZ, FOV)
+					local fs, _ = perspectiveProjectionSize(eachSize, eachSize, fadeoutStartZ, FOV)
+					local ts, _ = perspectiveProjectionSize(eachSize, eachSize, toZ, FOV)
+
+					-- 手前に飛んでくる場合は, 文字より後にdstを挿入
+					local d1 = {
+						id = "particle" .. particleImg, timer = 2, loop = -1, dst = {
+							{time = 0, x = particleStartX - eachSize / 2, y = particleStartY - eachSize / 2, w = eachSize, h = eachSize, a = 0, r = r, g = g, b = b},
+							{time = closeTime + i - 1, a = 0},
+							{time = closeTime + i, a = eachAlpha},
+							{time = closeTime + fadeoutStartTime - 1 + i, x = fx - fs / 2, y = fy - fs / 2, w = fs, h = fs}
+						}
+					}
+					local d2 = {
+						id = "particle" .. particleImg, timer = 2, loop = -1, dst = {
+							{time = 0, x = fx - fs / 2, y = fy - fs / 2, w = fs, h = fs, a = 0, acc = 2, r = r, g = g, b = b},
+							{time = closeTime + fadeoutStartTime + i - 1, a = 0},
+							{time = closeTime + fadeoutStartTime + i, a = eachAlpha},
+							{time = closeTime + eachFadeoutTime + i, x = tx - ts / 2, y = ty - ts / 2, w = ts, h = ts, a = 0}
+						}
+					}
+					if toZ < 0 then -- 手前に飛んでくるパーティクルは後でdstに入れる
+						frontParticleDsts[#frontParticleDsts+1] = d1
+						frontParticleDsts[#frontParticleDsts+1] = d2
+					else -- 奥に飛んでいくパーティクルは先にdstに入れる
+						dst[#dst+1] = d1
+						dst[#dst+1] = d2
+					end
+				end
+			end
+		end
+
+		-- 線が出てくる
+		local r, g, b = getCurtainShineColor()
+		for i = 1, 5 do
+			local timeOffst = math.random(0, 200)
+			dst[#dst+1] = {
+				id = "white", timer = 2, loop = CURTAIN.CLOSE_TIME + timeOffst, dst = {
+					{time = timeOffst, x = 0, y = CURTAIN.LINE.START_Y - CURTAIN.LINE.INTERVAL_Y * (i - 1), w = 0, h = 2, acc = 2, r = r, g = g, b = b},
+					{time = CURTAIN.CLOSE_TIME + timeOffst, w = WIDTH}
+				}
+			}
+		end
+		dst[#dst+1] = { -- 光球
+			id = "largeShine", timer = 2, loop = -1, dst = {
+				{time = 0, x = CURTAIN.FROM_X - CURTAIN.SHINE.W / 2 + 10, y = (HEIGHT - CURTAIN.SHINE.H) / 2, w = CURTAIN.SHINE.W, h = CURTAIN.SHINE.H, angle = 0, acc = 2, r = r, g = g, b = b},
+				{time = CURTAIN.CLOSE_TIME, x = CURTAIN.TO_X - CURTAIN.SHINE.W / 2 + 10, angle = -270}
+			}
+		}
+		-- 光球が戻ってくる
+		dst[#dst+1] = { -- 光球
+			id = "largeShine", timer = 2, loop = FADEOUT, dst = {
+				{time = 0, x = shineStartX, y = shineStartY, w = CURTAIN.SHINE.W, h = CURTAIN.SHINE.H, angle = -270, a = 0, acc = 2, r = r, g = g, b = b},
+				{time = CURTAIN.CLOSE_TIME, a = 255},
+				{time = CURTAIN.REVERSE_TIME, x = shineToX, angle = 90}
+			}
+		}
+
+		-- まず白文字
+		do
+			local div = CURTAIN.TEXT.DIV_W
+			local w = CURTAIN.TEXT.W
+
+		end
+
+
+		-- 手前に飛んでくるパーティクルを入れる
+		for i = 1, #frontParticleDsts do
+			dst[#dst+1] = frontParticleDsts[i]
+		end
+	end
 
     return skin
 end
