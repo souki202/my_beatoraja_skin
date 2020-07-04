@@ -1857,8 +1857,8 @@ local function main()
     end
 
     skin.font = {
-		-- {id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
-		{id = 0, path = "../common/fonts/mplus-2p-regular.ttf"},
+		{id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
+		-- {id = 0, path = "../common/fonts/font_1_kokumr_1.00_rls.ttf"},
 	}
 
     skin.text = {
