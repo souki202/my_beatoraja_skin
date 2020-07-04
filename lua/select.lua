@@ -1169,8 +1169,8 @@ local function main()
 
     -- バージョンチェック
     if isCheckNewVersion() then
-        local sv, rv = skinVersionCheck(SKIN_INFO.SELECT_VRESION, SKIN_INFO.RESULT_VERSION)
-        existNewVersion = sv or rv
+        local v1, v2, v3, v4 = skinVersionCheck(SKIN_INFO.SELECT_VRESION, SKIN_INFO.RESULT_VERSION, SKIN_INFO.DECIDE_VERSION, SKIN_INFO.PLAY_VERSION)
+        existNewVersion = v1 or v2 or v3 or v4
         userData.updateNextVersionCheckDate()
     end
 

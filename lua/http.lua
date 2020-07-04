@@ -34,17 +34,23 @@ end
 -- @param  number selectVersion 現在のバージョンの文字列
 -- @param  number resultVersion
 -- @return boolean, boolean 新しいバージョンがあればtrue, ないか, 接続失敗すればfalse 1個目はセレクト, 2個目はresult
-function skinVersionCheck(selectVersion, resultVersion)
+function skinVersionCheck(selectVersion, resultVersion, decideVersion, playVersion)
     local err, v = pcall(httpConnection, "https://tori-blog.net/wp-content/uploads/skin/version")
 
     if v then
-        if  #v ~= 2 then
+        if  #v < 2 then
             print("バージョンチェックに失敗しました")
-            return false, false
+            return false, false, false, false
+        elseif #v == 2 then
+            return tonumber(selectVersion) < tonumber(v[1]), tonumber(resultVersion) < tonumber(v[2]), false, false
+        elseif #v == 3 then
+            return tonumber(selectVersion) < tonumber(v[1]), tonumber(resultVersion) < tonumber(v[2]), tonumber(decideVersion) < tonumber(v[3]), false
+        elseif #v >= 4 then
+            return tonumber(selectVersion) < tonumber(v[1]), tonumber(resultVersion) < tonumber(v[2]), tonumber(decideVersion) < tonumber(v[3]), tonumber(playVersion) < tonumber(v[4])
         end
     else
-        return false, false
+        return false, false, false, false
     end
 
-    return tonumber(selectVersion) < tonumber(v[1]), tonumber(resultVersion) < tonumber(v[2])
+    return false, false, false, false
 end

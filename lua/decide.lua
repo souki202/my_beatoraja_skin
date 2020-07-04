@@ -9,6 +9,8 @@ local STAGE_FILE = {
 	H = 480,
 }
 
+local FADEOUT = 1500
+
 local TEXT_OFFSET = 708
 
 local ARTISTS = {
@@ -73,21 +75,22 @@ local CURTAIN = {
 	},
 	LINE = {
 		START_Y = 589,
-		INTERVAL_Y = 25
+		INTERVAL_Y = 25,
+		APPEAR_TIME_VAR = FADEOUT / 7,
 	},
 	PARTICLE = {
-		N = 10000,
-		LOOP_TIME = 100,
+		N = 3000,
+		LOOP_TIME = FADEOUT / 50,
 		ANGLE_VAR = 20, -- radian +-(ANGLE_VAR/2) だけばらつく
 
-		MOVE_X = 400, -- 飛んでからのxの移動量
-		FADEOUT_X = 300, -- 飛んでからこれだけのx移動するとフェードアウト開始
-		MOVE_X_VAR = 100, -- xの移動量のばらつき
-		FADEOUT_TIME = 800, -- 飛んでから消えるまでのms
-		FADEOUT_TIME_VAR = 300, -- 飛んでから消えるまでのmsのばらつき
+		MOVE_X = 1000, -- 飛んでからのxの移動量
+		FADEOUT_X = 600, -- 飛んでからこれだけのx移動するとフェードアウト開始
+		MOVE_X_VAR = 500, -- xの移動量のばらつき
+		FADEOUT_TIME = FADEOUT / 3, -- 飛んでから消えるまでのms
+		FADEOUT_TIME_VAR = FADEOUT / 7, -- 飛んでから消えるまでのmsのばらつき
 
 		MOVE_R = 500, -- 飛んでからx軸周りに移動するときの距離
-		MOVE_R_VAR = 1000, -- ばらつき
+		MOVE_R_VAR = 500, -- ばらつき
 		TIME_RES = 2, -- ms毎にパーティクルをばらまく
 		ALPHA = 128,
 		ALPHA_VAR = 48,
@@ -99,14 +102,19 @@ local CURTAIN = {
 		DIV_W = 6, -- このpx毎に分割してsrc入れる 1404の約数で. 2x2x3x3x3x13
 		W = 1404,
 		H = 256,
+		COLORED_DELAY_TIME = FADEOUT / 10,
+		-- COLORED_DEL1 = 40,
+		-- COLORED_DEL2 = 80,
+		-- COLORED_DEL_TIME = 30,
+		APPEAR_TIME = FADEOUT / 7,
 	},
 	FROM_X = -1000,
 	TO_X = WIDTH + 550,
-	CLOSE_TIME = 500,
-	REVERSE_TIME = 2000 -- fade開始からの経過時間
+	CLOSE_TIME = FADEOUT / 3,
+	REVERSE_TIME = FADEOUT * 0.9, -- fade開始からの経過時間
+	OVERALL_FADEOUT_START = FADEOUT * 0.8,
 }
 
-local FADEOUT = 2000
 local FOV = 90
 
 -- @param  int t アニメーション開始からの時間
@@ -130,13 +138,13 @@ local function easeOutTime(n, s, e, d)
 	-- n = c * rate + s
 	-- n - s = c * rate
 	-- rate = (n - s) / c
-	local rate = d * (n - s) / c
+	local rate = (n - s) / c
 	-- r2 = 1-(r-1)^2
 	-- r2 = 1 - (r^2 - 2r + 1)
 	-- r2 = -r^2 + 2r
 	-- r^2 - 2r + r2 = 0
 	if rate > 1 then return d end
-	return 1 - math.sqrt(1 - rate)
+	return d * (1 - math.sqrt(1 - rate))
 end
 
 local function dithering(v)
@@ -172,13 +180,19 @@ end
 
 local function getCurtainShineColor()
 	local dif = getDifficultyValueForColor()
-	local colors = {{255, 255, 255}, {218, 255, 218}, {218, 255, 255}, {255, 218, 183}, {255, 218, 218}, {255, 31, 150}}
+	local colors = {{255, 255, 255}, {218, 255, 218}, {218, 255, 255}, {255, 218, 183}, {255, 218, 218}, {255, 81, 200}}
 	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 
 local function getTextColor()
 	local dif = getDifficultyValueForColor()
 	local colors = {{255, 255, 255}, {0, 255, 0}, {0, 255, 255}, {255, 218, 0}, {255, 0, 0}, {255, 31, 150}}
+	return colors[dif][1], colors[dif][2], colors[dif][3]
+end
+
+local function getTextColor2()
+	local dif = getDifficultyValueForColor()
+	local colors = {{255, 255, 255}, {248, 255, 248}, {248, 255, 255}, {255, 248, 213}, {255, 248, 248}, {255, 131, 250}}
 	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 
@@ -200,18 +214,50 @@ local header = {
         {
             name = "ジャケット位置", item = {{name = "左", op = 930}, {name = "右", op = 931}}, def = "左"
 		},
+		{ -- 940番台も使うかも
+			name = "アニメーション時間", item = {{name = "0.75倍", op = 935}, {name = "1倍", op = 936}, {name = "1.5倍", op = 937}, {name = "2倍", op = 938}, {name = "3倍", op = 939}}, def = "1倍"
+		},
+		{--  950番台すべて
+			name = "パーティクル数", item = {{name = "0", op = 950}, {name = "0.25倍", op = 951}, {name = "0.5倍", op = 952}, {name = "1倍", op = 953}, {name = "1.5倍", op = 954}, {name = "2倍", op = 955}, {name = "3倍", op = 956}}, def = "1倍"
+		}
 	},
     filepath = {
+		{name = "ファイルパス-------------", path = "../dummy/*"},
         {name = "背景(png)", path = "../decide/background/*.png", def = "default"},
 		{name = "背景(mp4)", path = "../decide/background/*.mp4"},
 		{name = "NoImage画像", path = "../decide/noimage/*.png", def = "default"},
 	},
 }
 
-local function init()
+local function init(skin)
 	if getTableValue(skin_config.option, "ジャケット位置", 930) == 931 then
 		TEXT_OFFSET = 0
 		STAGE_FILE.X = WIDTH - STAGE_FILE.X - STAGE_FILE.W
+	end
+
+	local mulTable = {0.75, 1, 1.5, 2, 3}
+	for i = 935, 939 do
+		if getTableValue(skin_config.option, "アニメーション時間", 936) == i then
+			local mul = mulTable[i - 934]
+			FADEOUT = FADEOUT * mul
+			skin.fadeout = FADEOUT
+			CURTAIN.LINE.APPEAR_TIME_VAR = FADEOUT / 7
+			CURTAIN.PARTICLE.LOOP_TIME = FADEOUT / 50
+			CURTAIN.PARTICLE.FADEOUT_TIME = FADEOUT / 3
+			CURTAIN.PARTICLE.FADEOUT_TIME_VAR = FADEOUT / 7
+			CURTAIN.TEXT.COLORED_DELAY_TIME = FADEOUT / 10
+			CURTAIN.TEXT.APPEAR_TIME = FADEOUT / 7
+			CURTAIN.CLOSE_TIME = FADEOUT / 3
+			CURTAIN.REVERSE_TIME = FADEOUT * 0.9
+			CURTAIN.OVERALL_FADEOUT_START = FADEOUT * 0.85
+		end
+	end
+	mulTable = {0, 0.25, 0.5, 1, 1.5, 2, 3}
+	for i = 950, 956 do
+		if getTableValue(skin_config.option, "パーティクル数", 953) == i then
+			local mul = mulTable[i - 949]
+			CURTAIN.PARTICLE.N = CURTAIN.PARTICLE.N * mul
+		end
 	end
 end
 
@@ -222,12 +268,12 @@ local function main()
 		skin[k] = v
 	end
 
-	init()
+	init(skin)
 
 	skin.source = {
         {id = 0, path = "../decide/parts/parts.png"},
 		{id = 1, path = "../decide/background/*.png"},
-		{id = 2, path = "../decide/background/*.png"},
+		{id = 2, path = "../decide/background/*.mp4"},
         {id = 3, path = "../decide/noimage/*.png"},
         {id = 4, path = "../decide/parts/curtain.png"},
         {id = 5, path = "../decide/parts/largeshine.png"},
@@ -249,13 +295,16 @@ local function main()
 	local img = skin.image
 	for i = 0, CURTAIN.TEXT.W, CURTAIN.TEXT.DIV_W do
 		img[#img+1] = {
-			id = "textRich" .. i, src = 6, x = i, y = 0, w = CURTAIN.TEXT.DIV_W, h = CURTAIN.TEXT.H
+			id = "textRich2" .. i, src = 6, x = i, y = 0, w = CURTAIN.TEXT.DIV_W, h = CURTAIN.TEXT.H
 		}
 		img[#img+1] = {
-			id = "textColored" .. i, src = 6, x = i, y = CURTAIN.TEXT.H, w = CURTAIN.TEXT.DIV_W, h = CURTAIN.TEXT.H
+			id = "textRich" .. i, src = 6, x = i, y = CURTAIN.TEXT.H, w = CURTAIN.TEXT.DIV_W, h = CURTAIN.TEXT.H
 		}
 		img[#img+1] = {
-			id = "textWhite" .. i, src = 6, x = i, y = CURTAIN.TEXT.H*2, w = CURTAIN.TEXT.DIV_W, h = CURTAIN.TEXT.H
+			id = "textColored" .. i, src = 6, x = i, y = CURTAIN.TEXT.H*2, w = CURTAIN.TEXT.DIV_W, h = CURTAIN.TEXT.H
+		}
+		img[#img+1] = {
+			id = "textWhite" .. i, src = 6, x = i, y = CURTAIN.TEXT.H*3, w = CURTAIN.TEXT.DIV_W, h = CURTAIN.TEXT.H
 		}
 	end
 
@@ -480,15 +529,17 @@ local function main()
 		end
 
 		-- 線が出てくる
-		local r, g, b = getCurtainShineColor()
-		for i = 1, 5 do
-			local timeOffst = math.random(0, 200)
-			dst[#dst+1] = {
-				id = "white", timer = 2, loop = CURTAIN.CLOSE_TIME + timeOffst, dst = {
-					{time = timeOffst, x = 0, y = CURTAIN.LINE.START_Y - CURTAIN.LINE.INTERVAL_Y * (i - 1), w = 0, h = 2, acc = 2, r = r, g = g, b = b},
-					{time = CURTAIN.CLOSE_TIME + timeOffst, w = WIDTH}
+		do
+			local r, g, b = getCurtainShineColor()
+			for i = 1, 5 do
+				local timeOffst = math.random(0, CURTAIN.LINE.APPEAR_TIME_VAR)
+				dst[#dst+1] = {
+					id = "white", timer = 2, loop = CURTAIN.CLOSE_TIME + timeOffst, dst = {
+						{time = timeOffst, x = 0, y = CURTAIN.LINE.START_Y - CURTAIN.LINE.INTERVAL_Y * (i - 1), w = 0, h = 2, acc = 2, r = r, g = g, b = b},
+						{time = CURTAIN.CLOSE_TIME + timeOffst, w = WIDTH}
+					}
 				}
-			}
+			end
 		end
 		dst[#dst+1] = { -- 光球
 			id = "largeShine", timer = 2, loop = -1, dst = {
@@ -505,10 +556,69 @@ local function main()
 			}
 		}
 
-		-- まず白文字
 		do
+			-- まず白文字
+			local r, g, b = getTextColor()
 			local div = CURTAIN.TEXT.DIV_W
 			local w = CURTAIN.TEXT.W
+			local startX = (WIDTH - w) / 2
+			local h = CURTAIN.TEXT.H
+			local y = (HEIGHT - CURTAIN.TEXT.H) / 2
+			local appearTime = CURTAIN.TEXT.APPEAR_TIME
+			local coloredDelayTime = CURTAIN.TEXT.COLORED_DELAY_TIME
+			local coloredD1 = CURTAIN.TEXT.COLORED_DEL1
+			local coloredD2 = CURTAIN.TEXT.COLORED_DEL2
+			local coloredDelTime = CURTAIN.TEXT.COLORED_DEL_TIME
+			for i = 0, w, div do
+				local textX = startX + i
+				local time = easeOutTime(textX - div, CURTAIN.FROM_X, CURTAIN.TO_X, CURTAIN.CLOSE_TIME)
+				local delColoredTime = CURTAIN.CLOSE_TIME + easeOutTime(textX, shineStartX + CURTAIN.SHINE.W / 2, shineToX + CURTAIN.SHINE.W / 2, d)
+				dst[#dst+1] = {
+					id = "textWhite" .. i, timer = 2, loop = time + appearTime, dst = {
+						{time = 0, x = textX, y = y, w = div, h = h, a = 0, acc = 0},
+						{time = time},
+						{time = time + appearTime, a = 255}
+					}
+				}
+				dst[#dst+1] = {
+					id = "textColored" .. i, timer = 2, loop = delColoredTime + appearTime, dst = {
+						{time = 0, x = textX, y = y, w = div, h = h, a = 0, r = r, g = g, b = b, acc = 0},
+						{time = time + coloredDelayTime},
+						{time = time + appearTime + coloredDelayTime, a = 255},
+						{time = delColoredTime},
+						{time = delColoredTime + appearTime, a = 0}
+						-- {time = time + appearTime + coloredDelayTime + coloredD1-1, a = 0},
+						-- {time = time + appearTime + coloredDelayTime + coloredD1 + coloredDelTime - 1, a = 0},
+						-- {time = time + appearTime + coloredDelayTime + coloredD1 + coloredDelTime, a = 255},
+						-- {time = time + appearTime + coloredDelayTime + coloredD2-1, a = 0},
+						-- {time = time + appearTime + coloredDelayTime + coloredD2 + coloredDelTime - 1, a = 0},
+						-- {time = time + appearTime + coloredDelayTime + coloredD2 + coloredDelTime, a = 255},
+					}
+				}
+			end
+			-- rich
+			r, g, b = getCurtainShineColor()
+			local sr, sg, sb = getTextColor2()
+			for i = 0, w, div do
+				local textX = startX + i
+				local time = CURTAIN.CLOSE_TIME + easeOutTime(textX, shineStartX + CURTAIN.SHINE.W / 2, shineToX + CURTAIN.SHINE.W / 2, d)
+				dst[#dst+1] = {
+					id = "textRich" .. i, timer = 2, loop = time + appearTime, dst = {
+						{time = 0, x = textX, y = y, w = div, h = h, a = 0, r = r, g = g, b = b, acc = 0},
+						{time = time-1},
+						{time = time},
+						{time = time + appearTime, a = 255}
+					}
+				}
+				dst[#dst+1] = {
+					id = "textRich2" .. i, timer = 2, loop = time + appearTime, dst = {
+						{time = 0, x = textX, y = y, w = div, h = h, a = 0, r = sr, g = sg, b = sb, acc = 0},
+						{time = time-1},
+						{time = time},
+						{time = time + appearTime, a = 255}
+					}
+				}
+			end
 
 		end
 
@@ -518,6 +628,15 @@ local function main()
 			dst[#dst+1] = frontParticleDsts[i]
 		end
 	end
+
+	-- 全体のフェードアウト
+	dst[#dst+1] = {
+		id = "black", timer = 2, loop = FADEOUT, dst = {
+			{time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 0},
+			{time = CURTAIN.OVERALL_FADEOUT_START},
+			{time = FADEOUT, a = 255}
+		}
+	}
 
     return skin
 end
