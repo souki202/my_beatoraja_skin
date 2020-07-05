@@ -1,4 +1,4 @@
-require("define")
+
 local TEXTURE_SIZE = 2048
 local PARTS_OFFSET = HEIGHT + 32
 

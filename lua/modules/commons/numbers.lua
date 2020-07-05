@@ -1,5 +1,5 @@
 local main_state = require("main_state")
-require("timer")
+require("modules.commons.timer")
 
 NUMBERS_24PX = {
     W = 14,

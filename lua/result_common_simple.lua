@@ -1,8 +1,8 @@
-require("define")
-require("numbers")
-require("my_window")
+
+require("modules.commons.numbers")
+require("modules.commons.my_window")
 local main_state = require("main_state")
-local resultObtained = require("result_obtained")
+local resultObtained = require("modules.result.result_obtained")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048

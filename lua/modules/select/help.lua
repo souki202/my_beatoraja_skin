@@ -1,7 +1,7 @@
 local main_state = require("main_state")
-require("define")
-require("my_window")
-require("input")
+
+require("modules.commons.my_window")
+require("modules.commons.input")
 
 local TEXTURE_SIZE = 2048
 local PARTS_OFFSET = HEIGHT + 32

@@ -1,7 +1,7 @@
 local main_state = require("main_state")
-require("userdata")
-require("numbers")
-require("timer")
+require("modules.commons.userdata")
+require("modules.commons.numbers")
+require("modules.commons.timer")
 
 function table.in_key (tbl, key)
     for k, v in pairs (tbl) do

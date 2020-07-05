@@ -1,4 +1,4 @@
-require("define")
+
 require("position")
 local main_state = require("main_state")
 

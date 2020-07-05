@@ -14,15 +14,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with SocialSkin.  If not, see <http://www.gnu.org/licenses/>.
 
--- 背景画像 花のイラストなら「百花繚乱」 - 無料で使えるフリー素材 https://flowerillust.com/
--- フォント Source Han Sans Adobe Systems Incorporated
-
-
-require("define")
-require("http")
-require("my_window")
-require("numbers")
-require("sound")
+require("modules.commons.define")
+require("modules.commons.http")
+require("modules.commons.my_window")
+require("modules.commons.numbers")
 require("position")
 local commons = require("modules.select.commons")
 local help = require("modules.select.help")

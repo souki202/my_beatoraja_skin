@@ -1,5 +1,5 @@
-require("my_window")
-require("numbers")
+require("modules.commons.my_window")
+require("modules.commons.numbers")
 local main_state = require("main_state")
 
 local TEXTURE_SIZE = 2048
