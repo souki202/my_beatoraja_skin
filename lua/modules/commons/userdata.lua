@@ -122,13 +122,22 @@ userData.load = function()
         end
         cnt = cnt + 1
     end
+    
+    userData.wasLoaded = true
+
+    if userData.version <= 1 then
+        print("ユーザデータバージョン更新: " .. userData.version .. " -> 2")
+        userData.version = 2
+        userData.tokens.coin = main_state.number(33)
+        userData.tokens.dia = main_state.number(30)
+        userData.save()
+    end
 
     print("SocialSkin統計情報読み込み完了")
     print("ランク: " .. userData.rank.rank)
     print("累積経験値: " .. userData.rank.exp)
     print("スタミナ回復時刻: ")
     print("スタミナ: " .. userData.stamina.now)
-    userData.wasLoaded = true
 end
 
 
@@ -138,7 +147,7 @@ userData.writeUserData = function(fileHandle)
         return
     end
     -- version
-    fileHandle:write(1 .. "\n")
+    fileHandle:write(userData.version .. "\n")
     -- rank
     fileHandle:write(userData.rank.rank .. "\n")
     -- exp
