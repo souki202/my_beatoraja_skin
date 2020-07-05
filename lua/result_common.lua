@@ -806,6 +806,7 @@ local function main()
             userData.updateRemainingStamina()
             userData.useStamina(requireStamina)
             userData.addExp(exp)
+            userData.updateTokens()
             pcall(userData.save)
         end
     end

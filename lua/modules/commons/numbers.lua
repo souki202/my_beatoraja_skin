@@ -313,8 +313,6 @@ function preDrawStaticNumbers(skin, idPrefix, dstId, align, drawBackZero, baseDs
     end
 end
 
-
-
 function updateDrawNumbers()
     if myNumber.didInitStaticNumberTimer == false then
         for dstId, timer in pairs(myNumber.timerIds) do

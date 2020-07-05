@@ -170,9 +170,17 @@ statistics.functions.load = function(skin)
     texts[#texts + 1] = {id = "プレイ情報", font = 0, size = statistics.FONT_SIZE, align = 0, constantText = "プレイ情報"}
 
     -- 統計情報数値はdstで
+    statistics.USER.VALUES = {userData.rank.rank, userData.tokens.coin, userData.tokens.dia}
     for i = 1, #statistics.USER.VALUES do
         texts[#texts + 1] = {id = statistics.USER.TEXTS[i], font = 0, size = statistics.FONT_SIZE, align = 0, constantText = statistics.USER.TEXTS[i]}
+        values[#values + 1] = {
+            id = statistics.ID_PREFIX .. statistics.USER.TEXTS[i], src = 0, x = numSrcX, y = numSrcY, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = 9, align = 0,
+            value = function() return statistics.USER.VALUES[i] end
+        }
     end
+
+
+    
 end
 
 statistics.functions.destinationOpenButton = function(skin)
@@ -209,7 +217,6 @@ statistics.functions.destinationWindow = function(skin)
 
     -- プレイヤーデータ
     dstSubHeaderSelect(skin, SIMPLE_WND_AREA.X + statistics.HEADER.X1, nowY, statistics.HEADER.W, {}, statistics.functions.getWindowTimerId(), atime, "ユーザ")
-    statistics.USER.VALUES = {userData.rank.rank, userData.tokens.coin, userData.tokens.dia}
     nowY = nowY - interval
     for i = 1, #statistics.USER.VALUES do
         -- 文字
@@ -221,12 +228,11 @@ statistics.functions.destinationWindow = function(skin)
         })
 
         -- 数値
-        local dst = {
-            init,
-            {time = atime, x = numX1, y = nowY + numOffsetY, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
-        }
-        preDrawStaticNumbers(skin, NUMBERS_24PX.ID, statistics.ID_PREFIX .. "rank", 0, false, dst, statistics.USER.VALUES[i], {}, timer, atime, 0)
-
+        table.insert(skin.destination, {
+            id = statistics.ID_PREFIX .. statistics.USER.TEXTS[i], timer = timer, loop = atime, dst = {
+                {time = atime, x = numX1 - NUMBERS_24PX.W * 9, y = nowY + numOffsetY, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+            }
+        })
         nowY = nowY - interval
     end
     nowY = nowY - next

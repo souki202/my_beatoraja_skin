@@ -171,6 +171,11 @@ userData.save = function()
     print("統計情報保存処理終了")
 end
 
+userData.updateTokens = function()
+    userData.tokens.coin = main_state.number(33) + main_state.judge(0)
+    userData.tokens.dia = main_state.number(30) + 1
+end
+
 -- 次のランクに上がるのに必要な累計経験値を取得
 userData.rank.getSumExp = function(rank)
     if rank <= 0 then

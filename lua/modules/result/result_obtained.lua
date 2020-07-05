@@ -379,7 +379,7 @@ resultObtained.functions.load = function(skin)
     })
     table.insert(skin.text, {
         id = "coinValue", font = 0, size = DROPS.COIN.NUM.SIZE, align = 2,
-        value = function() return values.anim.coin end
+        value = function() return math.ceil(values.anim.coin) end
     })
     -- 獲得量
     table.insert(skin.value, {
