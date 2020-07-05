@@ -1,5 +1,6 @@
 
 require("position")
+require("modules.commons.define")
 local main_state = require("main_state")
 
 local STAGE_FILE = {
@@ -530,8 +531,8 @@ local function main()
 			end
 		end
 
-		-- 線が出てくる
 		do
+			-- 線が出てくる
 			local r, g, b = getCurtainShineColor()
 			for i = 1, 5 do
 				local timeOffst = math.random(0, CURTAIN.LINE.APPEAR_TIME_VAR)
@@ -542,21 +543,21 @@ local function main()
 					}
 				}
 			end
+			dst[#dst+1] = { -- 光球
+				id = "largeShine", timer = 2, loop = -1, dst = {
+					{time = 0, x = CURTAIN.FROM_X - CURTAIN.SHINE.W / 2 + 10, y = (HEIGHT - CURTAIN.SHINE.H) / 2, w = CURTAIN.SHINE.W, h = CURTAIN.SHINE.H, angle = 0, acc = 2, r = r, g = g, b = b},
+					{time = CURTAIN.CLOSE_TIME, x = CURTAIN.TO_X - CURTAIN.SHINE.W / 2 + 10, angle = -270}
+				}
+			}
+			-- 光球が戻ってくる
+			dst[#dst+1] = { -- 光球
+				id = "largeShine", timer = 2, loop = FADEOUT, dst = {
+					{time = 0, x = shineStartX, y = shineStartY, w = CURTAIN.SHINE.W, h = CURTAIN.SHINE.H, angle = -270, a = 0, acc = 2, r = r, g = g, b = b},
+					{time = CURTAIN.CLOSE_TIME, a = 255},
+					{time = CURTAIN.REVERSE_TIME, x = shineToX, angle = 90}
+				}
+			}
 		end
-		dst[#dst+1] = { -- 光球
-			id = "largeShine", timer = 2, loop = -1, dst = {
-				{time = 0, x = CURTAIN.FROM_X - CURTAIN.SHINE.W / 2 + 10, y = (HEIGHT - CURTAIN.SHINE.H) / 2, w = CURTAIN.SHINE.W, h = CURTAIN.SHINE.H, angle = 0, acc = 2, r = r, g = g, b = b},
-				{time = CURTAIN.CLOSE_TIME, x = CURTAIN.TO_X - CURTAIN.SHINE.W / 2 + 10, angle = -270}
-			}
-		}
-		-- 光球が戻ってくる
-		dst[#dst+1] = { -- 光球
-			id = "largeShine", timer = 2, loop = FADEOUT, dst = {
-				{time = 0, x = shineStartX, y = shineStartY, w = CURTAIN.SHINE.W, h = CURTAIN.SHINE.H, angle = -270, a = 0, acc = 2, r = r, g = g, b = b},
-				{time = CURTAIN.CLOSE_TIME, a = 255},
-				{time = CURTAIN.REVERSE_TIME, x = shineToX, angle = 90}
-			}
-		}
 
 		do
 			-- まず白文字

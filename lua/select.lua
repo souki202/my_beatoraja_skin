@@ -23,14 +23,13 @@ local commons = require("modules.select.commons")
 local help = require("modules.select.help")
 local statistics = require("modules.select.statistics")
 local opening = require("modules.select.opening")
+local user = require("modules.select.user")
 
 local main_state = require("main_state")
 
 local existNewVersion = false
 
 local PARTS_TEXTURE_SIZE = 2048
-
-local PARTS_OFFSET = HEIGHT + 32
 
 local ARTIST_FONT_SIZE = 24
 local SUBARTIST_FONT_SIZE = 18
@@ -41,7 +40,7 @@ local MUSIC_BAR_IMG_HEIGHT = 78
 local MUSIC_BAR_IMG_WIDTH = 607
 
 local NORMAL_NUMBER_SRC_X = 946
-local NORMAL_NUMBER_SRC_Y = PARTS_OFFSET
+local NORMAL_NUMBER_SRC_Y = commons.PARTS_OFFSET
 local NORMAL_NUMBER_W = 15
 local NORMAL_NUMBER_H = 21
 local STATUS_NUMBER_W = 18
@@ -102,151 +101,6 @@ local STAGE_FILE = {
 local UPPER_OPTION_W = 270
 local UPPER_OPTION_H = 56
 
--- 上部の統計情報的な部分の各種
-local USER_DATA = {
-    WND = {
-        X = 72,
-        Y = 976,
-    },
-    SLASH = {
-        W = 5,
-        H = 12,
-    },
-    NUM = {
-        W = 10,
-        H = 12,
-    },
-}
-
-local RANK = {
-    OLD = {
-        NUM_W = 18,
-        NUM_H = 24,
-    },
-    NEW = {
-        NUM_W = 18,
-        NUM_H = 24,
-        X = 235, -- 影含まず
-        Y = 59,
-    },
-
-    IMG = {
-        W = 106,
-        H = 46,
-        X = 18,
-        Y = 48,
-    },
-}
-
-local EXP = {
-    FRAME = {
-        W = 222,
-        H = 48,
-        X = 18,
-        Y = 2,
-    },
-    GAUGE = {
-        X = 13,
-        Y = 12,
-        W = 196,
-        H = 24,
-    },
-    NUM = {
-        X = 190, -- gaugeからの差分
-        Y = 6,
-    },
-    SLASH = {
-        Y = 6,
-    },
-    REFLECTION = {
-        W = 37,
-        H = 24,
-    },
-}
-
-local STAMINA = { -- 座標はUSER_DATA.WNDからの差分
-    LABEL = {
-        X = 278,
-        Y = 64,
-        W = 106,
-        H = 30,
-    },
-    HEAL = {
-        PREFIX = {
-            W = 29,
-            H = 16,
-            X = 284,
-            Y = 50
-        },
-        TIME = {
-            RANK_W = 16,
-            RANK_H = 16,
-            MIN_X = 324,
-            MIN_Y = 50,
-            SEC_X = 361,
-            SEC_Y = 50,
-            NUM_X = 324,
-            NUM2_X = 361,
-            NUM_Y = 52,
-            NUM_W = 10,
-            NUM_H = 12,
-            MAX_X = 314,
-            MAX_Y = 50,
-            MAX_W = 33,
-            MAX_H = 16
-        },
-    },
-    GAUGE = {
-        FRAME = {
-            X = 388,
-            Y = 46,
-            W = 222,
-            H = 48,
-        },
-        GAUGE = {
-            X = 13,
-            Y = 12,
-            W = 196,
-            H = 24,
-        },
-        REFLECTION = {
-            W = 37,
-            H = 24,
-        },
-        NUM = {
-            X = 190, -- gaugeからの差分
-            Y = 6,
-        },
-        SLASH = {
-            Y = 6,
-        },
-    },
-}
-
-local MONEY = {
-    COIN = {
-        W = 33,
-        H = 33,
-        X = 285, -- USER_DATA.WNDからの差分
-        Y = 5,
-        NUM_X = 156, -- xからの差分
-        NUM_Y = 8
-    },
-    DIA = {
-        W = 40,
-        H = 34,
-        X = 451,
-        Y = 5,
-        NUM_X = 156, -- xからの差分
-        NUM_Y = 8
-    },
-    NUM = {
-        X = 156, -- 各xからの差分
-        Y = 8,
-        W = 13,
-        H = 18,
-    },
-}
 
 -- Music bar
 local MUSIC_BAR = {
@@ -270,7 +124,7 @@ local LAMP_NAMES = {"Max", "Perfect", "Fc", "Exhard", "Hard", "Normal", "Easy", 
 -- スコア詳細
 local SCORE_INFO = {
     TEXT_SRC_X = 1127,
-    TEXT_SRC_Y = PARTS_OFFSET + 263,
+    TEXT_SRC_Y = commons.PARTS_OFFSET + 263,
     TEXT_W = 168,
     TEXT_H = 22,
     TEXT_BASE_X = 95,
@@ -862,56 +716,6 @@ local function destinationSmallKeysInHelp(skin, baseX, baseY, activeKeys, appear
     end
 end
 
-function calcStamina()
-    local tn = main_state.number(74)
-    if tn > 0 then
-        switchVisibleNumber("useStaminaValue", true)
-        setValue("useStaminaValue", userData.calcUseStamina(tn))
-    else
-        switchVisibleNumber("useStaminaValue", false)
-    end
-end
-
-function updateStamina()
-    if getFrame() % 60 == 0 then -- 単なる負荷軽減
-        userData.updateRemainingStamina()
-        if userData.getIsMaxStamina() then
-            -- 全快していればMAXを表示
-            main_state.set_timer(10004, main_state.timer_off_value)
-            switchVisibleNumber("nextStaminaHealMinute", false)
-            switchVisibleNumber("nextStaminaHealSecond", false)
-            main_state.set_timer(10005, 1)
-        else
-            -- 回復までの残り時間
-            local minute, second = userData.getNextHealStaminaRemainTime()
-            main_state.set_timer(10004, 1)
-            main_state.set_timer(10005, main_state.timer_off_value)
-            setValue("nextStaminaHealMinute", minute)
-            setValue("nextStaminaHealSecond", second)
-        end
-        setValue("staminaNowValue", userData.stamina.now)
-    end
-end
-
-function updateStaminaGauge()
-    local p = userData.stamina.now / userData.stamina.tbl[userData.rank.rank]
-    p = math.max(0, math.min(p, 1))
-    return main_state.time() - p * 20 * 1000 * 1000
-end
-
-function updateUseStamina()
-    if getFrame() % 20 == 0 then -- 単なる負荷軽減
-        local tn = main_state.number(106)
-        if tn > 0 then
-            local requireStamina = userData.calcUseStamina(tn)
-            setValue("useStaminaValue", requireStamina)
-            switchVisibleNumber("useStaminaValue", true)
-        else
-            switchVisibleNumber("useStaminaValue", false)
-        end
-    end
-end
-
 local function main()
 	local skin = {}
 	-- ヘッダ情報をスキン本体にコピー
@@ -944,8 +748,6 @@ local function main()
 
     table.insert(skin.customTimers, {id = 10002, timer = "calcStamina"})
     table.insert(skin.customTimers, {id = 10003, timer = "updateStamina"})
-    table.insert(skin.customTimers, {id = 10004}) -- スタミナ回復までの時間表示用タイマー
-    table.insert(skin.customTimers, {id = 10005}) -- スタミナMAX時の表示用タイマー
     table.insert(skin.customTimers, {id = 10006, timer = "updateStaminaGauge"}) -- スタミナゲージ表示用タイマー
     table.insert(skin.customTimers, {id = 10007, timer = "updateUseStamina"}) -- スタミナ使用量更新用タイマー
     table.insert(skin.customTimers, {id = 10008, timer = "newVersionAnimation"}) -- 新バージョンがある時の文字表示用
@@ -965,131 +767,131 @@ local function main()
         {id = "stagefileShadow", src = 4, x = 0, y = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2},
         {id = "noImage", src = 7, x = 0, y = 0, w = -1, h = -1},
         -- 選曲バー種類
-        {id = "barSong"   , src = 0, x = 0, y = PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barNosong" , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*1, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barGrade"  , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*2, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barNograde", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*2, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barFolder" , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*3, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barFolderWithLamp" , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*7, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barTable"  , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*4, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barTableWithLamp"  , src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*8, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barCommand", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*5, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barCommandWithLamp", src = 0, x = 0, y = PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*9, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barSearch" , src = 0, x = 0, y = PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barSong"   , src = 0, x = 0, y = commons.PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barNosong" , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*1, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barGrade"  , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*2, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barNograde", src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*2, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barFolder" , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*3, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barFolderWithLamp" , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*7, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barTable"  , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*4, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barTableWithLamp"  , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*8, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barCommand", src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*5, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barCommandWithLamp", src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*9, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
+        {id = "barSearch" , src = 0, x = 0, y = commons.PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
         -- 選曲バークリアランプはimagesの後
         -- 選曲バー中央
-        {id = "barCenterFrame", src = 0, x = 0, y = PARTS_OFFSET + 782, w = 714, h = 154},
+        {id = "barCenterFrame", src = 0, x = 0, y = commons.PARTS_OFFSET + 782, w = 714, h = 154},
         -- 選曲バーLN表示
-        {id = "barLn"    , src = 0, x = 607, y = PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*0, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-        {id = "barRandom", src = 0, x = 607, y = PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*1, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-        {id = "barBomb"  , src = 0, x = 607, y = PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*2, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-        {id = "barCn"    , src = 0, x = 607, y = PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*3, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-        {id = "barHcn"   , src = 0, x = 607, y = PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*4, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+        {id = "barLn"    , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*0, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+        {id = "barRandom", src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*1, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+        {id = "barBomb"  , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*2, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+        {id = "barCn"    , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*3, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+        {id = "barHcn"   , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*4, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
         -- Favorite
         -- {id = "favoriteButton", src = 0, x = 1563, y = 263, w = FAVORITE.W*2, h = FAVORITE.H, divx = 2, act = 9999},
         -- トロフィー
-        {id ="goldTrophy"  , src = 0, x = 1896, y = PARTS_OFFSET + MUSIC_BAR.TROPHY_H*0, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
-        {id ="silverTrophy", src = 0, x = 1896, y = PARTS_OFFSET + MUSIC_BAR.TROPHY_H*1, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
-        {id ="bronzeTrophy", src = 0, x = 1896, y = PARTS_OFFSET + MUSIC_BAR.TROPHY_H*2, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
+        {id ="goldTrophy"  , src = 0, x = 1896, y = commons.PARTS_OFFSET + MUSIC_BAR.TROPHY_H*0, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
+        {id ="silverTrophy", src = 0, x = 1896, y = commons.PARTS_OFFSET + MUSIC_BAR.TROPHY_H*1, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
+        {id ="bronzeTrophy", src = 0, x = 1896, y = commons.PARTS_OFFSET + MUSIC_BAR.TROPHY_H*2, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
         -- プレイ
-        {id = "playButton", src = 0, x = 773, y = PARTS_OFFSET + 377, w = DECIDE_BUTTON_W, h = DECIDE_BUTTON_H},
+        {id = "playButton", src = 0, x = 773, y = commons.PARTS_OFFSET + 377, w = DECIDE_BUTTON_W, h = DECIDE_BUTTON_H},
         {id = "playButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 15}, -- ボタン起動用ダミー
-        {id = "autoButton", src = 0, x = 773, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = AUTO_BUTTON_W, h = AUTO_BUTTON_H},
+        {id = "autoButton", src = 0, x = 773, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = AUTO_BUTTON_W, h = AUTO_BUTTON_H},
         {id = "autoButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 16}, -- ボタン起動用ダミー
-        {id = "replayButtonBg", src = 0, x = 773 + AUTO_BUTTON_W, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_BUTTON_SIZE, h = REPLAY_BUTTON_SIZE},
-        {id = "replay1Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*0, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
-        {id = "replay2Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*1, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
-        {id = "replay3Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*2, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
-        {id = "replay4Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*3, y = PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
+        {id = "replayButtonBg", src = 0, x = 773 + AUTO_BUTTON_W, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_BUTTON_SIZE, h = REPLAY_BUTTON_SIZE},
+        {id = "replay1Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*0, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
+        {id = "replay2Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*1, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
+        {id = "replay3Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*2, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
+        {id = "replay4Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*3, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
         {id = "replay1ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 19}, -- ボタン起動用ダミー
         {id = "replay2ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 316}, -- ボタン起動用ダミー
         {id = "replay3ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 317}, -- ボタン起動用ダミー
         {id = "replay4ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 318}, -- ボタン起動用ダミー
 
         -- 段位, コースの曲一覧部分
-        {id = "courseBarBg", src = 0, x = 0, y = PARTS_OFFSET + 468, w = COURSE.BG_W, h = COURSE.LABEL_H + 14},
-        {id = "courseMusic1Label", src = 0, x = 773, y = PARTS_OFFSET + 519 + COURSE.LABEL_H*0, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
-        {id = "courseMusic2Label", src = 0, x = 773, y = PARTS_OFFSET + 519 + COURSE.LABEL_H*1, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
-        {id = "courseMusic3Label", src = 0, x = 773, y = PARTS_OFFSET + 519 + COURSE.LABEL_H*2, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
-        {id = "courseMusic4Label", src = 0, x = 773, y = PARTS_OFFSET + 519 + COURSE.LABEL_H*3, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
-        {id = "courseMusic5Label", src = 0, x = 773, y = PARTS_OFFSET + 519 + COURSE.LABEL_H*4, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
+        {id = "courseBarBg", src = 0, x = 0, y = commons.PARTS_OFFSET + 468, w = COURSE.BG_W, h = COURSE.LABEL_H + 14},
+        {id = "courseMusic1Label", src = 0, x = 773, y = commons.PARTS_OFFSET + 519 + COURSE.LABEL_H*0, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
+        {id = "courseMusic2Label", src = 0, x = 773, y = commons.PARTS_OFFSET + 519 + COURSE.LABEL_H*1, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
+        {id = "courseMusic3Label", src = 0, x = 773, y = commons.PARTS_OFFSET + 519 + COURSE.LABEL_H*2, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
+        {id = "courseMusic4Label", src = 0, x = 773, y = commons.PARTS_OFFSET + 519 + COURSE.LABEL_H*3, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
+        {id = "courseMusic5Label", src = 0, x = 773, y = commons.PARTS_OFFSET + 519 + COURSE.LABEL_H*4, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
         -- コースのオプション
         {id = "courseBgEdgeLeft"   , src = 0, x = 1811                              , y = PARTS_TEXTURE_SIZE - COURSE.OPTION.BG_H, w = COURSE.OPTION.BG_EDGE_W, h = COURSE.OPTION.BG_H},
         {id = "courseBgMiddle"     , src = 0, x = 1811 + COURSE.OPTION.BG_EDGE_W    , y = PARTS_TEXTURE_SIZE - COURSE.OPTION.BG_H, w = 1, h = COURSE.OPTION.BG_H},
         {id = "courseBgMiddleRight", src = 0, x = 1811 + COURSE.OPTION.BG_EDGE_W + 1, y = PARTS_TEXTURE_SIZE - COURSE.OPTION.BG_H, w = COURSE.OPTION.BG_EDGE_W, h = COURSE.OPTION.BG_H},
-        {id = "courseHeaderBg"     , src = 0, x = 1898, y = PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*0, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseHeaderOption" , src = 0, x = 1898, y = PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*1, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseHeaderHiSpeed", src = 0, x = 1898, y = PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*2, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseHeaderJudge"  , src = 0, x = 1898, y = PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*3, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseHeaderGauge"  , src = 0, x = 1898, y = PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*4, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseHeaderLnType" , src = 0, x = 1898, y = PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*5, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseSettingClass"      , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*0, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingMirror"     , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*1, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingRandom"     , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*2, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingNoSpeed"    , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*3, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingNoGood"     , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*4, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingNoGreat"    , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*5, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGaugeLR2"   , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*6, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGauge5Keys" , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*7, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGauge7Keys" , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*8, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGauge9Keys" , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*9, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGauge24Keys", src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*10, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGaugeLn"    , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*11, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGaugeCn"    , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*12, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGaugeHcn"   , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*13, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingNoSetting"  , src = 0, x = 1898, y = PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*14, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseHeaderBg"     , src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*0, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
+        {id = "courseHeaderOption" , src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*1, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
+        {id = "courseHeaderHiSpeed", src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*2, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
+        {id = "courseHeaderJudge"  , src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*3, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
+        {id = "courseHeaderGauge"  , src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*4, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
+        {id = "courseHeaderLnType" , src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*5, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
+        {id = "courseSettingClass"      , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*0, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingMirror"     , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*1, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingRandom"     , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*2, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingNoSpeed"    , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*3, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingNoGood"     , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*4, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingNoGreat"    , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*5, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingGaugeLR2"   , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*6, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingGauge5Keys" , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*7, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingGauge7Keys" , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*8, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingGauge9Keys" , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*9, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingGauge24Keys", src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*10, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingGaugeLn"    , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*11, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingGaugeCn"    , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*12, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingGaugeHcn"   , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*13, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
+        {id = "courseSettingNoSetting"  , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*14, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
 
         -- レベルアイコン
-        {id = "nonActiveBeginnerIcon", src = 0, x = LARGE_LEVEL.SRC_X, y = PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
-        {id = "nonActiveNormalIcon"  , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
-        {id = "nonActiveHyperIcon"   , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
-        {id = "nonActiveAnotherIcon" , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
-        {id = "nonActiveInsaneIcon"  , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
-        {id = "activeBeginnerIcon"   , src = 0, x = LARGE_LEVEL.SRC_X, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "activeNormalIcon"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "activeHyperIcon"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "activeAnotherIcon"    , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "activeInsaneIcon"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "activeBeginnerText"   , src = 0, x = LARGE_LEVEL.SRC_X, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
-        {id = "activeNormalText"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
-        {id = "activeHyperText"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
-        {id = "activeAnotherText"    , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
-        {id = "activeInsaneText"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
-        {id = "activeBeginnerNote"   , src = 0, x = LARGE_LEVEL.SRC_X, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "activeNormalNote"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "activeHyperNote"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "activeAnotherNote"    , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "activeInsaneNote"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "nonActiveBeginnerIcon", src = 0, x = LARGE_LEVEL.SRC_X, y = commons.PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
+        {id = "nonActiveNormalIcon"  , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = commons.PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
+        {id = "nonActiveHyperIcon"   , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = commons.PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
+        {id = "nonActiveAnotherIcon" , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = commons.PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
+        {id = "nonActiveInsaneIcon"  , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = commons.PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
+        {id = "activeBeginnerIcon"   , src = 0, x = LARGE_LEVEL.SRC_X, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeNormalIcon"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeHyperIcon"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeAnotherIcon"    , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeInsaneIcon"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeBeginnerText"   , src = 0, x = LARGE_LEVEL.SRC_X, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
+        {id = "activeNormalText"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
+        {id = "activeHyperText"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
+        {id = "activeAnotherText"    , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
+        {id = "activeInsaneText"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_TEXT_H},
+        {id = "activeBeginnerNote"   , src = 0, x = LARGE_LEVEL.SRC_X, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeNormalNote"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeHyperNote"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeAnotherNote"    , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "activeInsaneNote"     , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*4, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
         -- 密度アイコン 難易度アイコン部分のアイコン表示は上ので読み込み済み
         -- 今のところのソースは, 平均はnormal, 終わり100notesはhyper, 最大値はanotherアイコン
         -- dstはdensity用の値 DENSITY_INFO参照
-        {id = "densityAverageIcon"   , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "densityEndIcon"       , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "densityPeakIcon"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "densityAverageNote"   , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "densityEndNote"       , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "densityPeakNote"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
-        {id = "densityDifficultyBeginnerText", src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*0, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
-        {id = "densityDifficultyNormalText"  , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*1, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
-        {id = "densityDifficultyHyperText"   , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*2, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
-        {id = "densityDifficultyAnotherText" , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*3, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
-        {id = "densityDifficultyInsaneText"  , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*4, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
-        {id = "densityAverageText" , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*5, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
-        {id = "densityEndText"     , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*6, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
-        {id = "densityPeakText"    , src = 0, x = 1788, y = PARTS_OFFSET + DENSITY_INFO.TEXT_H*7, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityAverageIcon"   , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "densityEndIcon"       , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "densityPeakIcon"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "densityAverageNote"   , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "densityEndNote"       , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*2, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "densityPeakNote"      , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*3, y = commons.PARTS_OFFSET + LARGE_LEVEL.NONACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_ICON_H + LARGE_LEVEL.ACTIVE_TEXT_H, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.ACTIVE_ICON_H},
+        {id = "densityDifficultyBeginnerText", src = 0, x = 1788, y = commons.PARTS_OFFSET + DENSITY_INFO.TEXT_H*0, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityDifficultyNormalText"  , src = 0, x = 1788, y = commons.PARTS_OFFSET + DENSITY_INFO.TEXT_H*1, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityDifficultyHyperText"   , src = 0, x = 1788, y = commons.PARTS_OFFSET + DENSITY_INFO.TEXT_H*2, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityDifficultyAnotherText" , src = 0, x = 1788, y = commons.PARTS_OFFSET + DENSITY_INFO.TEXT_H*3, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityDifficultyInsaneText"  , src = 0, x = 1788, y = commons.PARTS_OFFSET + DENSITY_INFO.TEXT_H*4, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityAverageText" , src = 0, x = 1788, y = commons.PARTS_OFFSET + DENSITY_INFO.TEXT_H*5, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityEndText"     , src = 0, x = 1788, y = commons.PARTS_OFFSET + DENSITY_INFO.TEXT_H*6, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
+        {id = "densityPeakText"    , src = 0, x = 1788, y = commons.PARTS_OFFSET + DENSITY_INFO.TEXT_H*7, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
         -- 密度表示部分のdot
-        {id = "densityAverageDot", src = 0, x = 931, y = PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*1, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
-        {id = "densityEndDot"    , src = 0, x = 931, y = PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
-        {id = "densityPeakDot"   , src = 0, x = 931, y = PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
+        {id = "densityAverageDot", src = 0, x = 931, y = commons.PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*1, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
+        {id = "densityEndDot"    , src = 0, x = 931, y = commons.PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
+        {id = "densityPeakDot"   , src = 0, x = 931, y = commons.PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
 
         -- 楽曲のkeys
-        {id = "music7keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*0, y = PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music5keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*2, y = PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music14keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*4, y = PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music10keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*6, y = PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music9keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*0, y = PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music24keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*2, y = PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music48keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*4, y = PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music7keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*0, y = commons.PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music5keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*2, y = commons.PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music14keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*4, y = commons.PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music10keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*6, y = commons.PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music9keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*0, y = commons.PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music24keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*2, y = commons.PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
+        {id = "music48keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*4, y = commons.PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
         -- オプションのkeys
         {id = "upperOptionButtonBg" , src = 2, x = 1321, y = PARTS_TEXTURE_SIZE - UPPER_OPTION_H, w = UPPER_OPTION_W, h = UPPER_OPTION_H},
         {id = "keysSet", src = 2, x = 1441, y = 836, w = 129, h = OPTION_INFO.ITEM_H * 8, divy = 8, len = 8, ref = 11, act = 11},
@@ -1102,26 +904,13 @@ local function main()
         {id = "slashForEmptyPoor", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W * 11, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
         -- ランキング用スラッシュ(同じ)
         {id = "slashForRanking"  , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W * 11, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
-        -- 上部プレイヤー情報 expゲージの背景とゲージ本体は汎用カラー
-        {id = "rankTextImg", src = 0, x = 1298, y = PARTS_OFFSET + 267, w = RANK.IMG.W, h = RANK.IMG.H},
-        {id = "coin", src = 0, x = 1410, y = PARTS_OFFSET + 263, w = MONEY.COIN.W, h = MONEY.COIN.H},
-        {id = "dia", src = 0, x = 1410 + MONEY.COIN.W, y = PARTS_OFFSET + 263, w = MONEY.DIA.W, h = MONEY.DIA.H},
-        {id = "expGaugeFrame", src = 0, x = 1298, y = PARTS_OFFSET + 313, w = EXP.FRAME.W, h = EXP.FRAME.H},
-        {id = "expGaugeNew", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET + 1, w = 1, h = 1},
-        {id = "gaugeReflection", src = 0, x = 1520, y = PARTS_OFFSET + 313, w = EXP.REFLECTION.W, h = EXP.REFLECTION.H},
-        {id = "staminaTextImg", src = 0, x = 1434, y = PARTS_OFFSET + 361, w = STAMINA.LABEL.W, h = STAMINA.LABEL.H},
-        {id = "staminaRemainPrefix", src = 0, x = 1557, y = PARTS_OFFSET + 311, w = STAMINA.HEAL.PREFIX.W, h = STAMINA.HEAL.PREFIX.H},
-        {id = "staminaMinuteText", src = 0, x = 1557 + STAMINA.HEAL.PREFIX.W, y = PARTS_OFFSET + 311, w = STAMINA.HEAL.TIME.RANK_W, h = STAMINA.HEAL.TIME.RANK_H},
-        {id = "staminaSecondText", src = 0, x = 1557 + STAMINA.HEAL.PREFIX.W + STAMINA.HEAL.TIME.RANK_W, y = PARTS_OFFSET + 311, w = STAMINA.HEAL.TIME.RANK_W, h = STAMINA.HEAL.TIME.RANK_H},
-        {id = "staminaMaxText", src = 0, x = 1557 + STAMINA.HEAL.PREFIX.W + STAMINA.HEAL.TIME.RANK_W + STAMINA.HEAL.TIME.RANK_W, y = PARTS_OFFSET + 311, w = STAMINA.HEAL.TIME.MAX_W, h = STAMINA.HEAL.TIME.MAX_H},
-        {id = "userStatusValueSlash", src = 0, x = 1534, y = PARTS_OFFSET + 391, w = USER_DATA.SLASH.W, h = USER_DATA.SLASH.H},
         -- BPM用チルダ
-        {id = "bpmTilda", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + 68, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
+        {id = "bpmTilda", src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + 68, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
         -- 判定難易度
-        {id = "judgeEasy"    , src = 0, x = 1298, y = PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 0, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
-        {id = "judgeNormal"  , src = 0, x = 1298, y = PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 1, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
-        {id = "judgeHard"    , src = 0, x = 1298, y = PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 2, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
-        {id = "judgeVeryhard", src = 0, x = 1298, y = PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 3, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
+        {id = "judgeEasy"    , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 0, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
+        {id = "judgeNormal"  , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 1, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
+        {id = "judgeHard"    , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 2, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
+        {id = "judgeVeryhard", src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 3, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
         -- アクティブなオブション用背景
         {id = "activeOptionFrame", src = 2, x = 0, y = PARTS_TEXTURE_SIZE - OPTION_INFO.ACTIVE_FRAME_H, w = OPTION_INFO.ACTIVE_FRAME_W, h = OPTION_INFO.ACTIVE_FRAME_H},
         -- オプション画面の端
@@ -1205,31 +994,31 @@ local function main()
         {id = "helpDetailReplayKey", src = 3, x = 397, y = 398, w = HELP_TEXT2_W, h = 248},
 
         -- 密度グラフ用
-        {id = "notesGraphFrame", src = 0, x = 965, y = PARTS_OFFSET + 593, w = 638, h = 178},
+        {id = "notesGraphFrame", src = 0, x = 965, y = commons.PARTS_OFFSET + 593, w = 638, h = 178},
         {id = "notesGraphFrame2", src = 8, x = 0, y = 0, w = GRAPH.WND.NEW.W, h = GRAPH.WND.NEW.H},
-        {id = "numOfNormalNotesIcon" , src = 0, x = 945 + NOTES_ICON_SIZE*0, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
-        {id = "numOfScratchNotesIcon", src = 0, x = 945 + NOTES_ICON_SIZE*1, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
-        {id = "numOfLnNotesIcon"     , src = 0, x = 945 + NOTES_ICON_SIZE*2, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
-        {id = "numOfBssNotesIcon"    , src = 0, x = 945 + NOTES_ICON_SIZE*3, y = PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
-        {id = "useStaminaTextImg", src = 0, x = 1298, y = PARTS_OFFSET + 471, w = GRAPH.STAMINA.LABEL.W, h = GRAPH.STAMINA.LABEL.H},
+        {id = "numOfNormalNotesIcon" , src = 0, x = 945 + NOTES_ICON_SIZE*0, y = commons.PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
+        {id = "numOfScratchNotesIcon", src = 0, x = 945 + NOTES_ICON_SIZE*1, y = commons.PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
+        {id = "numOfLnNotesIcon"     , src = 0, x = 945 + NOTES_ICON_SIZE*2, y = commons.PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
+        {id = "numOfBssNotesIcon"    , src = 0, x = 945 + NOTES_ICON_SIZE*3, y = commons.PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
+        {id = "useStaminaTextImg", src = 0, x = 1298, y = commons.PARTS_OFFSET + 471, w = GRAPH.STAMINA.LABEL.W, h = GRAPH.STAMINA.LABEL.H},
 
         -- IR用ドットと%
-        {id = "irDot", src = 0, x = NORMAL_NUMBER_SRC_X + IR.NUMBER_PERCENT_W * 10 + 15, y = PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H},
-        {id = "irPercent", src = 0, x = NORMAL_NUMBER_SRC_X + IR.NUMBER_PERCENT_W * 11 + 15, y = PARTS_OFFSET + 68, w = IR.PERCENT_W, h = IR.PERCENT_H},
+        {id = "irDot", src = 0, x = NORMAL_NUMBER_SRC_X + IR.NUMBER_PERCENT_W * 10 + 15, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H},
+        {id = "irPercent", src = 0, x = NORMAL_NUMBER_SRC_X + IR.NUMBER_PERCENT_W * 11 + 15, y = commons.PARTS_OFFSET + 68, w = IR.PERCENT_W, h = IR.PERCENT_H},
         -- IR用文字画像
-        {id = "irRankingText", src = 0, x = 1298, y = PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 4, w = EXSCORE_AREA.IR_W, h = EXSCORE_AREA.IR_H},
+        {id = "irRankingText", src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 4, w = EXSCORE_AREA.IR_W, h = EXSCORE_AREA.IR_H},
         -- IR loading
-        {id = "irLoadingFrame"   , src = 0, x = 965, y = PARTS_OFFSET + 771, w = IR.LOADING.FRAME_W, h = IR.LOADING.FRAME_H},
-        {id = "irLoadingWave1"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*0, y = PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
-        {id = "irLoadingWave2"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*1, y = PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
-        {id = "irLoadingWave3"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*2, y = PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
-        {id = "irLoadingWave4"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*3, y = PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
-        {id = "irLoadingWave5"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*4, y = PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
-        {id = "irLoadingWaitText", src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*5, y = PARTS_OFFSET + 771, w = IR.LOADING.WAITING_TEXT_W, h = IR.LOADING.WAITING_TEXT_H},
-        {id = "irLoadingLoadText", src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*5, y = PARTS_OFFSET + 771 + IR.LOADING.WAITING_TEXT_H, w = IR.LOADING.LOADING_TEXT_W, h = IR.LOADING.LOADING_TEXT_H},
+        {id = "irLoadingFrame"   , src = 0, x = 965, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.FRAME_W, h = IR.LOADING.FRAME_H},
+        {id = "irLoadingWave1"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*0, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
+        {id = "irLoadingWave2"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*1, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
+        {id = "irLoadingWave3"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*2, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
+        {id = "irLoadingWave4"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*3, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
+        {id = "irLoadingWave5"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*4, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
+        {id = "irLoadingWaitText", src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*5, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAITING_TEXT_W, h = IR.LOADING.WAITING_TEXT_H},
+        {id = "irLoadingLoadText", src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*5, y = commons.PARTS_OFFSET + 771 + IR.LOADING.WAITING_TEXT_H, w = IR.LOADING.LOADING_TEXT_W, h = IR.LOADING.LOADING_TEXT_H},
 
         -- 注目アイコン
-        {id = "attensionIcon", src = 0, x = 1846, y = PARTS_OFFSET + 874, w = ATTENSION_SIZE, h = ATTENSION_SIZE},
+        {id = "attensionIcon", src = 0, x = 1846, y = commons.PARTS_OFFSET + 874, w = ATTENSION_SIZE, h = ATTENSION_SIZE},
 
         -- ヘルプウィンドウ周り
         -- {id = "helpHeaderBgLeft", src = 0, x = 1591, y = },
@@ -1262,17 +1051,17 @@ local function main()
     for i, lamp in ipairs(LAMP_NAMES) do
         table.insert(skin.image, {
             id = "barLamp" .. lamp, src = 0,
-            x = 657, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
+            x = 657, y = commons.PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
             w = 110, h = LAMP_HEIGHT
         })
         table.insert(skin.image, {
             id = "barLampRivalPlayer" .. lamp, src = 0,
-            x = 657, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
+            x = 657, y = commons.PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
             w = 110, h = LAMP_HEIGHT / 2
         })
         table.insert(skin.image, {
             id = "barLampRivalTarget" .. lamp, src = 0,
-            x = 657, y = PARTS_OFFSET + LAMP_HEIGHT * (i - 1) + LAMP_HEIGHT / 2,
+            x = 657, y = commons.PARTS_OFFSET + LAMP_HEIGHT * (i - 1) + LAMP_HEIGHT / 2,
             w = 110, h = LAMP_HEIGHT / 2
         })
     end
@@ -1283,16 +1072,12 @@ local function main()
     }
     for i, t in ipairs(irTexts) do
         table.insert(skin.image, {
-            id = "ir" .. t .. "Text", src = 0, x = 1603, y = PARTS_OFFSET + 531 + IR.TEXT_H * (i - 1), w = IR.TEXT_W, h = IR.TEXT_H
+            id = "ir" .. t .. "Text", src = 0, x = 1603, y = commons.PARTS_OFFSET + 531 + IR.TEXT_H * (i - 1), w = IR.TEXT_W, h = IR.TEXT_H
         })
     end
 
-    -- ランク部分の数字の読み込み
-    loadNumbers(skin, "rankCoop", 0, NORMAL_NUMBER_SRC_X, PARTS_OFFSET + NORMAL_NUMBER_H + STATUS_NUMBER_H, RANK.NEW.NUM_W * 10, RANK.NEW.NUM_H, 10, 1)
-    -- スタミナの数字読み込み
-    loadNumbers(skin, "userDataSmallNumber", 0, 1434, PARTS_OFFSET + 391, USER_DATA.NUM.W * 10, USER_DATA.NUM.H, 10, 1)
     -- 汎用的な24px数値
-    loadNumbers(skin, NUMBERS_24PX.ID, 0, 1434, PARTS_OFFSET + 421, NUMBERS_24PX.W * 10, NUMBERS_24PX.H, 10, 1)
+    loadNumbers(skin, NUMBERS_24PX.ID, 0, 1434, commons.PARTS_OFFSET + 421, NUMBERS_24PX.W * 10, NUMBERS_24PX.H, 10, 1)
 
 
     -- 密度グラフ
@@ -1308,7 +1093,7 @@ local function main()
 
     if isDefaultLampGraphColor() then
         skin.graph = {
-            {id = "lampGraph", src = 0, x = 607, y = PARTS_OFFSET, w = 11, h = 16, divx = 11, divy = 2, cycle = 16.6*4, type = -1}
+            {id = "lampGraph", src = 0, x = 607, y = commons.PARTS_OFFSET, w = 11, h = 16, divx = 11, divy = 2, cycle = 16.6*4, type = -1}
         }
     else
         skin.graph = {
@@ -1318,7 +1103,7 @@ local function main()
 
     -- 選曲スライダー
     skin.slider = {
-        {id = "musicSelectSlider", src = 0, x = 1541, y = PARTS_OFFSET + 263, w = MUSIC_SLIDER_BUTTON_W, h = MUSIC_SLIDER_BUTTON_H, type = 1, range = 768 - MUSIC_SLIDER_BUTTON_H / 2 - 3, angle = 2, align = 0},
+        {id = "musicSelectSlider", src = 0, x = 1541, y = commons.PARTS_OFFSET + 263, w = MUSIC_SLIDER_BUTTON_W, h = MUSIC_SLIDER_BUTTON_H, type = 1, range = 768 - MUSIC_SLIDER_BUTTON_H / 2 - 3, angle = 2, align = 0},
     }
 
     if isViewFolderLampGraph() then
@@ -1361,7 +1146,7 @@ local function main()
     for i, rank in ipairs(ranks) do
         table.insert(skin.image, {
             id = "rank" .. rank, src = 0,
-            x = SCORE_RANK.SRC_X, y = PARTS_OFFSET + SCORE_RANK.H * i,
+            x = SCORE_RANK.SRC_X, y = commons.PARTS_OFFSET + SCORE_RANK.H * i,
             w = SCORE_RANK.W, h = SCORE_RANK.H
         })
     end
@@ -1440,49 +1225,41 @@ local function main()
 
     skin.value = {
         -- 選曲バー難易度数値
-        {id = "barPlayLevelUnknown",  src = 0, x = 771, y = PARTS_OFFSET,                                   w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelBeginner", src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*1, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelNormal",   src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelHyper",    src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelAnother",  src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*4, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelInsane",   src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*5, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelUnknown2", src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*6, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelUnknown",  src = 0, x = 771, y = commons.PARTS_OFFSET,                                   w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelBeginner", src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*1, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelNormal",   src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelHyper",    src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelAnother",  src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*4, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelInsane",   src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*5, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
+        {id = "barPlayLevelUnknown2", src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*6, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
         -- 左側の難易度表記数字
-        {id = "largeLevelBeginner", src = 0, x = 771, y = PARTS_OFFSET + 147                         , w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 45, align = 2},
-        {id = "largeLevelNormal"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 1, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 46, align = 2},
-        {id = "largeLevelHyper"   , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 2, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 47, align = 2},
-        {id = "largeLevelAnother" , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 3, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 48, align = 2},
-        {id = "largeLevelInsane"  , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 4, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 49, align = 2},
+        {id = "largeLevelBeginner", src = 0, x = 771, y = commons.PARTS_OFFSET + 147                         , w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 45, align = 2},
+        {id = "largeLevelNormal"  , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 1, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 46, align = 2},
+        {id = "largeLevelHyper"   , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 2, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 47, align = 2},
+        {id = "largeLevelAnother" , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 3, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 48, align = 2},
+        {id = "largeLevelInsane"  , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 4, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 49, align = 2},
         -- 密度
-        {id = "densityAverageNumber"    , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 1, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 364, align = 0},
-        {id = "densityAverageAfterDot"  , src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 365, align = 1, padding = 1},
-        {id = "densityEndNumber"        , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 2, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 362, align = 0},
-        {id = "densityEndAfterDot"      , src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 363, align = 1, padding = 1},
-        {id = "densityPeakNumber"       , src = 0, x = 771, y = PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 3, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 360, align = 2},
-        -- {id = "densityPeakAfterDot"     , src = 0, x = 771, y = PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*4, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 361, align = 1},
+        {id = "densityAverageNumber"    , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 1, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 364, align = 0},
+        {id = "densityAverageAfterDot"  , src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 365, align = 1, padding = 1},
+        {id = "densityEndNumber"        , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 2, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 362, align = 0},
+        {id = "densityEndAfterDot"      , src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 363, align = 1, padding = 1},
+        {id = "densityPeakNumber"       , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 3, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 360, align = 2},
+        -- {id = "densityPeakAfterDot"     , src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*4, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 361, align = 1},
         -- exscore用
-        {id = "richExScore",  src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_AREA.NUMBER_W * 10, h = EXSCORE_AREA.NUMBER_H, divx = 10, digit = 5, ref = 71, align = 0},
-        {id = "rivalExScore", src = 0, x = 771, y = PARTS_OFFSET + 347, w = EXSCORE_AREA.NUMBER_W * 10, h = EXSCORE_AREA.NUMBER_H, divx = 10, digit = 5, ref = 271, align = 0},
+        {id = "richExScore",  src = 0, x = 771, y = commons.PARTS_OFFSET + 347, w = EXSCORE_AREA.NUMBER_W * 10, h = EXSCORE_AREA.NUMBER_H, divx = 10, digit = 5, ref = 71, align = 0},
+        {id = "rivalExScore", src = 0, x = 771, y = commons.PARTS_OFFSET + 347, w = EXSCORE_AREA.NUMBER_W * 10, h = EXSCORE_AREA.NUMBER_H, divx = 10, digit = 5, ref = 271, align = 0},
         -- IR
         {id = "irRanking"         , src = 0, x = NORMAL_NUMBER_SRC_X, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W*10, h = NORMAL_NUMBER_H, divx = 10, digit = 5, ref = 179, align = 0},
-        {id = "irPlayerForRanking", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, digit = 5, ref = 200, align = 0},
-        -- 上部プレイヤー情報
-        {id = "numOfCoin", src = 0, x = 1434, y = PARTS_OFFSET + 403, w = MONEY.NUM.W * 10, h = MONEY.NUM.H, divx = 10, digit = 8, ref = 33, align = 0},
-        {id = "numOfDia", src = 0, x = 1434, y = PARTS_OFFSET + 403, w = MONEY.NUM.W * 10, h = MONEY.NUM.H, divx = 10, digit = 8, ref = 30, align = 0},
-        {id = "rankValue", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H + STATUS_NUMBER_H, w = RANK.OLD.NUM_W * 10, h = RANK.OLD.NUM_H, divx = 10, digit = 4, ref = 17, align = 0},
-        {id = "expGauge", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET, w = 10, h = 10, divy = 10, digit = 1, ref = 31, align = 1},
-        {id = "expGaugeRemnant", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = PARTS_OFFSET + 10, w = 10, h = 10, divy = 10, digit = 1, ref = 31, align = 1},
+        {id = "irPlayerForRanking", src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, digit = 5, ref = 200, align = 0},
         -- ノーツ数
-        {id = "numOfNormalNotes" , src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 350, align = 0},
-        {id = "numOfScratchNotes", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 352, align = 0},
-        {id = "numOfLnNotes"     , src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 351, align = 0},
-        {id = "numOfBssNotes"    , src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 353, align = 0},
+        {id = "numOfNormalNotes" , src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 350, align = 0},
+        {id = "numOfScratchNotes", src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 352, align = 0},
+        {id = "numOfLnNotes"     , src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 351, align = 0},
+        {id = "numOfBssNotes"    , src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 353, align = 0},
         -- オプション
         {id = "notesDisplayTime", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H, w = OPTION_INFO.NUMBER_W * 10, h = OPTION_INFO.NUMBER_H, divx = 10, digit = 4, ref = 312},
         {id = "judgeTiming", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H * 2, w = OPTION_INFO.NUMBER_W * 12, h = OPTION_INFO.NUMBER_H * 2, divx = 12, divy = 2, digit = 4, ref = 12},
 
-        -- stamina
-        {id = "staminaMaxValue", src = 0, x = 1434, y = PARTS_OFFSET + 391, w = USER_DATA.NUM.W * 10, h = USER_DATA.NUM.H, divx = 10, divy = 1, digit = 3, value = userData.stamina.tbl[userData.rank.rank]},
     }
     -- IR irTextsに対応する値を入れていく
     -- {人数, percentage, afterdot} で, irTextsに対応するrefsを入れる
@@ -1497,14 +1274,14 @@ local function main()
     for i, refs in ipairs(irNumbers) do
         local type = irTexts[i]
         table.insert(skin.value, {
-            id = "ir" .. type .. "Number", src = 0, x = NORMAL_NUMBER_SRC_X, y = PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, divy = 1, digit = IR.DIGIT, ref = refs[1]
+            id = "ir" .. type .. "Number", src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, divy = 1, digit = IR.DIGIT, ref = refs[1]
         })
         if refs[2] ~= 0 then
             table.insert(skin.value, {
-                id = "ir" .. type .. "Percentage", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W, y = PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 3, ref = refs[2]
+                id = "ir" .. type .. "Percentage", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 3, ref = refs[2]
             })
             table.insert(skin.value, {
-                id = "ir" .. type .. "PercentageAfterDot", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W, y = PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 1, ref = refs[3], padding = 1
+                id = "ir" .. type .. "PercentageAfterDot", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 1, ref = refs[3], padding = 1
             })
         end
     end
@@ -1585,6 +1362,8 @@ local function main()
 
     -- オープニングの読み込み
     opening.load(skin)
+    -- ユーザ情報出力周り
+    user.load(skin)
     -- ヘルプの読み込み
     help.loadHelpItem(skin)
     -- 統計の読み込み
@@ -2026,40 +1805,6 @@ local function main()
             }
         },
 
-        -- 上部プレイヤー情報
-        -- RANK
-        {
-            id = "rankTextImg", dst = {
-                {x = USER_DATA.WND.X + RANK.IMG.X, y = USER_DATA.WND.Y + RANK.IMG.Y, w = RANK.IMG.W, h = RANK.IMG.H}
-            }
-        },
-        -- 経験値は下に
-        -- コイン
-        {
-            id = "coin", dst = {
-                {x = USER_DATA.WND.X + MONEY.COIN.X, y = USER_DATA.WND.Y + MONEY.COIN.Y, w = MONEY.COIN.W, h = MONEY.COIN.H}
-            }
-        },
-        -- ダイヤ
-        {
-            id = "dia", dst = {
-                {x = USER_DATA.WND.X + MONEY.DIA.X, y = USER_DATA.WND.Y + MONEY.DIA.Y, w = MONEY.DIA.W, h = MONEY.DIA.H}
-            }
-        },
-        -- RANK値は下
-        -- コイン数
-        {
-            id = "numOfCoin", dst = {
-                {x = USER_DATA.WND.X + MONEY.COIN.X + MONEY.NUM.X - MONEY.NUM.W * 8, y = USER_DATA.WND.Y + MONEY.COIN.Y + MONEY.NUM.Y, w = MONEY.NUM.W, h = MONEY.NUM.H}
-            }
-        },
-        -- ダイヤ数
-        {
-            id = "numOfDia", dst = {
-                {x = USER_DATA.WND.X + MONEY.DIA.X + MONEY.NUM.X - MONEY.NUM.W * 8, y = USER_DATA.WND.Y + MONEY.DIA.Y + MONEY.NUM.Y, w = MONEY.NUM.W, h = MONEY.NUM.H}
-            }
-        },
-
         -- 上部オプション
         {
             id = "upperOptionButtonBg", dst = {
@@ -2273,193 +2018,9 @@ local function main()
         })
     end
 
-    -- プレイヤーのランク出力
-    if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 951 then
-        table.insert(skin.destination, {
-            id = "rankValue", dst = {
-                {x = USER_DATA.WND.X + RANK.NEW.X - RANK.OLD.NUM_W * 4, y = USER_DATA.WND.Y + RANK.NEW.Y, w = RANK.OLD.NUM_W, h = RANK.OLD.NUM_H}
-            }
-        })
-    elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
-        local dst = {{x = USER_DATA.WND.X + RANK.NEW.X, y = USER_DATA.WND.Y + RANK.NEW.Y, w = RANK.NEW.NUM_W, h = RANK.NEW.NUM_H}}
-        preDrawStaticNumbers(skin, "rankCoop", "rankCoop", 0, false, dst, userData.rank.rank, {}, -1, 0, 0)
-    end
+    -- ユーザ情報出力周り
+    user.dst(skin)
 
-    -- 経験値バー出力
-    do
-        local frameX = USER_DATA.WND.X + EXP.FRAME.X
-        local frameY = USER_DATA.WND.Y + EXP.FRAME.Y
-        local gaugeX = frameX + EXP.GAUGE.X
-        local gaugeY = frameY + EXP.GAUGE.Y
-        table.insert(skin.destination, {
-            id = "white", dst = {
-                {x = gaugeX , y = gaugeY, w = EXP.GAUGE.W, h = EXP.GAUGE.H}
-            }
-        })
-        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 951 then
-            table.insert(skin.destination, {
-                id = "expGauge", dst = {
-                    {x = gaugeX, y = gaugeY, w = EXP.GAUGE.W, h = EXP.GAUGE.H}
-                }
-            })
-        elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
-            local now = userData.rank.getSumExp(userData.rank.rank - 1)
-            local next = userData.rank.getSumExp(userData.rank.rank)
-            local p = (userData.rank.exp - now) / (next - now)
-            myPrint("現在レベルの累計経験値: " .. now)
-            myPrint("次レベルの必要累計経験値: " .. next)
-            myPrint("次レベルまでの経験値の進行度: " .. p)
-            p = math.max(0, math.min(p, 1))
-            table.insert(skin.destination, {
-                id = "expGaugeNew", dst = {
-                    {x = gaugeX, y = gaugeY, w = EXP.GAUGE.W * p, h = EXP.GAUGE.H}
-                }
-            })
-        end
-        table.insert(skin.destination, {
-            id = "gaugeReflection", loop = 0, dst = {
-                {time = 0, x = gaugeX - 8, y = gaugeY, w = 8, h = EXP.REFLECTION.H, a = 196},
-                {time = 4000},
-                {time = 4070, w = EXP.REFLECTION.W * 1.5},
-                {time = 4680, x = gaugeX + EXP.GAUGE.W - EXP.REFLECTION.W * 1.5},
-                {time = 4750, x = gaugeX + EXP.GAUGE.W, w = 8},
-            }
-        })
-        table.insert(skin.destination, {
-            id = "expGaugeFrame", dst = {
-                {x = frameX, y = frameY, w = EXP.FRAME.W, h = EXP.FRAME.H}
-            }
-        })
-
-        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
-            local sub = 20
-            local now = userData.rank.exp
-
-            if userData.rank.rank > 1 then
-                sub = userData.rank.tbl[userData.rank.rank] - userData.rank.tbl[userData.rank.rank - 1]
-                now = userData.rank.exp - userData.rank.tbl[userData.rank.rank - 1]
-            end
-
-            -- 次レベルの, 現在レベルとの相対経験値を表示
-            local dst = {{x = gaugeX + EXP.NUM.X, y = gaugeY + EXP.NUM.Y, w = USER_DATA.NUM.W, h = USER_DATA.NUM.H}}
-            preDrawStaticNumbers(skin, "userDataSmallNumber", "expNextValue", 0, 0, dst, sub, {}, -1, 0, 0)
-
-            -- スラッシュ
-            local offsetX = calcValueDigit(sub, false) * USER_DATA.NUM.W + 2
-            myPrint("経験値の数値表示オフセット: " .. offsetX)
-            table.insert(skin.destination, {
-                id = "userStatusValueSlash", dst = {
-                    {x = gaugeX + EXP.NUM.X - offsetX - USER_DATA.SLASH.W, y = gaugeY + EXP.SLASH.Y, w = USER_DATA.SLASH.W, h = USER_DATA.SLASH.H}
-                }
-            })
-
-            -- 現在値
-            dst = {{x = gaugeX + EXP.NUM.X - offsetX - USER_DATA.SLASH.W - 1, y = gaugeY + EXP.NUM.Y, w = USER_DATA.NUM.W, h = USER_DATA.NUM.H}}
-            preDrawStaticNumbers(skin, "userDataSmallNumber", "expNowValue", 0, 0, dst, now, {}, -1, 0, 0)
-        end
-    end
-
-    -- スタミナ表示
-    do
-        -- ラベル部分
-        table.insert(skin.destination, {
-            id = "staminaTextImg", dst = {
-                {x = USER_DATA.WND.X + STAMINA.LABEL.X, y = USER_DATA.WND.Y + STAMINA.LABEL.Y, w = STAMINA.LABEL.W, h = STAMINA.LABEL.H}
-            }
-        })
-        -- "あと"の文字
-        table.insert(skin.destination, {
-            id = "staminaRemainPrefix", timer = 10004, dst = {
-                {x = USER_DATA.WND.X + STAMINA.HEAL.PREFIX.X, y = USER_DATA.WND.Y + STAMINA.HEAL.PREFIX.Y, w = STAMINA.HEAL.PREFIX.W, h = STAMINA.HEAL.PREFIX.H}
-            }
-        })
-        -- 分の値
-        preDrawDynamicNumbers(
-            skin, "userDataSmallNumber", "nextStaminaHealMinute",
-            USER_DATA.WND.X + STAMINA.HEAL.TIME.NUM_X, USER_DATA.WND.Y + STAMINA.HEAL.TIME.NUM_Y,
-            USER_DATA.NUM.W, USER_DATA.NUM.H, 0, false, {})
-        setValue("nextStaminaHealMinute", 0)
-        -- 分の文字
-        table.insert(skin.destination, {
-            id = "staminaMinuteText", timer = 10004, dst = {
-                {x = USER_DATA.WND.X + STAMINA.HEAL.TIME.MIN_X, y = USER_DATA.WND.Y + STAMINA.HEAL.TIME.MIN_Y, w = STAMINA.HEAL.TIME.RANK_W, h = STAMINA.HEAL.TIME.RANK_H}
-            }
-        })
-        -- 秒の値
-        preDrawDynamicNumbers(
-            skin, "userDataSmallNumber", "nextStaminaHealSecond",
-            USER_DATA.WND.X + STAMINA.HEAL.TIME.NUM2_X, USER_DATA.WND.Y + STAMINA.HEAL.TIME.NUM_Y,
-            USER_DATA.NUM.W, USER_DATA.NUM.H, 0, false, {})
-        setValue("nextStaminaHealSecond", 0)
-        -- 秒の文字
-        table.insert(skin.destination, {
-            id = "staminaSecondText", timer = 10004, dst = {
-                {x = USER_DATA.WND.X + STAMINA.HEAL.TIME.SEC_X, y = USER_DATA.WND.Y + STAMINA.HEAL.TIME.SEC_Y, w = STAMINA.HEAL.TIME.RANK_W, h = STAMINA.HEAL.TIME.RANK_H}
-            }
-        })
-        -- MAXの文字
-        table.insert(skin.destination, {
-            id = "staminaMaxText", timer = 10005, dst = {
-                {x = USER_DATA.WND.X + STAMINA.HEAL.TIME.MAX_X, y = USER_DATA.WND.Y + STAMINA.HEAL.TIME.MAX_Y, w = STAMINA.HEAL.TIME.MAX_W, h = STAMINA.HEAL.TIME.MAX_H}
-            }
-        })
-
-        -- スタミナのゲージ
-        local frameX = USER_DATA.WND.X + STAMINA.GAUGE.FRAME.X
-        local frameY = USER_DATA.WND.Y + STAMINA.GAUGE.FRAME.Y
-        local gaugeX = frameX + STAMINA.GAUGE.GAUGE.X
-        local gaugeY = frameY + STAMINA.GAUGE.GAUGE.Y
-        table.insert(skin.destination, {
-            id = "white", dst = {
-                {x = gaugeX , y = gaugeY, w = STAMINA.GAUGE.GAUGE.W, h = STAMINA.GAUGE.GAUGE.H}
-            }
-        })
-        -- スタミナ本体
-        local p = userData.stamina.now / userData.stamina.tbl[userData.rank.rank]
-        table.insert(skin.destination, {
-            id = "white", timer = 10006, dst = {
-                {time = 0, x = gaugeX, y = gaugeY, w = 0, h = EXP.GAUGE.H, r = 255, g = 227, b = 98},
-                {time = 20000, x = gaugeX, y = gaugeY, w = STAMINA.GAUGE.GAUGE.W, h = STAMINA.GAUGE.GAUGE.H},
-                {time = 100000}
-            }
-        })
-        -- フレームと反射
-        table.insert(skin.destination, {
-            id = "gaugeReflection", loop = 0, dst = {
-                {time = 0, x = gaugeX - 8, y = gaugeY, w = 8, h = STAMINA.GAUGE.REFLECTION.H, a = 196},
-                {time = 4000},
-                {time = 4070, w = STAMINA.GAUGE.REFLECTION.W * 1.5},
-                {time = 4680, x = gaugeX + STAMINA.GAUGE.GAUGE.W - STAMINA.GAUGE.REFLECTION.W * 1.5},
-                {time = 4750, x = gaugeX + STAMINA.GAUGE.GAUGE.W, w = 8},
-            }
-        })
-        table.insert(skin.destination, {
-            id = "expGaugeFrame", dst = {
-                {x = frameX, y = frameY, w = STAMINA.GAUGE.FRAME.W, h = STAMINA.GAUGE.FRAME.H}
-            }
-        })
-
-        -- スタミナ数値表示
-        -- 最大値
-        local dst = {{x = gaugeX + STAMINA.GAUGE.NUM.X, y = gaugeY + STAMINA.GAUGE.NUM.Y, w = USER_DATA.NUM.W, h = USER_DATA.NUM.H}}
-        preDrawStaticNumbers(skin, "userDataSmallNumber", "staminaMaxValue", 0, 0, dst, userData.stamina.tbl[userData.rank.rank], {}, -1, 0, 0)
-
-        -- 最大値の桁数分だけずらす
-        local offsetX = calcValueDigit(userData.stamina.tbl[userData.rank.rank], false) * USER_DATA.NUM.W + 2
-        myPrint("スタミナの数値表示オフセット: " .. offsetX)
-        -- スラッシュ
-        table.insert(skin.destination, {
-            id = "userStatusValueSlash", dst = {
-                {x = gaugeX + STAMINA.GAUGE.NUM.X - offsetX - USER_DATA.SLASH.W, y = gaugeY + STAMINA.GAUGE.SLASH.Y, w = USER_DATA.SLASH.W, h = USER_DATA.SLASH.H}
-            }
-        })
-        -- 現在値
-        preDrawDynamicNumbers(
-            skin, "userDataSmallNumber", "staminaNowValue",
-            gaugeX + STAMINA.GAUGE.NUM.X - offsetX - USER_DATA.SLASH.W - 1, gaugeY + STAMINA.GAUGE.NUM.Y,
-            USER_DATA.NUM.W, USER_DATA.NUM.H, 0, false, {})
-        setValue("staminaNowValue", 0)
-    end
     -- コースの曲一覧
     for i = 1, 5 do
         local y = COURSE.BASE_Y - COURSE.INTERVAL_Y * (i - 1) -- 14は上下の影

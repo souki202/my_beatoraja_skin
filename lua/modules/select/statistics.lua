@@ -1,9 +1,8 @@
 require("modules.commons.my_window")
 require("modules.commons.numbers")
-local main_state = require("main_state")
 
-local TEXTURE_SIZE = 2048
-local PARTS_OFFSET = HEIGHT + 32
+local commons = require("modules.select.commons")
+local main_state = require("main_state")
 
 local statistics = {
     WND = {
@@ -132,13 +131,13 @@ statistics.functions.load = function(skin)
 
     -- 統計ボタン
     table.insert(skin.image, {
-        id = "statisticsOpenButton", src = 0, x = 1761, y = PARTS_OFFSET + 771, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H, act = 1010
+        id = "statisticsOpenButton", src = 0, x = 1761, y = commons.PARTS_OFFSET + 771, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H, act = 1010
     })
 
     -- 各種数値
     -- 数値の画像自体は読み込み済み
     local numSrcX = 1434
-    local numSrcY = PARTS_OFFSET + 421
+    local numSrcY = commons.PARTS_OFFSET + 421
 
     local values = skin.value
     local texts = skin.text

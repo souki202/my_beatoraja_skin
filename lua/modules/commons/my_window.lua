@@ -1,6 +1,5 @@
-
+local commons = require("modules.select.commons")
 local TEXTURE_SIZE = 2048
-local PARTS_OFFSET = HEIGHT + 32
 
 SIMPLE_WND_AREA = {
     X = 160,
@@ -76,7 +75,7 @@ SUB_HEADER = {
 
 CLOSE_BUTTON = {
     SRC_X = 1557,
-    SRC_Y = PARTS_OFFSET + 771,
+    SRC_Y = commons.PARTS_OFFSET + 771,
     W = 142,
     H = 62,
     Y = 12,

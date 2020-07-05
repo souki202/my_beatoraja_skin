@@ -2,9 +2,9 @@ local main_state = require("main_state")
 
 require("modules.commons.my_window")
 require("modules.commons.input")
+local commons = require("modules.select.commons")
 
 local TEXTURE_SIZE = 2048
-local PARTS_OFFSET = HEIGHT + 32
 
 local help = {
     WND = {
@@ -763,7 +763,7 @@ help.functions.loadHelpItem = function(skin)
     table.insert(skin.customEvents, {id = 1004, action = "closeDescriptionClickEvent()"})
 
     table.insert(skin.image, {
-        id = "helpOpenButton", src = 0, x = 1415, y = PARTS_OFFSET + 771, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H, act = 1000
+        id = "helpOpenButton", src = 0, x = 1415, y = commons.PARTS_OFFSET + 771, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H, act = 1000
     })
     loadCloseButtonSelect(skin, "helpCloseButton", 1001)
 
@@ -793,7 +793,7 @@ help.functions.loadHelpItem = function(skin)
 
     -- 詳細の戻るボタン
     table.insert(skin.image, {
-        id = "closeDescriptionButton", src = 0, x = 1699, y = PARTS_OFFSET + 771, w = help.detail.BUTTON.W, h = help.detail.BUTTON.H, act = 1004
+        id = "closeDescriptionButton", src = 0, x = 1699, y = commons.PARTS_OFFSET + 771, w = help.detail.BUTTON.W, h = help.detail.BUTTON.H, act = 1004
     })
 
     -- 各ヘッダー項目
