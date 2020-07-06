@@ -26,6 +26,15 @@ function table.add_all(tbl, ary)
     end
 end
 
+function table.has_value (tab, val)
+    for index, value in ipairs(tab) do
+        if value == val then
+            return true
+        end
+    end
+    return false
+end
+
 function mergeSkin(skin, addSkin)
     if addSkin then
         for k, v in pairs(addSkin) do -- image, text, value 等がkey
@@ -79,6 +88,8 @@ function globalInitialize(skin)
     skin.destination = {}
     skin.customTimers = {}
     skin.customEvents = {}
+
+    math.randomseed(os.time())
 
     -- 統計情報周り
     userData.name = main_state.text(2)

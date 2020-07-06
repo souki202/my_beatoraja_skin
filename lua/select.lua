@@ -255,7 +255,7 @@ local header = {
             name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}, def = "画像(png)"
         },
         {
-            name = "スライドショー(pngのみ)", item = {{name = "無効", op = 960}, {name = "ファイル名順", op = 961}, {name = "ランダム順", op = 962}}, def = "無効"
+            name = "スライドショー", item = {{name = "無効", op = 960}, {name = "ファイル名順", op = 961}, {name = "ランダム順", op = 962}}, def = "無効"
         },
         {
             name = "密度グラフ表示", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}, def = "ON"
@@ -305,6 +305,9 @@ local header = {
         {name = "NoImage画像", path = "../select/noimage/*.png", def = "default"},
     },
     offset = {
+        {name = "スライドショー設定(0で既定値)---------------------", x = 0},
+        {name = "表示時間 (単位 秒 既定値15)", x = 0},
+        {name = "フェード時間 (単位 100ms 既定値5)", x = 0},
         {name = "影2の座標と濃さ差分", x = 0, y = 0, a = 0, id = 40},
         {name = "全体設定(0で既定値)------------------------------", x = 0},
         {name = "FOV (既定値90 -1で平行投影 0<x<180 or x=-1)", x = 0},
