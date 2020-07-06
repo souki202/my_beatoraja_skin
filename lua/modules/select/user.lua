@@ -224,8 +224,14 @@ selectUserdata.functions.load = function (skin)
     vals[#vals+1] = {id = "expGauge", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = commons.PARTS_OFFSET, w = 10, h = 10, divy = 10, digit = 1, ref = 31, align = 1}
     vals[#vals+1] = {id = "expGaugeRemnant", src = 0, x = PARTS_TEXTURE_SIZE - 10, y = commons.PARTS_OFFSET + 10, w = 10, h = 10, divy = 10, digit = 1, ref = 31, align = 1}
     -- rank
-    vals[#vals+1] = {id = "expNextValue", src = 0, x = 1434, y = commons.PARTS_OFFSET + 391, w = USER_DATA.NUM.W * 10, h = USER_DATA.NUM.H, divx = 10, digit = 6, space = -1, value = function() return userData.rank.tbl[userData.rank.rank] - userData.rank.tbl[userData.rank.rank - 1] end}
-    vals[#vals+1] = {id = "expNowValue", src = 0, x = 1434, y = commons.PARTS_OFFSET + 391, w = USER_DATA.NUM.W * 10, h = USER_DATA.NUM.H, divx = 10, digit = 6, space = -1, value = function() return userData.rank.exp - userData.rank.tbl[userData.rank.rank - 1] end}
+    vals[#vals+1] = {
+        id = "expNextValue", src = 0, x = 1434, y = commons.PARTS_OFFSET + 391, w = USER_DATA.NUM.W * 10, h = USER_DATA.NUM.H, divx = 10, digit = 6, space = -1,
+        value = function() return userData.rank.getNext(userData.rank.rank) end
+    }
+    vals[#vals+1] = {
+        id = "expNowValue", src = 0, x = 1434, y = commons.PARTS_OFFSET + 391, w = USER_DATA.NUM.W * 10, h = USER_DATA.NUM.H, divx = 10, digit = 6, space = -1,
+        value = function() return userData.rank.getNowRankExp(userData.rank.exp, userData.rank.rank) end
+    }
     -- stamina
     vals[#vals+1] = {id = "staminaMaxValue", src = 0, x = 1434, y = commons.PARTS_OFFSET + 391, w = USER_DATA.NUM.W * 10, h = USER_DATA.NUM.H, divx = 10, divy = 1, space = -1, digit = STAMINA.GAUGE.NUM.MAX_DIGIT, value = function() return userData.stamina.tbl[userData.rank.rank] end}
     vals[#vals+1] = {id = "staminaNowValue", src = 0, x = 1434, y = commons.PARTS_OFFSET + 391, w = USER_DATA.NUM.W * 10, h = USER_DATA.NUM.H, divx = 10, divy = 1, space = -1, digit = STAMINA.GAUGE.NUM.NOW_DIGIT, value = function() return userData.stamina.now end}

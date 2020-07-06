@@ -64,7 +64,7 @@ local statistics = {
 
     PLAY = {
         IDS = {"PlayCount", "ClearCount", "Perfect", "Great", "Good", "Bad", "Poor", "TotalNotes"},
-        REFS = {31, 32, 33, 34, 35, 36, 37, 333},
+        REFS = {30, 31, 33, 34, 35, 36, 37, 333},
         TEXTS = {"プレイ回数", "クリア回数", "PERFECT", "GREAT", "GOOD", "BAD", "POOR", "TOTAL NOTES"},
     },
 

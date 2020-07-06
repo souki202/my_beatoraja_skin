@@ -508,7 +508,7 @@ local function main()
 					-- 手前に飛んでくる場合は, 文字より後にdstを挿入
 					local d1 = {
 						id = "particle" .. particleImg, timer = 2, loop = -1, dst = {
-							{time = 0, x = particleStartX - eachSize / 2, y = particleStartY - eachSize / 2, w = eachSize, h = eachSize, a = 0, r = r, g = g, b = b},
+							{time = 0, x = particleStartX - eachSize / 2, y = particleStartY - eachSize / 2, w = eachSize, h = eachSize, a = 0},
 							{time = closeTime + i - 1, a = 0},
 							{time = closeTime + i, a = eachAlpha},
 							{time = closeTime + fadeoutStartTime - 1 + i, x = fx - fs / 2, y = fy - fs / 2, w = fs, h = fs}
@@ -516,7 +516,7 @@ local function main()
 					}
 					local d2 = {
 						id = "particle" .. particleImg, timer = 2, loop = -1, dst = {
-							{time = 0, x = fx - fs / 2, y = fy - fs / 2, w = fs, h = fs, a = 0, acc = 2, r = r, g = g, b = b},
+							{time = 0, x = fx - fs / 2, y = fy - fs / 2, w = fs, h = fs, a = 0, acc = 2},
 							{time = closeTime + fadeoutStartTime + i - 1, a = 0},
 							{time = closeTime + fadeoutStartTime + i, a = eachAlpha},
 							{time = closeTime + eachFadeoutTime + i, x = tx - ts / 2, y = ty - ts / 2, w = ts, h = ts, a = 0}

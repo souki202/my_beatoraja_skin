@@ -3,6 +3,8 @@ require("modules.commons.userdata")
 require("modules.commons.numbers")
 require("modules.commons.timer")
 
+DEBUG = true
+
 function table.in_key (tbl, key)
     for k, v in pairs (tbl) do
         if k==key then return true end
@@ -57,12 +59,10 @@ function mergeSkin(skin, addSkin)
     end
 end
 
-DEBUG = true
-
 SKIN_INFO = {
-    SELECT_VRESION = "2.16",
+    SELECT_VRESION = "2.20",
     RESULT_VERSION = "2.05",
-    DECIDE_VERSION = "1.00",
+    DECIDE_VERSION = "1.01",
     PLAY_VERSION = "0.00",
 }
 

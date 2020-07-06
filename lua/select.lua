@@ -305,7 +305,8 @@ local header = {
         {name = "NoImage画像", path = "../select/noimage/*.png", def = "default"},
     },
     offset = {
-        {name = "スライドショー設定(0で既定値)---------------------", x = 0},
+        {name = "全体の透明度", a = 0},
+        {name = "背景, スライドショー設定(0で既定値)---------------------", x = 0},
         {name = "表示時間 (単位 秒 既定値15)", x = 0},
         {name = "フェード時間 (単位 100ms 既定値5)", x = 0},
         {name = "影2の座標と濃さ差分", x = 0, y = 0, a = 0, id = 40},
@@ -1663,6 +1664,8 @@ local function main()
         })
 
     end
+
+    mergeSkin(skin, background.dstWithAlpha(getTableValue(skin_config.offset, "全体の透明度", {a = 0}).a))
 
     -- 選曲画面突入時アニメーション
     if getTableValue(skin_config.option, "開幕アニメーション種類", 930) == 931 then

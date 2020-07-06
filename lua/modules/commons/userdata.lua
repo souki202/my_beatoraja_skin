@@ -122,7 +122,7 @@ userData.load = function()
         end
         cnt = cnt + 1
     end
-    
+
     userData.wasLoaded = true
 
     if userData.version <= 1 then
