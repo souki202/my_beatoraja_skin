@@ -503,6 +503,8 @@ local function main()
 					local fs, _ = perspectiveProjectionSize(eachSize, eachSize, fadeoutStartZ, FOV)
 					local ts, _ = perspectiveProjectionSize(eachSize, eachSize, toZ, FOV)
 
+					local r, g, b = getCurtainShineColor()
+
 					-- 手前に飛んでくる場合は, 文字より後にdstを挿入
 					local d1 = {
 						id = "particle" .. particleImg, timer = 2, loop = -1, dst = {
