@@ -161,8 +161,6 @@ local MONEY = {
     },
 }
 
-
-
 function calcStamina()
     local tn = main_state.number(74)
     if tn > 0 then

@@ -20,96 +20,24 @@ require("modules.commons.my_window")
 require("modules.commons.numbers")
 require("position")
 local commons = require("modules.select.commons")
+local background = require("modules.select.background")
 local help = require("modules.select.help")
 local statistics = require("modules.select.statistics")
 local opening = require("modules.select.opening")
 local user = require("modules.select.user")
+local stagefile = require("modules.select.stagefile")
+local course = require("modules.select.course")
+local upperOption = require("modules.select.upper_option")
+local playButtons = require("modules.select.play_buttons")
+local songlist = require("modules.select.songlist")
+local densityGraph = require("modules.select.density_graph")
+local searchBox = require("modules.select.search_box")
 
 local main_state = require("main_state")
 
 local existNewVersion = false
 
 local PARTS_TEXTURE_SIZE = 2048
-
-local ARTIST_FONT_SIZE = 24
-local SUBARTIST_FONT_SIZE = 18
-
-local BAR_FONT_SIZE = 32
-local LAMP_HEIGHT = 28
-local MUSIC_BAR_IMG_HEIGHT = 78
-local MUSIC_BAR_IMG_WIDTH = 607
-
-local NORMAL_NUMBER_SRC_X = 946
-local NORMAL_NUMBER_SRC_Y = commons.PARTS_OFFSET
-local NORMAL_NUMBER_W = 15
-local NORMAL_NUMBER_H = 21
-local STATUS_NUMBER_W = 18
-local STATUS_NUMBER_H = 23
-
--- 決定ボタン周り
-local DECIDE_BUTTON_W = 354
-local DECIDE_BUTTON_H = 78
-local AUTO_BUTTON_W = 110
-local AUTO_BUTTON_H = 62
-local REPLAY_BUTTON_SIZE = 62
-local REPLAY_TEXT_W = 17
-local REPLAY_TEXT_H = 22
-
--- コース表示
-local COURSE = {
-    BG_W = 772,
-    LABEL_W = 192,
-    LABEL_H = 64,
-    INTERVAL_Y = 64 + 16,
-    SONGNAME_W = 538,
-    BASE_Y = 832,
-
-    OPTION = {
-        BASE_X = 65,
-        BASE_Y = 434,
-
-        BG_W = 694 + 14,
-        BG_H = 64 + 14,
-        BG_EDGE_W = 17,
-        SETTING_START_X = 87,
-        HEADER_OFFSET_Y = 47,
-        VALUE_OFFSET_Y = 18,
-        HEADER_W = 120,
-        HEADER_H = 20,
-        INTERVAL_X = 136,
-        VALUE_W = 120,
-        VALUE_H = 18,
-    },
-}
-
--- stage fileまわり
-local STAGE_FILE = {
-    X = 105,
-    Y = 464,
-    W = 640,
-    H = 480,
-    FRAME_OFFSET = 31,
-
-    SHADOW = {
-        X = -12,
-        Y = -12,
-        A = 102,
-    },
-}
-
--- 上部のLNモードとkeysのボタンサイズ
-local UPPER_OPTION_W = 270
-local UPPER_OPTION_H = 56
-
-
--- Music bar
-local MUSIC_BAR = {
-    DIFFICULTY_NUMBER_W = 16,
-    DIFFICULTY_NUMBER_H = 21,
-
-    TROPHY_W = 56,
-    TROPHY_H = 56,
-}
 
 -- スクロールバー
 local MUSIC_SLIDER_H = 768
@@ -119,7 +47,6 @@ local MUSIC_SLIDER_BUTTON_H = 48
 
 local LEVEL_NAME_TABLE = {"Beginner", "Normal", "Hyper", "Another", "Insane"}
 local JUDGE_NAME_TABLE = {"Perfect", "Great", "Good", "Bad", "Poor"}
-local LAMP_NAMES = {"Max", "Perfect", "Fc", "Exhard", "Hard", "Normal", "Easy", "Lassist", "Assist", "Failed", "Noplay"}
 
 -- スコア詳細
 local SCORE_INFO = {
@@ -136,11 +63,6 @@ local SCORE_INFO = {
     DIGIT = 8,
 }
 
-local JUDGE_DIFFICULTY = {
-    W = 136,
-    H = 22,
-}
-
 -- exscoreと楽曲難易度周り
 local EXSCORE_AREA = {
     NUMBER_W = 22,
@@ -150,8 +72,8 @@ local EXSCORE_AREA = {
     Y = 385,
     NEXT_Y = 348,
 
-    RANKING_NUMBER_W = NORMAL_NUMBER_W,
-    RANKING_NUMBER_H = NORMAL_NUMBER_H,
+    RANKING_NUMBER_W = commons.NUM_28PX.W,
+    RANKING_NUMBER_H = commons.NUM_28PX.H,
     IR_Y = 311,
     IR_W = 26,
     IR_H = 22,
@@ -172,14 +94,6 @@ local SCORE_RANK = {
     H = 59,
     X = 895,
     Y = 430,
-}
-local SONG_LIST = {
-    LABEL = {
-        X = 70,
-        Y = 11,
-        W = 50,
-        H = 22,
-    },
 }
 
 -- 左下のレベルが並んでいる部分
@@ -219,6 +133,11 @@ local DENSITY_INFO = {
 
     START_X = 316,
     INTERVAL_X = 168,
+
+    AFTER_DOT = {
+        W = 16,
+        H = 21,
+    }
 }
 
 -- IR
@@ -254,8 +173,6 @@ local IR = {
     },
 }
 
--- 密度グラフ
-local NOTES_ICON_SIZE = 42
 
 -- オプションウィンドウ
 local OPTION_INFO = {
@@ -286,55 +203,6 @@ local OPTION_INFO = {
     WND_OFFSET_X = (WIDTH - 1600) / 2,
     WND_OFFSET_Y = (HEIGHT - 900) / 2,
     ANIMATION_TIME = 150,
-}
-
-local SELECT_OPTION = {
-    BUTTON = {
-        X = 720,
-        UPPER_Y = 1022,
-    },
-    KEYS = {
-        X = 6, -- buttonからの差分
-    },
-    SORT = {
-        X = 6
-    },
-    LN = {
-        X = 135
-    },
-}
-
-local GRAPH = {
-    WND = {
-        OLD = {
-            X = 1126, -- 影含まない
-            Y = 72,
-            W = 638, -- 影含む
-            H = 178,
-            SHADOW = 7,
-        },
-        NEW = {
-            X = 1126, -- 影含まない
-            Y = 47,
-            W = 638, -- 影含む
-            H = 203,
-            SHADOW = 7,
-        },
-    },
-    STAMINA = {
-        LABEL = {
-            X = 27, -- WNDからの差分
-            Y = 5,
-            W = 120,
-            H = 20,
-        },
-        NUM = {
-            X = 167, -- STAMINAからの差分
-            Y = 1,
-            W = 14,
-            H = 18,
-        },
-    },
 }
 
 local ATTENSION_SIZE = 62
@@ -381,10 +249,13 @@ local header = {
     fadeout = 500,
     scene = 3000,
     input = commons.INPUT_WAIT,
-    -- 使用済みリスト 910 915 920 925 930 935 940 945 950 955
+    -- 使用済みリスト 910 915 920 925 930 935 940 945 950 955 960
     property = {
         {
             name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}, def = "画像(png)"
+        },
+        {
+            name = "スライドショー(pngのみ)", item = {{name = "無効", op = 960}, {name = "ファイル名順", op = 961}, {name = "ランダム順", op = 962}}, def = "無効"
         },
         {
             name = "密度グラフ表示", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}, def = "ON"
@@ -417,7 +288,7 @@ local header = {
             name = "上部プレイヤー情報仕様", item = {{name = "リザルト連携版", op = 950}, {name = "旧仕様(プレイ時間とプレイ回数等)", op = 951}}, def = "リザルト連携版"
         },
         {
-            name = "新バージョン確認", item = {{name = "する", op = 998}, {name = "しない", op = 999}, def = "する"},
+            name = "新バージョン確認", item = {{name = "する", op = 998}, {name = "しない", op = 999}}, def = "する",
         },
         {
             name = "タイルアニメーション設定------------------------", item = {{name = "-"}}
@@ -432,7 +303,6 @@ local header = {
         {name = "背景(mp4)", path = "../select/background/*.mp4"},
         {name = "他画像-----------------------------------------", path="../dummy/*"},
         {name = "NoImage画像", path = "../select/noimage/*.png", def = "default"},
-
     },
     offset = {
         {name = "影2の座標と濃さ差分", x = 0, y = 0, a = 0, id = 40},
@@ -471,14 +341,6 @@ local header = {
         {name = "タイルの色(既定値0 0<=r,g,b<=255 rgbはそれぞれxywに割り当て)", x = 0, y = 0, w = 0},
     }
 }
-
-local function isViewFolderLampGraph()
-    return getTableValue(skin_config.option, "フォルダのランプグラフ", 925) == 925
-end
-
-local function isDefaultLampGraphColor()
-    return getTableValue(skin_config.option, "フォルダのランプグラフの色", 927) == 927
-end
 
 local function isCheckNewVersion()
     return getTableValue(skin_config.option, "新バージョン確認", 998) == 998 and userData.nextVersionCheckDate <= os.time()
@@ -736,12 +598,8 @@ local function main()
     skin.source = {
         {id = 0, path = "../select/parts/parts.png"},
         {id = 8, path = "../select/parts/parts2.png"},
-        {id = 1, path = "../select/background/*.png"},
-        {id = 101, path = "../select/background/*.mp4"},
         {id = 2, path = "../select/parts/option.png"},
         {id = 3, path = "../select/parts/help.png"},
-        {id = 4, path = "../select/parts/stagefile_frame.png"},
-        {id = 6, path = "../select/parts/lamp_gauge_rainbow.png"},
         {id = 7, path = "../select/noimage/*.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
@@ -752,7 +610,7 @@ local function main()
     table.insert(skin.customTimers, {id = 10007, timer = "updateUseStamina"}) -- スタミナ使用量更新用タイマー
     table.insert(skin.customTimers, {id = 10008, timer = "newVersionAnimation"}) -- 新バージョンがある時の文字表示用
     table.insert(skin.customTimers, {id = 10009, timer = "helpTimer"}) -- ヘルプ画面全体のタイマー
-    table.insert(skin.customTimers, {id = 13009, timer = "keyInput"}) -- ヘルプ画面全体のタイマー
+    table.insert(skin.customTimers, {id = 13009, timer = "keyInput"})
     for i = 1, 490 do
         table.insert(skin.customTimers, {id = 10010 + (i - 1)}) -- 10010~10499までヘルプ用で予約 増えるかもしれないので500くらい余裕見ておく
     end
@@ -763,83 +621,8 @@ local function main()
 
     skin.image = {
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
-        {id = "stagefileFrame", src = 4, x = 0, y = 0, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2},
-        {id = "stagefileShadow", src = 4, x = 0, y = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2},
-        {id = "noImage", src = 7, x = 0, y = 0, w = -1, h = -1},
-        -- 選曲バー種類
-        {id = "barSong"   , src = 0, x = 0, y = commons.PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barNosong" , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*1, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barGrade"  , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*2, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barNograde", src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*2, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barFolder" , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*3, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barFolderWithLamp" , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*7, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barTable"  , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*4, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barTableWithLamp"  , src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*8, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barCommand", src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*5, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barCommandWithLamp", src = 0, x = 0, y = commons.PARTS_OFFSET + MUSIC_BAR_IMG_HEIGHT*9, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        {id = "barSearch" , src = 0, x = 0, y = commons.PARTS_OFFSET, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT},
-        -- 選曲バークリアランプはimagesの後
-        -- 選曲バー中央
-        {id = "barCenterFrame", src = 0, x = 0, y = commons.PARTS_OFFSET + 782, w = 714, h = 154},
-        -- 選曲バーLN表示
-        {id = "barLn"    , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*0, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-        {id = "barRandom", src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*1, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-        {id = "barBomb"  , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*2, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-        {id = "barCn"    , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*3, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-        {id = "barHcn"   , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*4, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
         -- Favorite
         -- {id = "favoriteButton", src = 0, x = 1563, y = 263, w = FAVORITE.W*2, h = FAVORITE.H, divx = 2, act = 9999},
-        -- トロフィー
-        {id ="goldTrophy"  , src = 0, x = 1896, y = commons.PARTS_OFFSET + MUSIC_BAR.TROPHY_H*0, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
-        {id ="silverTrophy", src = 0, x = 1896, y = commons.PARTS_OFFSET + MUSIC_BAR.TROPHY_H*1, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
-        {id ="bronzeTrophy", src = 0, x = 1896, y = commons.PARTS_OFFSET + MUSIC_BAR.TROPHY_H*2, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H},
-        -- プレイ
-        {id = "playButton", src = 0, x = 773, y = commons.PARTS_OFFSET + 377, w = DECIDE_BUTTON_W, h = DECIDE_BUTTON_H},
-        {id = "playButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 15}, -- ボタン起動用ダミー
-        {id = "autoButton", src = 0, x = 773, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = AUTO_BUTTON_W, h = AUTO_BUTTON_H},
-        {id = "autoButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 16}, -- ボタン起動用ダミー
-        {id = "replayButtonBg", src = 0, x = 773 + AUTO_BUTTON_W, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_BUTTON_SIZE, h = REPLAY_BUTTON_SIZE},
-        {id = "replay1Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*0, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
-        {id = "replay2Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*1, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
-        {id = "replay3Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*2, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
-        {id = "replay4Text", src = 0, x = 773 + AUTO_BUTTON_W + REPLAY_BUTTON_SIZE + REPLAY_TEXT_W*3, y = commons.PARTS_OFFSET + 377 + DECIDE_BUTTON_H, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H},
-        {id = "replay1ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 19}, -- ボタン起動用ダミー
-        {id = "replay2ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 316}, -- ボタン起動用ダミー
-        {id = "replay3ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 317}, -- ボタン起動用ダミー
-        {id = "replay4ButtonDummy", src = 999, x = 0, y = 0, w = 1, h = 1, act = 318}, -- ボタン起動用ダミー
-
-        -- 段位, コースの曲一覧部分
-        {id = "courseBarBg", src = 0, x = 0, y = commons.PARTS_OFFSET + 468, w = COURSE.BG_W, h = COURSE.LABEL_H + 14},
-        {id = "courseMusic1Label", src = 0, x = 773, y = commons.PARTS_OFFSET + 519 + COURSE.LABEL_H*0, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
-        {id = "courseMusic2Label", src = 0, x = 773, y = commons.PARTS_OFFSET + 519 + COURSE.LABEL_H*1, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
-        {id = "courseMusic3Label", src = 0, x = 773, y = commons.PARTS_OFFSET + 519 + COURSE.LABEL_H*2, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
-        {id = "courseMusic4Label", src = 0, x = 773, y = commons.PARTS_OFFSET + 519 + COURSE.LABEL_H*3, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
-        {id = "courseMusic5Label", src = 0, x = 773, y = commons.PARTS_OFFSET + 519 + COURSE.LABEL_H*4, w = COURSE.LABEL_W, h = COURSE.LABEL_H},
-        -- コースのオプション
-        {id = "courseBgEdgeLeft"   , src = 0, x = 1811                              , y = PARTS_TEXTURE_SIZE - COURSE.OPTION.BG_H, w = COURSE.OPTION.BG_EDGE_W, h = COURSE.OPTION.BG_H},
-        {id = "courseBgMiddle"     , src = 0, x = 1811 + COURSE.OPTION.BG_EDGE_W    , y = PARTS_TEXTURE_SIZE - COURSE.OPTION.BG_H, w = 1, h = COURSE.OPTION.BG_H},
-        {id = "courseBgMiddleRight", src = 0, x = 1811 + COURSE.OPTION.BG_EDGE_W + 1, y = PARTS_TEXTURE_SIZE - COURSE.OPTION.BG_H, w = COURSE.OPTION.BG_EDGE_W, h = COURSE.OPTION.BG_H},
-        {id = "courseHeaderBg"     , src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*0, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseHeaderOption" , src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*1, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseHeaderHiSpeed", src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*2, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseHeaderJudge"  , src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*3, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseHeaderGauge"  , src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*4, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseHeaderLnType" , src = 0, x = 1898, y = commons.PARTS_OFFSET + 168 + COURSE.OPTION.HEADER_H*5, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H},
-        {id = "courseSettingClass"      , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*0, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingMirror"     , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*1, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingRandom"     , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*2, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingNoSpeed"    , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*3, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingNoGood"     , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*4, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingNoGreat"    , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*5, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGaugeLR2"   , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*6, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGauge5Keys" , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*7, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGauge7Keys" , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*8, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGauge9Keys" , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*9, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGauge24Keys", src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*10, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGaugeLn"    , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*11, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGaugeCn"    , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*12, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingGaugeHcn"   , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*13, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
-        {id = "courseSettingNoSetting"  , src = 0, x = 1898, y = commons.PARTS_OFFSET + 288 + COURSE.OPTION.VALUE_H*14, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H},
 
         -- レベルアイコン
         {id = "nonActiveBeginnerIcon", src = 0, x = LARGE_LEVEL.SRC_X, y = commons.PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
@@ -880,37 +663,25 @@ local function main()
         {id = "densityEndText"     , src = 0, x = 1788, y = commons.PARTS_OFFSET + DENSITY_INFO.TEXT_H*6, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
         {id = "densityPeakText"    , src = 0, x = 1788, y = commons.PARTS_OFFSET + DENSITY_INFO.TEXT_H*7, w = DENSITY_INFO.TEXT_W, h = DENSITY_INFO.TEXT_H},
         -- 密度表示部分のdot
-        {id = "densityAverageDot", src = 0, x = 931, y = commons.PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*1, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
-        {id = "densityEndDot"    , src = 0, x = 931, y = commons.PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
-        {id = "densityPeakDot"   , src = 0, x = 931, y = commons.PARTS_OFFSET + 35 + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
+        {id = "densityAverageDot", src = 0, x = 931, y = commons.PARTS_OFFSET + 35 + DENSITY_INFO.AFTER_DOT.H*1, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
+        {id = "densityEndDot"    , src = 0, x = 931, y = commons.PARTS_OFFSET + 35 + DENSITY_INFO.AFTER_DOT.H*2, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
+        {id = "densityPeakDot"   , src = 0, x = 931, y = commons.PARTS_OFFSET + 35 + DENSITY_INFO.AFTER_DOT.H*3, w = DENSITY_INFO.DOT_SIZE, h = DENSITY_INFO.DOT_SIZE},
 
         -- 楽曲のkeys
-        {id = "music7keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*0, y = commons.PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music5keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*2, y = commons.PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music14keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*4, y = commons.PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music10keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*6, y = commons.PARTS_OFFSET + 105, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music9keys" , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*0, y = commons.PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music24keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*2, y = commons.PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        {id = "music48keys", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W*4, y = commons.PARTS_OFFSET + 105 + NORMAL_NUMBER_H, w = NORMAL_NUMBER_W*2, h = NORMAL_NUMBER_H},
-        -- オプションのkeys
-        {id = "upperOptionButtonBg" , src = 2, x = 1321, y = PARTS_TEXTURE_SIZE - UPPER_OPTION_H, w = UPPER_OPTION_W, h = UPPER_OPTION_H},
-        {id = "keysSet", src = 2, x = 1441, y = 836, w = 129, h = OPTION_INFO.ITEM_H * 8, divy = 8, len = 8, ref = 11, act = 11},
-        -- オプションのLNモード
-        {id = "lnModeSet" , src = 2, x = 1570, y = 836, w = 129, h = OPTION_INFO.ITEM_H * 3, divy = 3, len = 3, ref = 308, act = 308},
-        -- ソート
-        {id = "sortModeSet" , src = 2, x = 1699, y = 836, w = 258, h = OPTION_INFO.ITEM_H * 8, divy = 8, len = 8, ref = 12, act = 12},
+        {id = "music7keys" , src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W*0, y = commons.PARTS_OFFSET + 105, w = commons.NUM_28PX.W*2, h = commons.NUM_28PX.H},
+        {id = "music5keys" , src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W*2, y = commons.PARTS_OFFSET + 105, w = commons.NUM_28PX.W*2, h = commons.NUM_28PX.H},
+        {id = "music14keys", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W*4, y = commons.PARTS_OFFSET + 105, w = commons.NUM_28PX.W*2, h = commons.NUM_28PX.H},
+        {id = "music10keys", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W*6, y = commons.PARTS_OFFSET + 105, w = commons.NUM_28PX.W*2, h = commons.NUM_28PX.H},
+        {id = "music9keys" , src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W*0, y = commons.PARTS_OFFSET + 105 + commons.NUM_28PX.H, w = commons.NUM_28PX.W*2, h = commons.NUM_28PX.H},
+        {id = "music24keys", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W*2, y = commons.PARTS_OFFSET + 105 + commons.NUM_28PX.H, w = commons.NUM_28PX.W*2, h = commons.NUM_28PX.H},
+        {id = "music48keys", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W*4, y = commons.PARTS_OFFSET + 105 + commons.NUM_28PX.H, w = commons.NUM_28PX.W*2, h = commons.NUM_28PX.H},
 
         -- 空プア表記用スラッシュ
-        {id = "slashForEmptyPoor", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W * 11, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
+        {id = "slashForEmptyPoor", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W * 11, y = commons.NUM_28PX.SRC_Y, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H},
         -- ランキング用スラッシュ(同じ)
-        {id = "slashForRanking"  , src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W * 11, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
+        {id = "slashForRanking"  , src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W * 11, y = commons.NUM_28PX.SRC_Y, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H},
         -- BPM用チルダ
-        {id = "bpmTilda", src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + 68, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H},
-        -- 判定難易度
-        {id = "judgeEasy"    , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 0, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
-        {id = "judgeNormal"  , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 1, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
-        {id = "judgeHard"    , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 2, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
-        {id = "judgeVeryhard", src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 3, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
+        {id = "bpmTilda", src = 0, x = commons.NUM_28PX.SRC_X, y = commons.PARTS_OFFSET + 68, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H},
         -- アクティブなオブション用背景
         {id = "activeOptionFrame", src = 2, x = 0, y = PARTS_TEXTURE_SIZE - OPTION_INFO.ACTIVE_FRAME_H, w = OPTION_INFO.ACTIVE_FRAME_W, h = OPTION_INFO.ACTIVE_FRAME_H},
         -- オプション画面の端
@@ -993,20 +764,12 @@ local function main()
         {id = "helpPlayKey", src = 3, x = 397, y = 30, w = HELP_TEXT2_W, h = HELP_TEXT_H},
         {id = "helpDetailReplayKey", src = 3, x = 397, y = 398, w = HELP_TEXT2_W, h = 248},
 
-        -- 密度グラフ用
-        {id = "notesGraphFrame", src = 0, x = 965, y = commons.PARTS_OFFSET + 593, w = 638, h = 178},
-        {id = "notesGraphFrame2", src = 8, x = 0, y = 0, w = GRAPH.WND.NEW.W, h = GRAPH.WND.NEW.H},
-        {id = "numOfNormalNotesIcon" , src = 0, x = 945 + NOTES_ICON_SIZE*0, y = commons.PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
-        {id = "numOfScratchNotesIcon", src = 0, x = 945 + NOTES_ICON_SIZE*1, y = commons.PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
-        {id = "numOfLnNotesIcon"     , src = 0, x = 945 + NOTES_ICON_SIZE*2, y = commons.PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
-        {id = "numOfBssNotesIcon"    , src = 0, x = 945 + NOTES_ICON_SIZE*3, y = commons.PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
-        {id = "useStaminaTextImg", src = 0, x = 1298, y = commons.PARTS_OFFSET + 471, w = GRAPH.STAMINA.LABEL.W, h = GRAPH.STAMINA.LABEL.H},
 
         -- IR用ドットと%
-        {id = "irDot", src = 0, x = NORMAL_NUMBER_SRC_X + IR.NUMBER_PERCENT_W * 10 + 15, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H},
-        {id = "irPercent", src = 0, x = NORMAL_NUMBER_SRC_X + IR.NUMBER_PERCENT_W * 11 + 15, y = commons.PARTS_OFFSET + 68, w = IR.PERCENT_W, h = IR.PERCENT_H},
+        {id = "irDot", src = 0, x = commons.NUM_28PX.SRC_X + IR.NUMBER_PERCENT_W * 10 + 15, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H},
+        {id = "irPercent", src = 0, x = commons.NUM_28PX.SRC_X + IR.NUMBER_PERCENT_W * 11 + 15, y = commons.PARTS_OFFSET + 68, w = IR.PERCENT_W, h = IR.PERCENT_H},
         -- IR用文字画像
-        {id = "irRankingText", src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 4, w = EXSCORE_AREA.IR_W, h = EXSCORE_AREA.IR_H},
+        {id = "irRankingText", src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + 22 * 4, w = EXSCORE_AREA.IR_W, h = EXSCORE_AREA.IR_H},
         -- IR loading
         {id = "irLoadingFrame"   , src = 0, x = 965, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.FRAME_W, h = IR.LOADING.FRAME_H},
         {id = "irLoadingWave1"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*0, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
@@ -1023,9 +786,6 @@ local function main()
         -- ヘルプウィンドウ周り
         -- {id = "helpHeaderBgLeft", src = 0, x = 1591, y = },
 
-        -- 検索ボックス
-        {id = "searchBox", src = 0, x = 773, y = PARTS_TEXTURE_SIZE - 62, w = 1038, h = 62},
-
         -- 汎用カラー
         {id = "blank", src = 999, x = 0, y = 0, w = 1, h = 1, act = 0},
         {id = "black", src = 999, x = 1, y = 0, w = 1, h = 1, act = 0},
@@ -1040,31 +800,6 @@ local function main()
     -- オプションはrefactorしたいけどtimerの都合上リファクタリングはしんどい
     loadBaseSelect(skin)
 
-    local c = getTableValue(skin_config.option, "背景形式", 915)
-    if c == 915 then
-        table.insert(skin.image, {id = "background", src = 1, x = 0, y = 0, w = -1, h = -1})
-    elseif c == 916 then
-        table.insert(skin.image, {id = "background", src = 101, x = 0, y = 0, w = -1, h = -1})
-    end
-
-    -- 選曲バーのクリアランプ
-    for i, lamp in ipairs(LAMP_NAMES) do
-        table.insert(skin.image, {
-            id = "barLamp" .. lamp, src = 0,
-            x = 657, y = commons.PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
-            w = 110, h = LAMP_HEIGHT
-        })
-        table.insert(skin.image, {
-            id = "barLampRivalPlayer" .. lamp, src = 0,
-            x = 657, y = commons.PARTS_OFFSET + LAMP_HEIGHT * (i - 1),
-            w = 110, h = LAMP_HEIGHT / 2
-        })
-        table.insert(skin.image, {
-            id = "barLampRivalTarget" .. lamp, src = 0,
-            x = 657, y = commons.PARTS_OFFSET + LAMP_HEIGHT * (i - 1) + LAMP_HEIGHT / 2,
-            w = 110, h = LAMP_HEIGHT / 2
-        })
-    end
 
     -- IR部分の文字の画像読み込み
     local irTexts = {
@@ -1091,54 +826,10 @@ local function main()
         {id = "bpmGraph", delay = 0},
     }
 
-    if isDefaultLampGraphColor() then
-        skin.graph = {
-            {id = "lampGraph", src = 0, x = 607, y = commons.PARTS_OFFSET, w = 11, h = 16, divx = 11, divy = 2, cycle = 16.6*4, type = -1}
-        }
-    else
-        skin.graph = {
-            {id = "lampGraph", src = 6, x = 0, y = 0, w = 1408, h = 256, divx = 11, divy = 256, cycle = 2000, type = -1},
-        }
-    end
-
     -- 選曲スライダー
     skin.slider = {
         {id = "musicSelectSlider", src = 0, x = 1541, y = commons.PARTS_OFFSET + 263, w = MUSIC_SLIDER_BUTTON_W, h = MUSIC_SLIDER_BUTTON_H, type = 1, range = 768 - MUSIC_SLIDER_BUTTON_H / 2 - 3, angle = 2, align = 0},
     }
-
-    if isViewFolderLampGraph() then
-        skin.imageset = {
-            {
-                id = "bar", images = {
-                    "barSong",
-                    "barFolderWithLamp",
-                    "barTableWithLamp",
-                    "barGrade",
-                    -- "barGrade",
-                    "barNosong",
-                    "barCommandWithLamp",
-                    "barNosong",
-                    "barSearch",
-                }
-            },
-        }
-    else
-        skin.imageset = {
-            {
-                id = "bar", images = {
-                    "barSong",
-                    "barFolder",
-                    "barTable",
-                    "barGrade",
-                    -- "barGrade",
-                    "barNosong",
-                    "barCommand",
-                    "barNosong",
-                    "barSearch",
-                }
-            },
-        }
-    end
 
     -- ランク
     -- local ranks = {"Max", "Aaa", "Aa", "a", "b", "c", "d", "e", "f"}
@@ -1224,14 +915,6 @@ local function main()
     end
 
     skin.value = {
-        -- 選曲バー難易度数値
-        {id = "barPlayLevelUnknown",  src = 0, x = 771, y = commons.PARTS_OFFSET,                                   w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelBeginner", src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*1, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelNormal",   src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelHyper",    src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelAnother",  src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*4, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelInsane",   src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*5, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
-        {id = "barPlayLevelUnknown2", src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*6, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, align = 2},
         -- 左側の難易度表記数字
         {id = "largeLevelBeginner", src = 0, x = 771, y = commons.PARTS_OFFSET + 147                         , w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 45, align = 2},
         {id = "largeLevelNormal"  , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 1, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 46, align = 2},
@@ -1240,26 +923,20 @@ local function main()
         {id = "largeLevelInsane"  , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 4, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 49, align = 2},
         -- 密度
         {id = "densityAverageNumber"    , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 1, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 364, align = 0},
-        {id = "densityAverageAfterDot"  , src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*2, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 365, align = 1, padding = 1},
+        {id = "densityAverageAfterDot"  , src = 0, x = 771, y = commons.PARTS_OFFSET + DENSITY_INFO.AFTER_DOT.H*2, w = DENSITY_INFO.AFTER_DOT.W*10, h = DENSITY_INFO.AFTER_DOT.H, divx = 10, digit = 2, ref = 365, align = 1, padding = 1},
         {id = "densityEndNumber"        , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 2, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 362, align = 0},
-        {id = "densityEndAfterDot"      , src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*3, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 363, align = 1, padding = 1},
+        {id = "densityEndAfterDot"      , src = 0, x = 771, y = commons.PARTS_OFFSET + DENSITY_INFO.AFTER_DOT.H*3, w = DENSITY_INFO.AFTER_DOT.W*10, h = DENSITY_INFO.AFTER_DOT.H, divx = 10, digit = 2, ref = 363, align = 1, padding = 1},
         {id = "densityPeakNumber"       , src = 0, x = 771, y = commons.PARTS_OFFSET + 147 + LARGE_LEVEL.NUMBER_H * 3, w = LARGE_LEVEL.NUMBER_W*10, h = LARGE_LEVEL.NUMBER_H, divx = 10, digit = 2, ref = 360, align = 2},
-        -- {id = "densityPeakAfterDot"     , src = 0, x = 771, y = commons.PARTS_OFFSET + MUSIC_BAR.DIFFICULTY_NUMBER_H*4, w = MUSIC_BAR.DIFFICULTY_NUMBER_W*10, h = MUSIC_BAR.DIFFICULTY_NUMBER_H, divx = 10, digit = 2, ref = 361, align = 1},
+        -- {id = "densityPeakAfterDot"     , src = 0, x = 771, y = commons.PARTS_OFFSET + DENSITY_INFO.AFTER_DOT.H*4, w = DENSITY_INFO.AFTER_DOT.W*10, h = DENSITY_INFO.AFTER_DOT.H, divx = 10, digit = 2, ref = 361, align = 1},
         -- exscore用
         {id = "richExScore",  src = 0, x = 771, y = commons.PARTS_OFFSET + 347, w = EXSCORE_AREA.NUMBER_W * 10, h = EXSCORE_AREA.NUMBER_H, divx = 10, digit = 5, ref = 71, align = 0},
         {id = "rivalExScore", src = 0, x = 771, y = commons.PARTS_OFFSET + 347, w = EXSCORE_AREA.NUMBER_W * 10, h = EXSCORE_AREA.NUMBER_H, divx = 10, digit = 5, ref = 271, align = 0},
         -- IR
-        {id = "irRanking"         , src = 0, x = NORMAL_NUMBER_SRC_X, y = NORMAL_NUMBER_SRC_Y, w = NORMAL_NUMBER_W*10, h = NORMAL_NUMBER_H, divx = 10, digit = 5, ref = 179, align = 0},
-        {id = "irPlayerForRanking", src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, digit = 5, ref = 200, align = 0},
-        -- ノーツ数
-        {id = "numOfNormalNotes" , src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 350, align = 0},
-        {id = "numOfScratchNotes", src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 352, align = 0},
-        {id = "numOfLnNotes"     , src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 351, align = 0},
-        {id = "numOfBssNotes"    , src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + NORMAL_NUMBER_H, w = STATUS_NUMBER_W * 10, h = STATUS_NUMBER_H, divx = 10, digit = 4, ref = 353, align = 0},
+        {id = "irRanking"         , src = 0, x = commons.NUM_28PX.SRC_X, y = commons.NUM_28PX.SRC_Y, w = commons.NUM_28PX.W*10, h = commons.NUM_28PX.H, divx = 10, digit = 5, ref = 179, align = 0},
+        {id = "irPlayerForRanking", src = 0, x = commons.NUM_28PX.SRC_X, y = commons.PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, digit = 5, ref = 200, align = 0},
         -- オプション
         {id = "notesDisplayTime", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H, w = OPTION_INFO.NUMBER_W * 10, h = OPTION_INFO.NUMBER_H, divx = 10, digit = 4, ref = 312},
         {id = "judgeTiming", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H * 2, w = OPTION_INFO.NUMBER_W * 12, h = OPTION_INFO.NUMBER_H * 2, divx = 12, divy = 2, digit = 4, ref = 12},
-
     }
     -- IR irTextsに対応する値を入れていく
     -- {人数, percentage, afterdot} で, irTextsに対応するrefsを入れる
@@ -1274,14 +951,14 @@ local function main()
     for i, refs in ipairs(irNumbers) do
         local type = irTexts[i]
         table.insert(skin.value, {
-            id = "ir" .. type .. "Number", src = 0, x = NORMAL_NUMBER_SRC_X, y = commons.PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, divy = 1, digit = IR.DIGIT, ref = refs[1]
+            id = "ir" .. type .. "Number", src = 0, x = commons.NUM_28PX.SRC_X, y = commons.PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, divy = 1, digit = IR.DIGIT, ref = refs[1]
         })
         if refs[2] ~= 0 then
             table.insert(skin.value, {
-                id = "ir" .. type .. "Percentage", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 3, ref = refs[2]
+                id = "ir" .. type .. "Percentage", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 3, ref = refs[2]
             })
             table.insert(skin.value, {
-                id = "ir" .. type .. "PercentageAfterDot", src = 0, x = NORMAL_NUMBER_SRC_X + NORMAL_NUMBER_W, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 1, ref = refs[3], padding = 1
+                id = "ir" .. type .. "PercentageAfterDot", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 1, ref = refs[3], padding = 1
             })
         end
     end
@@ -1318,15 +995,15 @@ local function main()
         })
         table.insert(skin.value, {
                 id = val, src = 0,
-                x = NORMAL_NUMBER_SRC_X, y = NORMAL_NUMBER_SRC_Y,
-                w = NORMAL_NUMBER_W*10, h = NORMAL_NUMBER_H,
+                x = commons.NUM_28PX.SRC_X, y = commons.NUM_28PX.SRC_Y,
+                w = commons.NUM_28PX.W*10, h = commons.NUM_28PX.H,
                 divx = 10, digit = digit, ref = useNormalNumberTexts[val], align = 0
         })
         if val == "numOfPoor" then
             table.insert(skin.value, {
                     id = "numOfEmptyPoor", src = 0,
-                    x = NORMAL_NUMBER_SRC_X, y = NORMAL_NUMBER_SRC_Y,
-                    w = NORMAL_NUMBER_W*10, h = NORMAL_NUMBER_H,
+                    x = commons.NUM_28PX.SRC_X, y = commons.NUM_28PX.SRC_Y,
+                    w = commons.NUM_28PX.W*10, h = commons.NUM_28PX.H,
                     divx = 10, digit = digit, ref = useNormalNumberTexts["numOfEmptyPoor"], align = 0
             })
         end
@@ -1338,20 +1015,6 @@ local function main()
 	}
 
     skin.text = {
-        {id = "dir", font = 0, size = 24, ref = 1000},
-		{id = "genre", font = 0, size = 24, ref = 13},
-        {id = "title", font = 0, size = 24, ref = 12},
-		{id = "artist", font = 0, size = ARTIST_FONT_SIZE, ref = 14, align = 2, overflow = 1},
-        {id = "subArtist", font = 0, size = SUBARTIST_FONT_SIZE, ref = 15, align = 2, overflow = 1},
-		{id = "course1Text", font = 0, size = BAR_FONT_SIZE, ref = 150, align = 2, overflow = 1},
-		{id = "course2Text", font = 0, size = BAR_FONT_SIZE, ref = 151, align = 2, overflow = 1},
-		{id = "course3Text", font = 0, size = BAR_FONT_SIZE, ref = 152, align = 2, overflow = 1},
-		{id = "course4Text", font = 0, size = BAR_FONT_SIZE, ref = 153, align = 2, overflow = 1},
-		{id = "course5Text", font = 0, size = BAR_FONT_SIZE, ref = 154, align = 2, overflow = 1},
-
-		{id = "bartext", font = 0, size = BAR_FONT_SIZE, align = 2, overflow = 1},
-        {id = "searchText", font = 0, size = 24, ref = 30},
-
         {id = "playerName", font = 0, size = RIVAL.FONT_SIZE, align = 0, ref = 2, overflow = 1},
         {id = "rivalName" , font = 0, size = RIVAL.FONT_SIZE, align = 0, ref = 1, overflow = 1},
         {id = "newVersion" , font = 0, size = 24, align = 0, overflow = 1, constantText = "スキンに更新があります"},
@@ -1369,645 +1032,36 @@ local function main()
     -- 統計の読み込み
     statistics.load(skin)
 
-    -- 選曲バー設定
-    skin.songlist = {
-        id = "songlist",
-        center = 8,
-        clickable = {8},
-        listoff = {},
-        liston = {},
-    }
+    -- stagefile, コース
+    mergeSkin(skin, background.load())
+    mergeSkin(skin, stagefile.load())
+    mergeSkin(skin, course.load())
+    mergeSkin(skin, course.load())
+    mergeSkin(skin, upperOption.load())
+    mergeSkin(skin, playButtons.load())
+    mergeSkin(skin, songlist.load())
+    mergeSkin(skin, densityGraph.load())
+    mergeSkin(skin, searchBox.load())
 
-    for i = 1, 17 do
-        local idx = i
-        if i > skin.songlist.center + 1 then
-            idx = idx + 0.75 -- BPM等を入れる部分の高さだけ下にずらす
-        end
-        local posX = math.floor(1184 + (skin.songlist.center - idx + 2) * 12)
-        local posY = math.floor(491 + (skin.songlist.center - idx + 2) * 80)
-        local INTERVAL = 20
-        -- ぽわんと1回跳ねる感じ
-        table.insert(skin.songlist.listoff, {
-            id = "bar", loop = 250 + i * INTERVAL,
-            dst = {
-                {time = 0                 , x = posX + 800, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
-                {time = i * INTERVAL      , x = posX + 800, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
-                {time = 200 + i * INTERVAL, x = posX -  50, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 1},
-                {time = 225 + i * INTERVAL, x = posX -  25, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
-                {time = 250 + i * INTERVAL, x = posX      , y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2}
-            }
-        })
-        table.insert(skin.songlist.liston, {
-            id = "bar", loop = 250 + i * INTERVAL,
-            dst = {
-                {time = 0                 , x = posX + 800, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
-                {time = i * INTERVAL      , x = posX + 800, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
-                {time = 200 + i * INTERVAL, x = posX -  50, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 1},
-                {time = 225 + i * INTERVAL, x = posX -  25, y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2},
-                {time = 250 + i * INTERVAL, x = posX      , y = posY, w = MUSIC_BAR_IMG_WIDTH, h = MUSIC_BAR_IMG_HEIGHT, acc = 2}
-            }
-        })
-    end
+    skin.destination = {}
 
-    skin.songlist.label = {
-        {
-            id = "barLn", dst = {
-                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
-            }
-        },
-        {
-            id = "barRandom", dst = {
-                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
-            }
-        },
-        {
-            id = "barBomb", dst = {
-                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
-            }
-        },
-        {
-            id = "barCn", dst = {
-                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
-            }
-        },
-        {
-            id = "barHcn", dst = {
-                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
-            }
-        },
-    }
+    mergeSkin(skin, background.dst())
 
-    -- skin.songlist.trophy = {
-    --     {
-    --         id = "bronzeTrophy", dst = {
-    --             {x = 146, y = 11, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H}
-    --         }
-    --     },
-    --     {
-    --         id = "silverTrophy", dst = {
-    --             {x = 146, y = 11, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H}
-    --         }
-    --     },
-    --     {
-    --         id = "goldTrophy", dst = {
-    --             {x = 146, y = 11, w = MUSIC_BAR.TROPHY_W, h = MUSIC_BAR.TROPHY_H}
-    --         }
-    --     },
-    -- }
-
-    -- 曲名等
-    skin.songlist.text = {
-        {
-            id = "bartext", filter = 1,
-            dst = {
-                {x = 570, y = 21, w = 397, h = BAR_FONT_SIZE, r = 0, g = 0, b = 0, filter = 1}
-            }
-        },
-        {
-            id = "bartext", filter = 1,
-            dst = {
-                {x = 570, y = 21, w = 397, h = BAR_FONT_SIZE, r = 200, g = 0, b = 0, filter = 1}
-            }
-        },
-    }
-
-    if isViewFolderLampGraph() then
-        skin.songlist.graph = {
-            id = "lampGraph", dst = {
-                {x = 170, y = 9, w = 397, h = 8}
-            }
+    table.insert(skin.destination, {
+        id = "baseFrame",
+        dst = {
+            {x = 0, y = 0, w = WIDTH, h = HEIGHT}
         }
-    end
+    })
 
-    local levelPosX = 19
-    local levelPosY = 12
-    skin.songlist.level = {
-        {
-            id = "barPlayLevelUnknown",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelBeginner",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelNormal",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelHyper",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelAnother",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelInsane",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelUnknown2",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-    }
-    local lampPosX = 17
-    local lampPosY = 41;
-
-    skin.songlist.lamp = {}
-    skin.songlist.playerlamp = {}
-    skin.songlist.rivallamp = {}
-
-    for i, lamp in ipairs(LAMP_NAMES) do
-        table.insert(skin.songlist.lamp, 1, {
-            id = "barLamp" .. lamp, dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT}
-            }
-        })
-        table.insert(skin.songlist.playerlamp, 1, {
-            id = "barLampRivalPlayer" .. lamp, dst = {
-                {x = lampPosX, y = lampPosY + LAMP_HEIGHT / 2, w = 110, h = LAMP_HEIGHT / 2}
-            }
-        })
-        table.insert(skin.songlist.rivallamp, 1, {
-            id = "barLampRivalTarget" .. lamp, dst = {
-                {x = lampPosX, y = lampPosY, w = 110, h = LAMP_HEIGHT / 2}
-            }
-        })
-    end
-
-    skin.destination = {
-        -- 背景
-        {
-            id = "background",
-            dst = {
-                {x = 0, y = 0, w = WIDTH, h = HEIGHT}
-            }
-        },
-        -- フレーム
-        {
-            id = "baseFrame",
-            dst = {
-                {x = 0, y = 0, w = WIDTH, h = HEIGHT}
-            }
-        },
-        -- ステージファイル背景
-        {
-            id = "black", op = {191, 2}, dst = {
-                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = 255}
-            }
-        },
-        -- stage file影1
-        {
-            id = "black", op = {2, 947}, offset = 40, dst = {
-                {x = STAGE_FILE.X + STAGE_FILE.SHADOW.X, y = STAGE_FILE.Y + STAGE_FILE.SHADOW.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = STAGE_FILE.SHADOW.A}
-            }
-        },
-        -- stage file影2(デフォルト)
-        {
-            id = "stagefileShadow", op = {2, 946}, dst = {
-                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y = STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2}
-            }
-        },
-        -- noステージファイル背景
-        {
-            id = "noImage", op = {190, 2}, stretch = 1, dst = {
-                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
-            }
-        },
-        -- ステージファイル
-        {
-            id = -100, op = {2}, filter = 1, stretch = 1, dst = {
-                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
-            }
-        },
-        -- ステージファイルマスク
-        {
-            id = "black", op = {{190, 191}, 2}, timer = 11, loop = 300, dst = {
-                {time = 0  , a = 128, x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H},
-                {time = 200, a = 128},
-                {time = 300, a = 0}
-            }
-        },
-        -- Stage fileフレーム
-        { -- 設定無し
-            id = "stagefileFrame", op = {2, 150, 945}, dst = {
-                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y = STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2}
-            }
-        },
-        { -- beginner
-            id = "stagefileFrame", op = {2, 151, 945}, dst = {
-                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 153, g = 255, b = 153}
-            }
-        },
-        { -- normal
-            id = "stagefileFrame", op = {2, 152, 945}, dst = {
-                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 153, g = 255, b = 255}
-            }
-        },
-        { -- hyper
-            id = "stagefileFrame", op = {2, 153, 945}, dst = {
-                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 255, g = 204, b = 102}
-            }
-        },
-        { -- another
-            id = "stagefileFrame", op = {2, 154, 945}, dst = {
-                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 255, g = 102, b = 102}
-            }
-        },
-        { -- insane
-            id = "stagefileFrame", op = {2, 155, 945}, dst = {
-                {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 204, g = 0, b = 102}
-            }
-        },
-
-        -- コース曲一覧表示は下のforで
-        -- コースオプション
-        -- BG
-        {
-            id = "courseBgEdgeLeft", op = {3}, dst = {
-                {x = COURSE.OPTION.BASE_X, y = COURSE.OPTION.BASE_Y, w = COURSE.OPTION.BG_EDGE_W, h = COURSE.OPTION.BG_H}
-            }
-        },
-        {
-            id = "courseBgMiddle", op = {3}, dst = {
-                {x = COURSE.OPTION.BASE_X + COURSE.OPTION.BG_EDGE_W, y = COURSE.OPTION.BASE_Y, w = COURSE.OPTION.BG_W - COURSE.OPTION.BG_EDGE_W * 2, h = COURSE.OPTION.BG_H}
-            }
-        },
-        {
-            id = "courseBgMiddleRight", op = {3}, dst = {
-                {x = COURSE.OPTION.BASE_X + COURSE.OPTION.BG_W - COURSE.OPTION.BG_EDGE_W, y = COURSE.OPTION.BASE_Y, w = COURSE.OPTION.BG_EDGE_W, h = COURSE.OPTION.BG_H}
-            }
-        },
-        -- 値
-        -- 譜面オプション
-        {
-            id = "courseHeaderBg", op = {3}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.HEADER_OFFSET_Y, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H}
-            }
-        },
-        {
-            id = "courseHeaderOption", op = {3}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.HEADER_OFFSET_Y, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H}
-            }
-        },
-        {
-            id = "courseSettingClass", op = {3, 1002}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingMirror", op = {3, 1003}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingRandom", op = {3, 1004}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingNoSetting", op = {3, -1002, -1003, -1004}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        -- ハイスピ
-        {
-            id = "courseHeaderBg", op = {3}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*1, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.HEADER_OFFSET_Y, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H}
-            }
-        },
-        {
-            id = "courseHeaderHiSpeed", op = {3}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*1, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.HEADER_OFFSET_Y, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H}
-            }
-        },
-        {
-            id = "courseSettingNoSpeed", op = {3, 1005}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*1, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingNoSetting", op = {3, -1005}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*1, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        -- 判定
-        {
-            id = "courseHeaderBg", op = {3}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*2, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.HEADER_OFFSET_Y, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H}
-            }
-        },
-        {
-            id = "courseHeaderJudge", op = {3}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*2, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.HEADER_OFFSET_Y, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H}
-            }
-        },
-        {
-            id = "courseSettingNoGood", op = {3, 1006}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*2, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingNoGreat", op = {3, 1007}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*2, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingNoSetting", op = {3, -1006, -1007}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*2, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        -- ゲージ
-        {
-            id = "courseHeaderBg", op = {3}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*3, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.HEADER_OFFSET_Y, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H}
-            }
-        },
-        {
-            id = "courseHeaderGauge", op = {3}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*3, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.HEADER_OFFSET_Y, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H}
-            }
-        },
-        {
-            id = "courseSettingGaugeLR2", op = {3, 1010}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*3, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingGauge5Keys", op = {3, 1011}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*3, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingGauge7Keys", op = {3, 1012}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*3, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingGauge9Keys", op = {3, 1013}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*3, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingGauge24Keys", op = {3, 1014}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*3, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingNoSetting", op = {3, -1010, -1011, -1012, -1013, -1014}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*3, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        -- LN
-        {
-            id = "courseHeaderBg", op = {3}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*4, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.HEADER_OFFSET_Y, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H}
-            }
-        },
-        {
-            id = "courseHeaderLnType", op = {3}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*4, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.HEADER_OFFSET_Y, w = COURSE.OPTION.HEADER_W, h = COURSE.OPTION.HEADER_H}
-            }
-        },
-        {
-            id = "courseSettingGaugeLn", op = {3, 1015}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*4, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingGaugeCn", op = {3, 1016}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*4, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingGaugeHcn", op = {3, 1017}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*4, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-        {
-            id = "courseSettingNoSetting", op = {3, -1015, -1016, -1017}, dst = {
-                {x = COURSE.OPTION.SETTING_START_X + COURSE.OPTION.INTERVAL_X*4, y = COURSE.OPTION.BASE_Y + COURSE.OPTION.VALUE_OFFSET_Y, w = COURSE.OPTION.VALUE_W, h = COURSE.OPTION.VALUE_H}
-            }
-        },
-
-        -- 上部オプション
-        {
-            id = "upperOptionButtonBg", dst = {
-                {x = SELECT_OPTION.BUTTON.X, y = SELECT_OPTION.BUTTON.UPPER_Y, w = 270, h = OPTION_INFO.SWITCH_BUTTON_H}
-            }
-        },
-        -- 上部オプションの上のやつの区切り
-        {
-            id = "white", dst = {
-                {x = SELECT_OPTION.BUTTON.X + 135, y = SELECT_OPTION.BUTTON.UPPER_Y + 6, w = 1, h = OPTION_INFO.ITEM_H, r = 102, g = 102, b = 102}
-            }
-        },
-        {
-            id = "upperOptionButtonBg", dst = {
-                {x = SELECT_OPTION.BUTTON.X, y = SELECT_OPTION.BUTTON.UPPER_Y - 53, w = 270, h = OPTION_INFO.SWITCH_BUTTON_H}
-            }
-        },
-        -- keys
-        {
-            id = "keysSet", dst = {
-                {x = SELECT_OPTION.BUTTON.X + SELECT_OPTION.KEYS.X, y = SELECT_OPTION.BUTTON.UPPER_Y + 6, w = 129, h = OPTION_INFO.ITEM_H}
-            }
-        },
-        -- LN
-        {
-            id = "lnModeSet", dst = {
-                {x = SELECT_OPTION.BUTTON.X + SELECT_OPTION.LN.X, y = SELECT_OPTION.BUTTON.UPPER_Y + 6, w = 129, h = OPTION_INFO.ITEM_H}
-            }
-        },
-        -- ソート
-        {
-            id = "sortModeSet", dst = {
-                {x = SELECT_OPTION.BUTTON.X + SELECT_OPTION.SORT.X, y = SELECT_OPTION.BUTTON.UPPER_Y - 53 + 6, w = 258, h = OPTION_INFO.ITEM_H}
-            }
-        },
-
-        -- プレイボタン
-        {
-            id = "playButton", op = {-1}, dst = {
-                {x = 780, y = 571, w = DECIDE_BUTTON_W, h = DECIDE_BUTTON_H}
-            }
-        },
-        { -- ボタン起動用にサイズを調整したやつ
-            id = "playButtonDummy", op = {-1}, dst = {
-                {x = 786, y = 577, w = DECIDE_BUTTON_W - 12, h = DECIDE_BUTTON_H - 12}
-            }
-        },
-        -- AUTO
-        {
-            id = "autoButton", op = {-1}, dst = {
-                {x = 780, y = 513, w = AUTO_BUTTON_W, h = AUTO_BUTTON_H}
-            }
-        },
-        {
-            id = "autoButtonDummy", op = {-1}, dst = {
-                {x = 786, y = 519, w = AUTO_BUTTON_W - 12, h = AUTO_BUTTON_H - 12}
-            }
-        },
-        -- replayは下のリプレイボタンfor文で挿入
-
-        -- 選曲バー
-        {id = "songlist"},
-        -- 選曲バー中央
-        {
-            id = "barCenterFrame", dst = {
-                {x = 1143, y = 503, w = 714, h = 154, filter = 1}
-            }
-        },
-        -- アーティスト
-        {
-            id = "artist", filter = 1, dst = {
-                {x = 1800, y = 543, w = 370, h = ARTIST_FONT_SIZE, r = 0, g = 0, b = 0, filter = 1}
-            }
-        },
-        {
-            id = "subArtist", filter = 1, dst = {
-                {x = 1800, y = 516, w = 310, h = SUBARTIST_FONT_SIZE, r = 0, g = 0, b = 0, filter = 1}
-            }
-        },
-
-        -- BPM
-        {
-            id = "bpmTextImg", op = {2}, dst = {
-                {x = 1207, y = 547, w = SCORE_INFO.TEXT_W, h = SCORE_INFO.TEXT_H}
-            }
-        },
-        -- BPM変化なし
-        {
-            id = "bpm", op = {176}, dst = {
-                {x = 1380 - NORMAL_NUMBER_W * 7, y = 547, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
-            }
-        },
-        -- BPM変化あり
-        {
-            id = "bpmMax", op = {177}, dst = {
-                {x = 1380 - NORMAL_NUMBER_W * 3, y = 547, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
-            }
-        },
-        {
-            id = "bpmTilda", op = {177}, dst = {
-                {x = 1380 - NORMAL_NUMBER_W * 4, y = 547, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
-            }
-        },
-        {
-            id = "bpmMin", op = {177}, dst = {
-                {x = 1380 - NORMAL_NUMBER_W * 7, y = 547, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
-            }
-        },
-        -- keys
-        {
-            id = "keysTextImg", op = {2}, dst = {
-                {x = 1207, y = 517, w = SCORE_INFO.TEXT_W, h = SCORE_INFO.TEXT_H}
-            }
-        },
-        -- 楽曲keys ゴリ押し
-        {
-            id = "music7keys", op = {160}, dst = {
-                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
-            }
-        },
-        {
-            id = "music5keys", op = {161}, dst = {
-                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
-            }
-        },
-        {
-            id = "music14keys", op = {162}, dst = {
-                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
-            }
-        },
-        {
-            id = "music10keys", op = {163}, dst = {
-                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
-            }
-        },
-        {
-            id = "music9keys", op = {164}, dst = {
-                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
-            }
-        },
-        {
-            id = "music24keys", op = {1160}, dst = {
-                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
-            }
-        },
-        {
-            id = "music48keys", op = {1161}, dst = {
-                {x = 1207 + 70, y = 517, w = NORMAL_NUMBER_W * 2, h = NORMAL_NUMBER_H}
-            }
-        },
-
-        -- 判定難易度
-        {
-            id = "judgeEasy", op = {183}, dst = {
-                {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
-            }
-        },
-        {
-            id = "judgeNormal", op = {182}, dst = {
-                {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
-            }
-        },
-        {
-            id = "judgeHard", op = {181}, dst = {
-                {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
-            }
-        },
-        {
-            id = "judgeVeryhard", op = {180}, dst = {
-                {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
-            }
-        },
-
-        -- 検索ボックス
-        {
-            id = "searchBox", dst = {
-                {x = -7, y = -7, w = 1038, h = 62}
-            }
-        },
-        -- テキスト入力欄
-        {
-            id = "searchText", filter = 1, dst = {
-                {x = 48, y = 12, w = 970, h = 24}
-            }
-        },
-        -- 密度グラフ共通部分
-        {
-            id = "black", op = {910}, dst = {
-                {x = 1138, y = 124, w = 600, h = 100, a = 192}
-            }
-        },
-        {
-            id = "notesGraph2", op = {2, 910}, dst = {
-                {x = 1138, y = 124, w = 600, h = 100}
-            }
-        },
-        {
-            id = "bpmGraph", op = {2, 910}, dst = {
-                {x = 1138, y = 124, w = 600, h = 100}
-            }
-        },
-        -- 各ノーツ数は下のfor
-    }
+    -- 各種出力
+    mergeSkin(skin, stagefile.dst())
+    mergeSkin(skin, course.dst())
+    mergeSkin(skin, upperOption.dst())
+    mergeSkin(skin, playButtons.dst())
+    mergeSkin(skin, songlist.dst())
+    mergeSkin(skin, densityGraph.dst())
+    mergeSkin(skin, searchBox.dst())
 
     -- バナー表示
     if isShowBanner() then
@@ -2020,107 +1074,6 @@ local function main()
 
     -- ユーザ情報出力周り
     user.dst(skin)
-
-    -- コースの曲一覧
-    for i = 1, 5 do
-        local y = COURSE.BASE_Y - COURSE.INTERVAL_Y * (i - 1) -- 14は上下の影
-        -- 背景
-        table.insert(skin.destination, {
-            id = "courseBarBg", op = {3}, dst = {
-                {x = 0, y = y, w = COURSE.BG_W, h = COURSE.LABEL_H + 14}
-            }
-        })
-        -- 1st等のラベル
-        table.insert(skin.destination, {
-            id = "courseMusic" .. i .. "Label", op = {3}, dst = {
-                {x = -2, y = y + 7, w = COURSE.LABEL_W, h = COURSE.LABEL_H}
-            }
-        })
-        -- 曲名
-        table.insert(skin.destination, {
-            id = "course" .. i .. "Text", op = {3}, filter = 1, dst = {
-                {x = 750, y = y + 20, w = COURSE.SONGNAME_W, h = BAR_FONT_SIZE, r = 0, g = 0, b = 0}
-            }
-        })
-    end
-
-    -- リプレイボタン
-    local replayOps = {197, 1197, 1200, 1203}
-    for i = 1, 4 do
-        local buttonX = 892 + 60 * (i - 1)
-        table.insert(skin.destination, { -- リプレイあり
-            id = "replayButtonBg", op = {replayOps[i]}, dst = {
-                {x = buttonX, y = 513, w = REPLAY_BUTTON_SIZE, h = REPLAY_BUTTON_SIZE}
-            }
-        })
-        table.insert(skin.destination, { -- リプレイ無し
-            id = "replayButtonBg", op = {replayOps[i] - 1}, dst = {
-                {x = buttonX, y = 513, w = REPLAY_BUTTON_SIZE, h = REPLAY_BUTTON_SIZE, a = 128}
-            }
-        })
-        table.insert(skin.destination, { -- 右下の1,2,3,4の数字
-            id = "replay" .. i .. "Text", op = {replayOps[i]}, dst = {
-                {x = buttonX + 34, y = 513 + 2, w = REPLAY_TEXT_W, h = REPLAY_TEXT_H}
-            }
-        })
-        table.insert(skin.destination, { -- 起動用ボタン
-            id = "replay" .. i .. "ButtonDummy", op = {replayOps[i]}, dst = {
-                {x = buttonX + 6, y = 513 + 6, w = REPLAY_BUTTON_SIZE - 12, h = REPLAY_BUTTON_SIZE - 12}
-            }
-        })
-    end
-
-    -- 密度グラフ
-    if getTableValue(skin_config.option, "密度グラフ表示", 910) == 910 then
-        -- フレーム表示
-        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 951 then
-            table.insert(skin.destination, {
-                id = "notesGraphFrame", op = {910}, dst = {
-                    {x = GRAPH.WND.OLD.X - GRAPH.WND.OLD.SHADOW, y = GRAPH.WND.OLD.Y - GRAPH.WND.OLD.SHADOW, w = GRAPH.WND.OLD.W, h = GRAPH.WND.OLD.H}
-                }
-            })
-        elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
-            table.insert(skin.destination, {
-                id = "notesGraphFrame2", op = {910}, dst = {
-                    {x = GRAPH.WND.NEW.X - GRAPH.WND.OLD.SHADOW, y = GRAPH.WND.NEW.Y - GRAPH.WND.OLD.SHADOW, w = GRAPH.WND.NEW.W, h = GRAPH.WND.NEW.H}
-                }
-            })
-        end
-        local noteTypes = {"Normal", "Scratch", "Ln", "Bss"}
-        for i = 1, 4 do
-            table.insert(skin.destination, {
-                id = "numOf" .. noteTypes[i] .. "NotesIcon", op = {910}, dst = {
-                    {x = 1152 + 150 * (i - 1), y = 77, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE}
-                }
-            })
-            table.insert(skin.destination, {
-                id = "numOf" .. noteTypes[i] .. "Notes", op = {910}, dst = {
-                    {x = 1152 + 58 + 150 * (i - 1), y = 77 + 10, w = STATUS_NUMBER_W, h = STATUS_NUMBER_H}
-                }
-            })
-        end
-
-        -- 消費スタミナ
-        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
-            local staminaX = GRAPH.WND.NEW.X + GRAPH.STAMINA.LABEL.X
-            local staminaY = GRAPH.WND.NEW.Y + GRAPH.STAMINA.LABEL.Y
-            -- ラベル
-            table.insert(skin.destination, {
-                id = "useStaminaTextImg", op = {910}, dst = {
-                    {x = staminaX, y = staminaY, w = GRAPH.STAMINA.LABEL.W, h = GRAPH.STAMINA.LABEL.H}
-                }
-            })
-            -- スタミナ出力
-            -- 現在値
-            preDrawDynamicNumbers(
-                skin, "24pxNumbers", "useStaminaValue",
-                staminaX + GRAPH.STAMINA.NUM.X, staminaY + GRAPH.STAMINA.NUM.Y,
-                NUMBERS_24PX.W, NUMBERS_24PX.H, 0, false, {})
-
-            setValue("useStaminaValue", 0)
-        end
-    end
-
 
     -- 選曲スライダー
     table.insert(skin.destination, {
@@ -2259,7 +1212,7 @@ local function main()
                 -- 小数点以下
                 table.insert(skin.destination, {
                     id = "density" ..  types[i] .. "AfterDot", op = {2}, dst = {
-                        {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset + 8, y = DENSITY_INFO.NUMBER_Y, w = MUSIC_BAR.DIFFICULTY_NUMBER_W, h = MUSIC_BAR.DIFFICULTY_NUMBER_H}
+                        {x = startX + DENSITY_INFO.INTERVAL_X * (i - 1) + offset + 8, y = DENSITY_INFO.NUMBER_Y, w = DENSITY_INFO.AFTER_DOT.W, h = DENSITY_INFO.AFTER_DOT.H}
                     }
                 })
             end
@@ -2293,7 +1246,7 @@ local function main()
     })
     table.insert(skin.destination, {
         id = "nextRank", op = {624}, dst = {
-            {x = EXSCORE_AREA.NUMBER_X - NORMAL_NUMBER_W * SCORE_INFO.DIGIT, y = EXSCORE_AREA.NEXT_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
+            {x = EXSCORE_AREA.NUMBER_X - commons.NUM_28PX.W * SCORE_INFO.DIGIT, y = EXSCORE_AREA.NEXT_Y, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H}
         }
     })
     table.insert(skin.destination, {
@@ -2303,12 +1256,12 @@ local function main()
     })
     table.insert(skin.destination, {
         id = "irRanking", dst = {
-            {x = EXSCORE_AREA.NUMBER_X - IR.NUMBER_NUM_W * 5 - NORMAL_NUMBER_W * 6, y = EXSCORE_AREA.IR_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
+            {x = EXSCORE_AREA.NUMBER_X - IR.NUMBER_NUM_W * 5 - commons.NUM_28PX.W * 6, y = EXSCORE_AREA.IR_Y, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H}
         }
     })
     table.insert(skin.destination, {
         id = "slashForRanking", op = {-606}, dst = {
-            {x = EXSCORE_AREA.NUMBER_X - IR.NUMBER_NUM_W * 5 - NORMAL_NUMBER_W * 1, y = EXSCORE_AREA.IR_Y, w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H}
+            {x = EXSCORE_AREA.NUMBER_X - IR.NUMBER_NUM_W * 5 - commons.NUM_28PX.W * 1, y = EXSCORE_AREA.IR_Y, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H}
         }
     })
     table.insert(skin.destination, {
@@ -2347,9 +1300,9 @@ local function main()
         for j, val in ipairs(arr) do
             local baseX = SCORE_INFO.TEXT_BASE_X + SCORE_INFO.INTERVAL_X * (i - 1)
             local baseY = SCORE_INFO.TEXT_BASE_Y - SCORE_INFO.INTERVAL_Y * (j - 1)
-            local numberX = baseX + SCORE_INFO.NUMBER_OFFSET_X - NORMAL_NUMBER_W * 8
+            local numberX = baseX + SCORE_INFO.NUMBER_OFFSET_X - commons.NUM_28PX.W * 8
             if val == "numOfPoor" then
-                numberX = numberX - NORMAL_NUMBER_W * 5
+                numberX = numberX - commons.NUM_28PX.W * 5
             end
 
             -- テキスト画像
@@ -2369,7 +1322,7 @@ local function main()
                     {
                         x = numberX,
                         y = baseY,
-                        w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H
+                        w = commons.NUM_28PX.W, h = commons.NUM_28PX.H
                     }
                 }
             })
@@ -2378,7 +1331,7 @@ local function main()
                     {
                         x = numberX,
                         y = baseY,
-                        w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H
+                        w = commons.NUM_28PX.W, h = commons.NUM_28PX.H
                     }
                 }
             })
@@ -2389,7 +1342,7 @@ local function main()
                         {
                             x = numberX,
                             y = baseY,
-                            w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H
+                            w = commons.NUM_28PX.W, h = commons.NUM_28PX.H
                         }
                     }
                 })
@@ -2399,18 +1352,18 @@ local function main()
                 table.insert(skin.destination, {
                     id = "slashForEmptyPoor", dst = {
                         {
-                            x = numberX + NORMAL_NUMBER_W*8,
+                            x = numberX + commons.NUM_28PX.W*8,
                             y = baseY,
-                            w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H
+                            w = commons.NUM_28PX.W, h = commons.NUM_28PX.H
                         }
                     }
                 })
                 table.insert(skin.destination, {
                     id = "numOfEmptyPoor", dst = {
                         {
-                            x = numberX + NORMAL_NUMBER_W + NORMAL_NUMBER_W*4,
+                            x = numberX + commons.NUM_28PX.W + commons.NUM_28PX.W*4,
                             y = baseY,
-                            w = NORMAL_NUMBER_W, h = NORMAL_NUMBER_H
+                            w = commons.NUM_28PX.W, h = commons.NUM_28PX.H
                         }
                     }
                 })

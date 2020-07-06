@@ -10,11 +10,49 @@ function table.in_key (tbl, key)
     return false
 end
 
+function table.add_all_dict(tbl, dict)
+    if dict then
+        for k, v in pairs(dict) do
+            tbl[k] = v
+        end
+    end
+end
+
+function table.add_all(tbl, ary)
+    if ary then
+        for _, v in ipairs(ary) do
+            table.insert(tbl, v)
+        end
+    end
+end
+
+function mergeSkin(skin, addSkin)
+    if addSkin then
+        for k, v in pairs(addSkin) do -- image, text, value 等がkey
+            if type(v) == nil then
+                skin[k] = v
+            else
+                if skin[k] == nil then
+                    skin[k] = {}
+                end
+                for _, v2 in ipairs(v) do -- 普通のdstやimage等への挿入はここ
+                    table.insert(skin[k], v2)
+                end
+                for k2, v2 in pairs(v) do -- songlistやnotes等, 中身が辞書ならここ
+                    if not (type(k2) == "number" and k2 % 1 == 0) then
+                        skin[k][k2] = v2
+                    end
+                end
+            end
+        end
+    end
+end
+
 DEBUG = true
 
 SKIN_INFO = {
-    SELECT_VRESION = "2.15",
-    RESULT_VERSION = "2.01",
+    SELECT_VRESION = "2.16",
+    RESULT_VERSION = "2.05",
     DECIDE_VERSION = "1.00",
     PLAY_VERSION = "0.00",
 }
@@ -31,6 +69,17 @@ LARGE_TITLE_TEXT_SIZE = NORMAL_TEXT_SIZE * 2
 NORMAL_DESCENDER_LINE = 3 -- フォントサイズ64
 
 function globalInitialize(skin)
+    -- skinの要素をとりあえず空で入れておく. エラー防止
+    skin.image = {}
+    skin.imageset = {}
+    skin.font = {}
+    skin.text = {}
+    skin.value = {}
+    skin.songlist = {}
+    skin.destination = {}
+    skin.customTimers = {}
+    skin.customEvents = {}
+
     -- 統計情報周り
     userData.name = main_state.text(2)
 
