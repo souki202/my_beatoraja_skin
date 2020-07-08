@@ -57,7 +57,7 @@ background.functions.load = function ()
                     local path = "../select/background/slideshow/" .. filename
                     local srcId = BACKGROUND.SRC_START_ID + background.numOfFiles
                     local imageId = background.createId(srcId)
-                    print(imageId, srcId, path)
+                    myPrint(imageId, srcId, path)
                     table.insert(background.filelist, path)
                     table.insert(background.imageIdList, imageId)
                     table.insert(skin.source, {

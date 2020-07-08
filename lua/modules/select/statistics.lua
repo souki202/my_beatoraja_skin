@@ -72,6 +72,10 @@ local statistics = {
 }
 
 function openStatistics()
+    if isRightClicking() then
+        switchMenu()
+        return
+    end
     statistics.isOpen = true
     statistics.isClosing = false
     statistics.isClosed = false
@@ -127,11 +131,6 @@ statistics.functions.load = function(skin)
 
     table.insert(skin.image, {
         id = "whiteStatisticBg", src = 999, x = 2, y = 0, w = 1, h = 1, act = 1012
-    })
-
-    -- 統計ボタン
-    table.insert(skin.image, {
-        id = "statisticsOpenButton", src = 0, x = 1761, y = commons.PARTS_OFFSET + 771, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H, act = 1010
     })
 
     -- 各種数値

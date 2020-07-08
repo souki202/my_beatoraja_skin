@@ -60,7 +60,7 @@ function mergeSkin(skin, addSkin)
 end
 
 SKIN_INFO = {
-    SELECT_VRESION = "2.20",
+    SELECT_VRESION = "2.25",
     RESULT_VERSION = "2.05",
     DECIDE_VERSION = "1.01",
     PLAY_VERSION = "0.00",

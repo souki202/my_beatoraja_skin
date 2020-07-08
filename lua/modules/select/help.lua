@@ -674,6 +674,10 @@ end
 
 
 function openHelpList()
+    if isRightClicking() then
+        switchMenu()
+        return
+    end
     if help.isOpening == false and help.hasOpened == false then
         -- myPrint("ヘルプを開く")
         help.isOpening = true
@@ -762,9 +766,6 @@ help.functions.loadHelpItem = function(skin)
     table.insert(skin.customEvents, {id = 1003, action = "closeDescriptionRightClickEvent()"})
     table.insert(skin.customEvents, {id = 1004, action = "closeDescriptionClickEvent()"})
 
-    table.insert(skin.image, {
-        id = "helpOpenButton", src = 0, x = 1415, y = commons.PARTS_OFFSET + 771, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H, act = 1000
-    })
     loadCloseButtonSelect(skin, "helpCloseButton", 1001)
 
     -- 背景は閉じるボタン

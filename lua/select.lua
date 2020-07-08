@@ -32,6 +32,7 @@ local playButtons = require("modules.select.play_buttons")
 local songlist = require("modules.select.songlist")
 local densityGraph = require("modules.select.density_graph")
 local searchBox = require("modules.select.search_box")
+local menu = require("modules.select.menu")
 
 local main_state = require("main_state")
 
@@ -305,7 +306,8 @@ local header = {
         {name = "NoImage画像", path = "../select/noimage/*.png", def = "default"},
     },
     offset = {
-        {name = "全体の透明度", a = 0},
+        {name = "各種数値設定項目群----------------", x = 0},
+        {name = "全体の透明度(255で透明)", a = 0},
         {name = "背景, スライドショー設定(0で既定値)---------------------", x = 0},
         {name = "表示時間 (単位 秒 既定値15)", x = 0},
         {name = "フェード時間 (単位 100ms 既定値5)", x = 0},
@@ -608,18 +610,20 @@ local function main()
         {id = 999, path = "../common/colors/colors.png"}
     }
 
+    -- 10000, 10001はタイマ周り
     table.insert(skin.customTimers, {id = 10002, timer = "calcStamina"})
     table.insert(skin.customTimers, {id = 10003, timer = "updateStamina"})
     table.insert(skin.customTimers, {id = 10006, timer = "updateStaminaGauge"}) -- スタミナゲージ表示用タイマー
     table.insert(skin.customTimers, {id = 10007, timer = "updateUseStamina"}) -- スタミナ使用量更新用タイマー
     table.insert(skin.customTimers, {id = 10008, timer = "newVersionAnimation"}) -- 新バージョンがある時の文字表示用
     table.insert(skin.customTimers, {id = 10009, timer = "helpTimer"}) -- ヘルプ画面全体のタイマー
-    table.insert(skin.customTimers, {id = 13009, timer = "keyInput"})
+    table.insert(skin.customTimers, {id = 12000, timer = "keyInput"})
     for i = 1, 490 do
         table.insert(skin.customTimers, {id = 10010 + (i - 1)}) -- 10010~10499までヘルプ用で予約 増えるかもしれないので500くらい余裕見ておく
     end
     table.insert(skin.customTimers, {id = statistics.getWindowTimerId(), timer = "statisticsTimer"}) -- 統計画面全体のタイマー
     table.insert(skin.customTimers, {id = 13000, timer = "update"})
+    -- 13100はmenu
 
     skin.customEvents = {} -- 1000~未定はヘルプ
 
@@ -1046,6 +1050,7 @@ local function main()
     mergeSkin(skin, songlist.load())
     mergeSkin(skin, densityGraph.load())
     mergeSkin(skin, searchBox.load())
+    mergeSkin(skin, menu.load())
 
     skin.destination = {}
 
@@ -1445,8 +1450,9 @@ local function main()
     end
 
     -- ボタン
-    help.destinationOpenButton(skin)
-    statistics.destinationOpenButton(skin)
+    -- help.destinationOpenButton(skin)
+    -- statistics.destinationOpenButton(skin)
+    mergeSkin(skin, menu.dst())
     -- ヘルプウィンドウ
     help.setWindowDestination(skin)
     help.setListDestination(skin)
@@ -1665,7 +1671,7 @@ local function main()
 
     end
 
-    mergeSkin(skin, background.dstWithAlpha(getTableValue(skin_config.offset, "全体の透明度", {a = 0}).a))
+    mergeSkin(skin, background.dstWithAlpha(getTableValue(skin_config.offset, "全体の透明度(255で透明)", {a = 0}).a))
 
     -- 選曲画面突入時アニメーション
     if getTableValue(skin_config.option, "開幕アニメーション種類", 930) == 931 then
