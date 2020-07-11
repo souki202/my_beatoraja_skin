@@ -42,6 +42,22 @@ BASE_WINDOW = {
     }
 }
 
+RESULT_BASE_WINDOW = {
+    SHADOW_LEN = 14,
+    EDGE_SIZE = 10,
+    ID = {
+       UPPER_LEFT   = "baseWindowUpperLeft",
+       UPPER_RIGHT  = "baseWindowUpperRight",
+       BOTTOM_RIGHT = "baseWindowBottomRight",
+       BOTTOM_LEFT  = "baseWindowBottomLeft",
+       TOP    = "baseWindowTopEdge",
+       LEFT   = "baseWindowLeftEdge",
+       BOTTOM = "baseWindowBottomEdge",
+       RIGHT  = "baseWindowRightEdge",
+       BODY = "baseWindowBody",
+    }
+}
+
 HEADER = {
     MARKER = {
         X = 32,
@@ -117,9 +133,9 @@ end
 function loadBaseWindowResult(skin)
     loadWindow(
         skin,
-        BASE_WINDOW.ID,
+        RESULT_BASE_WINDOW.ID,
         0, 0,
-        BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN
+        RESULT_BASE_WINDOW.EDGE_SIZE, RESULT_BASE_WINDOW.SHADOW_LEN
     )
 end
 
@@ -198,6 +214,10 @@ end
 
 function destinationStaticBaseWindow(skin, x, y, w, h)
     destinationStaticWindowBg(skin, BASE_WINDOW.ID, x, y, w, h, BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN * 2, {})
+end
+
+function destinationStaticBaseWindowResult(skin, x, y, w, h)
+    destinationStaticWindowBg(skin, RESULT_BASE_WINDOW.ID, x, y, w, h, RESULT_BASE_WINDOW.EDGE_SIZE, RESULT_BASE_WINDOW.SHADOW_LEN, {})
 end
 
 -- ウィンドウを描画

@@ -1,5 +1,6 @@
 require("modules.commons.define")
 local lanes = require("modules.play.lanes")
+local judges = require("modules.play.judges")
 
 local header = {
     type = 0,
@@ -9,21 +10,21 @@ local header = {
     playstart = 1000,
     scene = 36000000,
     input = 500,
-    close = 1500,
+    close = 100,
     fadeout = 1000,
 
     property = { -- 使用済み 970まで
         {
-            name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}, {name = "center", op = 902}}, def = "1P"
+            name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
         {
             name = "ターンテーブル位置", item = {{name = "通常", op = 950}, {name = "反転", op = 951}}, def = "通常"
         },
         {
-            name = "コンボ位置", item = {{name = "判定横", op = 970}, {name = "判定下", op = 971}, {name = "レーン右上(1P), 左上(2P)", op = 973}}, def = "判定横"
+            name = "コンボ位置", item = {{name = "判定横", op = 970}, {name = "判定下", op = 971}, {name = "レーン右上(1P), 左上(2P)", op = 973}}, def = "判定下"
         },
         {
-            name = "EARLY, LATE表示", item = {{name = "OFF", op = 905}, {name = "EARLY/LATE", op = 906}, {name = "+-ms", op = 907}}, def = "EARLY/LATE"
+            name = "EARLY, LATE表示", item = {{name = "OFF", op = 905}, {name = "EARLY/LATE", op = 906}, {name = "+-ms", op = 907}, {name = "+-ms(PG時非表示)", op = 908}}, def = "EARLY/LATE"
         },
         {
             name = "レーン色分け", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}, def = "ON"
@@ -106,11 +107,13 @@ local function main()
 
     -- 各種読み込み
     mergeSkin(skin, lanes.load())
+    mergeSkin(skin, judges.load())
 
     skin.destination = {}
 
     -- 各種出力
     mergeSkin(skin, lanes.dst())
+    mergeSkin(skin, judges.dst())
     return skin
 end
 

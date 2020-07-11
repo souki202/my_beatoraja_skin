@@ -119,6 +119,9 @@ function globalInitialize(skin)
 end
 
 function getTableValue(tbl, key, defaultValue)
+    if tbl == nil then
+        return defaultValue
+    end
     for k, v in pairs(tbl) do
         if key == k then
             return v

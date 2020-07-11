@@ -1,3 +1,4 @@
+require("modules.commons.define")
 local main_state = require("main_state")
 
 local commons = {
@@ -9,6 +10,7 @@ function setKeys(keys)
 end
 
 function is1P()
+	if skin_config == nil or skin_config.option == nil then return true end
     return getTableValue(skin_config.option, "プレイ位置", 900) == 900
 end
 
@@ -33,7 +35,27 @@ function isDrawLaneSymbol()
 end
 
 function isDrawComboNextToTheJudge()
-    return getTableValue(skin_config.option, "コンボ位置", 970) == 970
+    return getTableValue(skin_config.option, "コンボ位置", 971) == 970
+end
+
+function isDrawComboBottom()
+    return getTableValue(skin_config.option, "コンボ位置", 971) == 971
+end
+
+function isDrawComboOuterLane()
+    return getTableValue(skin_config.option, "コンボ位置", 971) == 973
+end
+
+function isDrawEarlyLate()
+	return getTableValue(skin_config.option, "EARLY, LATE表示", 906) == 906
+end
+
+function isDrawErrorJudgeTimeIncludetPg()
+	return getTableValue(skin_config.option, "EARLY, LATE表示", 906) == 907
+end
+
+function isDrawErrorJudgeTimeExcludePg()
+	return getTableValue(skin_config.option, "EARLY, LATE表示", 906) == 908
 end
 
 function getDifficultyValueForColor()

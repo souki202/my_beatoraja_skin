@@ -1166,7 +1166,7 @@ local function main()
     })
 
     -- タイトル部分
-    destinationStaticBaseWindow(skin, TITLE_BAR.WND.X, TITLE_BAR.WND.Y, TITLE_BAR.WND.W, TITLE_BAR.WND.H)
+    destinationStaticBaseWindowResult(skin, TITLE_BAR.WND.X, TITLE_BAR.WND.Y, TITLE_BAR.WND.W, TITLE_BAR.WND.H)
     table.insert(skin.destination, {
         id = "title", filter = 1, dst = {
             {x = TITLE_BAR.WND.X + TITLE_BAR.WND.W / 2, y = TITLE_BAR.WND.Y + TITLE_BAR.TITLE.Y, w = TITLE_BAR.TITLE.W, h = TITLE_BAR.TITLE.FONT_SIZE, r = 0, g = 0, b = 0}
@@ -1192,7 +1192,7 @@ local function main()
         }
     })
     -- フォルダ名
-    destinationStaticBaseWindow(skin, DIR_BAR.WND.X, DIR_BAR.WND.Y, DIR_BAR.WND.W, DIR_BAR.WND.H)
+    destinationStaticBaseWindowResult(skin, DIR_BAR.WND.X, DIR_BAR.WND.Y, DIR_BAR.WND.W, DIR_BAR.WND.H)
     table.insert(skin.destination, {
         id = "tableName", dst = {
             {
@@ -1205,7 +1205,7 @@ local function main()
 
 
     -- 難易度, ノーツ数部分
-    destinationStaticBaseWindow(skin, DIFFICULTY_INFO.WND.X, DIFFICULTY_INFO.WND.Y, DIFFICULTY_INFO.WND.W, DIFFICULTY_INFO.WND.H)
+    destinationStaticBaseWindowResult(skin, DIFFICULTY_INFO.WND.X, DIFFICULTY_INFO.WND.Y, DIFFICULTY_INFO.WND.W, DIFFICULTY_INFO.WND.H)
     -- 難易度
     local difficultyTextX = DIFFICULTY_INFO.WND.X + DIFFICULTY_INFO.DIFFICULTY.X
     local difficultyTextY = DIFFICULTY_INFO.WND.Y + DIFFICULTY_INFO.DIFFICULTY.Y
@@ -1272,7 +1272,7 @@ local function main()
     end
 
     -- スコア部分
-    destinationStaticBaseWindow(skin, SCORE.WND.X, SCORE.WND.Y, SCORE.WND.W, SCORE.WND.H)
+    destinationStaticBaseWindowResult(skin, SCORE.WND.X, SCORE.WND.Y, SCORE.WND.W, SCORE.WND.H)
     local scoreTextX = SCORE.WND.X + SCORE.RELATIVE_X
     local scoreTextY = SCORE.WND.Y + SCORE.EXSCORE.RELATIVE_Y
     -- EXSCORE
@@ -1355,7 +1355,7 @@ local function main()
     })
 
     -- BP等
-    destinationStaticBaseWindow(skin, COMBO.WND.X, COMBO.WND.Y, COMBO.WND.W, COMBO.WND.H)
+    destinationStaticBaseWindowResult(skin, COMBO.WND.X, COMBO.WND.Y, COMBO.WND.W, COMBO.WND.H)
     for i, text in ipairs(COMBO.PREFIX) do
         local x = COMBO.WND.X + COMBO.TEXT.X
         local y = COMBO.WND.Y + COMBO.TEXT.Y + COMBO.TEXT.INTERVAL_Y * (i - 1)
@@ -1398,7 +1398,7 @@ local function main()
     end
 
     -- 各種判定
-    destinationStaticBaseWindow(skin, JUDGE.WND.X, JUDGE.WND.Y, JUDGE.WND.W, JUDGE.WND.H)
+    destinationStaticBaseWindowResult(skin, JUDGE.WND.X, JUDGE.WND.Y, JUDGE.WND.W, JUDGE.WND.H)
     -- early lateの文字
     table.insert(skin.destination, {
         id = "earlyText", dst = {
@@ -1448,7 +1448,7 @@ local function main()
 
 
     -- IR
-    destinationStaticBaseWindow(skin, IR.WND.X, IR.WND.Y, IR.WND.W, IR.WND.H)
+    destinationStaticBaseWindowResult(skin, IR.WND.X, IR.WND.Y, IR.WND.W, IR.WND.H)
     table.insert(skin.destination, {
         id = "irText", dst = {
             {x = IR.WND.X + IR.TEXT.X, y = IR.WND.Y + IR.TEXT.Y, w = IR.TEXT.W, h = IR.TEXT.H}
@@ -1473,7 +1473,7 @@ local function main()
     })
 
     -- lamp
-    destinationStaticBaseWindow(skin, LAMP.WND.X, LAMP.WND.Y, LAMP.WND.W, LAMP.WND.H)
+    destinationStaticBaseWindowResult(skin, LAMP.WND.X, LAMP.WND.Y, LAMP.WND.W, LAMP.WND.H)
     table.insert(skin.destination, {
         id = "lampText", dst = {
             {x = LAMP.WND.X + LAMP.TEXT.X, y = LAMP.WND.Y + LAMP.TEXT.Y, w = LAMP.TEXT.W, h = LAMP.TEXT.H}
@@ -1496,7 +1496,7 @@ local function main()
     })
 
     -- タイミング部分
-    destinationStaticBaseWindow(skin, TIMING.WND.X, TIMING.WND.Y, TIMING.WND.W, TIMING.WND.H)
+    destinationStaticBaseWindowResult(skin, TIMING.WND.X, TIMING.WND.Y, TIMING.WND.W, TIMING.WND.H)
     local stdX = TIMING.WND.X + TIMING.TEXT_X
     local stdY = TIMING.WND.Y + TIMING.STD_Y
     -- 標準偏差

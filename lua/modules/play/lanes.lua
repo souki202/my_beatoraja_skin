@@ -18,7 +18,7 @@ local LANES = {
         H = 723,
         X = nil,
         X_1 = function (self) return 75 end,
-        X_2 = function (self) return WIDTH - self.AREA.W - self.AREA.X() end,
+        X_2 = function (self) return WIDTH - self.AREA.W - self.AREA.X_1() end,
         Y = 357,
     },
     EDGE = {
@@ -52,12 +52,27 @@ local function getJudgeLineColor()
 	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 
+local function isLeftScratch()
+    local b = true
+    if isMirrorTable() then
+        b = not b
+    end
+    if not is1P() then
+        b = not b
+    end
+    return b
+end
+
 notes.functions.getAreaX = function ()
     if is1P() then
         return LANES.AREA.X_1(LANES)
     else
         return LANES.AREA.X_2(LANES)
     end
+end
+
+notes.functions.getAreaY = function ()
+    return LANES.AREA.Y
 end
 
 notes.functions.getLaneW = function ()
@@ -121,7 +136,7 @@ notes.functions.load = function ()
             {id = "mine-w", src = 1, x = 99, y = 23, w = 27, h = 8},
             {id = "mine-s", src = 1, x = 50, y = 23, w = 46, h = 8},
 
-            {id = "laneEdge", src = 0, x = 0, y = 0, w = LANES.EDGE.W, h = LANES.EDGE.H},
+            {id = "laneEdge", src = 0, x = 0, y = 55, w = LANES.EDGE.W, h = LANES.EDGE.H},
 
             -- シンボル
             {id = "whiteSymbol", src = 2, x = 0, y = 0, w = -1, h = -1},
@@ -171,23 +186,16 @@ notes.functions.load = function ()
 
     -- noteのxを埋める 1234567s または 12345s
     do
-        local isLeftScratch = false
-        if isMirrorTable() then
-            isLeftScratch = not isLeftScratch
-        end
-        if not is1P() then
-            isLeftScratch = not isLeftScratch
-        end
-        local offsetX = isLeftScratch and 0 or NOTES.SCRATCH_W + NOTES.SPACE
+        local offsetX = isLeftScratch() and NOTES.SCRATCH_W + NOTES.SPACE or 0
         for i = 1, commons.keys do
             table.insert(NOTES.X, notes.functions.getAreaX() + offsetX)
             offsetX = offsetX + NOTES.W[i] + NOTES.SPACE
         end
 
         -- 皿
-        local sx = LANES.AREA.X()
-        if not isLeftScratch then
-            sx = offsetX
+        local sx = laneX
+        if not isLeftScratch() then
+            sx = laneX + offsetX
         end
         table.insert(NOTES.X, sx)
     end
@@ -224,12 +232,12 @@ notes.functions.dst = function ()
         local r, g, b = getDifficultyColor()
         dst[#dst+1] = {
             id = "laneEdge", dst = {
-                {x = laneX, y = 0, w = LANES.EDGE.W, h = LANES.EDGE.H, r = r, g = g, b = b}
+                {x = laneX - LANES.EDGE.W, y = 0, w = LANES.EDGE.W, h = LANES.EDGE.H, r = r, g = g, b = b}
             }
         }
         dst[#dst+1] = {
             id = "laneEdge", dst = {
-                {x = laneX + LANES.AREA.W, y = 0, w = -LANES.EDGE.W, h = LANES.EDGE.H, r = r, g = g, b = b}
+                {x = laneX + LANES.AREA.W + LANES.EDGE.W, y = 0, w = -LANES.EDGE.W, h = LANES.EDGE.H, r = r, g = g, b = b}
             }
         }
     end
@@ -246,12 +254,15 @@ notes.functions.dst = function ()
     end
 
     -- レーンの区切り線
-    for i = 1, #NOTES.X do
-        dst[#dst+1] = {
-            id = "white", dst = {
-                {x = NOTES.X[i], y = LANES.AREA.Y, w = 1, h = LANES.AREA.H}
+    for i = 1, commons.keys+1 do
+        if (isLeftScratch() and i ~= commons.keys+1) or (not isLeftScratch() and i ~= 1) then
+            print(i)
+            dst[#dst+1] = {
+                id = "white", dst = {
+                    {x = NOTES.X[i], y = LANES.AREA.Y, w = 1, h = LANES.AREA.H}
+                }
             }
-        }
+        end
     end
 
     -- 判定線
@@ -264,10 +275,19 @@ notes.functions.dst = function ()
         }
     end
 
+    -- アンダーライン
+    do
+        local r, g, b = getDifficultyColor()
+        dst[#dst+1] = {
+            id = "white", dst = {
+                {x = 0, y = LANES.AREA.Y - 2, w = WIDTH, h = 2, r = r, g = g, b = b}
+            }
+        }
+    end
     -- レーンのシンボル
     if isDrawLaneSymbol() then
         local r, g, b = getDifficultyColor()
-        for i = 1, commons.keys do
+        for i = 1, commons.keys+1 do
             local id = "turntable"
             local s = SYMBOL.TURNTABLE
             if i ~= commons.keys + 1 and i % 2 == 0 then
