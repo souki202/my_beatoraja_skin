@@ -4,6 +4,8 @@ local judges = require("modules.play.judges")
 local life = require("modules.play.life")
 local scoreGraph = require("modules.play.score_graph")
 local bga = require("modules.play.bga")
+local progress = require("modules.play.progress_bar")
+local judgeDetail = require("modules.play.judge_detail")
 
 local header = {
     type = 0,
@@ -16,7 +18,7 @@ local header = {
     close = 100,
     fadeout = 1000,
 
-    property = { -- 使用済み 985まで
+    property = { -- 使用済み 995まで
         {
             name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
@@ -28,6 +30,12 @@ local header = {
         },
         {
             name = "EARLY, LATE表示", item = {{name = "OFF", op = 905}, {name = "EARLY/LATE", op = 906}, {name = "+-ms", op = 907}, {name = "+-ms(PG時非表示)", op = 908}}, def = "EARLY/LATE"
+        },
+        {
+            name = "スコア差表示", item = {{name = "無し", op = 990}, {name = "目標スコア", op = 991}, {name = "自己ベスト", op = 992}}, def = "目標スコア"
+        },
+        {
+            name = "スコア差表示位置", item = {{name = "レーン横", op = 995}, {name = "判定上", op = 996}}, def = "レーン横"
         },
         {
             name = "レーン色分け", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}, def = "ON"
@@ -64,6 +72,9 @@ local header = {
         },
         {
             name = "黒帯部分のBGA表示", item = {{name = "ON", op = 945}, {name = "OFF", op = 946}}, def = "ON"
+        },
+        {
+            name = "サイド部分のグラフ", item = {{name = "無し", op = 10000}, {name = "判定分布", op = 10001}, {name = "EARLY, LATE分布", op = 10002}}, def = "判定分布"
         },
         { -- 961まで使用
             name = "難易度毎の色変化", item = {{name = "あり", op = 955}, {name = "灰固定", op = 956}, {name = "緑固定", op = 957}, {name = "青固定", op = 958}, {name = "橙固定", op = 959}, {name = "赤固定", op = 960}, {name = "紫固定", op = 961}}, def = "あり"
@@ -123,19 +134,23 @@ local function main()
 
     -- 各種読み込み
     mergeSkin(skin, bga.load())
+    mergeSkin(skin, progress.load())
     mergeSkin(skin, lanes.load())
     mergeSkin(skin, judges.load())
     mergeSkin(skin, life.load())
     mergeSkin(skin, scoreGraph.load())
+    mergeSkin(skin, judgeDetail.load())
 
     skin.destination = {}
 
     -- 各種出力
     mergeSkin(skin, bga.dst())
+    mergeSkin(skin, progress.dst())
     mergeSkin(skin, lanes.dst()) -- キービームはここの中でmergeSkin
     mergeSkin(skin, judges.dst())
     mergeSkin(skin, life.dst())
     mergeSkin(skin, scoreGraph.dst())
+    mergeSkin(skin, judgeDetail.dst())
     return skin
 end
 

@@ -114,10 +114,36 @@ function isFullScreenBga()
 	return getTableValue(skin_config.option, "BGA枠", 940) == 942
 end
 
+function drawDiffBestScore()
+	return getTableValue(skin_config.option, "スコア差表示", 991) == 992
+end
+
+function drawDiffTargetScore()
+	return getTableValue(skin_config.option, "スコア差表示", 991) == 991
+end
+
+function drawDiffUpperJudge()
+	if not (drawDiffBestScore() or drawDiffTargetScore()) then return false end
+	return getTableValue(skin_config.option, "スコア差表示位置", 995) == 996
+end
+
+function drawDiffLaneSide()
+	if not (drawDiffBestScore() or drawDiffTargetScore()) then return false end
+	return getTableValue(skin_config.option, "スコア差表示位置", 995) == 995
+end
+
 function getLaneAlpha()
 	local v = getTableValue(skin_config.offset, "レーンの黒背景(既定値192 255で透明)", {a = 192}).a
 	if v == 0 then return 192 end
 	return v
+end
+
+function drawSideJudgeGraph()
+	return getTableValue(skin_config.option, "サイド部分のグラフ", 10001) == 10001
+end
+
+function drawSideEarlyLateGraph()
+	return getTableValue(skin_config.option, "サイド部分のグラフ", 10001) == 10002
 end
 
 function getDifficultyValueForColor()

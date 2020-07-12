@@ -21,19 +21,33 @@ local JUDGES = {
 
     TIMING = {
         TEXT = {
-            X = function(self) return self.X() + self.W / 2 - self.TIMING.TEXT.W / 2 end,
+            X_1 = function(self) return self.X() + self.W / 2 - self.TIMING.TEXT.W / 2 end,
+            X_2 = function(self) return self.X() + self.W / 4 - self.TIMING.TEXT.W / 2 end,
             Y = function(self) return self.Y() + 35 end,
             W = 56,
             H = 16,
         },
         NUM = {
-            X = function(self) return self.X() + self.W / 2 - self.TIMING.NUM.W * self.TIMING.NUM.DIGIT / 2 end,
+            X_1 = function(self) return self.X() + self.W / 2 - self.TIMING.NUM.W * self.TIMING.NUM.DIGIT / 2 end,
+            X_2 = function(self) return self.X() + self.W / 4 - self.TIMING.NUM.W * self.TIMING.NUM.DIGIT / 2 end,
             Y = function(self) return self.Y() + 35 end,
             W = 12,
             H = 15,
             DIGIT = 3,
         }
     },
+    SCORE = {
+        DIFF = {
+            X_1 = function(self) return self.X() + self.W / 2 - self.SCORE.DIFF.W * self.SCORE.DIFF.DIGIT / 2 end,
+            X_2 = function(self) return self.X() + self.W / 4 * 3 - self.SCORE.DIFF.W * self.SCORE.DIFF.DIGIT / 2 end,
+            SIDE_X_1 = function(self) return lanes.getAreaX() + lanes.getAreaW() + 8 end,
+            SIDE_X_2 = function(self) return lanes.getAreaX() + 8 - self.SCORE.DIFF.W * self.SCORE.DIFF.DIGIT end,
+            Y = function(self) return self.Y() + 35 end,
+            W = 12,
+            H = 15,
+            DIGIT = 5,
+        }
+    }
 }
 
 local COMBO = {
@@ -73,6 +87,8 @@ judges.functions.load = function ()
         value = {
             {id = "nowCombo", src = 6, x = 0, y = 0, w = COMBO.W * 10, h = COMBO.H, divx = 10, digit = COMBO.DIGIT, ref = 75, align = (isDrawComboNextToTheJudge() and 0 or 2)},
             {id = "judgeTimeError", src = 0, x = 1904, y = 46, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.TIMING.NUM.DIGIT, align = 2, ref = 525},
+            {id = "bestDiffValue", src = 0, x = 1904, y = 46, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.SCORE.DIFF.DIGIT, ref = 152, align = drawDiffUpperJudge() and 2 or 1},
+            {id = "targetDiffValue", src = 0, x = 1904, y = 46, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.SCORE.DIFF.DIGIT, ref = 153, align = drawDiffUpperJudge() and 2 or 1},
         },
         judge = {
             {
@@ -160,32 +176,79 @@ judges.functions.dst = function ()
     end
     dst[#dst+1] = {id = "judges"}
 
-    -- early late
-    if isDrawEarlyLate() then
+    do
+        -- early late
+        if isDrawEarlyLate() then
+            local x = JUDGES.TIMING.TEXT.X_1(JUDGES)
+            if drawDiffUpperJudge() then
+                x = JUDGES.TIMING.TEXT.X_2(JUDGES)
+            end
+            dst[#dst+1] = {
+                id = "earlyText", offsets = {3, 32}, timer = 46, loop = -1, op = {1242}, dst = {
+                    {time = 0, x = x, y = JUDGES.TIMING.TEXT.Y(JUDGES), w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
+                    {time = JUDGES.DRAW_TIME}
+                }
+            }
+            dst[#dst+1] = {
+                id = "lateText", offsets = {3, 32}, timer = 46, loop = -1, op = {1243}, dst = {
+                    {time = 0, x = x, y = JUDGES.TIMING.TEXT.Y(JUDGES), w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
+                    {time = JUDGES.DRAW_TIME}
+                }
+            }
+        elseif isDrawErrorJudgeTimeExcludePg() then
+            local x = JUDGES.TIMING.NUM.X_1(JUDGES)
+            if drawDiffUpperJudge() then
+                x = JUDGES.TIMING.NUM.X_2(JUDGES)
+            end
+            -- +-ms
+            dst[#dst+1] = {
+                id = "judgeTimeError", offsets = {3, 32}, timer = 46, loop = -1, op = {-241}, dst = {
+                    {time = 0, x = x, y = JUDGES.TIMING.NUM.Y(JUDGES), w = JUDGES.TIMING.NUM.W, h = JUDGES.TIMING.NUM.H},
+                    {time = JUDGES.DRAW_TIME}
+                }
+            }
+        elseif isDrawErrorJudgeTimeIncludetPg() then
+            local x = JUDGES.TIMING.NUM.X_1(JUDGES)
+            if drawDiffUpperJudge() then
+                x = JUDGES.TIMING.NUM.X_2(JUDGES)
+            end
+            dst[#dst+1] = {
+                id = "judgeTimeError", offsets = {3, 32}, timer = 46, loop = -1, dst = {
+                    {time = 0, x = x, y = JUDGES.TIMING.NUM.Y(JUDGES), w = JUDGES.TIMING.NUM.W, h = JUDGES.TIMING.NUM.H},
+                    {time = JUDGES.DRAW_TIME}
+                }
+            }
+        end
+    end
+
+    -- スコア差表示
+    if drawDiffUpperJudge() then
+        local x = JUDGES.SCORE.DIFF.X_1(JUDGES)
+        if isDrawEarlyLate() or isDrawErrorJudgeTimeExcludePg() or isDrawErrorJudgeTimeIncludetPg() then
+            x = JUDGES.SCORE.DIFF.X_2(JUDGES)
+        end
+        local id = "bestDiffValue"
+        if drawDiffTargetScore() then
+            id = "targetDiffValue"
+        end
         dst[#dst+1] = {
-            id = "earlyText", offsets = {3, 32}, timer = 46, loop = -1, op = {1242}, dst = {
-                {time = 0, x = JUDGES.TIMING.TEXT.X(JUDGES), y = JUDGES.TIMING.TEXT.Y(JUDGES), w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
+            id = id, timer = 46, loop = -1, dst = {
+                {time = 0, x = x, y = JUDGES.SCORE.DIFF.Y(JUDGES), w = JUDGES.SCORE.DIFF.W, h = JUDGES.SCORE.DIFF.H},
                 {time = JUDGES.DRAW_TIME}
             }
         }
+    elseif drawDiffLaneSide() then
+        local x = JUDGES.SCORE.DIFF.SIDE_X_1(JUDGES)
+        if not is1P() then
+            x =  JUDGES.SCORE.DIFF.SIDE_X_2(JUDGES)
+        end
+        local id = "bestDiffValue"
+        if drawDiffTargetScore() then
+            id = "targetDiffValue"
+        end
         dst[#dst+1] = {
-            id = "lateText", offsets = {3, 32}, timer = 46, loop = -1, op = {1243}, dst = {
-                {time = 0, x = JUDGES.TIMING.TEXT.X(JUDGES), y = JUDGES.TIMING.TEXT.Y(JUDGES), w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
-                {time = JUDGES.DRAW_TIME}
-            }
-        }
-    elseif isDrawErrorJudgeTimeExcludePg() then
-        -- +-ms
-        dst[#dst+1] = {
-            id = "judgeTimeError", offsets = {3, 32}, timer = 46, loop = -1, op = {-241}, dst = {
-                {time = 0, x = JUDGES.TIMING.NUM.X(JUDGES), y = JUDGES.TIMING.NUM.Y(JUDGES), w = JUDGES.TIMING.NUM.W, h = JUDGES.TIMING.NUM.H},
-                {time = JUDGES.DRAW_TIME}
-            }
-        }
-    elseif isDrawErrorJudgeTimeIncludetPg() then
-        dst[#dst+1] = {
-            id = "judgeTimeError", offsets = {3, 32}, timer = 46, loop = -1, dst = {
-                {time = 0, x = JUDGES.TIMING.NUM.X(JUDGES), y = JUDGES.TIMING.NUM.Y(JUDGES), w = JUDGES.TIMING.NUM.W, h = JUDGES.TIMING.NUM.H},
+            id = id, timer = 46, loop = -1, dst = {
+                {time = 0, x = x, y = JUDGES.SCORE.DIFF.Y(JUDGES), w = JUDGES.SCORE.DIFF.W, h = JUDGES.SCORE.DIFF.H},
                 {time = JUDGES.DRAW_TIME}
             }
         }
