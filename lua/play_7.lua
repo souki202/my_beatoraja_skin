@@ -1,6 +1,8 @@
 require("modules.commons.define")
 local lanes = require("modules.play.lanes")
 local judges = require("modules.play.judges")
+local keyBeam = require("modules.play.key_beam")
+local life = require("modules.play.life")
 
 local header = {
     type = 0,
@@ -13,7 +15,7 @@ local header = {
     close = 100,
     fadeout = 1000,
 
-    property = { -- 使用済み 970まで
+    property = { -- 使用済み 985まで
         {
             name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
@@ -39,13 +41,22 @@ local header = {
             name = "レーンのシンボル", item = {{name = "ON", op = 965}, {name = "OFF", op = 966}}, def = "ON"
         },
         {
-            name = "キーフラッシュ長さ", item = {{name = "短め", op = 925}, {name = "普通", op = 926}, {name = "長め", op = 927}}, def = "普通"
+            name = "キービーム長さ", item = {{name = "無し", op = 925}, {name = "とても短め", op = 926}, {name = "短め", op = 927}, {name = "普通", op = 928}, {name = "長め", op = 929}}, def = "普通"
         },
         {
-            name = "キーフラッシュ表示時間", item = {{name = "短め", op = 930}, {name = "普通", op = 931}, {name = "長め", op = 932}}, def = "普通"
+            name = "キービーム出現時間", item = {{name = "即", op = 930}, {name = "とても短め", op = 931}, {name = "短め", op = 932}, {name = "普通", op = 933}, {name = "長め", op = 934}}, def = "即"
         },
         {
-            name = "後方キーフラッシュ", item = {{name = "ON", op = 935}, {name = "OFF", op = 936}}, def = "ON"
+            name = "キービーム消失時間", item = {{name = "即", op = 985}, {name = "とても短め", op = 986}, {name = "短め", op = 987}, {name = "普通", op = 988}, {name = "長め", op = 989}}, def = "短め"
+        },
+        {
+            name = "キービーム出現アニメーション", item = {{name = "通常", op = 975}, {name = "端から", op = 976}, {name = "中央から", op = 977}}, def = "通常"
+        },
+        {
+            name = "キービーム消失アニメーション", item = {{name = "通常", op = 980}, {name = "端から", op = 981}, {name = "中央から", op = 982}}, def = "端から"
+        },
+        {
+            name = "後方キービーム", item = {{name = "ON", op = 935}, {name = "OFF", op = 936}}, def = "ON"
         },
         {
             name = "BGA枠", item = {{name = "16:9", op = 940}, {name = "横の領域全体", op = 941}, {name = "画面全体", op = 942}}, def = "横の領域全体"
@@ -64,6 +75,7 @@ local header = {
         {name = "レーンのシンボル(ターンテーブル)", path = "../play/parts/lanesymbols/turntable/*.png", def = "circle"},
         {name = "判定画像", path = "../play/parts/judges/*.png", def = "default"},
         {name = "コンボ画像", path = "../play/parts/combo/*.png", def = "default"},
+        {name = "グルーヴゲージのインディケーター", path = "../play/parts/indicators/*.png", def = "default"},
     },
     offset = {
         {name = "各種オフセット(0で既定値)---------", x = 0},
@@ -88,6 +100,7 @@ local function main()
         {id = 4, path = "../play/parts/lanesymbols/turntable/*.png"},
         {id = 5, path = "../play/parts/judges/*.png"},
         {id = 6, path = "../play/parts/combo/*.png"},
+        {id = 7, path = "../play/parts/indicators/*.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 
@@ -101,19 +114,23 @@ local function main()
 
 
     skin.font = {
-		{id = 0, path = "../commON/fONts/SourceHanSans-Regular.otf"},
+		{id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
     }
-    
+
 
     -- 各種読み込み
     mergeSkin(skin, lanes.load())
     mergeSkin(skin, judges.load())
+    mergeSkin(skin, keyBeam.load())
+    mergeSkin(skin, life.load())
 
     skin.destination = {}
 
     -- 各種出力
     mergeSkin(skin, lanes.dst())
     mergeSkin(skin, judges.dst())
+    mergeSkin(skin, keyBeam.dst())
+    mergeSkin(skin, life.dst())
     return skin
 end
 

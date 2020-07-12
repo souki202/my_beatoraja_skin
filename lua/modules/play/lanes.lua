@@ -75,8 +75,27 @@ notes.functions.getAreaY = function ()
     return LANES.AREA.Y
 end
 
-notes.functions.getLaneW = function ()
+notes.functions.getInnerAreaY = function ()
+    return LANES.AREA.Y + LANES.JUDGE_LINE.H
+end
+
+notes.functions.getOurterAreaY = function ()
+    return LANES.AREA.Y - 2
+end
+
+notes.functions.getAreaW = function ()
     return LANES.AREA.W
+end
+
+notes.functions.getLaneX = function (key)
+    if #NOTES.X < key then return 0 end
+    return NOTES.X[key]
+end
+
+notes.functions.getLaneW = function (key)
+    if key == commons.keys + 1 then return NOTES.SCRATCH_W end
+    if #NOTES.W < key          then return 0 end
+    return NOTES.W[key]
 end
 
 notes.functions.load = function ()
@@ -136,7 +155,7 @@ notes.functions.load = function ()
             {id = "mine-w", src = 1, x = 99, y = 23, w = 27, h = 8},
             {id = "mine-s", src = 1, x = 50, y = 23, w = 46, h = 8},
 
-            {id = "laneEdge", src = 0, x = 0, y = 55, w = LANES.EDGE.W, h = LANES.EDGE.H},
+            {id = "laneEdge", src = 0, x = 0, y = 30, w = LANES.EDGE.W, h = LANES.EDGE.H},
 
             -- シンボル
             {id = "whiteSymbol", src = 2, x = 0, y = 0, w = -1, h = -1},
@@ -256,10 +275,9 @@ notes.functions.dst = function ()
     -- レーンの区切り線
     for i = 1, commons.keys+1 do
         if (isLeftScratch() and i ~= commons.keys+1) or (not isLeftScratch() and i ~= 1) then
-            print(i)
             dst[#dst+1] = {
                 id = "white", dst = {
-                    {x = NOTES.X[i], y = LANES.AREA.Y, w = 1, h = LANES.AREA.H}
+                    {x = NOTES.X[i] - 1, y = LANES.AREA.Y, w = 1, h = LANES.AREA.H}
                 }
             }
         end

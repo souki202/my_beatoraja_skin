@@ -58,6 +58,46 @@ function isDrawErrorJudgeTimeExcludePg()
 	return getTableValue(skin_config.option, "EARLY, LATE表示", 906) == 908
 end
 
+function getKeyFlashHeightIndex()
+	return 5 - (929 - getTableValue(skin_config.option, "キービーム長さ", 925))
+end
+
+function getKeyFlashAppearAnimationTimeIndex()
+	return 5 - (934 - getTableValue(skin_config.option, "キービーム出現時間", 930))
+end
+
+function getKeyFlashDelAnimationTimeIndex()
+	return 5 - (989 - getTableValue(skin_config.option, "キービーム消失時間", 985))
+end
+
+function iskeyFlashAppearNormalAnimation()
+	return getTableValue(skin_config.option, "キービーム出現アニメーション", 975) == 975
+end
+
+function iskeyFlashAppearFromEdgeAnimation()
+	return getTableValue(skin_config.option, "キービーム出現アニメーション", 975) == 976
+end
+
+function iskeyFlashAppearFromCenterAnimation()
+	return getTableValue(skin_config.option, "キービーム出現アニメーション", 975) == 977
+end
+
+function iskeyFlashDelNormalAnimation()
+	return getTableValue(skin_config.option, "キービーム消失アニメーション", 980) == 980
+end
+
+function iskeyFlashDelFromEdgeAnimation()
+	return getTableValue(skin_config.option, "キービーム消失アニメーション", 980) == 981
+end
+
+function iskeyFlashDelFromCenterAnimation()
+	return getTableValue(skin_config.option, "キービーム消失アニメーション", 980) == 982
+end
+
+function isDrwaBackKeyBeam()
+	return getTableValue(skin_config.option, "後方キービーム", 935) == 935
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)

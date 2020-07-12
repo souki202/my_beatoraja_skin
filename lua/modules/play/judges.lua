@@ -13,6 +13,7 @@ local JUDGES = {
     X = function() return lanes.getAreaX() + 136 end, -- 後で初期化
     Y = function() return lanes.getAreaY() + 132 end,
     W = 160,
+    INIT_MUL_SIZE = 0.75,
     H = 31,
 
     IDS = {"Perfect", "Great", "Good", "Bad", "Poor", "Miss"},
@@ -37,17 +38,17 @@ local JUDGES = {
 
 local COMBO = {
     LEFT = {
-        X = function(self) return JUDGES.W + 14 end,
-        Y = -19
+        X = function(self) return JUDGES.W * 1.25 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
+        Y = -19 + JUDGES.H * JUDGES.INIT_MUL_SIZE / 2,
     },
     BOTTOM = {
-        X = function(self) return self.W * self.DIGIT / 2 end,
-        Y = -60,
+        X = function(self) return self.W * self.DIGIT / 2 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
+        Y = -60 + JUDGES.H * JUDGES.INIT_MUL_SIZE / 2,
     },
     OUTER = {
-        X_1 = function(self) return 376 + self.W / 4 end,
-        X_2 = function(self) return -138 - 78 + self.W / 4 end,
-        Y = 350,
+        X_1 = function(self) return 376 + self.W / 4 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
+        X_2 = function(self) return -138 - 78 + self.W / 4 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
+        Y = 350 + JUDGES.H * JUDGES.INIT_MUL_SIZE / 2,
     },
     TEXT = {
         X_1 = 542,
@@ -96,7 +97,7 @@ judges.functions.load = function ()
         for i = 1, #JUDGES.IDS do
             judgeImgs[#judgeImgs+1] = {
                 id = JUDGES.ID_PREFIX .. JUDGES.IDS[i], loop = -1, timer = 46, offsets = {3, 32}, dst = {
-                    {time = 0, x = JUDGES.X() + JUDGES.W / 2, y = JUDGES.Y() + JUDGES.H / 2, w = 0, h = 0},
+                    {time = 0, x = JUDGES.X() + JUDGES.W * (1 - JUDGES.INIT_MUL_SIZE) / 2, y = JUDGES.Y() + JUDGES.H * (1 - JUDGES.INIT_MUL_SIZE) / 2, w = JUDGES.W * JUDGES.INIT_MUL_SIZE, h = JUDGES.H * JUDGES.INIT_MUL_SIZE},
                     {time = JUDGES.APPEAR_TIME, x = JUDGES.X(), y = JUDGES.Y(), w = JUDGES.W, h = JUDGES.H},
                     {time = JUDGES.DRAW_TIME}
                 }
@@ -116,18 +117,18 @@ judges.functions.load = function ()
         if isDrawComboNextToTheJudge() then
             x = COMBO.LEFT.X(COMBO)
             y = COMBO.LEFT.Y
-            x2 = x - COMBO.W / 4
-            y2 = y + COMBO.H / 3 + 2
+            x2 = x - COMBO.W / 4 - JUDGES.W * JUDGES.INIT_MUL_SIZE / 2
+            y2 = y + COMBO.H / 3 + 2 - JUDGES.H * JUDGES.INIT_MUL_SIZE / 2
         elseif isDrawComboBottom() then
             x = COMBO.BOTTOM.X(COMBO)
             y = COMBO.BOTTOM.Y
-            x2 = x - COMBO.W / 4
-            y2 = y + COMBO.H / 3 + 2
+            x2 = x - COMBO.W / 4 - JUDGES.W * JUDGES.INIT_MUL_SIZE / 2
+            y2 = y + COMBO.H / 3 + 2 - JUDGES.H * JUDGES.INIT_MUL_SIZE / 2
         elseif isDrawComboOuterLane() then
             x = is1P() and COMBO.OUTER.X_1(COMBO) or COMBO.OUTER.X_2(COMBO)
             y = COMBO.OUTER.Y
-            x2 = x - COMBO.W / 4
-            y2 = y + COMBO.H / 3 + 3
+            x2 = x - COMBO.W / 4 - JUDGES.W * JUDGES.INIT_MUL_SIZE / 2
+            y2 = y + COMBO.H / 3 + 3 - JUDGES.H * JUDGES.INIT_MUL_SIZE / 2
         end
         for i = 1, #JUDGES.IDS do
             judgeNums[#judgeNums+1] = {
@@ -140,12 +141,6 @@ judges.functions.load = function ()
         end
     end
     return skin
-end
-
-function isDrawCombo()
-    local c = main_state.number(104)
-    print(c)
-    return c ~= nil and main_state.number(75) > 0
 end
 
 judges.functions.dst = function ()
