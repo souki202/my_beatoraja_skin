@@ -10,18 +10,19 @@ local KEY_BEAM = {
     HEIGHTS = {0, 160, 350, 564, 720},
     BACK_H = {80, 60},
     ANIMATION_TIMES = {0, 50, 100, 200, 350},
+    ALPHA = 192,
 }
 
 -- 皿もこれ
 local function getWhiteBeamColor()
 	local dif = getDifficultyValueForColor()
-	local colors = {{213, 213, 213}, {248, 255, 248}, {248, 255, 255}, {255, 248, 213}, {255, 248, 248}, {255, 131, 250}}
+	local colors = {{183, 183, 183}, {151, 190, 151}, {151, 190, 190}, {218, 180, 151}, {218, 64, 64}, {255, 81, 200}}
 	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 
 local function getBlueBeamColor()
 	local dif = getDifficultyValueForColor()
-	local colors = {{183, 183, 183}, {218, 255, 218}, {218, 255, 255}, {255, 218, 183}, {255, 218, 218}, {255, 81, 200}}
+	local colors = {{128, 128, 128}, {64, 255, 66}, {66, 66, 255}, {255, 128, 64}, {218, 0, 0}, {204, 102, 153}}
 	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 
@@ -73,7 +74,7 @@ keyBeam.functions.dst = function ()
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                         dst = {
-                            {time = 0, x = x, y = y, w = w, h = 0, r = r, g = g, b = b, acc = 2},
+                            {time = 0, x = x, y = y, w = w, h = 0, r = r, g = g, b = b, a = KEY_BEAM.ALPHA, acc = 2},
                             {time = atime, h = h2}
                         }
                     }
@@ -81,7 +82,7 @@ keyBeam.functions.dst = function ()
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                             dst = {
-                                {time = 0, x = x, y = by, w = w, h = 0, r = r, g = g, b = b, acc = 2},
+                                {time = 0, x = x, y = by, w = w, h = 0, r = r, g = g, b = b, a = KEY_BEAM.ALPHA, acc = 2},
                                 {time = atime, h = -bh}
                             }
                         }
@@ -90,7 +91,7 @@ keyBeam.functions.dst = function ()
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                         dst = {
-                            {time = 0, x = x + w / 2, y = y, w = 0, h = h2, r = r, g = g, b = b, acc = 2},
+                            {time = 0, x = x + w / 2, y = y, w = 0, h = h2, r = r, g = g, b = b, a = KEY_BEAM.ALPHA, acc = 2},
                             {time = atime, x = x, w = w}
                         }
                     }
@@ -98,7 +99,7 @@ keyBeam.functions.dst = function ()
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                             dst = {
-                                {time = 0, x = x + w / 2, y = by, w = 0, h = -bh, r = r, g = g, b = b, acc = 2},
+                                {time = 0, x = x + w / 2, y = by, w = 0, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA, acc = 2},
                                 {time = atime, x = x, w = w}
                             }
                         }
@@ -108,7 +109,7 @@ keyBeam.functions.dst = function ()
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                         dst = {
-                            {time = 0, x = x, y = y, w = 0, h = h2, r = r, g = g, b = b},
+                            {time = 0, x = x, y = y, w = 0, h = h2, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                             {time = atime, w = math.ceil(w / 2)},
                         }
                     }
@@ -116,7 +117,7 @@ keyBeam.functions.dst = function ()
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                             dst = {
-                                {time = 0, x = x, y = by, w = 0, h = -bh, r = r, g = g, b = b},
+                                {time = 0, x = x, y = by, w = 0, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                                 {time = atime, w = math.ceil(w / 2)},
                             }
                         }
@@ -125,7 +126,7 @@ keyBeam.functions.dst = function ()
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                         dst = {
-                            {time = 0, x = x + w, y = y, w = 0, h = h2, r = r, g = g, b = b},
+                            {time = 0, x = x + w, y = y, w = 0, h = h2, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                             {time = atime, w = -math.floor(w / 2)},
                         }
                     }
@@ -133,7 +134,7 @@ keyBeam.functions.dst = function ()
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                             dst = {
-                                {time = 0, x = x + w, y = by, w = 0, h = -bh, r = r, g = g, b = b},
+                                {time = 0, x = x + w, y = by, w = 0, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                                 {time = atime, w = -math.floor(w / 2)},
                             }
                         }
@@ -148,7 +149,7 @@ keyBeam.functions.dst = function ()
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                         dst = {
-                            {time = 0, x = x, y = y, w = w, h = h2, r = r, g = g, b = b},
+                            {time = 0, x = x, y = y, w = w, h = h2, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                             {time = dtime, h = 0}
                         }
                     }
@@ -156,7 +157,7 @@ keyBeam.functions.dst = function ()
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                             dst = {
-                                {time = 0, x = x, y = by, w = w, h = -bh, r = r, g = g, b = b},
+                                {time = 0, x = x, y = by, w = w, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                                 {time = dtime, h = 0}
                             }
                         }
@@ -165,7 +166,7 @@ keyBeam.functions.dst = function ()
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                         dst = {
-                            {time = 0, x = x, y = y, w = w, h = h2, r = r, g = g, b = b},
+                            {time = 0, x = x, y = y, w = w, h = h2, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                             {time = dtime, x = x + w / 2, w = 0}
                         }
                     }
@@ -173,7 +174,7 @@ keyBeam.functions.dst = function ()
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                             dst = {
-                                {time = 0, x = x, y = by, w = w, h = -bh, r = r, g = g, b = b},
+                                {time = 0, x = x, y = by, w = w, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                                 {time = dtime, x = x + w / 2, w = 0}
                             }
                         }
@@ -183,7 +184,7 @@ keyBeam.functions.dst = function ()
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                         dst = {
-                            {time = 0, x = x, y = y, w = math.ceil(w / 2), h = h2, r = r, g = g, b = b},
+                            {time = 0, x = x, y = y, w = math.ceil(w / 2), h = h2, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                             {time = dtime, w = 0},
                         }
                     }
@@ -191,7 +192,7 @@ keyBeam.functions.dst = function ()
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                             dst = {
-                                {time = 0, x = x, y = by, w = math.ceil(w / 2), h = -bh, r = r, g = g, b = b},
+                                {time = 0, x = x, y = by, w = math.ceil(w / 2), h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                                 {time = dtime, w = 0},
                             }
                         }
@@ -200,7 +201,7 @@ keyBeam.functions.dst = function ()
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                         dst = {
-                            {time = 0, x = x + w, y = y, w = -math.floor(w / 2), h = h2, r = r, g = g, b = b},
+                            {time = 0, x = x + w, y = y, w = -math.floor(w / 2), h = h2, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                             {time = dtime, w = 0},
                         }
                     }
@@ -208,7 +209,7 @@ keyBeam.functions.dst = function ()
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                             dst = {
-                                {time = 0, x = x + w, y = by, w = -math.floor(w / 2), h = -bh, r = r, g = g, b = b},
+                                {time = 0, x = x + w, y = by, w = -math.floor(w / 2), h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
                                 {time = dtime, w = 0},
                             }
                         }

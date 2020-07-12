@@ -105,11 +105,13 @@ detail.functions.dst = function ()
         }
 
         -- 区切り線
-        dst[#dst+1] = {
-            id = "white", dst = {
-                {x = DETAIL.TEXT.X(DETAIL, i), y = DETAIL.AREA.Y, w = 1, h = DETAIL.AREA.H}
+        if i ~= 1 then
+            dst[#dst+1] = {
+                id = "white", dst = {
+                    {x = DETAIL.TEXT.X(DETAIL, i), y = DETAIL.AREA.Y, w = 1, h = DETAIL.AREA.H}
+                }
             }
-        }
+        end
     end
     -- 区切り線
     dst[#dst+1] = {
