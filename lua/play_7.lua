@@ -1,8 +1,9 @@
 require("modules.commons.define")
 local lanes = require("modules.play.lanes")
 local judges = require("modules.play.judges")
-local keyBeam = require("modules.play.key_beam")
 local life = require("modules.play.life")
+local scoreGraph = require("modules.play.score_graph")
+local bga = require("modules.play.bga")
 
 local header = {
     type = 0,
@@ -59,7 +60,7 @@ local header = {
             name = "後方キービーム", item = {{name = "ON", op = 935}, {name = "OFF", op = 936}}, def = "ON"
         },
         {
-            name = "BGA枠", item = {{name = "16:9", op = 940}, {name = "横の領域全体", op = 941}, {name = "画面全体", op = 942}}, def = "横の領域全体"
+            name = "BGA枠", item = {{name = "横上部", op = 940}, {name = "横全体", op = 941}, {name = "画面全体", op = 942}}, def = "横上部"
         },
         {
             name = "黒帯部分のBGA表示", item = {{name = "ON", op = 945}, {name = "OFF", op = 946}}, def = "ON"
@@ -79,7 +80,8 @@ local header = {
     },
     offset = {
         {name = "各種オフセット(0で既定値)---------", x = 0},
-        {name = "判定線の高さ(既定値 4px)", h = 0}
+        {name = "判定線の高さ(既定値 4px)", h = 0},
+        {name = "レーンの黒背景(既定値192 255で透明)", a = 0}
     }
 }
 
@@ -101,6 +103,7 @@ local function main()
         {id = 5, path = "../play/parts/judges/*.png"},
         {id = 6, path = "../play/parts/combo/*.png"},
         {id = 7, path = "../play/parts/indicators/*.png"},
+        {id = 8, path = "../play/parts/bgamask/default.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 
@@ -119,18 +122,20 @@ local function main()
 
 
     -- 各種読み込み
+    mergeSkin(skin, bga.load())
     mergeSkin(skin, lanes.load())
     mergeSkin(skin, judges.load())
-    mergeSkin(skin, keyBeam.load())
     mergeSkin(skin, life.load())
+    mergeSkin(skin, scoreGraph.load())
 
     skin.destination = {}
 
     -- 各種出力
-    mergeSkin(skin, lanes.dst())
+    mergeSkin(skin, bga.dst())
+    mergeSkin(skin, lanes.dst()) -- キービームはここの中でmergeSkin
     mergeSkin(skin, judges.dst())
-    mergeSkin(skin, keyBeam.dst())
     mergeSkin(skin, life.dst())
+    mergeSkin(skin, scoreGraph.dst())
     return skin
 end
 

@@ -98,6 +98,28 @@ function isDrwaBackKeyBeam()
 	return getTableValue(skin_config.option, "後方キービーム", 935) == 935
 end
 
+function isDrawLargeBga()
+	return getTableValue(skin_config.option, "黒帯部分のBGA表示", 945) == 945
+end
+
+function isBgaOnLeftUpper()
+	return getTableValue(skin_config.option, "BGA枠", 940) == 940
+end
+
+function isBgaOnLeft()
+	return getTableValue(skin_config.option, "BGA枠", 940) == 941
+end
+
+function isFullScreenBga()
+	return getTableValue(skin_config.option, "BGA枠", 940) == 942
+end
+
+function getLaneAlpha()
+	local v = getTableValue(skin_config.offset, "レーンの黒背景(既定値192 255で透明)", {a = 192}).a
+	if v == 0 then return 192 end
+	return v
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)

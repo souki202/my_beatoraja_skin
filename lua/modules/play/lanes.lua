@@ -99,6 +99,7 @@ notes.functions.getLaneW = function (key)
 end
 
 notes.functions.load = function ()
+    local keyBeam = require("modules.play.key_beam")
     local laneX = notes.functions.getAreaX()
 
     -- offsetで初期化
@@ -237,14 +238,23 @@ notes.functions.load = function ()
         skin.note.dst = notesDst
     end
 
+    mergeSkin(skin, keyBeam.load())
+
     return skin
 end
 
 notes.functions.dst = function ()
+    local keyBeam = require("modules.play.key_beam")
     local laneX = notes.functions.getAreaX()
     local skin = {destination = {}}
     local dst = skin.destination
 
+    --レーン全体の背景
+    dst[#dst+1] = {
+        id = "black", dst = {
+            {x = laneX, y = LANES.AREA.Y, w = LANES.AREA.W, h = LANES.AREA.H, a = getLaneAlpha()}
+        }
+    }
 
     -- レーンの左右
     do
@@ -272,6 +282,9 @@ notes.functions.dst = function ()
         end
     end
 
+    mergeSkin(skin, keyBeam.dst())
+
+
     -- レーンの区切り線
     for i = 1, commons.keys+1 do
         if (isLeftScratch() and i ~= commons.keys+1) or (not isLeftScratch() and i ~= 1) then
@@ -296,11 +309,23 @@ notes.functions.dst = function ()
     -- アンダーライン
     do
         local r, g, b = getDifficultyColor()
-        dst[#dst+1] = {
-            id = "white", dst = {
-                {x = 0, y = LANES.AREA.Y - 2, w = WIDTH, h = 2, r = r, g = g, b = b}
+        if isFullScreenBga() or isBgaOnLeft() then
+            local x = 0
+            if not is1P() then
+                x = laneX
+            end
+            dst[#dst+1] = {
+                id = "white", dst = {
+                    {x = x, y = LANES.AREA.Y - 2, w = LANES.AREA.W + 75, h = 2, r = r, g = g, b = b}
+                }
             }
-        }
+        else
+            dst[#dst+1] = {
+                id = "white", dst = {
+                    {x = 0, y = LANES.AREA.Y - 2, w = WIDTH, h = 2, r = r, g = g, b = b}
+                }
+            }
+        end
     end
     -- レーンのシンボル
     if isDrawLaneSymbol() then

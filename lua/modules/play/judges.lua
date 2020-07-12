@@ -133,7 +133,7 @@ judges.functions.load = function ()
         for i = 1, #JUDGES.IDS do
             judgeNums[#judgeNums+1] = {
                 id = "nowCombo", loop = -1, offsets = {3, 32}, timer = 46, dst = {
-                    {time = 0, x = x - COMBO.W * 3, y = y + COMBO.H / 4, w = COMBO.W / 2, h = COMBO.H / 2},
+                    {time = 0, x = x - COMBO.W * 3, y = y + COMBO.H * (1 - JUDGES.INIT_MUL_SIZE) * 0.75, w = COMBO.W * JUDGES.INIT_MUL_SIZE, h = COMBO.H * JUDGES.INIT_MUL_SIZE},
                     {time = JUDGES.APPEAR_TIME, x = x2, y = y2, w = COMBO.W, h = COMBO.H},
                     {time = COMBO.DRAW_TIME}
                 }
