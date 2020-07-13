@@ -129,3 +129,14 @@ function getTableValue(tbl, key, defaultValue)
     end
     return defaultValue
 end
+
+-- 0でdefaultを適用するようにしてoffsetを取得
+function getOffsetValueWithDefault(name, defaultValue)
+    local v = getTableValue(skin_config.offset, name, defaultValue)
+    for key, value in pairs(defaultValue) do
+        if not table.in_key(v, key) or v[key] == 0 then
+            v[key] = value
+        end
+    end
+    return v
+end

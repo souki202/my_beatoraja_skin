@@ -16,7 +16,7 @@ local HISPEED = {
             X_2 = function () return WIDTH - lanes.getSideSpace() end,
             Y = function () return 355 end,
             H = 76,
-            W = function () return lanes.getSideSpace() end,
+            W = function () return lanes.getSideSpace() - 2 end,
         },
         LABEL = {
             X = function (self) return self.OPERATION.AREA.X() + (self.OPERATION.AREA.W() - self.OPERATION.LABEL.W) / 2 end,
@@ -196,7 +196,6 @@ hispeed.functions.dst = function ()
     --     }
     -- }
     -- ハイスピ
-    print(HISPEED.NUM.HS.AF_X(HISPEED), HISPEED.NUM.HS.Y(HISPEED))
     dst[#dst+1] = {
         id = "hispeedValue", op = {270}, dst = {
             {x = HISPEED.NUM.HS.X(HISPEED), y = HISPEED.NUM.HS.Y(HISPEED), w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}

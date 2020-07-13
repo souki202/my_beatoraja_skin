@@ -7,6 +7,9 @@ local bga = require("modules.play.bga")
 local progress = require("modules.play.progress_bar")
 local judgeDetail = require("modules.play.judge_detail")
 local hispeed = require("modules.play.hispeed")
+local sideInfo = require("modules.play.side_info")
+local grow = require("modules.play.grow")
+local bomb = require("modules.play.bomb")
 
 local header = {
     type = 0,
@@ -19,7 +22,7 @@ local header = {
     close = 100,
     fadeout = 1000,
 
-    property = { -- 使用済み 995まで
+    property = { -- 使用済み 10005まで
         {
             name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
@@ -80,8 +83,12 @@ local header = {
         { -- 961まで使用
             name = "難易度毎の色変化", item = {{name = "あり", op = 955}, {name = "灰固定", op = 956}, {name = "緑固定", op = 957}, {name = "青固定", op = 958}, {name = "橙固定", op = 959}, {name = "赤固定", op = 960}, {name = "紫固定", op = 961}}, def = "あり"
         },
+        {
+            name = "ボムのパーティクル", item = {{name = "ON", op = 10005}, {name = "OFF", op = 10006}}, def = "ON"
+        },
     },
     filepath = {
+        {name = "各種画像--------------", path = "../dummy/*"},
         {name = "ノーツ画像", path = "../play/parts/notes/*.png", def = "default"},
         {name = "レーンのシンボル(白鍵)", path = "../play/parts/lanesymbols/white/*.png", def = "dia"},
         {name = "レーンのシンボル(青鍵)", path = "../play/parts/lanesymbols/blue/*.png", def = "dia"},
@@ -91,11 +98,30 @@ local header = {
         {name = "判定画像", path = "../play/parts/judges/*.png", def = "default"},
         {name = "コンボ画像", path = "../play/parts/combo/*.png", def = "default"},
         {name = "グルーヴゲージのインディケーター", path = "../play/parts/indicators/*.png", def = "default"},
+        {name = "ボム関連画像---------", path = "../dummy/*"},
+        {name = "波紋1", path = "../play/parts/bombs/wave1/*.png", def = "default"},
+        {name = "パーティクル1", path = "../play/parts/bombs/particle1/*.png", def = "default"},
+        {name = "アニメーション1", path = "../play/parts/bombs/animation1/*.png", def = "default"},
+        {name = "波紋2", path = "../play/parts/bombs/wave2/*.png", def = "default"},
+        {name = "パーティクル2", path = "../play/parts/bombs/particle2/*.png", def = "default"},
+        {name = "アニメーション2", path = "../play/parts/bombs/animation2/*.png", def = "default"},
     },
     offset = {
         {name = "各種オフセット(0で既定値)---------", x = 0},
         {name = "判定線の高さ(既定値 4px)", h = 0},
-        {name = "レーンの黒背景(既定値192 255で透明)", a = 0}
+        {name = "レーンの黒背景(既定値192 255で透明)", a = 0},
+        {name = "ボム関連------------------------", x = 0},
+        {name = "100%の縦横はwave 500px, anim 300px, particle 16px"},
+        {name = "ボムのwave1の大きさ(単位10% 既定値10)", w = 0, h = 0},
+        {name = "ボムのwave2の大きさ(単位10% 既定値10)", w = 0, h = 0},
+        {name = "ボムのparticle1の大きさ(単位10% 既定値10)", w = 0, h = 0},
+        {name = "ボムのparticle2の大きさ(単位10% 既定値10)", w = 0, h = 0},
+        {name = "ボムのanimation1の大きさ(単位10% 既定値10)", w = 0, h = 0},
+        {name = "ボムのanimation2の大きさ(単位10% 既定値10)", w = 0, h = 0},
+        {name = "ボムのanimation1の画像分割数", x = 0, y = 0},
+        {name = "ボムのanimation2の画像分割数", x = 0, y = 0},
+        {name = "ボムのparticle1の描画数(既定値15)", x = 0},
+        {name = "ボムのparticle12の描画数(既定値15)", x = 0},
     }
 }
 
@@ -120,6 +146,12 @@ local function main()
         {id = 8, path = "../play/parts/bgamask/default.png"},
         {id = 9, path = "../play/parts/lanecover/default.png"},
         {id = 10, path = "../play/parts/liftcover/default.png"},
+        {id = 11, path = "../play/parts/bombs/wave1/*.png"},
+        {id = 12, path = "../play/parts/bombs/particle1/*.png"},
+        {id = 13, path = "../play/parts/bombs/animation1/*.png"},
+        {id = 14, path = "../play/parts/bombs/wave2/*.png"},
+        {id = 15, path = "../play/parts/bombs/particle2/*.png"},
+        {id = 16, path = "../play/parts/bombs/animation2/*.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 
@@ -139,20 +171,26 @@ local function main()
 
     -- 各種読み込み
     mergeSkin(skin, bga.load())
-    mergeSkin(skin, progress.load())
     mergeSkin(skin, lanes.load())
+    mergeSkin(skin, progress.load())
+    mergeSkin(skin, sideInfo.load())
+    mergeSkin(skin, grow.load())
     mergeSkin(skin, judges.load())
     mergeSkin(skin, life.load())
     mergeSkin(skin, scoreGraph.load())
     mergeSkin(skin, judgeDetail.load())
     mergeSkin(skin, hispeed.load())
+    mergeSkin(skin, bomb.load())
 
     skin.destination = {}
 
     -- 各種出力
     mergeSkin(skin, bga.dst())
     mergeSkin(skin, progress.dst())
+    mergeSkin(skin, sideInfo.dst())
     mergeSkin(skin, lanes.dst()) -- キービームとリフト, レーンカバーはここの中でmergeSkin
+    mergeSkin(skin, grow.dst())
+    mergeSkin(skin, bomb.dst())
     mergeSkin(skin, hispeed.dst())
     mergeSkin(skin, judges.dst())
     mergeSkin(skin, life.dst())
