@@ -10,6 +10,7 @@ local hispeed = require("modules.play.hispeed")
 local sideInfo = require("modules.play.side_info")
 local grow = require("modules.play.grow")
 local bomb = require("modules.play.bomb")
+local loading = require("modules.play.loading")
 
 local header = {
     type = 0,
@@ -169,6 +170,7 @@ local function main()
         {id = 14, path = "../play/parts/bombs/wave2/*.png"},
         {id = 15, path = "../play/parts/bombs/particle2/*.png"},
         {id = 16, path = "../play/parts/bombs/animation2/*.png"},
+        {id = 17, path = "../play/parts/ready/*.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 
@@ -198,6 +200,7 @@ local function main()
     mergeSkin(skin, judgeDetail.load())
     mergeSkin(skin, hispeed.load())
     mergeSkin(skin, bomb.load())
+    mergeSkin(skin, loading.load())
 
     skin.destination = {}
 
@@ -213,6 +216,7 @@ local function main()
     mergeSkin(skin, life.dst())
     mergeSkin(skin, scoreGraph.dst())
     mergeSkin(skin, judgeDetail.dst())
+    mergeSkin(skin, loading.dst())
     return skin
 end
 

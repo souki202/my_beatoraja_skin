@@ -118,6 +118,31 @@ bga.functions.dst = function ()
         }
     end
 
+
+    -- ロード中はステージファイルを出す
+    dst[#dst+1] = {
+        id = -101, op = {80, 195}, stretch = 1, dst = {
+            {x = bgaX, y = BGA.Y, w = BGA.W, h = BGA.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = -101, op = {81, 195}, stretch = 1, timer = 40, loop = -1, dst = {
+            {time = 0, x = bgaX, y = BGA.Y, w = BGA.W, h = BGA.H, a = 255},
+            {time = 500, a = 0}
+        }
+    }
+    dst[#dst+1] = {
+        id = -100, op = {80, 191, -195}, stretch = 1, dst = {
+            {x = bgaX, y = BGA.Y, w = BGA.W, h = BGA.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = -100, op = {81, 191, -195}, stretch = 1, timer = 40, loop = -1, dst = {
+            {time = 0, x = bgaX, y = BGA.Y, w = BGA.W, h = BGA.H, a = 255},
+            {time = 500, a = 0}
+        }
+    }
+
     return skin
 end
 
