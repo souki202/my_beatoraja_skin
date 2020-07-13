@@ -99,6 +99,12 @@ notes.functions.getLaneW = function (key)
     return NOTES.W[key]
 end
 
+notes.functions.getLaneCenterX = function (key)
+    local x = notes.functions.getLaneX(key)
+    local w = notes.functions.getLaneW(key)
+    return x + w / 2
+end
+
 notes.functions.getLaneHeight = function ()
     return LANES.AREA.H
 end

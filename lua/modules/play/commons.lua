@@ -146,6 +146,22 @@ function drawSideEarlyLateGraph()
 	return getTableValue(skin_config.option, "サイド部分のグラフ", 10001) == 10002
 end
 
+function isDrawBombParticle()
+	return getTableValue(skin_config.option, "ボムのパーティクル", 10005) == 10005
+end
+
+function getParticle1AnimationType()
+	return getTableValue(skin_config.option, "ボムのparticle1のアニメーション", 10010) - 10010
+end
+
+function getParticle2AnimationType()
+	return getTableValue(skin_config.option, "ボムのparticle2のアニメーション", 10015) - 10015
+end
+
+function isTransparentBombAnimationBlackBg()
+	return getTableValue(skin_config.option, "ボムのanimation1と2の黒背景透過", 10020) == 10020
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)

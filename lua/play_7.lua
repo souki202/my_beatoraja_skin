@@ -22,7 +22,7 @@ local header = {
     close = 100,
     fadeout = 1000,
 
-    property = { -- 使用済み 10005まで
+    property = { -- 使用済み 10020まで
         {
             name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
@@ -86,6 +86,15 @@ local header = {
         {
             name = "ボムのパーティクル", item = {{name = "ON", op = 10005}, {name = "OFF", op = 10006}}, def = "ON"
         },
+        {
+            name = "ボムのparticle1のアニメーション", item = {{name = "フロー", op = 10010}, {name = "拡散", op = 10011}, {name = "静止", op = 10012}}, def = "フロー"
+        },
+        {
+            name = "ボムのparticle2のアニメーション", item = {{name = "フロー", op = 10015}, {name = "拡散", op = 10016}, {name = "静止", op = 10017}}, def = "フロー"
+        },
+        {
+            name = "ボムのanimation1と2の黒背景透過", item = {{name = "ON", op = 10020}, {name = "OFF", op = 10021}}, def = "ON"
+        },
     },
     filepath = {
         {name = "各種画像--------------", path = "../dummy/*"},
@@ -99,19 +108,19 @@ local header = {
         {name = "コンボ画像", path = "../play/parts/combo/*.png", def = "default"},
         {name = "グルーヴゲージのインディケーター", path = "../play/parts/indicators/*.png", def = "default"},
         {name = "ボム関連画像---------", path = "../dummy/*"},
-        {name = "波紋1", path = "../play/parts/bombs/wave1/*.png", def = "default"},
-        {name = "パーティクル1", path = "../play/parts/bombs/particle1/*.png", def = "default"},
-        {name = "アニメーション1", path = "../play/parts/bombs/animation1/*.png", def = "default"},
-        {name = "波紋2", path = "../play/parts/bombs/wave2/*.png", def = "default"},
-        {name = "パーティクル2", path = "../play/parts/bombs/particle2/*.png", def = "default"},
-        {name = "アニメーション2", path = "../play/parts/bombs/animation2/*.png", def = "default"},
+        {name = "wave1", path = "../play/parts/bombs/wave1/*.png", def = "default"},
+        {name = "particle1", path = "../play/parts/bombs/particle1/*.png", def = "default"},
+        {name = "animation1", path = "../play/parts/bombs/animation1/*.png", def = "blank"},
+        {name = "wave2", path = "../play/parts/bombs/wave2/*.png", def = "blank"},
+        {name = "particle2", path = "../play/parts/bombs/particle2/*.png", def = "blank"},
+        {name = "animation2", path = "../play/parts/bombs/animation2/*.png", def = "blank"},
     },
     offset = {
         {name = "各種オフセット(0で既定値)---------", x = 0},
         {name = "判定線の高さ(既定値 4px)", h = 0},
         {name = "レーンの黒背景(既定値192 255で透明)", a = 0},
         {name = "ボム関連------------------------", x = 0},
-        {name = "100%の縦横はwave 500px, anim 300px, particle 16px"},
+        {name = "100%の描画縦横はwave 500px, anim 300px, particle 16px", x = 0},
         {name = "ボムのwave1の大きさ(単位10% 既定値10)", w = 0, h = 0},
         {name = "ボムのwave2の大きさ(単位10% 既定値10)", w = 0, h = 0},
         {name = "ボムのparticle1の大きさ(単位10% 既定値10)", w = 0, h = 0},
@@ -120,8 +129,16 @@ local header = {
         {name = "ボムのanimation2の大きさ(単位10% 既定値10)", w = 0, h = 0},
         {name = "ボムのanimation1の画像分割数", x = 0, y = 0},
         {name = "ボムのanimation2の画像分割数", x = 0, y = 0},
-        {name = "ボムのparticle1の描画数(既定値15)", x = 0},
-        {name = "ボムのparticle12の描画数(既定値15)", x = 0},
+        {name = "ボムのparticle1の描画数(既定値7)", x = 0},
+        {name = "ボムのparticle2の描画数(既定値7)", x = 0},
+        {name = "ボムのwave1の描画時間(単位100ms 既定値3)", x = 0},
+        {name = "ボムのwave2の描画時間(単位100ms 既定値3)", x = 0},
+        {name = "ボムのparticle1の描画時間(単位100ms 既定値3)", x = 0},
+        {name = "ボムのparticle2の描画時間(単位100ms 既定値3)", x = 0},
+        {name = "ボムのanimation1の描画時間(単位100ms 既定値3)", x = 0},
+        {name = "ボムのanimation2の描画時間(単位100ms 既定値3)", x = 0},
+        {name = "ボムのanimation1の描画座標差分", id = 40, x = 0, y = 0},
+        {name = "ボムのanimation2の描画座標差分", id = 41, x = 0, y = 0},
     }
 }
 
