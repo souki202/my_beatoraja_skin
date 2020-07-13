@@ -7,6 +7,20 @@ NUMBERS_24PX = {
     ID = "24pxNumbers",
 }
 
+NUMBERS_18PX = {
+    SRC_X = 1928,
+    SRC_Y = 183,
+    W = 10,
+    H = 13,
+}
+
+NUMBERS_14PX = {
+    W = 8,
+    H = 10,
+    SRC_X = 1952,
+    SRC_Y = 94,
+}
+
 -- 自作の任意の数値を表示させるための色々
 -- 力技なので重い上に複雑です
 local myNumber = {

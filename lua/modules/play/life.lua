@@ -2,6 +2,7 @@ require("modules.commons.define")
 local commons = require("modules.play.commons")
 local lanes = require("modules.play.lanes")
 local main_state = require("main_state")
+require("modules.commons.numbers")
 
 local life = {
     functions = {},
@@ -31,8 +32,8 @@ local LIFE = {
         DOT_X = function (self) return self.NUM.X(self) + self.NUM.W * self.NUM.DIGIT + 1 end,
         AFTER_DOT_X = function (self) return self.NUM.DOT_X(self) + 18 - self.NUM.W end,
         P_X = function (self) return self.NUM.AFTER_DOT_X(self) + self.NUM.W + 1 end,
-        W = 14,
-        H = 18,
+        W = NUMBERS_24PX.W,
+        H = NUMBERS_24PX.H,
         P_W = 21,
         P_H = 18,
         DIGIT = 3,
@@ -106,8 +107,8 @@ life.functions.load = function ()
             -- {id = "warnCenter", src = 0, x = 433 + LIFE.GAUGE.WARN.SHADOW, y = PARTS_TEXTURE_SIZE - LIFE.GAUGE.WARN.H, w = 1, h = LIFE.GAUGE.WARN.H},
         },
         value = {
-            {id = "grooveValue", src = 0, x = 1880, y = 76, w = LIFE.NUM.W * 10, h = LIFE.NUM.H, divx = 10, digit = LIFE.NUM.DIGIT, ref = 107},
-            {id = "grooveValueAfterDot", src = 0, x = 1880, y = 76, w = LIFE.NUM.W * 10, h = LIFE.NUM.H, divx = 10, digit = 1, ref = 407},
+            {id = "grooveValue", src = 0, x = 1880, y = 76, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = LIFE.NUM.DIGIT, ref = 107},
+            {id = "grooveValueAfterDot", src = 0, x = 1880, y = 76, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = 1, ref = 407},
         },
         graph = {},
         customTimers = {

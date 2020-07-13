@@ -27,8 +27,8 @@ local SCORE = {
         DOT_X = function (self) return self.P_NUM.X(self) + self.P_NUM.W * self.P_NUM.DIGIT + 1 end,
         A_X = function (self) return self.P_NUM.DOT_X(self) + 18 - self.P_NUM.W * self.P_NUM.A_DIGIT end,
         P_X = function (self) return self.P_NUM.A_X(self) + self.P_NUM.W * self.P_NUM.A_DIGIT + 1 end,
-        W = 8,
-        H = 10,
+        W = NUMBERS_14PX.W,
+        H = NUMBERS_14PX.H,
         P_W = 13,
         P_H = 11,
         DIGIT = 3,
@@ -77,7 +77,7 @@ scoreGraph.functions.load = function ()
             {id = "graphRankAa", src = 0, x = 0, y = SCORE.RANK_TEXT.H, w = SCORE.RANK_TEXT.W, h = SCORE.RANK_TEXT.H},
             {id = "graphRankAaa", src = 0, x = 0, y = SCORE.RANK_TEXT.H * 2, w = SCORE.RANK_TEXT.W, h = SCORE.RANK_TEXT.H},
             {id = "exscoreText", src = 0, x = 124, y = 0, w = SCORE.TEXT.W, h = SCORE.TEXT.H},
-            {id = "scorePercentageDot", src = 0, x = 2032, y = 94, w = SCORE.P_NUM.W, h = SCORE.P_NUM.H},
+            {id = "scorePercentageDot", src = 0, x = 2032, y = 94, w = NUMBERS_14PX.W, h = NUMBERS_14PX.H},
             {id = "scorePercent", src = 0, x = 1939, y = 94, w = SCORE.P_NUM.P_W, h = SCORE.P_NUM.P_H},
         },
         graph = {
@@ -87,8 +87,8 @@ scoreGraph.functions.load = function ()
         },
         value = {
             {id = "scoreValue", src = 0, x = 1880, y = 76, w = SCORE.NUM.W * 10, h = SCORE.NUM.H, divx = 10, digit = SCORE.NUM.DIGIT, ref = 101},
-            {id = "scorePercentage", src = 0, x = 1952, y = 94, w = SCORE.P_NUM.W * 10, h = SCORE.P_NUM.H, divx = 10, digit = SCORE.P_NUM.DIGIT, ref = 102},
-            {id = "scorePercentageAfterDot", src = 0, x = 1952, y = 94, w = SCORE.P_NUM.W * 10, h = SCORE.P_NUM.H, divx = 10, digit = SCORE.P_NUM.A_DIGIT, ref = 103, padding = 1},
+            {id = "scorePercentage", src = 0, x = NUMBERS_14PX.SRC_X, y = NUMBERS_14PX.SRC_Y, w = NUMBERS_14PX.W * 10, h = NUMBERS_14PX.H, divx = 10, digit = SCORE.P_NUM.DIGIT, ref = 102},
+            {id = "scorePercentageAfterDot", src = 0, x = NUMBERS_14PX.SRC_X, y = NUMBERS_14PX.SRC_Y, w = NUMBERS_14PX.W * 10, h = NUMBERS_14PX.H, divx = 10, digit = SCORE.P_NUM.A_DIGIT, ref = 103, padding = 1},
 
             {id = "scoreDiffMyBest", src = 0, x = 1940, y = 0, w = SCORE.DIFF.W * 12, h = SCORE.DIFF.H * 2, divx = 12, divy = 2, digit = SCORE.DIFF.DIGIT, ref = 152, padding = 0, space = -1},
             {id = "scoreDiffTarget", src = 0, x = 1940, y = 0, w = SCORE.DIFF.W * 12, h = SCORE.DIFF.H * 2, divx = 12, divy = 2, digit = SCORE.DIFF.DIGIT, ref = 153, padding = 0, space = -1},
@@ -169,17 +169,17 @@ scoreGraph.functions.dst = function ()
     -- パーセンテージ
     dst[#dst+1] = {
         id = "scorePercentage", dst = {
-            {x = SCORE.P_NUM.X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = SCORE.P_NUM.W, h = SCORE.P_NUM.H}
+            {x = SCORE.P_NUM.X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = NUMBERS_14PX.W, h = NUMBERS_14PX.H}
         }
     }
     dst[#dst+1] = {
         id = "scorePercentageDot", dst = {
-            {x = SCORE.P_NUM.DOT_X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = SCORE.P_NUM.W, h = SCORE.P_NUM.H}
+            {x = SCORE.P_NUM.DOT_X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = NUMBERS_14PX.W, h = NUMBERS_14PX.H}
         }
     }
     dst[#dst+1] = {
         id = "scorePercentageAfterDot", dst = {
-            {x = SCORE.P_NUM.A_X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = SCORE.P_NUM.W, h = SCORE.P_NUM.H}
+            {x = SCORE.P_NUM.A_X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = NUMBERS_14PX.W, h = NUMBERS_14PX.H}
         }
     }
     dst[#dst+1] = {

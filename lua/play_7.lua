@@ -6,6 +6,7 @@ local scoreGraph = require("modules.play.score_graph")
 local bga = require("modules.play.bga")
 local progress = require("modules.play.progress_bar")
 local judgeDetail = require("modules.play.judge_detail")
+local hispeed = require("modules.play.hispeed")
 
 local header = {
     type = 0,
@@ -83,8 +84,10 @@ local header = {
     filepath = {
         {name = "ノーツ画像", path = "../play/parts/notes/*.png", def = "default"},
         {name = "レーンのシンボル(白鍵)", path = "../play/parts/lanesymbols/white/*.png", def = "dia"},
-        {name = "レーンのシンボル(青鍵)", path = "../play/parts/lanesymbols/blue/*.png", def = "square"},
+        {name = "レーンのシンボル(青鍵)", path = "../play/parts/lanesymbols/blue/*.png", def = "dia"},
         {name = "レーンのシンボル(ターンテーブル)", path = "../play/parts/lanesymbols/turntable/*.png", def = "circle"},
+        {name = "レーンカバー", path = "../play/parts/lanecover/*.png", def = "default"},
+        {name = "リフトカバー", path = "../play/parts/liftcover/*.png", def = "default"},
         {name = "判定画像", path = "../play/parts/judges/*.png", def = "default"},
         {name = "コンボ画像", path = "../play/parts/combo/*.png", def = "default"},
         {name = "グルーヴゲージのインディケーター", path = "../play/parts/indicators/*.png", def = "default"},
@@ -115,6 +118,8 @@ local function main()
         {id = 6, path = "../play/parts/combo/*.png"},
         {id = 7, path = "../play/parts/indicators/*.png"},
         {id = 8, path = "../play/parts/bgamask/default.png"},
+        {id = 9, path = "../play/parts/lanecover/default.png"},
+        {id = 10, path = "../play/parts/liftcover/default.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 
@@ -140,13 +145,15 @@ local function main()
     mergeSkin(skin, life.load())
     mergeSkin(skin, scoreGraph.load())
     mergeSkin(skin, judgeDetail.load())
+    mergeSkin(skin, hispeed.load())
 
     skin.destination = {}
 
     -- 各種出力
     mergeSkin(skin, bga.dst())
     mergeSkin(skin, progress.dst())
-    mergeSkin(skin, lanes.dst()) -- キービームはここの中でmergeSkin
+    mergeSkin(skin, lanes.dst()) -- キービームとリフト, レーンカバーはここの中でmergeSkin
+    mergeSkin(skin, hispeed.dst())
     mergeSkin(skin, judges.dst())
     mergeSkin(skin, life.dst())
     mergeSkin(skin, scoreGraph.dst())

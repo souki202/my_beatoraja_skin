@@ -17,9 +17,10 @@ local LANES = {
         W = 432,
         H = 723,
         X = nil,
-        X_1 = function (self) return 75 end,
-        X_2 = function (self) return WIDTH - self.AREA.W - self.AREA.X_1() end,
+        X_1 = function (self) return self.AREA.SPACE end,
+        X_2 = function (self) return WIDTH - self.AREA.W - self.AREA.SPACE end,
         Y = 357,
+        SPACE = 75,
     },
     EDGE = {
         W = 18,
@@ -98,8 +99,17 @@ notes.functions.getLaneW = function (key)
     return NOTES.W[key]
 end
 
+notes.functions.getLaneHeight = function ()
+    return LANES.AREA.H
+end
+
+notes.functions.getSideSpace = function ()
+    return LANES.AREA.SPACE
+end
+
 notes.functions.load = function ()
     local keyBeam = require("modules.play.key_beam")
+    local cover = require("modules.play.cover")
     local laneX = notes.functions.getAreaX()
 
     -- offsetで初期化
@@ -239,12 +249,14 @@ notes.functions.load = function ()
     end
 
     mergeSkin(skin, keyBeam.load())
+    mergeSkin(skin, cover.load())
 
     return skin
 end
 
 notes.functions.dst = function ()
     local keyBeam = require("modules.play.key_beam")
+    local cover = require("modules.play.cover")
     local laneX = notes.functions.getAreaX()
     local skin = {destination = {}}
     local dst = skin.destination
@@ -286,24 +298,16 @@ notes.functions.dst = function ()
 
 
     -- レーンの区切り線
-    for i = 1, commons.keys+1 do
-        if (isLeftScratch() and i ~= commons.keys+1) or (not isLeftScratch() and i ~= 1) then
-            dst[#dst+1] = {
-                id = "white", dst = {
-                    {x = NOTES.X[i] - 1, y = LANES.AREA.Y, w = 1, h = LANES.AREA.H}
+    if isDrawSeparator() then
+        for i = 1, commons.keys+1 do
+            if (isLeftScratch() and i ~= commons.keys+1) or (not isLeftScratch() and i ~= 1) then
+                dst[#dst+1] = {
+                    id = "white", dst = {
+                        {x = NOTES.X[i] - 1, y = LANES.AREA.Y, w = 1, h = LANES.AREA.H}
+                    }
                 }
-            }
+            end
         end
-    end
-
-    -- 判定線
-    if isDrawJudgeLine() then
-        local r, g, b = getJudgeLineColor()
-        dst[#dst+1] = {
-            id = "white", dst = {
-                {x = laneX, y = LANES.AREA.Y, w = LANES.AREA.W, h = LANES.JUDGE_LINE.H, r = r, g = g, b = b}
-            }
-        }
     end
 
     -- アンダーライン
@@ -327,6 +331,20 @@ notes.functions.dst = function ()
             }
         end
     end
+
+    dst[#dst+1] = {id = "notes"}
+    mergeSkin(skin, cover.dst())
+
+    -- 判定線
+    if isDrawJudgeLine() then
+        local r, g, b = getJudgeLineColor()
+        dst[#dst+1] = {
+            id = "white", offsets = {3}, dst = {
+                {x = laneX, y = LANES.AREA.Y, w = LANES.AREA.W, h = LANES.JUDGE_LINE.H, r = r, g = g, b = b}
+            }
+        }
+    end
+
     -- レーンのシンボル
     if isDrawLaneSymbol() then
         local r, g, b = getDifficultyColor()
@@ -348,8 +366,6 @@ notes.functions.dst = function ()
             }
         end
     end
-
-    dst[#dst+1] = {id = "notes"}
 
     return skin
 end
