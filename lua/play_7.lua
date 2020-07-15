@@ -105,6 +105,9 @@ local header = {
         {
             name = "ボムのanimation1と2の黒背景透過", item = {{name = "ON", op = 10020}, {name = "OFF", op = 10021}}, def = "ON"
         },
+        {
+            name = "ビジュアライザー1の棒線タイプ", item = {{name = "太い", op = 10035}, {name = "細い", 10036}}, def = "細い"
+        },
     },
     filepath = {
         {name = "各種画像--------------", path = "../dummy/*"},
@@ -154,7 +157,6 @@ local header = {
         {name = "ボムのanimation1の描画座標差分", id = 40, x = 0, y = 0},
         {name = "ボムのanimation2の描画座標差分", id = 41, x = 0, y = 0},
         {name = "ビジュアライザー関連---------", x = 0},
-        {name = "本数(単位10本 既定値15)", x = 0},
         {name = "伝播速度(単位10% 既定値10)", x = 0},
     }
 }

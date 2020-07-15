@@ -171,12 +171,12 @@ function getNoteType()
 	return getTableValue(skin_config.option, "ノートの画像", 10030) - 10030
 end
 
-function numOfVisualizerBar()
-	return getOffsetValueWithDefault("本数(単位10本 既定値15)", {x = 15}).x * 10
-end
-
 function getVisualizerPropagationSpeed()
 	return getOffsetValueWithDefault("伝播速度(単位10% 既定値10)", {x = 10}).x * 10 / 100
+end
+
+function isThinVisualizerBarType()
+	return getTableValue("ビジュアライザー1の棒線タイプ", 10036)
 end
 
 function getDifficultyValueForColor()

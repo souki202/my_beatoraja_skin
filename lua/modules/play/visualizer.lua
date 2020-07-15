@@ -18,7 +18,9 @@ local visualizer = {
 
     v2 = {
         vals = {},
-        laseScore = 0,
+        subBaseVals = {}, -- グラフを縮めていくときに基準とする値
+        laseScore = 0, -- goodでも波を起こすため
+        lastExScore = 0,
     },
 
     functions = {},
@@ -29,7 +31,7 @@ local VISUALIZER = {
     MOVE_TIME = 800,
     BASE_DENSITY = 1,
     DENSITY_DIV_TIME = 500,
-    ERROR_TIME_RAMGE = 200, -- 左右に+-
+    ERROR_TIME_RAMGE = 100, -- 左右に+-
 
     AREA = {
         X = function () return is1P() and lanes.getAreaX() + lanes.getAreaW() + 67 or 67 end,
@@ -45,16 +47,23 @@ local VISUALIZER = {
         CX = function (self) return self.AREA.X() + self.AREA.W() / 2 end,
         Y = function (self) return self.AREA.Y() + 130 end,
         N = 150,
-        LIGHT = 12
+        LIGHT = 12,
+        DRAW_W = 32,
+        DIVS = {1, 2, 4, 8, 16, 32, 64, 128, 160, 256},
+
+        SATURATION = 1,
+        BRIGHTNESS = 0.8,
+        ALPHA = 96
     },
     BACK_BAR = {
         W = 27,
         H = 89,
     },
     V2 = {
-        WAVE_RANGE = 300, -- px +-WAVE_RANGEが反応できる
+        WAVE_RANGE = 100, -- px +-WAVE_RANGEが反応できる
         NUM_OF_PROTRUSION = 3,
-        PROTRUSION_RANGE = 150, -- px
+        CREATE_PROTRUSION_RANGE = 400, -- px
+        SUB_PER_SEC = 1, -- 1秒間に小さくなる量
     }
 }
 
@@ -176,20 +185,89 @@ end
     @return int 該当するバーのidx
 ]]
 local function xToBarIdx(x)
-    return math.ceil(x / VISUALIZER.BAR.N)
+    if x < 0 then return 0 end
+    if x > VISUALIZER.AREA.W() then return 0 end
+    return math.ceil(x / VISUALIZER.BAR.INTERVAL)
+end
+
+--[[
+    v2用 指定したidxのバーの中心x座標を取得する
+]]
+local function barCenterX(idx)
+    return VISUALIZER.BAR.INTERVAL * (idx - 0.5)
+end
+
+--[[
+    v2用の山を作る
+]]
+local function makeProtrusion(x, pow)
+    if x <= 0 then x = 1
+    elseif x >= VISUALIZER.AREA.W() then x = VISUALIZER.AREA.W() - 1
+    end
+    local lbar = xToBarIdx(x - VISUALIZER.V2.WAVE_RANGE)
+    local rbar = xToBarIdx(x + VISUALIZER.V2.WAVE_RANGE)
+    if lbar == 0 then lbar = 1 end
+    if rbar == 0 then rbar = VISUALIZER.BAR.N end
+
+    local div = VISUALIZER.BASE_DENSITY / 2
+    local range = VISUALIZER.V2.WAVE_RANGE
+    local vals = visualizer.v2.vals
+    -- 上限付近での張り付き防止
+    local scaleSup = (vals[xToBarIdx(x)]) + pow / div * 2
+    if scaleSup < 1 then scaleSup = 1 end
+
+    for i = lbar, rbar do
+        local dx = math.abs(barCenterX(i) - x)
+        local scale = pow * math.cos((dx / range) * math.pi / 2) / div * 2 / scaleSup
+        if scale < 0 then scale = 0
+        elseif scale > 1 then scale = 1
+        end
+        -- どーん
+        -- 1以上のときに1にする処理はあとでしている
+        vals[i] = vals[i] + scale
+        visualizer.v2.subBaseVals[i] = vals[i]
+    end
 end
 
 function updateVisualizer2()
-    local pt = main_state.judge(100)
+    local pt = main_state.number(100)
 
     -- スコアが増えていたら波を起こす
     if pt ~= visualizer.v2.laseScore then
-        pt = visualizer.v2.laseScore
+        visualizer.v2.laseScore = pt
+        local exScore = main_state.exscore()
+        local pow = exScore - visualizer.v2.lastExScore
+        visualizer.v2.lastExScore = exScore
+        if pow == 0 then pow = 0.5 end
+
+        local waveRange = VISUALIZER.V2.WAVE_RANGE
 
         local hw = VISUALIZER.AREA.W() / 2
-        local x = main_state.number(525) * hw / VISUALIZER.ERROR_TIME_RAMGE
+        local x = main_state.number(525) * hw / VISUALIZER.ERROR_TIME_RAMGE + hw
+        makeProtrusion(x + math.random(-waveRange, waveRange), pow)
+        local randomRange = VISUALIZER.V2.CREATE_PROTRUSION_RANGE
+        for i = 1, VISUALIZER.V2.NUM_OF_PROTRUSION-1 do
+            local dx = math.random(-randomRange, randomRange)
+            local randPow = math.random() * 0.75
+            makeProtrusion(x + dx, randPow * pow)
+        end
     end
 
+    -- 波を減らす
+    do
+        local vals = visualizer.v2.vals
+        local subBaseVals = visualizer.v2.subBaseVals
+        local subPerSec = VISUALIZER.V2.SUB_PER_SEC
+        local mul = getDeltaTime() / 1000000
+        for i = 1, #vals do
+            local v = vals[i]
+            v = v - subBaseVals[i] / subPerSec * mul
+            if v < 0 then v = 0
+            elseif v > 1 then v = 1
+            end
+            vals[i] = v
+        end
+    end
     return 0
 end
 
@@ -197,6 +275,7 @@ visualizer.functions.load = function ()
     local skin = {
         image = {
             {id = "frontBar", src = 25, x = 0, y = 12, w = -1, h = 1},
+            {id = "frontBarFull", src = 25, x = 12, y = 12, w = 12, h = 1},
             {id = "backBar", src = 26, x = 0, y = 12, w = -1, h = 1},
         },
         graph = {},
@@ -207,8 +286,9 @@ visualizer.functions.load = function ()
     }
 
     judgeNum = main_state.number
-    VISUALIZER.BAR.N = numOfVisualizerBar()
+    VISUALIZER.BAR.N = VISUALIZER.AREA.W() / VISUALIZER.BAR.DIVS[4]
     VISUALIZER.BAR.INTERVAL = VISUALIZER.AREA.W() / VISUALIZER.BAR.N
+    VISUALIZER.BAR.DRAW_W = VISUALIZER.BAR.DRAW_W * VISUALIZER.BAR.DIVS[4] / VISUALIZER.BAR.DRAW_W * 32 / 8
     VISUALIZER.UPDATE_INTERVAL = VISUALIZER.MOVE_TIME / (VISUALIZER.AREA.W() / VISUALIZER.BAR.INTERVAL) * 1000 * getVisualizerPropagationSpeed()
     VISUALIZER.BASE_DENSITY = math.max(1, math.ceil(main_state.number(360)))
     -- 先に配列を確保
@@ -224,8 +304,10 @@ visualizer.functions.load = function ()
         end
     end
     local v2vals = visualizer.v2.vals
+    local v2SubBaseVals = visualizer.v2.subBaseVals
     for i = 1, VISUALIZER.BAR.N do
         v2vals[i] = 0
+        v2SubBaseVals[i] = 0
     end
 
     -- 描画部分のグラフを作成
@@ -252,21 +334,26 @@ visualizer.functions.load = function ()
     -- v2
     do
         local vals = visualizer.v2.vals
-        for i = 1, VISUALIZER.BAR.N do
-            g[#g+1] = {
-                id = "visualizerFrontBarL" .. i, src = 25, x = 0, y = 12, w = -1, h = 1,
-                value = function ()
-                    if vals[i] == nil then return 0 end
-                    return vals[i]
-                end
-            }
-            g[#g+1] = {
-                id = "visualizerFrontBarR" .. i, src = 25, x = 0, y = 12, w = -1, h = 1,
-                value = function ()
-                    if vals[i] == nil then return 0 end
-                    return vals[i]
-                end
-            }
+        if isThinVisualizerBarType() then
+            for i = 1, VISUALIZER.BAR.N do
+                g[#g+1] = {
+                    id = "visualizerFrontBar" .. i, src = 25, x = 0, y = 12, w = -1, h = 1,
+                    value = function ()
+                        if vals[i] == nil then return 0 end
+                        return vals[i]
+                    end
+                }
+            end
+        else
+            for i = 1, VISUALIZER.BAR.N do
+                g[#g+1] = {
+                    id = "visualizerFrontBar" .. i, src = 25, x = 12, y = 12, w = 12, h = 1,
+                    value = function ()
+                        if vals[i] == nil then return 0 end
+                        return vals[i]
+                    end
+                }
+            end
         end
     end
     return skin
@@ -275,26 +362,24 @@ end
 visualizer.functions.dst = function ()
     local skin = {destination = {}}
     local dst = skin.destination
-    for i = 1, VISUALIZER.BAR.N / 2 do
+    local hue = 0
+    local addHuePerBar = 360 / VISUALIZER.BAR.N
+    local a = VISUALIZER.BAR.ALPHA
+    for i = 1, VISUALIZER.BAR.N do
         -- 本数次第で隙間ができるので幅を1足す
         -- 左
+        local r, g, b = hsvToRgb(hue, VISUALIZER.BAR.SATURATION, VISUALIZER.BAR.BRIGHTNESS)
+
         dst[#dst+1] = {
-            id = "visualizerFrontBarL" .. i, dst = {
+            id = "visualizerFrontBar" .. i, dst = {
                 {
-                    x = math.ceil(VISUALIZER.AREA.LEFT_START_X(VISUALIZER) + VISUALIZER.BAR.INTERVAL * (i - 1)),
-                    y = VISUALIZER.BAR.Y(VISUALIZER), w = VISUALIZER.BAR.W + 1, h = VISUALIZER.BAR.MAX_H
+                    x = VISUALIZER.AREA.X() + VISUALIZER.BAR.INTERVAL * (i - 1),
+                    y = VISUALIZER.BAR.Y(VISUALIZER), w = VISUALIZER.BAR.DRAW_W, h = VISUALIZER.BAR.MAX_H,
+                    r = r, g = g, b = b, a = a
                 }
             }
         }
-        -- 右
-        dst[#dst+1] = {
-            id = "visualizerFrontBarR" .. i, dst = {
-                {
-                    x = math.floor(VISUALIZER.AREA.RIGHT_START_X(VISUALIZER) - VISUALIZER.BAR.INTERVAL * (i - 1)),
-                    y = VISUALIZER.BAR.Y(VISUALIZER), w = VISUALIZER.BAR.W + 1, h = VISUALIZER.BAR.MAX_H
-                }
-            }
-        }
+        hue = hue + addHuePerBar
     end
     return skin
 end
