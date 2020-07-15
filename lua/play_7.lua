@@ -11,24 +11,30 @@ local sideInfo = require("modules.play.side_info")
 local grow = require("modules.play.grow")
 local bomb = require("modules.play.bomb")
 local loading = require("modules.play.loading")
+local finish = require("modules.play.finish")
+local fadeout = require("modules.play.fadeout")
+local visualizer = require("modules.play.visualizer")
 
 local header = {
     type = 0,
     name = "Social Skin" .. (DEBUG and " play dev" or ""),
     w = WIDTH,
     h = HEIGHT,
-    playstart = 1000,
+    playstart = 1800,
     scene = 36000000,
     input = 500,
-    close = 100,
-    fadeout = 1000,
+    close = 2000,
+    fadeout = fadeout.getFadeoutTime(),
 
-    property = { -- 使用済み 10020まで
+    property = { -- 使用済み 10030まで
         {
             name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
         {
             name = "ターンテーブル位置", item = {{name = "通常", op = 950}, {name = "反転", op = 951}}, def = "通常"
+        },
+        {
+            name = "汎用BGA形式", item = {{name = "png", op = 10025}, {name = "mp4", op = 10026}}, def = "mp4"
         },
         {
             name = "コンボ位置", item = {{name = "判定横", op = 970}, {name = "判定下", op = 971}, {name = "レーン右上(1P), 左上(2P)", op = 973}}, def = "判定下"
@@ -41,6 +47,9 @@ local header = {
         },
         {
             name = "スコア差表示位置", item = {{name = "レーン横", op = 995}, {name = "判定上", op = 996}}, def = "レーン横"
+        },
+        {
+            name = "ノートの画像", item = {{name = "通常形式", op = 10030}, {name = "独自形式", op = 10031}}, def = "通常形式"
         },
         {
             name = "レーン色分け", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}, def = "ON"
@@ -99,7 +108,11 @@ local header = {
     },
     filepath = {
         {name = "各種画像--------------", path = "../dummy/*"},
-        {name = "ノーツ画像", path = "../play/parts/notes/*.png", def = "default"},
+        {name = "背景画像", path = "../play/parts/background/*.png", def = "default"},
+        {name = "汎用画像(png)", path = "../play/parts/versatilitybga/*.png", def = "default"},
+        {name = "汎用画像(mp4)", path = "../play/parts/versatilitybga/*.mp4", def = "default"},
+        {name = "ノート画像(通常形式)", path = "../play/parts/notes/normal/*.png", def = "default"},
+        {name = "ノート画像(独自形式)", path = "../play/parts/notes/original/*.png", def = "default"},
         {name = "レーンのシンボル(白鍵)", path = "../play/parts/lanesymbols/white/*.png", def = "dia"},
         {name = "レーンのシンボル(青鍵)", path = "../play/parts/lanesymbols/blue/*.png", def = "dia"},
         {name = "レーンのシンボル(ターンテーブル)", path = "../play/parts/lanesymbols/turntable/*.png", def = "circle"},
@@ -119,7 +132,7 @@ local header = {
     offset = {
         {name = "各種オフセット(0で既定値)---------", x = 0},
         {name = "判定線の高さ(既定値 4px)", h = 0},
-        {name = "レーンの黒背景(既定値192 255で透明)", a = 0},
+        {name = "レーンの黒背景(255で透明)", a = 0},
         {name = "ボム関連------------------------", x = 0},
         {name = "100%の描画縦横はwave 500px, anim 300px, particle 16px", x = 0},
         {name = "ボムのwave1の大きさ(単位10% 既定値10)", w = 0, h = 0},
@@ -140,6 +153,9 @@ local header = {
         {name = "ボムのanimation2の描画時間(単位100ms 既定値3)", x = 0},
         {name = "ボムのanimation1の描画座標差分", id = 40, x = 0, y = 0},
         {name = "ボムのanimation2の描画座標差分", id = 41, x = 0, y = 0},
+        {name = "ビジュアライザー関連---------", x = 0},
+        {name = "本数(単位10本 既定値15)", x = 0},
+        {name = "伝播速度(単位10% 既定値10)", x = 0},
     }
 }
 
@@ -154,7 +170,8 @@ local function main()
 
     skin.source = {
         {id = 0, path = "../play/parts/parts.png"},
-        {id = 1, path = "../play/parts/notes/*.png"},
+        {id = 1, path = "../play/parts/notes/normal/*.png"},
+        {id = 24, path = "../play/parts/notes/original/*.png"},
         {id = 2, path = "../play/parts/lanesymbols/white/*.png"},
         {id = 3, path = "../play/parts/lanesymbols/blue/*.png"},
         {id = 4, path = "../play/parts/lanesymbols/turntable/*.png"},
@@ -171,6 +188,14 @@ local function main()
         {id = 15, path = "../play/parts/bombs/particle2/*.png"},
         {id = 16, path = "../play/parts/bombs/animation2/*.png"},
         {id = 17, path = "../play/parts/ready/*.png"},
+        {id = 18, path = "../play/parts/background/*.png"},
+        {id = 19, path = "../play/parts/fc/shine_circle.png"},
+        {id = 20, path = "../play/parts/fc/fireworks/default.png"},
+        {id = 21, path = "../play/parts/fc/particle/default.png"},
+        {id = 22, path = "../play/parts/versatilitybga/*.png"},
+        {id = 23, path = "../play/parts/versatilitybga/*.mp4"},
+        {id = 25, path = "../play/parts/visualizer/bar.png"},
+        {id = 26, path = "../play/parts/visualizer/back_bar.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 
@@ -179,9 +204,6 @@ local function main()
         {id = "black", src = 999, x = 1, y = 0, w = 1, h = 1},
         {id = "white", src = 999, x = 2, y = 0, w = 1, h = 1},
     }
-
-    -- 数字を作成するのは面倒なので, 一部は文字化して対処
-
 
     skin.font = {
 		{id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
@@ -201,11 +223,15 @@ local function main()
     mergeSkin(skin, hispeed.load())
     mergeSkin(skin, bomb.load())
     mergeSkin(skin, loading.load())
+    mergeSkin(skin, finish.load())
+    mergeSkin(skin, fadeout.load())
+    mergeSkin(skin, visualizer.load())
 
     skin.destination = {}
 
     -- 各種出力
     mergeSkin(skin, bga.dst())
+    mergeSkin(skin, visualizer.dst())
     mergeSkin(skin, progress.dst())
     mergeSkin(skin, sideInfo.dst())
     mergeSkin(skin, lanes.dst()) -- キービームとリフト, レーンカバーはここの中でmergeSkin
@@ -217,6 +243,8 @@ local function main()
     mergeSkin(skin, scoreGraph.dst())
     mergeSkin(skin, judgeDetail.dst())
     mergeSkin(skin, loading.dst())
+    mergeSkin(skin, finish.dst())
+    mergeSkin(skin, fadeout.dst())
     return skin
 end
 

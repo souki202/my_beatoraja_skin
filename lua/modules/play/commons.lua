@@ -2,7 +2,8 @@ require("modules.commons.define")
 local main_state = require("main_state")
 
 local commons = {
-    keys = 7
+	keys = 7,
+	calcTimeLeftSecond = function () return main_state.number(163) * 60 + main_state.number(164) end,
 }
 
 function setKeys(keys)
@@ -133,8 +134,8 @@ function drawDiffLaneSide()
 end
 
 function getLaneAlpha()
-	local v = getTableValue(skin_config.offset, "レーンの黒背景(既定値192 255で透明)", {a = 192}).a
-	if v == 0 then return 192 end
+	local v = getTableValue(skin_config.offset, "レーンの黒背景(255で透明)", {a = 0}).a
+	if v == 0 then return 0 end
 	return v
 end
 
@@ -160,6 +161,22 @@ end
 
 function isTransparentBombAnimationBlackBg()
 	return getTableValue(skin_config.option, "ボムのanimation1と2の黒背景透過", 10020) == 10020
+end
+
+function isVersatilitybgaPng()
+	return getTableValue(skin_config.option, "汎用BGA形式", 10025) == 10025
+end
+
+function getNoteType()
+	return getTableValue(skin_config.option, "ノートの画像", 10030) - 10030
+end
+
+function numOfVisualizerBar()
+	return getOffsetValueWithDefault("本数(単位10本 既定値15)", {x = 15}).x * 10
+end
+
+function getVisualizerPropagationSpeed()
+	return getOffsetValueWithDefault("伝播速度(単位10% 既定値10)", {x = 10}).x * 10 / 100
 end
 
 function getDifficultyValueForColor()

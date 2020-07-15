@@ -135,7 +135,7 @@ end
     @param  int   timer
 ]]
 bomb.functions.addParticle = function (skin, number, cx, y, timer, isLn)
-    if isDrawBombParticle() then return end
+    if not isDrawBombParticle() then return end
     local dst = skin.destination
     local particle = number == 1 and BOMB.P1 or BOMB.P2
     local loop = isLn and 0 or -1
@@ -184,6 +184,21 @@ end
 bomb.functions.dst = function ()
     local skin = {destination = {}}
     local dst = skin.destination
+
+    -- ピクッとするとので先に出力
+    do
+        local ids = {"Wave", "Particle", "Animation1", "Animation2"}
+        local ids2 = {"", "", "51", "51"}
+        for key, value in pairs(ids) do
+            for i = 1, 2 do
+                dst[#dst+1] = {
+                    id = "bomb" .. value .. ids2[key], dst = {
+                        {x = 0, y = 0, w = 1, h = 1, a = 1}
+                    }
+                }
+            end
+        end
+    end
 
     local animBlend = isTransparentBombAnimationBlackBg() and 2 or 1
     -- timer並べる

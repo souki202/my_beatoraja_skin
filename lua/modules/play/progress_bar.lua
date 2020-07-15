@@ -27,9 +27,6 @@ progress.functions.load = function ()
         bpmgraph = {
             {id = "bpmgraph"}
         },
-        customTimers = {
-            {id = 10020, }
-        }
     }
 end
 

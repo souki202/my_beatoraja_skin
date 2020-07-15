@@ -47,9 +47,9 @@ local LOADING = {
         START_Y = function (self) return self.AREA.Y() + 306 - self.READY.H * self.READY.INIT_MUL / 2 end,
         W = 301,
         H = 115,
-        APPEAR_TIME = 300,
-        DEL_START_TIME = 700,
-        DEL_TIME = 1000,
+        APPEAR_TIME = 350,
+        DEL_START_TIME = 800,
+        DEL_TIME = 1100,
         INIT_MUL = 3,
     },
     GAUGE = {
@@ -106,7 +106,7 @@ loading.functions.dst = function ()
             }},
             {id = "loadingCircle", op = {80}, loop = 0, dst = {
                 {time = 0, x = LOADING.CIRCLE.X(LOADING), y = LOADING.CIRCLE.Y(LOADING), w = LOADING.CIRCLE.SIZE, h = LOADING.CIRCLE.SIZE, angle = 0},
-                {time = LOADING.CIRCLE.ANIM_TIME, angle = 360},
+                {time = LOADING.CIRCLE.ANIM_TIME, angle = -360},
             }},
             {id = "loadingText", draw = function() return not isLoaded() and main_state.option(80) end, dst = {
                 {x = LOADING.TEXT.X(LOADING), y = LOADING.TEXT.Y(LOADING), w = 999, h = LOADING.TEXT.SIZE}

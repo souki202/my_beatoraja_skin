@@ -69,6 +69,12 @@ keyBeam.functions.dst = function ()
                     id = "keyBeam", offst = 3, timer = myTimer,
                     dst = {{x = x, y = y, w = w, h = h, r = r, g = g, b = b}}
                 }
+                dst[#dst+1] = {
+                    id = "keyBeam", offset = 3, timer = myTimer,
+                    dst = {
+                        {time = 0, x = x, y = by, w = w, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
+                    }
+                }
             else
                 if iskeyFlashAppearNormalAnimation() then
                     dst[#dst+1] = {

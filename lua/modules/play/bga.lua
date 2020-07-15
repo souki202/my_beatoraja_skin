@@ -49,10 +49,26 @@ local _BGA = {
     }
 }
 
+local BG = {
+
+}
+
 bga.functions.load = function ()
+    if isFullScreenBga() then
+        BGA = _BGA.FULL
+    elseif isBgaOnLeftUpper() then
+        BGA = _BGA.LEFT_UPPER
+    elseif isBgaOnLeft() then
+        BGA = _BGA.LEFT
+    end
+    print(BGA.Y)
     return {
         image = {
-            {id = "bgaMask", src = 8, x = 0, y = 0, w = -1, h = -1}
+            {id = "bgaMask", src = 8, x = 0, y = 0, w = -1, h = -1},
+            {id = "background", src = 18, x = 0, y = 0, w = WIDTH, h = HEIGHT},
+            {id = "background2", src = 18, x = 0, y = HEIGHT - BGA.Y, w = WIDTH, h = BGA.Y},
+            {id = "versatilityBgaPng", src = 22, x = 0, y = 0, w = -1, h = -1},
+            {id = "versatilityBgaMp4", src = 23, x = 0, y = 0, w = -1, h = -1},
         },
         bga = {id = "bga"}
     }
@@ -62,25 +78,31 @@ bga.functions.dst = function ()
     local skin = {destination = {}}
     local dst = skin.destination
 
-    if isFullScreenBga() then
-        BGA = _BGA.FULL
-    elseif isBgaOnLeftUpper() then
-        BGA = _BGA.LEFT_UPPER
-    elseif isBgaOnLeft() then
-        BGA = _BGA.LEFT
-    end
-
     local bgaX = is1P() and BGA.X_1 or BGA.X_2
+    local versatilityBgaId = isVersatilitybgaPng() and "versatilityBgaPng" or "versatilityBgaMp4"
+
+    -- 背景
+    dst[#dst+1] = {
+        id = "background", dst = {
+            {x = 0, y = 0, w = WIDTH, h = HEIGHT}
+        }
+    }
 
     if isDrawLargeBga() then
         local backBgaX = is1P() and BGA.BACK.X_1 or BGA.BACK.X_2
         local w = BGA.BACK.W
-        local maskBga = backBgaX
+        local maskBgaX = backBgaX
         local maskW = w
         if isBgaOnLeft() then
             maskW = BGA.W
-            maskBga = bgaX
+            maskBgaX = bgaX
         end
+
+        dst[#dst+1] = {
+            id = versatilityBgaId, op = {170}, timer = 41, stretch = 1, dst = {
+                {x = backBgaX, y = BGA.BACK.Y, w = w, h = BGA.BACK.H}
+            }
+        }
 
         dst[#dst+1] = {
             id = "bga", op = {171}, dst = {
@@ -89,11 +111,18 @@ bga.functions.dst = function ()
         }
 
         dst[#dst+1] = {
-            id = "bgaMask", op = {171}, dst = {
-                {x = maskBga, y = BGA.BACK.Y, w = maskW, h = BGA.BACK.H}
+            id = "bgaMask", dst = {
+                {x = maskBgaX, y = BGA.BACK.Y, w = maskW, h = BGA.BACK.H}
             }
         }
     end
+
+    dst[#dst+1] = {
+        id = versatilityBgaId, op = {170}, timer = 41, stretch = 1, dst = {
+            {x = bgaX, y = BGA.Y, w = BGA.W, h = BGA.H}
+        }
+    }
+
     dst[#dst+1] = {
         id = "bga", op = {171}, dst = {
             {x = bgaX, y = BGA.Y, w = BGA.W, h = BGA.H}
@@ -117,6 +146,13 @@ bga.functions.dst = function ()
             }
         }
     end
+
+    -- 背景2
+    dst[#dst+1] = {
+        id = "background2", dst = {
+            {x = 0, y = 0, w = WIDTH, h = BGA.Y}
+        }
+    }
 
 
     -- ロード中はステージファイルを出す

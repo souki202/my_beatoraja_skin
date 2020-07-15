@@ -55,35 +55,6 @@ local function calcComplementValueByTime(startValue, endValue, nowTime, overallT
     return startValue + (endValue - startValue) * nowTime / overallTime
 end
 
-local function hsvToRgb(h, s, v)
-    h = h % 360
-    local c = v * s * 1.0
-    local hp = h / 60.0
-    local x = c * (1 - math.abs(hp % 2 - 1))
-
-    local r, g, b
-    if 0 <= hp and hp < 1 then
-        r, g, b = c, x, 0
-    elseif 1 <= hp and hp < 2 then
-        r, g, b = x, c, 0
-    elseif 2 <= hp and hp < 3 then
-        r, g, b = 0, c, x
-    elseif 3 <= hp and hp < 4 then
-        r, g, b = 0, x, c
-    elseif 4 <= hp and hp < 5 then
-        r, g, b = x, 0, c
-    elseif 5 <= hp and hp < 6 then
-        r, g, b = c, 0, x
-    end
-
-    local m = v - c
-    r, g, b = r + m, g + m, b + m
-    r = math.floor(r * 255)
-    g = math.floor(g * 255)
-    b = math.floor(b * 255)
-    return r, g, b
-end
-
 local function calcOpeningAnimationStartPosition(initX, initY, toX, toY, timeOffset)
     local x = initX + (toX - initX) * (1.0 * timeOffset / OPENING_ANIM_TIME)
     local y = initY + (toY - initY) * (1.0 * timeOffset / OPENING_ANIM_TIME)

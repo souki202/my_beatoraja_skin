@@ -11,7 +11,7 @@ local JUDGES = {
     APPEAR_TIME = 75,
     DRAW_TIME = 1000,
     X = function() return lanes.getAreaX() + 136 end, -- 後で初期化
-    Y = function() return lanes.getAreaY() + 132 end,
+    Y = function() return lanes.getAreaY() + 260 end,
     W = 160,
     INIT_MUL_SIZE = 0.75,
     H = 31,
@@ -81,8 +81,8 @@ judges.functions.load = function ()
     local skin = {
         image = {
             {id = "comboText", src = 0, x = 360, y = 0, w = COMBO.TEXT.W, h = COMBO.TEXT.H},
-            {id = "earlyText", src = 0, x = 453, y = 0, w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
-            {id = "lateText", src = 0, x = 453, y = JUDGES.TIMING.TEXT.H, w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
+            {id = "earlyText", src = 0, x = 452, y = 0, w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
+            {id = "lateText", src = 0, x = 452, y = JUDGES.TIMING.TEXT.H, w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
         },
         value = {
             {id = "nowCombo", src = 6, x = 0, y = 0, w = COMBO.W * 10, h = COMBO.H, divx = 10, digit = COMBO.DIGIT, ref = 75, align = (isDrawComboNextToTheJudge() and 0 or 2)},
