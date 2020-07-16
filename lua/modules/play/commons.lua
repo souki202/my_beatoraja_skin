@@ -176,7 +176,11 @@ function getVisualizerPropagationSpeed()
 end
 
 function isThinVisualizerBarType()
-	return getTableValue("ビジュアライザー1の棒線タイプ", 10036)
+	return getTableValue(skin_config.option, "ビジュアライザー1の棒線タイプ", 10036) == 10036
+end
+
+function getVisualizerBarQuantityLevel()
+	return 10047 - getTableValue(skin_config.option, "ビジュアライザー1の棒線の多さ", 10042)
 end
 
 function getDifficultyValueForColor()

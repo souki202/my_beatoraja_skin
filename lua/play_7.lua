@@ -26,7 +26,7 @@ local header = {
     close = 2000,
     fadeout = fadeout.getFadeoutTime(),
 
-    property = { -- 使用済み 10030まで
+    property = { -- 使用済み 10035まで
         {
             name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
@@ -106,7 +106,10 @@ local header = {
             name = "ボムのanimation1と2の黒背景透過", item = {{name = "ON", op = 10020}, {name = "OFF", op = 10021}}, def = "ON"
         },
         {
-            name = "ビジュアライザー1の棒線タイプ", item = {{name = "太い", op = 10035}, {name = "細い", 10036}}, def = "細い"
+            name = "ビジュアライザー1の棒線タイプ", item = {{name = "太い", op = 10035}, {name = "細い", op = 10036}}, def = "細い"
+        },
+        {
+            name = "ビジュアライザー1の棒線の多さ", item = {{name = "1(Very Low)", op = 10040}, {name = "2(Low)", op = 10041}, {name = "3", op = 10042}, {name = "4", op = 10043}, {name = "5(High)", op = 10044}, {name = "6(Very High)", op = 10045}, {name = "7(Ultra)", op = 10046}}, def = "3"
         },
     },
     filepath = {
@@ -198,6 +201,7 @@ local function main()
         {id = 23, path = "../play/parts/versatilitybga/*.mp4"},
         {id = 25, path = "../play/parts/visualizer/bar.png"},
         {id = 26, path = "../play/parts/visualizer/back_bar.png"},
+        {id = 27, path = "../play/parts/visualizer/reflection.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 
