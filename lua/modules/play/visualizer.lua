@@ -12,6 +12,7 @@ local visualizer = {
     lastUpdateJudgeSec = 0,
     barIdxOffset = 0,
     nextUpdateTime = 0,
+    lastBombTimes = {},
 
     v2 = {
         vals = {},
@@ -75,10 +76,15 @@ local VISUALIZER = {
         INTERVAL_Z = -60,
     },
     V2 = {
-        WAVE_RANGE = 100, -- px +-WAVE_RANGEが反応できる
+        WAVE_RANGE = 100, -- px +-WAVE_RANGEが反応できる ボム基準の場合はキー数によって変動
         NUM_OF_PROTRUSION = 3,
         CREATE_PROTRUSION_RANGE = 400, -- px
         SUB_PER_SEC = 1, -- 1秒間に小さくなる量
+    },
+    BOMB = {
+        CX = {},
+        SCRATCH_NUM_OF_PROTRUSION = 6,
+        BASE_POW = 3,
     },
     MASK1 = {
         X = function (self) return self.AREA.FULL_X() end,
@@ -104,114 +110,6 @@ end
 
 local function reflecAlphaPercentageToTime(p)
     return p * 100000000
-end
-
--- 高速化のため外出し
-local judgeNum = nil -- あとでmain_state.numberを入れる
-local pg = 0
-local egr = 0
-local lgr = 0
-local egd = 0
-local lgd = 0
-
-local getSec = function ()
-    return math.floor(getElapsedTime() / 1000000)
-end
-
-local getTimeForDensity = function ()
-    return math.floor(getElapsedTime() / 1000 / VISUALIZER.DENSITY_DIV_TIME)
-end
-
-local getElapsedTimeForDensity = function ()
-    return (getElapsedTime() - getTimeForDensity() * 1000 * VISUALIZER.DENSITY_DIV_TIME)
-end
-
-local function updateDensity()
-    local nowTime = getTimeForDensity()
-    pg = main_state.judge(0)
-    egr = judgeNum(412)
-    lgr = judgeNum(413)
-    egd = judgeNum(414)
-    lgd = judgeNum(415)
-
-    -- 現在の判定数を記録
-    visualizer.judges[nowTime] = {
-        pg = pg,
-        egr = egr,
-        lgr = lgr,
-        egd = egd,
-        lgd = lgd,
-    }
-    -- 前の秒の判定数を取得
-    local last = {}
-    if visualizer.judges[nowTime - 1] == nil then
-        last = {
-            pg = 0,
-            egr = 0,
-            lgr = 0,
-            egd = 0,
-            lgd = 0,
-        }
-        visualizer.judges[nowTime - 1] = last
-        visualizer.ldensities[nowTime - 1] = 0
-        visualizer.rdensities[nowTime - 1] = 0
-    else
-        last = visualizer.judges[nowTime - 1]
-    end
-    -- 現在の秒で発生した判定数を計算
-    pg = pg - last.pg
-    egr = egr - last.egr
-    lgr = lgr - last.lgr
-    egd = egd - last.egd
-    lgd = lgd - last.lgd
-
-
-    local left = pg + egr + lgr * 0.5 + egd * 0.5 -- early側
-    local right = pg + egr * 0.5 + lgr + lgd * 0.5 -- late側
-    visualizer.ldensities[nowTime] = left
-    visualizer.rdensities[nowTime] = right
-end
-
-function updateVisualizer()
-    if not main_state.option(81) then
-        return 0
-    end
-    local nowSec = getTimeForDensity()
-    local divt = VISUALIZER.DENSITY_DIV_TIME
-    local lvals = visualizer.lvals
-    local rvals = visualizer.rvals
-    local ld = visualizer.ldensities
-    local rd = visualizer.rdensities
-    while visualizer.nextUpdateTime < getElapsedTime() do
-        -- どれだけ判定が発生したか調べて更新
-        updateDensity()
-
-        local barIdx = visualizer.barIdxOffset + 1
-        visualizer.barIdxOffset = barIdx
-
-        -- 秒未満の密度用単位の値を取得
-        local t = getElapsedTimeForDensity() / 1000
-        -- 値をもとにビジュアライザーの最新の高さを計算
-        local lh = (ld[nowSec] * (t / divt) + ld[nowSec - 1] * (divt - t) / divt) / (VISUALIZER.BASE_DENSITY * divt / 1000)
-        local rh = (rd[nowSec] * (t / divt) + rd[nowSec - 1] * (divt - t) / divt) / (VISUALIZER.BASE_DENSITY * divt / 1000)
-        lvals[barIdx] = math.min(1, lh)
-        rvals[barIdx] = math.min(1, rh)
-        -- print(lh)
-        -- print(rh)
-        visualizer.nextUpdateTime = visualizer.nextUpdateTime + VISUALIZER.UPDATE_INTERVAL
-    end
-    return 0
-end
-
---[[
-    @return int, int 0左1右, idx
-]]
-local function overallIndexToLeftRightIndex(idx)
-    if idx > VISUALIZER.BAR.N / 2 then
-        return 1, idx - VISUALIZER.BAR.N / 2
-    else
-        return 0, idx
-    end
 end
 
 --[[
@@ -254,13 +152,28 @@ local function makeProtrusion(x, pow)
     for i = lbar, rbar do
         local dx = math.abs(barCenterX(i) - x)
         local scale = pow * math.cos((dx / range) * math.pi / 2) / scaleSup
-        if scale < 0 then scale = 0
-        elseif scale > 1 then scale = 1
-        end
+        if scale < 0 then scale = 0 end
         -- どーん
-        -- 1以上のときに1にする処理はあとでしている
-        vals[i] = vals[i] + scale
+        vals[i] = math.min(1, vals[i] + scale)
         visualizer.v2.subBaseVals[i] = vals[i]
+    end
+end
+
+local function updateBarDecay()
+    -- 波を減らす
+    do
+        local vals = visualizer.v2.vals
+        local subBaseVals = visualizer.v2.subBaseVals
+        local subPerSec = VISUALIZER.V2.SUB_PER_SEC
+        local mul = getDeltaTime() / 1000000
+        for i = 1, #vals do
+            local v = vals[i]
+            v = v - subBaseVals[i] / subPerSec * mul
+            if v < 0 then v = 0
+            elseif v > 1 then v = 1
+            end
+            vals[i] = v
+        end
     end
 end
 
@@ -287,22 +200,51 @@ function updateVisualizer2()
             makeProtrusion(x + dx, randPow * pow)
         end
     end
+    updateBarDecay()
+    return 0
+end
 
-    -- 波を減らす
-    do
-        local vals = visualizer.v2.vals
-        local subBaseVals = visualizer.v2.subBaseVals
-        local subPerSec = VISUALIZER.V2.SUB_PER_SEC
-        local mul = getDeltaTime() / 1000000
-        for i = 1, #vals do
-            local v = vals[i]
-            v = v - subBaseVals[i] / subPerSec * mul
-            if v < 0 then v = 0
-            elseif v > 1 then v = 1
+function updateVisualizerBombBase()
+    local nowBombTime = 0
+    local lnBombTime = 0
+    local randomRange = VISUALIZER.V2.CREATE_PROTRUSION_RANGE
+    local visualizerW = VISUALIZER.AREA.W()
+    local basePow = VISUALIZER.BOMB.BASE_POW
+    local numIdx, lnIdx = 0, 0
+    -- ボム更新
+    for i = 1, commons.keys+1 do
+        local thisPow = basePow
+        numIdx = 50 + i
+        lnIdx = 70 + i
+        if i == commons.keys+1 then numIdx = 50 lnIdx = 70 end
+        nowBombTime = main_state.timer(numIdx)
+        lnBombTime = main_state.timer(lnIdx)
+        if visualizer.lastBombTimes[i] < nowBombTime
+            or ((visualizer.lastBombTimes[i] + 100 < getElapsedTime() / 1000) and lnBombTime > 0)
+        then
+            if lnBombTime > 0 then thisPow = basePow / 1000 end
+            if i == commons.keys+1 then
+                -- 皿はランダムで
+                for j = 1, VISUALIZER.BOMB.SCRATCH_NUM_OF_PROTRUSION do
+                    makeProtrusion(math.random(0, visualizerW), math.random() * thisPow)
+                end
+            else
+                local x = VISUALIZER.BOMB.CX[i]
+                makeProtrusion(x + math.random(-VISUALIZER.V2.WAVE_RANGE, VISUALIZER.V2.WAVE_RANGE), thisPow)
+                for j = 1, VISUALIZER.V2.NUM_OF_PROTRUSION-1 do
+                    makeProtrusion(x + math.random(-randomRange, randomRange), math.random() * 0.25 * thisPow)
+                end
             end
-            vals[i] = v
+
+            if lnBombTime > 0 then
+                visualizer.lastBombTimes[i] = math.ceil(getElapsedTime() / 1000)
+            else
+                visualizer.lastBombTimes[i] = nowBombTime
+            end
         end
     end
+
+    updateBarDecay()
     return 0
 end
 
@@ -310,43 +252,33 @@ visualizer.functions.load = function ()
     local skin = {
         image = {},
         graph = {},
-        customTimers = {
-            -- {timer = function () pcall(updateVisualizer()) return 0 end},
-            {timer = function () pcall(updateVisualizer2()) return 0 end},
-        },
+        customTimers = {},
     }
+    if isVisualizerProtrusionBombBase() then
+        table.insert(skin.customTimers,  {timer = function () pcall(updateVisualizerBombBase()) return 0 end})
+    else
+        table.insert(skin.customTimers,  {timer = function () pcall(updateVisualizer2()) return 0 end})
+    end
+
     local imgs = skin.image
 
-    judgeNum = main_state.number
     VISUALIZER.BAR.DIV_IDX = getVisualizerBarQuantityLevel()
     local divIdx = VISUALIZER.BAR.DIV_IDX
     -- 各種パラメータ計算
     VISUALIZER.BAR.N = VISUALIZER.AREA.W() / VISUALIZER.BAR.DIVS[divIdx]
     VISUALIZER.BAR.INTERVAL = VISUALIZER.AREA.W() / VISUALIZER.BAR.N
     VISUALIZER.BAR.DRAW_W = VISUALIZER.BAR.DRAW_W * VISUALIZER.BAR.DIVS[divIdx] / VISUALIZER.BAR.DRAW_W
-    VISUALIZER.UPDATE_INTERVAL = VISUALIZER.MOVE_TIME / (VISUALIZER.AREA.W() / VISUALIZER.BAR.INTERVAL) * 1000 * getVisualizerPropagationSpeed()
     VISUALIZER.BASE_DENSITY = math.max(1, math.ceil(main_state.number(360)))
-
+    VISUALIZER.BAR.ALPHA = 255 - getVisualizerBarTransparencyValue()
+    VISUALIZER.BACK_BAR.ALPHA = 255 - getVisualizerBarTransparencyValue()
+    VISUALIZER.REFLEC.MAX_ALPHA = 255 - getVisualizerReflectionTransparencyValue();
     -- 下側の反射の数とサイズ計算
     do
-        local mul = VISUALIZER.BAR.BASE_DIV / VISUALIZER.BAR.DIVS[divIdx]
-        print(mul)
-        VISUALIZER.REFLEC.NUM_X = VISUALIZER.BAR.N / 4
-        VISUALIZER.REFLEC.DRAW_SIZE = VISUALIZER.REFLEC.DRAW_SIZE * VISUALIZER.BAR.DRAW_W / VISUALIZER.BAR.W
+        local mul = math.min(VISUALIZER.BAR.BASE_DIV / VISUALIZER.BAR.DIVS[divIdx], 0.5)
+        VISUALIZER.REFLEC.NUM_X = math.min(VISUALIZER.BAR.N / 4, 10)
+        VISUALIZER.REFLEC.DRAW_SIZE = VISUALIZER.REFLEC.DRAW_SIZE * math.max(VISUALIZER.BAR.DRAW_W / VISUALIZER.BAR.W, 1)
         VISUALIZER.REFLEC.NUM_Y = VISUALIZER.REFLEC.NUM_Y * mul
         VISUALIZER.REFLEC.INTERVAL_Z = VISUALIZER.REFLEC.INTERVAL_Z / mul
-    end
-    -- 先に配列を確保
-    local lvals = visualizer.lvals
-    local rvals = visualizer.rvals
-    do
-        local playtime = main_state.number(163) * 60 * main_state.number(165)
-        local addSec = math.ceil(VISUALIZER.BAR.N * VISUALIZER.UPDATE_INTERVAL) -- *2は余裕をもたせているだけ
-        local n = (playtime + addSec) * 1000 / VISUALIZER.UPDATE_INTERVAL
-        for i = 1, n do
-            lvals[i] = 0
-            rvals[i] = 0
-        end
     end
     local v2vals = visualizer.v2.vals
     local v2SubBaseVals = visualizer.v2.subBaseVals
@@ -354,7 +286,14 @@ visualizer.functions.load = function ()
         v2vals[i] = 0
         v2SubBaseVals[i] = 0
     end
-
+    if isVisualizerProtrusionBombBase() then
+        local bombAreaW = VISUALIZER.AREA.W() / 7
+        VISUALIZER.V2.WAVE_RANGE = bombAreaW / 2
+        for i = 1, commons.keys+1 do
+            visualizer.lastBombTimes[i] = 0
+            VISUALIZER.BOMB.CX[i] = bombAreaW * (i - 0.5)
+        end
+    end
     -- 描画部分のグラフを作成
     local g = skin.graph
     myPrint("ビジュアライザー本数: " .. VISUALIZER.BAR.N)
@@ -364,7 +303,7 @@ visualizer.functions.load = function ()
         if isThinVisualizerBarType() then
             for i = 1, VISUALIZER.BAR.N do
                 g[#g+1] = {
-                    id = "visualizerFrontBar" .. i, src = 25, x = 0, y = 12, w = -1, h = 1,
+                    id = "visualizerFrontBar" .. i, src = 25, x = 0, y = 88, w = -1, h = 1,
                     value = function ()
                         if vals[i] == nil then return 0 end
                         return vals[i]
@@ -372,12 +311,12 @@ visualizer.functions.load = function ()
                 }
             end
             imgs[#imgs+1] = {
-                id = "visualizerBackBar", src = 26, x = 0, y = 0, w = -1, h = -1,
+                id = "visualizerBackBar", src = 25, x = 0, y = 0, w = -1, h = -1,
             }
         else
             for i = 1, VISUALIZER.BAR.N do
                 g[#g+1] = {
-                    id = "visualizerFrontBar" .. i, src = 25, x = 12, y = 12, w = 8, h = 1,
+                    id = "visualizerFrontBar" .. i, src = 25, x = 12, y = 88, w = 8, h = 1,
                     value = function ()
                         if vals[i] == nil then return 0 end
                         return vals[i]
@@ -385,12 +324,12 @@ visualizer.functions.load = function ()
                 }
             end
             imgs[#imgs+1] = {
-                id = "visualizerBackBar", src = 26, x = 12, y = 0, w = 8, h = -1,
+                id = "visualizerBackBar", src = 25, x = 12, y = 0, w = 8, h = -1,
             }
         end
     end
     imgs[#imgs+1] = {
-        id = "visualizerReflection", src = 27, x = 0, y = 0, w = -1, h = -1
+        id = "visualizerReflection", src = 26, x = 0, y = 0, w = -1, h = -1
     }
     -- 反射のマスク用
     imgs[#imgs+1] = {
@@ -421,7 +360,7 @@ visualizer.functions.dst = function ()
         local intervalZ = VISUALIZER.REFLEC.INTERVAL_Z
         local size = VISUALIZER.REFLEC.DRAW_SIZE
         local maxAlpha, minAlpha = VISUALIZER.REFLEC.MAX_ALPHA, VISUALIZER.REFLEC.MIN_ALPHA
-        for i = 0, VISUALIZER.REFLEC.NUM_X do
+        for i = 0, VISUALIZER.REFLEC.NUM_X + 1 do
             local r, g, b = hsvToRgb(hue, VISUALIZER.BAR.SATURATION, VISUALIZER.BAR.BRIGHTNESS)
             for j = 1, VISUALIZER.REFLEC.NUM_Y do
                 local correspondBar = math.ceil((i - 1) * barPerReflec + 0.5)

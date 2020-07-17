@@ -171,8 +171,8 @@ function getNoteType()
 	return getTableValue(skin_config.option, "ノートの画像", 10030) - 10030
 end
 
-function getVisualizerPropagationSpeed()
-	return getOffsetValueWithDefault("伝播速度(単位10% 既定値10)", {x = 10}).x * 10 / 100
+function isDrawVisualizer1()
+	return getTableValue(skin_config.option, "ビジュアライザー1", 10055) == 10055
 end
 
 function isThinVisualizerBarType()
@@ -181,6 +181,18 @@ end
 
 function getVisualizerBarQuantityLevel()
 	return 10047 - getTableValue(skin_config.option, "ビジュアライザー1の棒線の多さ", 10042)
+end
+
+function isVisualizerProtrusionBombBase()
+	return getTableValue(skin_config.option, "ビジュアライザー1の山の出現位置", 10050) == 10050
+end
+
+function getVisualizerBarTransparencyValue()
+	return getOffsetValueWithDefault("ビジュアライザー1のバーの透明度(既定値64 255で透明)", {a = 64}).a
+end
+
+function getVisualizerReflectionTransparencyValue()
+	return getOffsetValueWithDefault("ビジュアライザー1の反射の透明度(既定値196 255で透明)", {a = 195}).a
 end
 
 function getDifficultyValueForColor()

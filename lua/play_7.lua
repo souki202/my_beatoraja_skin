@@ -12,7 +12,7 @@ local grow = require("modules.play.grow")
 local bomb = require("modules.play.bomb")
 local loading = require("modules.play.loading")
 local finish = require("modules.play.finish")
-local fadeout = require("modules.play.fadeout")
+local fade = require("modules.play.fade")
 local visualizer = require("modules.play.visualizer")
 
 local header = {
@@ -20,13 +20,14 @@ local header = {
     name = "Social Skin" .. (DEBUG and " play dev" or ""),
     w = WIDTH,
     h = HEIGHT,
-    playstart = 1800,
+    loadend = 2500,
+    playstart = 1500,
     scene = 36000000,
     input = 500,
     close = 2000,
-    fadeout = fadeout.getFadeoutTime(),
+    fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10035まで
+    property = { -- 使用済み 10055まで
         {
             name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
@@ -106,10 +107,16 @@ local header = {
             name = "ボムのanimation1と2の黒背景透過", item = {{name = "ON", op = 10020}, {name = "OFF", op = 10021}}, def = "ON"
         },
         {
+            name = "ビジュアライザー1", item = {{name = "ON", op = 10055}, {name = "OFF", op = 10056}}, def = "ON"
+        },
+        {
             name = "ビジュアライザー1の棒線タイプ", item = {{name = "太い", op = 10035}, {name = "細い", op = 10036}}, def = "細い"
         },
         {
             name = "ビジュアライザー1の棒線の多さ", item = {{name = "1(Very Low)", op = 10040}, {name = "2(Low)", op = 10041}, {name = "3", op = 10042}, {name = "4", op = 10043}, {name = "5(High)", op = 10044}, {name = "6(Very High)", op = 10045}, {name = "7(Ultra)", op = 10046}}, def = "3"
+        },
+        {
+            name = "ビジュアライザー1の山の出現位置", item = {{name = "ボム基準", op = 10050}, {name = "判定基準", op = 10051}}, def = "ボム基準"
         },
     },
     filepath = {
@@ -160,7 +167,8 @@ local header = {
         {name = "ボムのanimation1の描画座標差分", id = 40, x = 0, y = 0},
         {name = "ボムのanimation2の描画座標差分", id = 41, x = 0, y = 0},
         {name = "ビジュアライザー関連---------", x = 0},
-        {name = "伝播速度(単位10% 既定値10)", x = 0},
+        {name = "ビジュアライザー1のバーの透明度(既定値64 255で透明)", a = 0},
+        {name = "ビジュアライザー1の反射の透明度(既定値196 255で透明)", a = 0},
     }
 }
 
@@ -200,8 +208,7 @@ local function main()
         {id = 22, path = "../play/parts/versatilitybga/*.png"},
         {id = 23, path = "../play/parts/versatilitybga/*.mp4"},
         {id = 25, path = "../play/parts/visualizer/bar.png"},
-        {id = 26, path = "../play/parts/visualizer/back_bar.png"},
-        {id = 27, path = "../play/parts/visualizer/reflection.png"},
+        {id = 26, path = "../play/parts/visualizer/reflection.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 
@@ -230,14 +237,18 @@ local function main()
     mergeSkin(skin, bomb.load())
     mergeSkin(skin, loading.load())
     mergeSkin(skin, finish.load())
-    mergeSkin(skin, fadeout.load())
-    mergeSkin(skin, visualizer.load())
+    mergeSkin(skin, fade.load())
+    if isDrawVisualizer1() then
+        mergeSkin(skin, visualizer.load())
+    end
 
     skin.destination = {}
 
     -- 各種出力
     mergeSkin(skin, bga.dst())
-    mergeSkin(skin, visualizer.dst())
+    if isDrawVisualizer1() then
+        mergeSkin(skin, visualizer.dst())
+    end
     mergeSkin(skin, progress.dst())
     mergeSkin(skin, sideInfo.dst())
     mergeSkin(skin, lanes.dst()) -- キービームとリフト, レーンカバーはここの中でmergeSkin
@@ -250,7 +261,7 @@ local function main()
     mergeSkin(skin, judgeDetail.dst())
     mergeSkin(skin, loading.dst())
     mergeSkin(skin, finish.dst())
-    mergeSkin(skin, fadeout.dst())
+    mergeSkin(skin, fade.dst())
     return skin
 end
 
