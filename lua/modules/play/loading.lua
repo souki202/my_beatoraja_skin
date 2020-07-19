@@ -128,7 +128,12 @@ loading.functions.dst = function ()
                 {time = LOADING.READY.APPEAR_TIME, x = LOADING.READY.X(LOADING), y = LOADING.READY.Y(LOADING), w = LOADING.READY.W, h = LOADING.READY.H},
                 {time = LOADING.READY.DEL_START_TIME, a = 255},
                 {time = LOADING.READY.DEL_TIME, a = 0},
-            }}
+            }},
+            -- 描画が引っかかるので先に読んでおく
+            {id = "readyText", loop = -1, dst = {
+                {time = 0, x = 0, y = 0, w = 1, h = 1, a = 1},
+                {time = 1, a = 0},
+            }},
         }
     }
 end

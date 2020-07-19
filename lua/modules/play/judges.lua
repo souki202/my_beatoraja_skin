@@ -31,8 +31,8 @@ local JUDGES = {
             X_1 = function(self) return self.X() + self.W / 2 - self.TIMING.NUM.W * self.TIMING.NUM.DIGIT / 2 end,
             X_2 = function(self) return self.X() + self.W / 4 - self.TIMING.NUM.W * self.TIMING.NUM.DIGIT / 2 end,
             Y = function(self) return self.Y() + 35 end,
-            W = 12,
-            H = 15,
+            W = 15,
+            H = 20,
             DIGIT = 3,
         }
     },
@@ -43,8 +43,8 @@ local JUDGES = {
             SIDE_X_1 = function(self) return lanes.getAreaX() + lanes.getAreaW() + 8 end,
             SIDE_X_2 = function(self) return lanes.getAreaX() + 8 - self.SCORE.DIFF.W * self.SCORE.DIFF.DIGIT end,
             Y = function(self) return self.Y() + 35 end,
-            W = 12,
-            H = 15,
+            W = 15,
+            H = 20,
             DIGIT = 5,
         }
     }
@@ -86,9 +86,9 @@ judges.functions.load = function ()
         },
         value = {
             {id = "nowCombo", src = 6, x = 0, y = 0, w = COMBO.W * 10, h = COMBO.H, divx = 10, digit = COMBO.DIGIT, ref = 75, align = (isDrawComboNextToTheJudge() and 0 or 2)},
-            {id = "judgeTimeError", src = 0, x = 1904, y = 46, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.TIMING.NUM.DIGIT, align = 2, ref = 525},
-            {id = "bestDiffValue", src = 0, x = 1904, y = 46, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.SCORE.DIFF.DIGIT, ref = 152, align = drawDiffUpperJudge() and 2 or 1},
-            {id = "targetDiffValue", src = 0, x = 1904, y = 46, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.SCORE.DIFF.DIGIT, ref = 153, align = drawDiffUpperJudge() and 2 or 1},
+            {id = "judgeTimeError", src = 0, x = 1868, y = 197, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.TIMING.NUM.DIGIT, align = 2, ref = 525},
+            {id = "bestDiffValue", src = 0, x = 1868, y = 197, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.SCORE.DIFF.DIGIT, ref = 152, align = drawDiffUpperJudge() and 2 or 1},
+            {id = "targetDiffValue", src = 0, x = 1868, y = 197, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.SCORE.DIFF.DIGIT, ref = 153, align = drawDiffUpperJudge() and 2 or 1},
         },
         judge = {
             {

@@ -177,7 +177,7 @@ local function updateBarDecay()
     end
 end
 
-function updateVisualizer2()
+function updateVisualizer()
     local pt = main_state.number(100)
 
     -- スコアが増えていたら波を起こす
@@ -257,7 +257,7 @@ visualizer.functions.load = function ()
     if isVisualizerProtrusionBombBase() then
         table.insert(skin.customTimers,  {timer = function () pcall(updateVisualizerBombBase()) return 0 end})
     else
-        table.insert(skin.customTimers,  {timer = function () pcall(updateVisualizer2()) return 0 end})
+        table.insert(skin.customTimers,  {timer = function () pcall(updateVisualizer()) return 0 end})
     end
 
     local imgs = skin.image
@@ -392,12 +392,14 @@ visualizer.functions.dst = function ()
         end
     end
     -- バーより奥に反射が出ないようにマスク
-    -- dst[#dst+1] = {
-    --     id = "barReflectionMask", dst = {
-    --         {x = VISUALIZER.MASK1.X(VISUALIZER), y = VISUALIZER.MASK1.Y(VISUALIZER),
-    --         w = VISUALIZER.MASK1.W(VISUALIZER), h = VISUALIZER.MASK1.H(VISUALIZER)}
-    --     }
-    -- }
+    if not isDrawVisualizerBackSideReflection() then
+        dst[#dst+1] = {
+            id = "barReflectionMask", dst = {
+                {x = VISUALIZER.MASK1.X(VISUALIZER), y = VISUALIZER.MASK1.Y(VISUALIZER),
+                w = VISUALIZER.MASK1.W(VISUALIZER), h = VISUALIZER.MASK1.H(VISUALIZER)}
+            }
+        }
+    end
     -- ゲージ等の部分にかぶらないようにマスク
     dst[#dst+1] = {
         id = "barReflectionMask2", dst = {

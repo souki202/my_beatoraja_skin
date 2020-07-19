@@ -187,12 +187,24 @@ function isVisualizerProtrusionBombBase()
 	return getTableValue(skin_config.option, "ビジュアライザー1の山の出現位置", 10050) == 10050
 end
 
+function isDrawVisualizerBackSideReflection()
+	return getTableValue(skin_config.option, "ビジュアライザー1の奥側の反射", 10060) == 10060
+end
+
 function getVisualizerBarTransparencyValue()
 	return getOffsetValueWithDefault("ビジュアライザー1のバーの透明度(既定値64 255で透明)", {a = 64}).a
 end
 
 function getVisualizerReflectionTransparencyValue()
 	return getOffsetValueWithDefault("ビジュアライザー1の反射の透明度(既定値196 255で透明)", {a = 195}).a
+end
+
+function getLifeGaugeEffectThresholdIdx()
+	return getTableValue(skin_config.option, "グルーヴゲージの通知エフェクトの基準", 10066) - 10064
+end
+
+function getLifeGaugeEffectSizeYOffset()
+	return getOffsetValueWithDefault("グルーブゲージの通知エフェクトの大きさ差分(%)", {y = 0}).y
 end
 
 function getDifficultyValueForColor()

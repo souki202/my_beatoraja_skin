@@ -621,6 +621,8 @@ local NEW_RECORD = {
     }
 }
 
+local FADEOUT_ANIM_TIME = 300
+
 local isCourseResult = false
 local function setIsCourseResult(b)
     isCourseResult = b
@@ -773,6 +775,7 @@ local function main()
         end
     elseif CLEAR_TYPE > LAMPS.NO_PLAY then
         myPrint("スタミナ要求量: " .. requireStamina)
+        -- リザでリプレイかどうかは検出できない
         if userData.getIsUsableStamina(requireStamina) then
             -- ランプがあって(単体, コースリザルト, フルコン以上)クリアなら経験値を更新
             local exp = math.ceil(math.pow(main_state.number(362) * main_state.number(71), 0.75))
@@ -1917,6 +1920,16 @@ local function main()
             }
         })
     end
+
+    -- フェードアウト
+    print(skin.fadeout)
+    table.insert(skin.destination, {
+        id = "black", timer = 2, loop = skin.fadeout, dst = {
+            {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 0},
+            {time = skin.fadeout - FADEOUT_ANIM_TIME},
+            {time = skin.fadeout, a = 255}
+        }
+    })
 
     return skin
 end

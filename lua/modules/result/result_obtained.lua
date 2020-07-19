@@ -179,6 +179,8 @@ local resultObtained = {
     ramp = 0,
     isShortageStamina = false,
 
+    isExtensionFadeout = false,
+
     functions = {},
 }
 
@@ -259,9 +261,9 @@ function obtainedTimer()
             -- ゲームを起動してから終了するまでAudioDriverのインスタンスは維持されるぽいので, disposeしなくても別にリークしない(メモリのリソースが再利用されるだけ)
             local isEndSe = (main_state.time() - resultObtained.activateTime) / 1000 > resultObtained.APPEAR_TIME + resultObtained.BEFORE_WAIT_TIME + 500
             if isEndSe and resultObtained.didDispose == false then
-                myPrint("効果音をメモリから解放")
-                Sound.stop(RANK.EXP_SE)
-                Sound.stop(RANK.RANKUP_SE)
+                -- myPrint("効果音をメモリから解放")
+                -- Sound.stop(RANK.EXP_SE)
+                -- Sound.stop(RANK.RANKUP_SE)
                 Sound.dispose(RANK.EXP_SE)
                 Sound.dispose(RANK.RANKUP_SE)
                 resultObtained.didDispose = true
@@ -279,6 +281,7 @@ resultObtained.functions.setRampAndUpdateFadeTime = function(skin, ramp, isShort
     if isTransitionByDecide() and ramp > 1 then
         local fade = math.max(getTableValue(skin_config.offset, "経験値等画面表示秒数 (決定キーの場合, 最小1秒)", {x = 1}).x, 1) * 1000
         skin.fadeout = fade + resultObtained.APPEAR_TIME + resultObtained.BEFORE_WAIT_TIME + resultObtained.AFTER_WAIT_TIME
+        resultObtained.isExtensionFadeout = true
     end
 end
 
@@ -595,6 +598,10 @@ resultObtained.functions.dst = function (skin)
             }
         }
     }
+end
+
+resultObtained.functions.getIsExtensionFadeout = function ()
+    return resultObtained.isExtensionFadeout
 end
 
 return resultObtained.functions

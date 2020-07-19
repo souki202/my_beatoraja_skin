@@ -41,7 +41,7 @@ local SCORE = {
         INTERVAL_Y = 15,
         H = 14,
         W = 428,
-        COLORS = {{0, 102, 204}, {0, 143, 34}, {153, 0, 0}}
+        COLORS = {{0, 128, 255}, {0, 192, 64}, {192, 0, 0}}
     },
     TEXT = {
         X = function (self) return self.AREA.X() + 4 end,
@@ -111,7 +111,7 @@ scoreGraph.functions.dst = function ()
                         x = SCORE.GRAPH.X(SCORE),
                         y = SCORE.GRAPH.Y(SCORE) - SCORE.GRAPH.INTERVAL_Y * (i - 1),
                         w = SCORE.GRAPH.W, h = SCORE.GRAPH.H,
-                        a = 96
+                        a = 96, r = 0, g = 0, b = 0
                     }
                 }
             }
@@ -204,7 +204,7 @@ scoreGraph.functions.dst = function ()
     do
         local ids = {"graphRankA", "graphRankAa", "graphRankAaa"}
         for i = 1, 3 do
-            local lineX = SCORE.GRAPH.X(SCORE) + SCORE.GRAPH.W * (0.66 + (0.11 * (i - 1)))
+            local lineX = SCORE.GRAPH.X(SCORE) + SCORE.GRAPH.W * (0.6666 + (0.1111 * (i - 1)))
             -- 線
             dst[#dst+1] = {
                 id = "white", dst = {

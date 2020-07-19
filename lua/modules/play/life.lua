@@ -2,6 +2,7 @@ require("modules.commons.define")
 local commons = require("modules.play.commons")
 local lanes = require("modules.play.lanes")
 local main_state = require("main_state")
+local timer_util = require("timer_util")
 require("modules.commons.numbers")
 
 local life = {
@@ -84,11 +85,21 @@ local LIFE = {
             SHADOW = 12,
             H = 68,
             LOOP_TIME = 1000,
-        }
+        },
+        LIGHT = {
+            SIZE = 24,
+            MAX_H = 768,
+            CY = function (self) return self.GAUGE.Y(self) + self.GAUGE.H / 2 end,
+            THRESHOLD_INTERVALS = {5, 10, 20, 30, 9999},
+            THRESHOLD_INTERVAL = 5,
+            ANIM_TIME = 500,
+        },
     },
 }
 
 life.functions.load = function ()
+    LIFE.GAUGE.LIGHT.THRESHOLD_INTERVAL = LIFE.GAUGE.LIGHT.THRESHOLD_INTERVALS[math.max(1, math.min(getLifeGaugeEffectThresholdIdx(), 5))]
+    LIFE.GAUGE.LIGHT.MAX_H = LIFE.GAUGE.LIGHT.MAX_H * (100 + getLifeGaugeEffectSizeYOffset()) / 100
     local skin = {
         image = {
             {id = "grooveFrame", src = 0, x = 0, y = PARTS_TEXTURE_SIZE - LIFE.AREA.H, w = LIFE.AREA.W, h = LIFE.AREA.H},
@@ -105,6 +116,9 @@ life.functions.load = function ()
             {id = "warnLeft", src = 0, x = 433, y = PARTS_TEXTURE_SIZE - LIFE.GAUGE.WARN.H, w = LIFE.GAUGE.WARN.SHADOW, h = LIFE.GAUGE.WARN.H},
             -- {id = "warnRight", src = 0, x = 433 + 1 + LIFE.GAUGE.WARN.SHADOW, y = PARTS_TEXTURE_SIZE - LIFE.GAUGE.WARN.H, w = LIFE.GAUGE.WARN.SHADOW, h = LIFE.GAUGE.WARN.H},
             -- {id = "warnCenter", src = 0, x = 433 + LIFE.GAUGE.WARN.SHADOW, y = PARTS_TEXTURE_SIZE - LIFE.GAUGE.WARN.H, w = 1, h = LIFE.GAUGE.WARN.H},
+
+            -- 10%ごとのエフェクト
+            {id = "lightIndicator", src = 0, x = 22, y = 0, w = LIFE.GAUGE.LIGHT.SIZE, h = LIFE.GAUGE.LIGHT.SIZE},
         },
         value = {
             {id = "grooveValue", src = 0, x = 1880, y = 76, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = LIFE.NUM.DIGIT, ref = 107},
@@ -133,7 +147,7 @@ life.functions.load = function ()
         }
     end
 
-    -- grapg読み込み
+    -- graph読み込み
     local g = skin.graph
     for i = 1, #LIFE.TYPES do
         local border = LIFE.GAUGE.COLOR_BORDERS[i]
@@ -160,7 +174,6 @@ life.functions.load = function ()
             end,
         }
     end
-
     return skin
 end
 
@@ -243,7 +256,7 @@ life.functions.dst = function ()
     for i = 1, #LIFE.TYPES do
         local borderDanger = LIFE.GAUGE.INDICATOR_BORDERS[i][1]
         local borderSafe = LIFE.GAUGE.INDICATOR_BORDERS[i][2]
-        
+
         -- 100% safeの波紋
         local maxW = LIFE.INDICATOR.W * LIFE.INDICATOR.WAVE_MUL
         local maxH = LIFE.INDICATOR.H * LIFE.INDICATOR.WAVE_MUL
@@ -404,6 +417,31 @@ life.functions.dst = function ()
 
     -- 100%時のキラキラ
 
+
+    -- n%ごとの通知読み込み
+    do
+        local size = LIFE.GAUGE.LIGHT.SIZE
+        local cy = LIFE.GAUGE.LIGHT.CY(LIFE)
+        local maxH = LIFE.GAUGE.LIGHT.MAX_H
+        local animTime = LIFE.GAUGE.LIGHT.ANIM_TIME
+        for i = 0, 100, LIFE.GAUGE.LIGHT.THRESHOLD_INTERVAL do
+            local x = LIFE.GAUGE.X(LIFE) - size / 2 + LIFE.GAUGE.W * i / 100
+            -- 超えた時
+            dst[#dst+1] = {
+                id = "lightIndicator", loop = -1, timer = timer_util.timer_observe_boolean(function () return life.value >= i end), dst = {
+                    {time = 0, x = x, y = cy, w = size, h = 0, acc = 2},
+                    {time = animTime, y = cy - maxH / 2, h = maxH, a = 0},
+                }
+            }
+            -- 下回った時
+            dst[#dst+1] = {
+                id = "lightIndicator", loop = -1, timer = timer_util.timer_observe_boolean(function () return life.value < i end), dst = {
+                    {time = 0, x = x, y = cy, w = size, h = 0, r = 255, g = 128, b = 128, acc = 2},
+                    {time = animTime, y = cy - maxH / 2, h = maxH, a = 0},
+                }
+            }
+        end
+    end
     return skin
 end
 

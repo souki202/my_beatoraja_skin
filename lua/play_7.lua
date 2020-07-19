@@ -14,6 +14,7 @@ local loading = require("modules.play.loading")
 local finish = require("modules.play.finish")
 local fade = require("modules.play.fade")
 local visualizer = require("modules.play.visualizer")
+local autoplay = require("modules.play.autoplay")
 
 local header = {
     type = 0,
@@ -27,7 +28,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10055まで
+    property = { -- 使用済み 10065まで
         {
             name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
@@ -89,6 +90,9 @@ local header = {
             name = "黒帯部分のBGA表示", item = {{name = "ON", op = 945}, {name = "OFF", op = 946}}, def = "ON"
         },
         {
+            name = "グルーヴゲージの通知エフェクトの基準", item = {{name = "5%毎", op = 10065}, {name = "10%毎", op = 10066}, {name = "20%毎", op = 10067}, {name = "30%毎", op = 10068}, {name = "無し", op = 10069}}, def = "10%毎"
+        },
+        {
             name = "サイド部分のグラフ", item = {{name = "無し", op = 10000}, {name = "判定分布", op = 10001}, {name = "EARLY, LATE分布", op = 10002}}, def = "判定分布"
         },
         { -- 961まで使用
@@ -118,6 +122,9 @@ local header = {
         {
             name = "ビジュアライザー1の山の出現位置", item = {{name = "ボム基準", op = 10050}, {name = "判定基準", op = 10051}}, def = "ボム基準"
         },
+        {
+            name = "ビジュアライザー1の奥側の反射", item = {{name = "ON", op = 10060}, {name = "OFF", op = 10061}}, def = "ON"
+        },
     },
     filepath = {
         {name = "各種画像--------------", path = "../dummy/*"},
@@ -146,6 +153,7 @@ local header = {
         {name = "各種オフセット(0で既定値)---------", x = 0},
         {name = "判定線の高さ(既定値 4px)", h = 0},
         {name = "レーンの黒背景(255で透明)", a = 0},
+        {name = "グルーブゲージの通知エフェクトの大きさ差分(%)", y = 0},
         {name = "ボム関連------------------------", x = 0},
         {name = "100%の描画縦横はwave 500px, anim 300px, particle 16px", x = 0},
         {name = "ボムのwave1の大きさ(単位10% 既定値10)", w = 0, h = 0},
@@ -238,6 +246,7 @@ local function main()
     mergeSkin(skin, loading.load())
     mergeSkin(skin, finish.load())
     mergeSkin(skin, fade.load())
+    mergeSkin(skin, autoplay.load())
     if isDrawVisualizer1() then
         mergeSkin(skin, visualizer.load())
     end
@@ -259,6 +268,7 @@ local function main()
     mergeSkin(skin, life.dst())
     mergeSkin(skin, scoreGraph.dst())
     mergeSkin(skin, judgeDetail.dst())
+    mergeSkin(skin, autoplay.dst())
     mergeSkin(skin, loading.dst())
     mergeSkin(skin, finish.dst())
     mergeSkin(skin, fade.dst())
