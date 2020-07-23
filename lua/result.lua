@@ -1,5 +1,5 @@
 local common = require("result_common")
-local header = common.header
+local header = common.header()
 
 local function main()
     return common.main()

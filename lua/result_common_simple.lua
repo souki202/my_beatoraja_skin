@@ -387,6 +387,7 @@ local LARGE_LAMP = {
     LEN = {9, 17, 19, 11, 12, 12, 15, 12, 10, 10}, -- 空白込み
     POS = { -- 文字の左端部分の座標間隔と, 画像側の文字左端と文字領域左端の差 座標間隔の1文字目だけ絶対座標
         INIT_Y = 533,
+        FAILED_START_DY = 200,
         AT_TOP_Y = 894,
         PERFECT = {759, 48, 45, 49, 42, 46, 49, 42, 27, 27},
         PERFECT_D = {10, 12, 10, 12, 12, 12, 12, 23, 23, 23},
@@ -414,6 +415,7 @@ local LARGE_LAMP = {
         TO_TOP_TIME = 800,
         AT_TOP_TIME = 1300,
         END_TIME = 1700,
+        FAILED_DROP_ORDER = {},
 
         START_BRIGHT_ROOP = 4000,
         BRIGHT_ROOP_INTERVAL = 3000,
@@ -605,6 +607,15 @@ local function initialize(skin)
         RANKS.X = SCORE.WND.X + 491
         NEW_RECORD.SCORE.X = SCORE.WND.X + 310
     end
+
+    -- failed向け
+    do
+        local order = LARGE_LAMP.ANIMATION.FAILED_DROP_ORDER
+        for i = 1, LARGE_LAMP.LEN[LAMPS.FAILED] do
+            order[#order+1] = i - 1
+        end
+        table.shuffle(order)
+    end
 end
 
 local function main()
@@ -727,17 +738,17 @@ local function main()
         {id = "targetScoreText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = VALUE_ITEM_TEXT.SRC_Y + VALUE_ITEM_TEXT.H*1, w = VALUE_ITEM_TEXT.W, h = VALUE_ITEM_TEXT.H},
 
         -- combo ir
-        {id = "comboText"      , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 520, w = JUDGE.COMBO.TEXT.W, h = JUDGE.COMBO.TEXT.H},
-        {id = "irText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 520 + JUDGE.COMBO.TEXT.H, w = JUDGE.IR.TEXT.W, h = JUDGE.IR.TEXT.H},
+        {id = "comboText" , src = 0, x = 1032, y = 70, w = JUDGE.COMBO.TEXT.W, h = JUDGE.COMBO.TEXT.H},
+        {id = "irText"    , src = 0, x = 1032, y = 70 + JUDGE.COMBO.TEXT.H, w = JUDGE.IR.TEXT.W, h = JUDGE.IR.TEXT.H},
         {id = "comboFrame", src = 0, x = 1404, y = TEXTURE_SIZE - 1 - JUDGE.COMBO.WND.H, w = JUDGE.COMBO.WND.W, h = JUDGE.COMBO.WND.H},
-        {id = "irFrame", src = 0, x = 1404, y = TEXTURE_SIZE - 1 - JUDGE.IR.WND.H, w = JUDGE.IR.WND.W, h = JUDGE.IR.WND.H},
+        {id = "irFrame"   , src = 0, x = 1404, y = TEXTURE_SIZE - 1 - JUDGE.IR.WND.H, w = JUDGE.IR.WND.W, h = JUDGE.IR.WND.H},
 
         -- 判定部分
         {id = "judgeSlash", src = 0, x = 1872, y = 36, w = JUDGE.SLASH.W, h = JUDGE.SLASH.H},
 
         -- グラフ
         {id = "grooveGaugeFrame", src = 0, x = 0, y = TEXTURE_SIZE - 371 - GRAPH.WND_GAUGE.H - GRAPH.WND_GAUGE.SHADOW*2, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW*2},
-        {id = "grooveGaugeText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.GROOVE_TEXT.H*3, w = GRAPH.GROOVE_TEXT.W ,h = GRAPH.GROOVE_TEXT.H},
+        {id = "grooveGaugeText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.GROOVE_TEXT.H*4, w = GRAPH.GROOVE_TEXT.W ,h = GRAPH.GROOVE_TEXT.H},
 
         -- ランク
         {id = "rankShine", src = 1, x = 0, y = 0, w = RANKS.SHINE.W, h = RANKS.SHINE.H},
@@ -1419,25 +1430,44 @@ local function main()
         local initCy = LARGE_LAMP.POS.INIT_Y + LARGE_LAMP.SIZE / 2
         local initSize = LARGE_LAMP.SIZE * LARGE_LAMP.ANIMATION.INIT_SIZE_MUL
         local dx = cx - WIDTH / 2
+        local dstArrayFirstHalf = {}
+        local dstArrayLatterHalf = {}
         -- shadowと本体は同時に動かす, brightは別働隊
-        local dstArrayFirstHalf = {
-            {time = 0, x = (cx - initSize / 2) + dx, y = initCy - initSize / 2, w = initSize, h = initSize, a = 0, acc = 2},
-            {time = st + dt - 1, a = 0},
-            {time = st + dt, a = 255},
-            {
-                time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION,
-                x = dstBodyX, y = LARGE_LAMP.POS.INIT_Y, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE,
-            },
-            {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 0},
-            {time = st + LARGE_LAMP.ANIMATION.END_TIME},
-        }
-
-        local dstArrayLatterHalf = {
-            {time = 0, x = dstBodyX, y = LARGE_LAMP.POS.INIT_Y, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE, a = 0, acc = 0},
-            {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION, a = 0},
-            {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 255},
-            {time = st + LARGE_LAMP.ANIMATION.TO_TOP_TIME},
-        }
+        if CLEAR_TYPE == LAMPS.FAILED then
+            local dropDt = popInterval * LARGE_LAMP.ANIMATION.FAILED_DROP_ORDER[i]
+            local fromY = LARGE_LAMP.POS.INIT_Y + LARGE_LAMP.POS.FAILED_START_DY
+            dstArrayFirstHalf = {
+                {time = 0, x = dstBodyX, y = fromY, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE, a = 0, acc = 2},
+                {time = st + dropDt},
+                {time = st + dropDt + LARGE_LAMP.ANIMATION.POP_DURATION, y = LARGE_LAMP.POS.INIT_Y, a = 255},
+                {time = st + dropDt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 0},
+                {time = st + LARGE_LAMP.ANIMATION.END_TIME},
+            }
+            dstArrayLatterHalf = {
+                {time = 0, x = dstBodyX, y = LARGE_LAMP.POS.INIT_Y, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE, a = 0, acc = 0},
+                {time = st + dropDt + LARGE_LAMP.ANIMATION.POP_DURATION, a = 0},
+                {time = st + dropDt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 255},
+                {time = st + LARGE_LAMP.ANIMATION.TO_TOP_TIME},
+            }
+        else
+            dstArrayFirstHalf = {
+                {time = 0, x = (cx - initSize / 2) + dx, y = initCy - initSize / 2, w = initSize, h = initSize, a = 0, acc = 2},
+                {time = st + dt - 1, a = 0},
+                {time = st + dt, a = 255},
+                {
+                    time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION,
+                    x = dstBodyX, y = LARGE_LAMP.POS.INIT_Y, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE,
+                },
+                {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 0},
+                {time = st + LARGE_LAMP.ANIMATION.END_TIME},
+            }
+            dstArrayLatterHalf = {
+                {time = 0, x = dstBodyX, y = LARGE_LAMP.POS.INIT_Y, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE, a = 0, acc = 0},
+                {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION, a = 0},
+                {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 255},
+                {time = st + LARGE_LAMP.ANIMATION.TO_TOP_TIME},
+            }
+        end
         local dstArrayBright = {
             {time = 0, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE, a = 0, acc = 0},
             {time = st + LARGE_LAMP.ANIMATION.TO_TOP_TIME},

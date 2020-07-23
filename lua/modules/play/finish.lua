@@ -258,7 +258,8 @@ finish.functions.dst = function ()
         end
         -- 中央移動->perspective projection->レーンに移動
         local ty = text.Y() + text.H
-        local lastX = text.FIRST_X() + text.TO_CENTER
+        local toCenter = text.TO_CENTER * (is1P() and 1 or -1)
+        local lastX = text.FIRST_X() + toCenter
         for i = 1, #text.DX do
             -- 中央移動
             local lx = lastX + text.DX[i] - text.OFFSET_X[i]
@@ -279,17 +280,17 @@ finish.functions.dst = function ()
             -- 終了時点の座標は最初の設定した値
             dst[#dst+1] = {
                 id = "fcText" .. i, timer = 48, loop = -1, dst = {
-                    {time = 0, x = ilx - text.TO_CENTER, y = iy, w = irx - ilx, h = ity - iy, acc = 2},
-                    {time = popTime, x = plx - text.TO_CENTER, y = py, w = prx - plx, h = pty - py},
+                    {time = 0, x = ilx - toCenter, y = iy, w = irx - ilx, h = ity - iy, acc = 2},
+                    {time = popTime, x = plx - toCenter, y = py, w = prx - plx, h = pty - py},
                 }
             }
             -- ポップから並ぶまで
             dst[#dst+1] = {
                 id = "fcText" .. i, timer = 48, loop = endTime, dst = {
-                    {time = 0, x = plx - text.TO_CENTER, y = py, w = prx - plx, h = pty - py, a = 0, acc = 1},
+                    {time = 0, x = plx - toCenter, y = py, w = prx - plx, h = pty - py, a = 0, acc = 1},
                     {time = popTime, a = 0},
                     {time = popTime + 1, a = 255},
-                    {time = endTime, x = lx - text.TO_CENTER, y = textY, w = text.W, h = text.H}
+                    {time = endTime, x = lx - toCenter, y = textY, w = text.W, h = text.H}
                 }
             }
         end

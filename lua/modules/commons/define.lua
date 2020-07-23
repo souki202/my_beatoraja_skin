@@ -37,6 +37,13 @@ function table.has_value (tab, val)
     return false
 end
 
+function table.shuffle(tbl)
+    for i = #tbl, 2, -1 do
+        local j = math.random(i)
+        tbl[i], tbl[j] = tbl[j], tbl[i]
+    end
+end
+
 function table.sum (tbl)
     local sum = 0
     for i = 1, #tbl do
@@ -104,9 +111,9 @@ end
 
 SKIN_INFO = {
     SELECT_VRESION = "2.25",
-    RESULT_VERSION = "2.06",
+    RESULT_VERSION = "2.10",
     DECIDE_VERSION = "1.01",
-    PLAY_VERSION = "0.90",
+    PLAY_VERSION = "0.91",
 }
 
 BASE_WIDTH = 1920

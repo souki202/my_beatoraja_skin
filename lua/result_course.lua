@@ -1,8 +1,9 @@
 local common = require("result_common")
-local header = common.header
+
+common.setIsCourseResult(true)
+local header = common.header()
 
 local function main()
-    common.setIsCourseResult(true)
 
     local skin = common.main()
     skin.type = 15

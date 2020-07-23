@@ -145,7 +145,7 @@ info.functions.dst = function ()
     }
     -- ラベル
     dst[#dst+1] = {
-        id = "bpmLabel", dst = {
+        id = "tnLabel", dst = {
             {x = INFO.LABEL.X(INFO), y = INFO.LABEL.OTHER_Y(tnY), w = INFO.LABEL.W, h = INFO.LABEL.H}
         }
     }

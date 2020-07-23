@@ -421,7 +421,7 @@ local help = {
                 {
                     TEXT = "バージョン",
                     description = {
-                        TEXT = "選曲スキン: " .. string.format( "%2.3f", SKIN_INFO.SELECT_VRESION) .. "\nリザルトスキン: " .. string.format("%.2f", SKIN_INFO.RESULT_VERSION) .. "\n決定スキン: " .. string.format("%.2f", SKIN_INFO.DECIDE_VERSION)
+                        TEXT = "選曲スキン: " .. string.format( "%2.3f", SKIN_INFO.SELECT_VRESION) .. "\nリザルトスキン: " .. string.format("%.2f", SKIN_INFO.RESULT_VERSION) .. "\n決定スキン: " .. string.format("%.2f", SKIN_INFO.DECIDE_VERSION) .. "\nプレイスキン: " .. string.format("%.2f", SKIN_INFO.PLAY_VERSION)
                     },
                 },
                 {

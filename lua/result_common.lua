@@ -481,7 +481,7 @@ local GRAPH = {
         H = 12,
     },
 
-    PREFIX = {"notes", "judges", "el"}
+    PREFIX = {"notes", "judges", "el", "timing"}
 }
 
 local OPTIONS = {
@@ -504,6 +504,7 @@ local LARGE_LAMP = {
     LEN = {9, 17, 19, 11, 12, 12, 15, 12, 10, 10}, -- 空白込み
     POS = { -- 文字の左端部分の座標間隔と, 画像側の文字左端と文字領域左端の差 座標間隔の1文字目だけ絶対座標
         INIT_Y = 533,
+        FAILED_START_DY = 200,
         AT_TOP_Y = 950,
         PERFECT = {759, 48, 45, 49, 42, 46, 49, 42, 27, 27},
         PERFECT_D = {10, 12, 10, 12, 12, 12, 12, 23, 23, 23},
@@ -531,6 +532,7 @@ local LARGE_LAMP = {
         TO_TOP_TIME = 800,
         AT_TOP_TIME = 1300,
         END_TIME = 1700,
+        FAILED_DROP_ORDER = {},
 
         START_BRIGHT_ROOP = 4000,
         BRIGHT_ROOP_INTERVAL = 3000,
@@ -628,57 +630,100 @@ local function setIsCourseResult(b)
     isCourseResult = b
 end
 
-local header = {
-    type = 7,
-    name = "Social Skin" .. (DEBUG and " dev result" or ""),
-    w = WIDTH,
-    h = HEIGHT,
-    fadeout = 500,
-    scene = 3600000,
-    input = INPUT_WAIT,
-    property = {
-        {
-            name = "背景の分類", item = {{name = "クリアかどうか", op = 910}, {name = "ランク毎", op = 911}, {name = "クリアランプ毎", op = 912}}, def = "クリアかどうか"
+--[[
+    グルーヴゲージ下の各種グラフの種類を取得
+
+    @param  int pos 上から何番目か 1が一番上
+    @return int 1:ノーツ数分布 2:判定分布 3:EARLY/LATE分布(棒グラフ) 4:タイミング可視化グラフ
+]]
+local function getGraphType(pos)
+    if pos < 1 or 3 < pos then return 0 end
+    local def = 930
+    if pos == 2 then def = 936
+    elseif pos == 3 then def = 942
+    end
+    return (getTableValue(skin_config.option, "各種グラフ" .. pos .. "個目", def) % 5) + 1
+end
+
+local function setProperties(skin)
+    if isCourseResult then
+        table.insert(skin.property, {
+            name = "各種グラフ1個目", item = {{name = "ノーツ数分布", op = 930}, {name = "判定分布", op = 931}, {name = "EARLY/LATE分布(棒グラフ)", op = 932}}, def = "ノーツ数分布"
+        })
+        table.insert(skin.property, {
+            name = "各種グラフ2個目", item = {{name = "ノーツ数分布", op = 935}, {name = "判定分布", op = 936}, {name = "EARLY/LATE分布(棒グラフ)", op = 937}}, def = "判定分布"
+        })
+        table.insert(skin.property, {
+            name = "各種グラフ3個目", item = {{name = "ノーツ数分布", op = 940}, {name = "判定分布", op = 941}, {name = "EARLY/LATE分布(棒グラフ)", op = 942}}, def = "EARLY/LATE分布(棒グラフ)"
+        })
+    else
+        table.insert(skin.property, {
+            name = "各種グラフ1個目", item = {{name = "ノーツ数分布", op = 930}, {name = "判定分布", op = 931}, {name = "EARLY/LATE分布(棒グラフ)", op = 932}, {name = "タイミング可視化グラフ", op = 933}}, def = "ノーツ数分布"
+        })
+        table.insert(skin.property, {
+            name = "各種グラフ2個目", item = {{name = "ノーツ数分布", op = 935}, {name = "判定分布", op = 936}, {name = "EARLY/LATE分布(棒グラフ)", op = 937}, {name = "タイミング可視化グラフ", op = 938}}, def = "判定分布"
+        })
+        table.insert(skin.property, {
+            name = "各種グラフ3個目", item = {{name = "ノーツ数分布", op = 940}, {name = "判定分布", op = 941}, {name = "EARLY/LATE分布(棒グラフ)", op = 942}, {name = "タイミング可視化グラフ", op = 943}}, def = "EARLY/LATE分布(棒グラフ)"
+        })
+    end
+end
+
+function makeHeader()
+    local header = {
+        type = 7,
+        name = "Social Skin" .. (DEBUG and " dev result" or ""),
+        w = WIDTH,
+        h = HEIGHT,
+        fadeout = 500,
+        scene = 3600000,
+        input = INPUT_WAIT,
+        property = {
+            {
+                name = "背景の分類", item = {{name = "クリアかどうか", op = 910}, {name = "ランク毎", op = 911}, {name = "クリアランプ毎", op = 912}}, def = "クリアかどうか"
+            },
+            {
+                name = "レイアウト", item = {{name = "1", op = 915}, {name = "2", op = 916}}, def = "1"
+            },
+            {
+                name = "スコア位置", item = {{name = "左", op = 920}, {name = "右", op = 921}}, def = "左"
+            },
+            {
+                name = "経験値等画面遷移", item = {{name = "右キー", op = 925}, {name = "左キー", op = 926}, {name = "決定ボタン(一定時間表示)", op = 927}, {name = "無し", op = 928}}, def = "右キー"
+            },
         },
-        {
-            name = "レイアウト", item = {{name = "1", op = 915}, {name = "2", op = 916}}, def = "1"
+        filepath = {
+            {name = "NoImage画像(png)", path = "../result/noimage/*.png", def = "default"},
+            {name = "背景選択-----------------------------------------", path="../dummy/*"},
+            {name = "CLEAR背景(png)", path = "../result/background/isclear/clear/*.png"},
+            {name = "FAILED背景(png)", path = "../result/background/isclear/failed/*.png"},
+            {name = "背景選択2-----------------------------------------", path="../dummy/*"},
+            {name = "AAA背景(png)", path = "../result/background/ranks/aaa/*.png"},
+            {name = "AA背景(png)" , path = "../result/background/ranks/aa/*.png"},
+            {name = "A背景(png)"  , path = "../result/background/ranks/a/*.png"},
+            {name = "B背景(png)"  , path = "../result/background/ranks/b/*.png"},
+            {name = "C背景(png)"  , path = "../result/background/ranks/c/*.png"},
+            {name = "D背景(png)"  , path = "../result/background/ranks/d/*.png"},
+            {name = "E背景(png)"  , path = "../result/background/ranks/e/*.png"},
+            {name = "F背景(png)"  , path = "../result/background/ranks/f/*.png"},
+            {name = "背景選択3-----------------------------------------", path="../dummy/*"},
+            {name = "FAILED(ランプ毎)背景(png)", path = "../result/background/lamps/failed/*.png"},
+            {name = "ASSIST EASY背景(png)"    , path = "../result/background/lamps/aeasy/*.png"},
+            {name = "LASSIST EASY背景(png)"   , path = "../result/background/lamps/laeasy/*.png"},
+            {name = "EASY背景(png)"           , path = "../result/background/lamps/easy/*.png"},
+            {name = "NORMAL背景(png)"         , path = "../result/background/lamps/normal/*.png"},
+            {name = "HARD背景(png)"           , path = "../result/background/lamps/hard/*.png"},
+            {name = "EXHARD背景(png)"         , path = "../result/background/lamps/exhard/*.png"},
+            {name = "FULLCOMBO背景(png)"      , path = "../result/background/lamps/fullcombo/*.png"},
+            {name = "PERFECT背景(png)"        , path = "../result/background/lamps/perfect/*.png"},
         },
-        {
-            name = "スコア位置", item = {{name = "左", op = 920}, {name = "右", op = 921}}, def = "左"
+        offset = {
+            {name = "経験値等画面表示秒数 (決定キーの場合, 最小1秒)", x = 0},
         },
-        {
-            name = "経験値等画面遷移", item = {{name = "右キー", op = 925}, {name = "左キー", op = 926}, {name = "決定ボタン(一定時間表示)", op = 927}, {name = "無し", op = 928}}, def = "右キー"
-        },
-    },
-    filepath = {
-        {name = "NoImage画像(png)", path = "../result/noimage/*.png", def = "default"},
-        {name = "背景選択-----------------------------------------", path="../dummy/*"},
-        {name = "CLEAR背景(png)", path = "../result/background/isclear/clear/*.png"},
-        {name = "FAILED背景(png)", path = "../result/background/isclear/failed/*.png"},
-        {name = "背景選択2-----------------------------------------", path="../dummy/*"},
-        {name = "AAA背景(png)", path = "../result/background/ranks/aaa/*.png"},
-        {name = "AA背景(png)" , path = "../result/background/ranks/aa/*.png"},
-        {name = "A背景(png)"  , path = "../result/background/ranks/a/*.png"},
-        {name = "B背景(png)"  , path = "../result/background/ranks/b/*.png"},
-        {name = "C背景(png)"  , path = "../result/background/ranks/c/*.png"},
-        {name = "D背景(png)"  , path = "../result/background/ranks/d/*.png"},
-        {name = "E背景(png)"  , path = "../result/background/ranks/e/*.png"},
-        {name = "F背景(png)"  , path = "../result/background/ranks/f/*.png"},
-        {name = "背景選択3-----------------------------------------", path="../dummy/*"},
-        {name = "FAILED(ランプ毎)背景(png)", path = "../result/background/lamps/failed/*.png"},
-        {name = "ASSIST EASY背景(png)"    , path = "../result/background/lamps/aeasy/*.png"},
-        {name = "LASSIST EASY背景(png)"   , path = "../result/background/lamps/laeasy/*.png"},
-        {name = "EASY背景(png)"           , path = "../result/background/lamps/easy/*.png"},
-        {name = "NORMAL背景(png)"         , path = "../result/background/lamps/normal/*.png"},
-        {name = "HARD背景(png)"           , path = "../result/background/lamps/hard/*.png"},
-        {name = "EXHARD背景(png)"         , path = "../result/background/lamps/exhard/*.png"},
-        {name = "FULLCOMBO背景(png)"      , path = "../result/background/lamps/fullcombo/*.png"},
-        {name = "PERFECT背景(png)"        , path = "../result/background/lamps/perfect/*.png"},
-    },
-    offset = {
-        {name = "経験値等画面表示秒数 (決定キーの場合, 最小1秒)", x = 0},
-    },
-}
+    }
+    setProperties(header)
+    return header
+end
 
 local function isOldLayout()
     return getTableValue(skin_config.option, "レイアウト", 915) == 915
@@ -749,12 +794,21 @@ local function initialize(skin)
         LAMP.WND.X = WIDTH - LAMP.WND.X - LAMP.WND.W
         TIMING.WND.X = WIDTH - TIMING.WND.X - TIMING.WND.W
     end
+
+    -- failed向け
+    do
+        local order = LARGE_LAMP.ANIMATION.FAILED_DROP_ORDER
+        for i = 1, LARGE_LAMP.LEN[LAMPS.FAILED] do
+            order[#order+1] = i - 1
+        end
+        table.shuffle(order)
+    end
 end
 
 local function main()
     local skin = {}
 	-- ヘッダ情報をスキン本体にコピー
-    for k, v in pairs(header) do
+    for k, v in pairs(makeHeader()) do
         skin[k] = v
     end
 
@@ -893,13 +947,15 @@ local function main()
         -- グラフ
         {id = "grooveGaugeFrame", src = 0, x = 0, y = TEXTURE_SIZE - 371, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW*2},
         {id = "judgeFrame", src = 0, x = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, y = TEXTURE_SIZE - 367, w = GRAPH.WND_JUDGE.W + GRAPH.WND_JUDGE.SHADOW*2, h = GRAPH.WND_JUDGE.H + GRAPH.WND_JUDGE.SHADOW*2},
-        {id = "notesDescription", src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*0, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
-        {id = "judgesDescription", src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*1, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
-        {id = "elDescription"   , src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*2, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
-        {id = "notesGraphText" , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*0, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
-        {id = "judgesGraphText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*1, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
-        {id = "elGraphText"    , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*2, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
-        {id = "grooveGaugeText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.GROOVE_TEXT.H*3, w = GRAPH.GROOVE_TEXT.W ,h = GRAPH.GROOVE_TEXT.H},
+        {id = "notesDescription"  , src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*0, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
+        {id = "judgesDescription" , src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*1, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
+        {id = "elDescription"     , src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*2, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
+        {id = "timingDescription" , src = 999, x = 0, y = 0, w = 1, h = 1},
+        {id = "notesGraphText"  , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*0, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
+        {id = "judgesGraphText" , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*1, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
+        {id = "elGraphText"     , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*2, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
+        {id = "timingGraphText" , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*3, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
+        {id = "grooveGaugeText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.GROOVE_TEXT.H*4, w = GRAPH.GROOVE_TEXT.W ,h = GRAPH.GROOVE_TEXT.H},
 
         -- ランク
         {id = "rankShine", src = 1, x = 0, y = 0, w = RANKS.SHINE.W, h = RANKS.SHINE.H},
@@ -911,6 +967,7 @@ local function main()
         {id = "newRecordDust", src = 0, x = 1215, y = 0, w = NEW_RECORD.DUST.SIZE, h = NEW_RECORD.DUST.SIZE},
 
         -- その他色
+        {id = "blank", src = 999, x = 0, y = 0, w = 1, h = 1},
         {id = "black", src = 999, x = 1, y = 0, w = 1, h = 1},
         {id = "white", src = 999, x = 2, y = 0, w = 1, h = 1},
     }
@@ -986,6 +1043,10 @@ local function main()
         {id = "judgesGraph", noGap = 1, orderReverse = 1, type = 1, backTexOff = 1},
         {id = "elGraph", noGap = 1, orderReverse = 1, type = 2, backTexOff = 1},
     }
+
+    skin.timingdistributiongraph = {
+		{id = "timingGraph", graphColor = "88FF88FF"},
+	}
 
     skin.value = {
         {id = "difficultyValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 2, ref = 96, align = 0},
@@ -1081,16 +1142,6 @@ local function main()
                 {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
             }
         },
-        -- 判定グラフ黒背景
-        {
-            id = "black", dst = {
-                {
-                    x = GRAPH.WND_JUDGE.X + GRAPH.WND_JUDGE.EDGE, y = GRAPH.WND_JUDGE.Y + GRAPH.WND_JUDGE.EDGE,
-                    w = GRAPH.WND_JUDGE.W - GRAPH.WND_JUDGE.EDGE * 2, h = GRAPH.WND_JUDGE.H - GRAPH.WND_JUDGE.EDGE * 2,
-                    a = 128
-                }
-            }
-        },
     }
 
     -- groove gauge出力
@@ -1136,27 +1187,38 @@ local function main()
     -- end
 
     -- グラフ出力
-    for i, text in ipairs(GRAPH.PREFIX) do
-        local x = GRAPH.WND_JUDGE.X + GRAPH.JUDGE_GRAPH.X
-        local y = GRAPH.WND_JUDGE.Y + GRAPH.JUDGE_GRAPH.Y + GRAPH.JUDGE_GRAPH.INTERVAL_Y * (i - 1)
-        -- グラフ本体
-        table.insert(skin.destination, {
-            id = text .. "Graph", dst = {
-                {x = x, y = y, w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.JUDGE_GRAPH.H}
-            }
-        })
-        -- グラフ種別文字
-        table.insert(skin.destination, {
-            id = text .. "GraphText", dst = {
-                {x = x + GRAPH.JUDGE_TEXT.X, y = y + GRAPH.JUDGE_TEXT.Y, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H}
-            }
-        })
-        -- グラフ項目
-        table.insert(skin.destination, {
-            id = text .. "Description", dst = {
-                {x = x + GRAPH.DESCRIPTION.X, y = y + GRAPH.DESCRIPTION.Y, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H}
-            }
-        })
+    for i = 1, #GRAPH.PREFIX do
+        local type = getGraphType(i)
+        if 0 < type and type < 5 then
+            local x = GRAPH.WND_JUDGE.X + GRAPH.JUDGE_GRAPH.X
+            local y = GRAPH.WND_JUDGE.Y + GRAPH.JUDGE_GRAPH.Y + GRAPH.JUDGE_GRAPH.INTERVAL_Y * (i - 1)
+            local prefix = GRAPH.PREFIX[type]
+            local alpha = type == 4 and 255 or 255
+            -- 黒背景
+            table.insert(skin.destination, {
+                id = "black", dst = {
+                    {x = x, y = y, w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.JUDGE_GRAPH.H, a = 128}
+                }
+            })
+            -- グラフ本体
+            table.insert(skin.destination, {
+                id = prefix .. "Graph", blend = type == 4 and 2 or 1, dst = {
+                    {x = x, y = y, w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.JUDGE_GRAPH.H, a = alpha}
+                }
+            })
+            -- グラフ種別文字
+            table.insert(skin.destination, {
+                id = prefix .. "GraphText", dst = {
+                    {x = x + GRAPH.JUDGE_TEXT.X, y = y + GRAPH.JUDGE_TEXT.Y, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H}
+                }
+            })
+            -- グラフ項目
+            table.insert(skin.destination, {
+                id = prefix .. "Description", dst = {
+                    {x = x + GRAPH.DESCRIPTION.X, y = y + GRAPH.DESCRIPTION.Y, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H}
+                }
+            })
+        end
     end
     -- グラフフレーム
     table.insert(skin.destination, {
@@ -1833,25 +1895,44 @@ local function main()
         local initCy = LARGE_LAMP.POS.INIT_Y + LARGE_LAMP.SIZE / 2
         local initSize = LARGE_LAMP.SIZE * LARGE_LAMP.ANIMATION.INIT_SIZE_MUL
         local dx = cx - WIDTH / 2
+        local dstArrayFirstHalf = {}
+        local dstArrayLatterHalf = {}
         -- shadowと本体は同時に動かす, brightは別働隊
-        local dstArrayFirstHalf = {
-            {time = 0, x = (cx - initSize / 2) + dx, y = initCy - initSize / 2, w = initSize, h = initSize, a = 0, acc = 2},
-            {time = st + dt - 1, a = 0},
-            {time = st + dt, a = 255},
-            {
-                time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION,
-                x = dstBodyX, y = LARGE_LAMP.POS.INIT_Y, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE,
-            },
-            {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 0},
-            {time = st + LARGE_LAMP.ANIMATION.END_TIME},
-        }
-
-        local dstArrayLatterHalf = {
-            {time = 0, x = dstBodyX, y = LARGE_LAMP.POS.INIT_Y, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE, a = 0, acc = 0},
-            {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION, a = 0},
-            {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 255},
-            {time = st + LARGE_LAMP.ANIMATION.TO_TOP_TIME},
-        }
+        if CLEAR_TYPE == LAMPS.FAILED then
+            local dropDt = popInterval * LARGE_LAMP.ANIMATION.FAILED_DROP_ORDER[i]
+            local fromY = LARGE_LAMP.POS.INIT_Y + LARGE_LAMP.POS.FAILED_START_DY
+            dstArrayFirstHalf = {
+                {time = 0, x = dstBodyX, y = fromY, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE, a = 0, acc = 2},
+                {time = st + dropDt},
+                {time = st + dropDt + LARGE_LAMP.ANIMATION.POP_DURATION, y = LARGE_LAMP.POS.INIT_Y, a = 255},
+                {time = st + dropDt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 0},
+                {time = st + LARGE_LAMP.ANIMATION.END_TIME},
+            }
+            dstArrayLatterHalf = {
+                {time = 0, x = dstBodyX, y = LARGE_LAMP.POS.INIT_Y, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE, a = 0, acc = 0},
+                {time = st + dropDt + LARGE_LAMP.ANIMATION.POP_DURATION, a = 0},
+                {time = st + dropDt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 255},
+                {time = st + LARGE_LAMP.ANIMATION.TO_TOP_TIME},
+            }
+        else
+            dstArrayFirstHalf = {
+                {time = 0, x = (cx - initSize / 2) + dx, y = initCy - initSize / 2, w = initSize, h = initSize, a = 0, acc = 2},
+                {time = st + dt - 1, a = 0},
+                {time = st + dt, a = 255},
+                {
+                    time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION,
+                    x = dstBodyX, y = LARGE_LAMP.POS.INIT_Y, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE,
+                },
+                {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 0},
+                {time = st + LARGE_LAMP.ANIMATION.END_TIME},
+            }
+            dstArrayLatterHalf = {
+                {time = 0, x = dstBodyX, y = LARGE_LAMP.POS.INIT_Y, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE, a = 0, acc = 0},
+                {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION, a = 0},
+                {time = st + dt + LARGE_LAMP.ANIMATION.POP_DURATION + 1, a = 255},
+                {time = st + LARGE_LAMP.ANIMATION.TO_TOP_TIME},
+            }
+        end
         local dstArrayBright = {
             {time = 0, w = LARGE_LAMP.SIZE, h = LARGE_LAMP.SIZE, a = 0, acc = 0},
             {time = st + LARGE_LAMP.ANIMATION.TO_TOP_TIME},
@@ -1936,7 +2017,7 @@ end
 
 
 return {
-    header = header,
+    header = makeHeader,
     main = main,
 
     setIsCourseResult = setIsCourseResult,
