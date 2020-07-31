@@ -21,7 +21,7 @@ local LOADING = {
         ANIM_TIME = 1000,
     },
     TEXT = {
-        X = function (self) return self.AREA.X() + 216 end,
+        X = function (self) return self.AREA.X() + 251 end,
         Y = function (self) return self.AREA.Y() + 352 end,
         SIZE = 24,
     },
@@ -84,7 +84,7 @@ loading.functions.load = function ()
         text = {
             {id = "title", font = 0, size = LOADING.TITLE.TEXT.SIZE, ref = 12, align = 1},
             {id = "loadingText", font = 0, size = LOADING.TEXT.SIZE, constantText = "楽曲データ読込中", align = 1},
-            {id = "loadCompleteText", font = 0, size = LOADING.TEXT.SIZE, constantText = "楽曲データ読込完了", align = 1},
+            {id = "loadCompleteText", font = 0, size = LOADING.TEXT.SIZE, constantText = "プレイ開始待機中", align = 1},
         },
         graph = {
             {id = "loadingGauge", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 2, type = 102},

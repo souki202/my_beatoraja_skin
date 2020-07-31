@@ -24,19 +24,34 @@ local GRAPH = {
     },
     STAMINA = {
         LABEL = {
+            X = 237, -- WNDからの差分
+            Y = 5,
+            W = 120,
+            H = 20,
+        },
+        NUM = {
+            X = 182, -- STAMINAからの差分
+            Y = 1,
+            W = 14,
+            H = 18,
+        },
+    },
+    TOTAL = {
+        LABEL = {
             X = 27, -- WNDからの差分
             Y = 5,
             W = 120,
             H = 20,
         },
         NUM = {
-            X = 167, -- STAMINAからの差分
+            X = 182, -- STAMINAからの差分
             Y = 1,
             W = 14,
             H = 18,
         },
     },
 }
+
 -- 密度グラフ
 local NOTES_ICON_SIZE = 42
 
@@ -51,6 +66,7 @@ densityGraph.functions.load = function ()
             {id = "numOfLnNotesIcon"     , src = 0, x = 945 + NOTES_ICON_SIZE*2, y = commons.PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
             {id = "numOfBssNotesIcon"    , src = 0, x = 945 + NOTES_ICON_SIZE*3, y = commons.PARTS_OFFSET + 477, w = NOTES_ICON_SIZE, h = NOTES_ICON_SIZE},
             {id = "useStaminaTextImg", src = 0, x = 1298, y = commons.PARTS_OFFSET + 471, w = GRAPH.STAMINA.LABEL.W, h = GRAPH.STAMINA.LABEL.H},
+            {id = "totalValueTextImg", src = 0, x = 1298, y = commons.PARTS_OFFSET + 471 + GRAPH.STAMINA.LABEL.H, w = GRAPH.TOTAL.LABEL.W, h = GRAPH.TOTAL.LABEL.H},
         },
         value = {
             -- ノーツ数
@@ -59,7 +75,7 @@ densityGraph.functions.load = function ()
             {id = "numOfLnNotes"     , src = 0, x = commons.NUM_28PX.SRC_X, y = commons.PARTS_OFFSET + commons.NUM_28PX.H, w = commons.NUM_32PX.W * 10, h = commons.NUM_32PX.H, divx = 10, digit = 4, ref = 351, align = 0},
             {id = "numOfBssNotes"    , src = 0, x = commons.NUM_28PX.SRC_X, y = commons.PARTS_OFFSET + commons.NUM_28PX.H, w = commons.NUM_32PX.W * 10, h = commons.NUM_32PX.H, divx = 10, digit = 4, ref = 353, align = 0},
             {
-                id = "useStaminaValue", src = 0, x = 1434, y = commons.PARTS_OFFSET + 421, w = commons.NUM_24PX.W * 10, h = commons.NUM_24PX.H, divx = 10, align = 0, digit = 2,
+                id = "useStaminaValue", src = 0, x = commons.NUM_24PX.SRC_X, y = commons.NUM_24PX.SRC_Y, w = commons.NUM_24PX.W * 10, h = commons.NUM_24PX.H, divx = 10, align = 0, digit = 2,
                 value = function()
                     local tn = main_state.number(74)
                     if tn > 0 then
@@ -67,6 +83,7 @@ densityGraph.functions.load = function ()
                     end
                 end
             },
+            {id = "totalValue", src = 0, x = commons.NUM_24PX.SRC_X, y = commons.NUM_24PX.SRC_Y, w = commons.NUM_24PX.W * 10, h = commons.NUM_24PX.H, divx = 10, align = 0, digit = 4, ref = 368},
         }
     }
 end
@@ -89,23 +106,14 @@ densityGraph.functions.dst = function ()
                 {x = 1138, y = 124, w = 600, h = 100}
             }
         },
+        {
+            id = "notesGraphFrame2", op = {910}, dst = {
+                {x = GRAPH.WND.NEW.X - GRAPH.WND.OLD.SHADOW, y = GRAPH.WND.NEW.Y - GRAPH.WND.OLD.SHADOW, w = GRAPH.WND.NEW.W, h = GRAPH.WND.NEW.H}
+            }
+        },
     }}
     -- 密度グラフ
     if getTableValue(skin_config.option, "密度グラフ表示", 910) == 910 then
-        -- フレーム表示
-        if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 951 then
-            table.insert(skin.destination, {
-                id = "notesGraphFrame", op = {910}, dst = {
-                    {x = GRAPH.WND.OLD.X - GRAPH.WND.OLD.SHADOW, y = GRAPH.WND.OLD.Y - GRAPH.WND.OLD.SHADOW, w = GRAPH.WND.OLD.W, h = GRAPH.WND.OLD.H}
-                }
-            })
-        elseif getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
-            table.insert(skin.destination, {
-                id = "notesGraphFrame2", op = {910}, dst = {
-                    {x = GRAPH.WND.NEW.X - GRAPH.WND.OLD.SHADOW, y = GRAPH.WND.NEW.Y - GRAPH.WND.OLD.SHADOW, w = GRAPH.WND.NEW.W, h = GRAPH.WND.NEW.H}
-                }
-            })
-        end
         local noteTypes = {"Normal", "Scratch", "Ln", "Bss"}
         for i = 1, 4 do
             table.insert(skin.destination, {
@@ -120,6 +128,28 @@ densityGraph.functions.dst = function ()
             })
         end
 
+        -- total値
+        do
+            local totalX = GRAPH.WND.NEW.X + GRAPH.TOTAL.LABEL.X
+            local totalY = GRAPH.WND.NEW.Y + GRAPH.TOTAL.LABEL.Y
+            -- ラベル
+            table.insert(skin.destination, {
+                id = "totalValueTextImg", op = {910}, dst = {
+                    {x = totalX, y = totalY, w = GRAPH.TOTAL.LABEL.W, h = GRAPH.TOTAL.LABEL.H}
+                }
+            })
+            -- 数値
+            table.insert(skin.destination, {
+                id = "totalValue", op = {910}, dst = {
+                    {
+                        x = totalX + GRAPH.TOTAL.NUM.X - commons.NUM_24PX.W * 4,
+                        y = totalY + GRAPH.TOTAL.NUM.Y,
+                        w = commons.NUM_24PX.W, h = commons.NUM_24PX.H
+                    }
+                }
+            })
+
+        end
         -- 消費スタミナ
         if getTableValue(skin_config.option, "上部プレイヤー情報仕様", 950) == 950 then
             local staminaX = GRAPH.WND.NEW.X + GRAPH.STAMINA.LABEL.X

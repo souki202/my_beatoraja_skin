@@ -39,6 +39,11 @@ local SONG_LIST = {
     }
 }
 
+local FAVORITE = {
+    W = 27,
+    H = 26,
+}
+
 local JUDGE_DIFFICULTY = {
     W = 136,
     H = 22,
@@ -90,7 +95,11 @@ songlist.functions.load = function ()
             {id ="goldTrophy"  , src = 0, x = 1896, y = commons.PARTS_OFFSET + SONG_LIST.BAR.TROPHY.H*0, w = SONG_LIST.BAR.TROPHY.W, h = SONG_LIST.BAR.TROPHY.H},
             {id ="silverTrophy", src = 0, x = 1896, y = commons.PARTS_OFFSET + SONG_LIST.BAR.TROPHY.H*1, w = SONG_LIST.BAR.TROPHY.W, h = SONG_LIST.BAR.TROPHY.H},
             {id ="bronzeTrophy", src = 0, x = 1896, y = commons.PARTS_OFFSET + SONG_LIST.BAR.TROPHY.H*2, w = SONG_LIST.BAR.TROPHY.W, h = SONG_LIST.BAR.TROPHY.H},
-        },
+
+            -- ふぁぼ
+            -- {id = "favoriteButton", src = 0, x = 1563, y = commons.PARTS_OFFSET + 263, w = FAVORITE.W*2, h = FAVORITE.H, divx = 2, act = 89},
+            -- {id = "favoriteButton", src = 0, x = 1563, y = commons.PARTS_OFFSET + 263, w = FAVORITE.W, h = FAVORITE.H, act = 89},
+    },
         text = {
             {id = "artist", font = 0, size = SONG_LIST.TEXT.ARTIST_SIZE, ref = 14, align = 2, overflow = 1},
             {id = "subArtist", font = 0, size = SONG_LIST.TEXT.SUBARTIST_SIZE, ref = 15, align = 2, overflow = 1},

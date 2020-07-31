@@ -33,6 +33,7 @@ local songlist = require("modules.select.songlist")
 local densityGraph = require("modules.select.density_graph")
 local searchBox = require("modules.select.search_box")
 local menu = require("modules.select.menu")
+local clock = require("modules.select.clock")
 
 local main_state = require("main_state")
 
@@ -237,11 +238,6 @@ local HELP_TEXT_H = 368
 local HELP_TEXT1_W = 380
 local HELP_TEXT2_W = 530
 
-local FAVORITE = {
-    W = 27,
-    H = 26,
-}
-
 local header = {
     type = 5,
     name = "Social Skin" .. (DEBUG and " dev" or ""),
@@ -308,12 +304,12 @@ local header = {
     offset = {
         {name = "各種数値設定項目群----------------", x = 0},
         {name = "全体の透明度(255で透明)", a = 0},
+        {name = "バナー座標オフセット", x = 0, y = 0, id = 41},
+        {name = "影2の座標と濃さ差分", x = 0, y = 0, a = 0, id = 40},
+        {name = "FOV (既定値90 -1で平行投影 0<x<180 or x=-1)", x = 0},
         {name = "背景, スライドショー設定(0で既定値)---------------------", x = 0},
         {name = "表示時間 (単位 秒 既定値15)", x = 0},
         {name = "フェード時間 (単位 100ms 既定値5)", x = 0},
-        {name = "影2の座標と濃さ差分", x = 0, y = 0, a = 0, id = 40},
-        {name = "全体設定(0で既定値)------------------------------", x = 0},
-        {name = "FOV (既定値90 -1で平行投影 0<x<180 or x=-1)", x = 0},
         {name = "流星群(0で既定値)--------------------------------", x = 0},
         {name = "流星アニメーション時間(ms 既定値1500 0<x)", x = 0},
         {name = "流星アニメーション開始時間オフセット(ms 既定値0 0<=x<流星アニメーション時間)", x = 0},
@@ -629,9 +625,6 @@ local function main()
 
     skin.image = {
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
-        -- Favorite
-        -- {id = "favoriteButton", src = 0, x = 1563, y = 263, w = FAVORITE.W*2, h = FAVORITE.H, divx = 2, act = 9999},
-
         -- レベルアイコン
         {id = "nonActiveBeginnerIcon", src = 0, x = LARGE_LEVEL.SRC_X, y = commons.PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
         {id = "nonActiveNormalIcon"  , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = commons.PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
@@ -1051,6 +1044,7 @@ local function main()
     mergeSkin(skin, densityGraph.load())
     mergeSkin(skin, searchBox.load())
     mergeSkin(skin, menu.load())
+    mergeSkin(skin, clock.load())
 
     skin.destination = {}
 
@@ -1064,6 +1058,7 @@ local function main()
     })
 
     -- 各種出力
+    mergeSkin(skin, clock.dst())
     mergeSkin(skin, stagefile.dst())
     mergeSkin(skin, course.dst())
     mergeSkin(skin, upperOption.dst())
@@ -1075,8 +1070,8 @@ local function main()
     -- バナー表示
     if isShowBanner() then
         table.insert(skin.destination, {
-            id = -102, dst = {
-                {x = 800, y = 784, w = 300, h = 80, filter = 1}
+            id = -102, offset = 41, dst = {
+                {x = 807, y = 784, w = 300, h = 80, filter = 1}
             }
         })
     end

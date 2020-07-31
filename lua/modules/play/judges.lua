@@ -4,8 +4,13 @@ local lanes = require("modules.play.lanes")
 local main_state = require("main_state")
 
 local judges = {
+    baseBpm = 0,
+    slowBorderBpm = 0,
+
     functions = {}
 }
+
+local inited = false
 
 local JUDGES = {
     APPEAR_TIME = 75,
@@ -21,16 +26,18 @@ local JUDGES = {
 
     TIMING = {
         TEXT = {
-            X_1 = function(self) return self.X() + self.W / 2 - self.TIMING.TEXT.W / 2 end,
-            X_2 = function(self) return self.X() + self.W / 4 - self.TIMING.TEXT.W / 2 end,
-            Y = function(self) return self.Y() + 35 end,
+            X_1 = function (self) return self.X() + self.W / 2 - self.TIMING.TEXT.W / 2 end,
+            X_2 = function (self) return self.X() + self.W / 4 - self.TIMING.TEXT.W / 2 end,
+            TOP_Y = function (self) return self.Y() + 35 end,
+            BOTTOM_Y1 = function (self) return self.Y() - 24 end,
+            BOTTOM_Y2 = function (self) return self.Y() - 70 end,
             W = 56,
             H = 16,
         },
         NUM = {
-            X_1 = function(self) return self.X() + self.W / 2 - self.TIMING.NUM.W * self.TIMING.NUM.DIGIT / 2 end,
-            X_2 = function(self) return self.X() + self.W / 4 - self.TIMING.NUM.W * self.TIMING.NUM.DIGIT / 2 end,
-            Y = function(self) return self.Y() + 35 end,
+            X_1 = function (self) return self.X() + self.W / 2 - self.TIMING.NUM.W * self.TIMING.NUM.DIGIT / 2 end,
+            X_2 = function (self) return self.X() + self.W / 4 - self.TIMING.NUM.W * self.TIMING.NUM.DIGIT / 2 end,
+            Y = function (self) return self.Y() + 35 end,
             W = 15,
             H = 20,
             DIGIT = 3,
@@ -38,11 +45,11 @@ local JUDGES = {
     },
     SCORE = {
         DIFF = {
-            X_1 = function(self) return self.X() + self.W / 2 - self.SCORE.DIFF.W * self.SCORE.DIFF.DIGIT / 2 end,
-            X_2 = function(self) return self.X() + self.W / 4 * 3 - self.SCORE.DIFF.W * self.SCORE.DIFF.DIGIT / 2 end,
-            SIDE_X_1 = function(self) return lanes.getAreaX() + lanes.getAreaW() + 8 end,
-            SIDE_X_2 = function(self) return lanes.getAreaX() - 8 - self.SCORE.DIFF.W * self.SCORE.DIFF.DIGIT end,
-            Y = function(self) return self.Y() + 35 end,
+            X_1 = function (self) return self.X() + self.W / 2 - self.SCORE.DIFF.W * self.SCORE.DIFF.DIGIT / 2 end,
+            X_2 = function (self) return self.X() + self.W / 4 * 3 - self.SCORE.DIFF.W * self.SCORE.DIFF.DIGIT / 2 end,
+            SIDE_X_1 = function (self) return lanes.getAreaX() + lanes.getAreaW() + 8 end,
+            SIDE_X_2 = function (self) return lanes.getAreaX() - 8 - self.SCORE.DIFF.W * self.SCORE.DIFF.DIGIT end,
+            Y = function (self) return self.Y() + 35 end,
             W = 15,
             H = 20,
             DIGIT = 5,
@@ -52,16 +59,16 @@ local JUDGES = {
 
 local COMBO = {
     LEFT = {
-        X = function(self) return JUDGES.W * 1.25 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
+        X = function (self) return JUDGES.W * 1.25 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
         Y = -19 + JUDGES.H * JUDGES.INIT_MUL_SIZE / 2,
     },
     BOTTOM = {
-        X = function(self) return self.W * self.DIGIT / 2 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
+        X = function (self) return self.W * self.DIGIT / 2 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
         Y = -60 + JUDGES.H * JUDGES.INIT_MUL_SIZE / 2,
     },
     OUTER = {
-        X_1 = function(self) return 376 + self.W / 4 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
-        X_2 = function(self) return -138 - 78 + self.W / 4 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
+        X_1 = function (self) return 376 + self.W / 4 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
+        X_2 = function (self) return -138 - 78 + self.W / 4 + JUDGES.W * JUDGES.INIT_MUL_SIZE / 2 end,
         Y = 350 + JUDGES.H * JUDGES.INIT_MUL_SIZE / 2,
     },
     TEXT = {
@@ -156,6 +163,43 @@ judges.functions.load = function ()
             }
         end
     end
+
+    -- 低速等の判定基準用BPMを取得
+    skin.customTimers = {
+        {
+            id = 10101, timer = function ()
+                -- 2フレーム目以降でないとNOW_BPMを取得できない? 0フレーム目はヌルポ, 1フレーム目は0BPM, 2フレーム目で正常
+                -- 念の為1秒待つ設定で
+                if inited == false and getElapsedTime() / 1000 > 1000 then
+                    if isBaseBpmTypeStartBpm() then
+                        judges.baseBpm = main_state.number(160)
+                    elseif isBaseBpmTypeMainBpm() then
+                        judges.baseBpm = main_state.number(92)
+                    end
+
+                    myPrint("低速判定基準用BPM: " .. judges.baseBpm)
+
+                    local calcType = slowBpmCalcType()
+                    myPrint(calcType)
+                    if calcType == 1 then
+                        judges.slowBorderBpm = judges.baseBpm * 4 / 5
+                    elseif calcType == 2 then
+                        judges.slowBorderBpm = judges.baseBpm * 3 / 4
+                    elseif calcType == 3 then
+                        judges.slowBorderBpm = judges.baseBpm * 2 / 3
+                    elseif calcType == 4 then
+                        judges.slowBorderBpm = judges.baseBpm * 1 / 2
+                    else
+                        judges.slowBorderBpm = 0
+                    end
+                    myPrint("低速とするBPM: " .. judges.slowBorderBpm)
+                    inited = true
+                    return main_state.timer_off_value
+                end
+                return getElapsedTime()
+            end
+        }
+    }
     return skin
 end
 
@@ -177,21 +221,47 @@ judges.functions.dst = function ()
     dst[#dst+1] = {id = "judges"}
 
     do
+        local elBottomY = JUDGES.TIMING.TEXT.BOTTOM_Y1(JUDGES)
+        if isDrawComboBottom() then
+            elBottomY = JUDGES.TIMING.TEXT.BOTTOM_Y2(JUDGES)
+        end
         -- early late
         if isDrawEarlyLate() then
             local x = JUDGES.TIMING.TEXT.X_1(JUDGES)
             if drawDiffUpperJudge() then
                 x = JUDGES.TIMING.TEXT.X_2(JUDGES)
             end
+            -- 早いときのel
             dst[#dst+1] = {
-                id = "earlyText", offsets = {3, 32}, timer = 46, loop = -1, op = {1242}, dst = {
-                    {time = 0, x = x, y = JUDGES.TIMING.TEXT.Y(JUDGES), w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
+                id = "earlyText", offsets = {3, 32}, timer = 46, loop = -1, draw = function ()
+                    return main_state.option(1242) and main_state.number(160) > judges.slowBorderBpm
+                end, dst = {
+                    {time = 0, x = x, y = JUDGES.TIMING.TEXT.TOP_Y(JUDGES), w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
                     {time = JUDGES.DRAW_TIME}
                 }
             }
             dst[#dst+1] = {
-                id = "lateText", offsets = {3, 32}, timer = 46, loop = -1, op = {1243}, dst = {
-                    {time = 0, x = x, y = JUDGES.TIMING.TEXT.Y(JUDGES), w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
+                id = "lateText", offsets = {3, 32}, timer = 46, loop = -1, draw = function ()
+                    return main_state.option(1243) and main_state.number(160) > judges.slowBorderBpm
+                end, dst = {
+                    {time = 0, x = x, y = JUDGES.TIMING.TEXT.TOP_Y(JUDGES), w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
+                    {time = JUDGES.DRAW_TIME}
+                }
+            }
+            -- 遅いときのel
+            dst[#dst+1] = {
+                id = "earlyText", offsets = {3, 32}, timer = 46, loop = -1, draw = function ()
+                    return main_state.option(1242) and main_state.number(160) <= judges.slowBorderBpm
+                end, dst = {
+                    {time = 0, x = x, y = elBottomY, w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
+                    {time = JUDGES.DRAW_TIME}
+                }
+            }
+            dst[#dst+1] = {
+                id = "lateText", offsets = {3, 32}, timer = 46, loop = -1, draw = function ()
+                    return main_state.option(1243) and main_state.number(160) <= judges.slowBorderBpm
+                end, dst = {
+                    {time = 0, x = x, y = elBottomY, w = JUDGES.TIMING.TEXT.W, h = JUDGES.TIMING.TEXT.H},
                     {time = JUDGES.DRAW_TIME}
                 }
             }
@@ -202,8 +272,18 @@ judges.functions.dst = function ()
             end
             -- +-ms
             dst[#dst+1] = {
-                id = "judgeTimeError", offsets = {3, 32}, timer = 46, loop = -1, op = {-241}, dst = {
+                id = "judgeTimeError", offsets = {3, 32}, timer = 46, loop = -1, draw = function ()
+                    return main_state.option(241) == false and main_state.number(160) > judges.slowBorderBpm
+                end, dst = {
                     {time = 0, x = x, y = JUDGES.TIMING.NUM.Y(JUDGES), w = JUDGES.TIMING.NUM.W, h = JUDGES.TIMING.NUM.H},
+                    {time = JUDGES.DRAW_TIME}
+                }
+            }
+            dst[#dst+1] = {
+                id = "judgeTimeError", offsets = {3, 32}, timer = 46, loop = -1, draw = function ()
+                    return main_state.option(241) == false and main_state.number(160) <= judges.slowBorderBpm
+                end, dst = {
+                    {time = 0, x = x, y = elBottomY, w = JUDGES.TIMING.NUM.W, h = JUDGES.TIMING.NUM.H},
                     {time = JUDGES.DRAW_TIME}
                 }
             }
@@ -213,8 +293,18 @@ judges.functions.dst = function ()
                 x = JUDGES.TIMING.NUM.X_2(JUDGES)
             end
             dst[#dst+1] = {
-                id = "judgeTimeError", offsets = {3, 32}, timer = 46, loop = -1, dst = {
+                id = "judgeTimeError", offsets = {3, 32}, timer = 46, loop = -1, draw = function ()
+                    return main_state.number(160) > judges.slowBorderBpm
+                end, dst = {
                     {time = 0, x = x, y = JUDGES.TIMING.NUM.Y(JUDGES), w = JUDGES.TIMING.NUM.W, h = JUDGES.TIMING.NUM.H},
+                    {time = JUDGES.DRAW_TIME}
+                }
+            }
+            dst[#dst+1] = {
+                id = "judgeTimeError", offsets = {3, 32}, timer = 46, loop = -1, draw = function ()
+                    return main_state.number(160) <= judges.slowBorderBpm
+                end, dst = {
+                    {time = 0, x = x, y = elBottomY, w = JUDGES.TIMING.NUM.W, h = JUDGES.TIMING.NUM.H},
                     {time = JUDGES.DRAW_TIME}
                 }
             }

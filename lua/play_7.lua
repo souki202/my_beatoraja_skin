@@ -1,4 +1,5 @@
 require("modules.commons.define")
+local playCommons = require("modules.play.commons")
 local lanes = require("modules.play.lanes")
 local judges = require("modules.play.judges")
 local life = require("modules.play.life")
@@ -15,6 +16,7 @@ local finish = require("modules.play.finish")
 local fade = require("modules.play.fade")
 local visualizer = require("modules.play.visualizer")
 local autoplay = require("modules.play.autoplay")
+local logger = require("modules.play.logger")
 
 local header = {
     type = 0,
@@ -22,13 +24,13 @@ local header = {
     w = WIDTH,
     h = HEIGHT,
     loadend = 2500,
-    playstart = 1500,
+    playstart = playCommons.startTime,
     scene = 36000000,
     input = 500,
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10065まで
+    property = { -- 使用済み 10080まで
         {
             name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
@@ -43,6 +45,12 @@ local header = {
         },
         {
             name = "EARLY, LATE表示", item = {{name = "OFF", op = 905}, {name = "EARLY/LATE", op = 906}, {name = "+-ms", op = 907}, {name = "+-ms(PG時非表示)", op = 908}}, def = "EARLY/LATE"
+        },
+        {
+            name = "低速時のEARLY, LATE位置変更基準", item = {{name = "OFF", op = 10075}, {name = "4/5", op = 10076}, {name = "3/4", op = 10077}, {name = "2/3", op = 10078}, {name = "1/2", op = 10079}}, def = "3/4"
+        },
+        {
+            name = "BPM変化の判定基準", item = {{name = "開始時BPM", op = 10080}, {name = "MAIN BPM", op = 10081}}, def = "MAIN BPM"
         },
         {
             name = "スコア差表示", item = {{name = "無し", op = 990}, {name = "目標スコア", op = 991}, {name = "自己ベスト", op = 992}}, def = "目標スコア"
@@ -94,6 +102,9 @@ local header = {
         },
         {
             name = "サイド部分のグラフ", item = {{name = "無し", op = 10000}, {name = "判定分布", op = 10001}, {name = "EARLY, LATE分布", op = 10002}}, def = "判定分布"
+        },
+        {
+            name = "ゲージ100%時のキラキラ", item = {{name = "ON", op = 10070}, {name = "OFF", op = 10071}}, def = "ON"
         },
         { -- 961まで使用
             name = "難易度毎の色変化", item = {{name = "あり", op = 955}, {name = "灰固定", op = 956}, {name = "緑固定", op = 957}, {name = "青固定", op = 958}, {name = "橙固定", op = 959}, {name = "赤固定", op = 960}, {name = "紫固定", op = 961}}, def = "あり"
@@ -154,6 +165,7 @@ local header = {
         {name = "判定線の高さ(既定値 4px)", h = 0},
         {name = "レーンの黒背景(255で透明)", a = 0},
         {name = "グルーブゲージの通知エフェクトの大きさ差分(%)", y = 0},
+        {name = "ゲージ100%時のキラキラの数(既定値20)", x = 0},
         {name = "ボム関連------------------------", x = 0},
         {name = "100%の描画縦横はwave 500px, anim 300px, particle 16px", x = 0},
         {name = "ボムのwave1の大きさ(単位10% 既定値10)", w = 0, h = 0},
@@ -217,6 +229,7 @@ local function main()
         {id = 23, path = "../play/parts/versatilitybga/*.mp4"},
         {id = 25, path = "../play/parts/visualizer/bar.png"},
         {id = 26, path = "../play/parts/visualizer/reflection.png"},
+        {id = 27, path = "../play/parts/gauge100/default.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 
@@ -232,6 +245,7 @@ local function main()
 
 
     -- 各種読み込み
+    mergeSkin(skin, logger.load())
     mergeSkin(skin, bga.load())
     mergeSkin(skin, lanes.load())
     mergeSkin(skin, progress.load())

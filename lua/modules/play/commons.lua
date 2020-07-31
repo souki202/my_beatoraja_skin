@@ -3,6 +3,7 @@ local main_state = require("main_state")
 
 local commons = {
 	keys = 7,
+	startTime = 1500,
 	calcTimeLeftSecond = function () return main_state.number(163) * 60 + main_state.number(164) end,
 }
 
@@ -205,6 +206,26 @@ end
 
 function getLifeGaugeEffectSizeYOffset()
 	return getOffsetValueWithDefault("グルーブゲージの通知エフェクトの大きさ差分(%)", {y = 0}).y
+end
+
+function isDrawGauge100Particle()
+	return getTableValue(skin_config.option, "ゲージ100%時のキラキラ", 10070) == 10070
+end
+
+function getNumOfGauge100Particles()
+	return getOffsetValueWithDefault("ゲージ100%時のキラキラの数(既定値20)", {x = 20}).x
+end
+
+function isBaseBpmTypeStartBpm()
+	return getTableValue(skin_config.option, "BPM変化の判定基準", 10081) == 10080
+end
+
+function isBaseBpmTypeMainBpm()
+	return getTableValue(skin_config.option, "BPM変化の判定基準", 10081) == 10081
+end
+
+function slowBpmCalcType()
+	return getTableValue(skin_config.option, "低速時のEARLY, LATE位置変更基準", 10077) - 10075
 end
 
 function getDifficultyValueForColor()

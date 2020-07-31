@@ -216,6 +216,10 @@ function destinationStaticBaseWindow(skin, x, y, w, h)
     destinationStaticWindowBg(skin, BASE_WINDOW.ID, x, y, w, h, BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN * 2, {})
 end
 
+function destinationStaticBaseWindowSelect(skin, x, y, w, h)
+    destinationStaticWindowBg(skin, BASE_WINDOW.ID, x, y, w, h, BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN, {})
+end
+
 function destinationStaticBaseWindowResult(skin, x, y, w, h)
     destinationStaticWindowBg(skin, RESULT_BASE_WINDOW.ID, x, y, w, h, RESULT_BASE_WINDOW.EDGE_SIZE, RESULT_BASE_WINDOW.SHADOW_LEN, {})
 end

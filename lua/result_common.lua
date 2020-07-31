@@ -1,16 +1,14 @@
-
 require("modules.commons.numbers")
 require("modules.commons.my_window")
+require("modules.result.commons")
 local main_state = require("main_state")
 local resultObtained = require("modules.result.result_obtained")
+local graphs = require("modules.result.notesgraph")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048
 local BG_ID = "background"
 
-local LEFT_X = 64
-local RIGHT_X = 1206
-local WND_WIDTH = 650
 
 local CLEAR_TYPE = 0 -- 後で初期化
 -- local CLEAR_TYPE = 6
@@ -29,61 +27,11 @@ local LAMPS = {
     MAX = 10,
 }
 
-local BASE_WINDOW = {
-    SHADOW_LEN = 14,
-    EDGE_SIZE = 10,
-    ID = {
-       UPPER_LEFT   = "baseWindowUpperLeft",
-       UPPER_RIGHT  = "baseWindowUpperRight",
-       BOTTOM_RIGHT = "baseWindowBottomRight",
-       BOTTOM_LEFT  = "baseWindowBottomLeft",
-       TOP    = "baseWindowTopEdge",
-       LEFT   = "baseWindowLeftEdge",
-       BOTTOM = "baseWindowBottomEdge",
-       RIGHT  = "baseWindowRightEdge",
-       BODY = "baseWindowBody",
-    }
-}
-
 local STAGE_FILE = {
     X = 79,
     Y = 834,
     W = 256,
     H = 192,
-}
-
-local NUM_24PX = {
-    SRC = 0,
-    SRC_X = 1880,
-    SRC_Y = 36,
-    W = 14,
-    H = 18,
-
-    PERCENT = {
-        W = 17,
-        H = 14,
-    },
-    DOT_SIZE = 4,
-}
-
-local NUM_36PX = {
-    SRC = 0,
-    SRC_X = 1808,
-    SRC_Y = 54,
-    W = 20,
-    H = 26,
-
-    DOT_SIZE = 5,
-}
-
-local NUM_18PX = {
-    SRC = 0,
-    SRC_X = 1928,
-    SRC_Y = 172,
-    W = 10,
-    H = 13,
-
-    DOT_SIZE = 3,
 }
 
 local DEVIDING_LINE_BASE = {
@@ -172,7 +120,7 @@ local DIFFICULTY_INFO = {
         Y = 14,
         NUM_OFFSET_X = 217, -- relative_xからの右端の距離
         NUM_OFFSET_Y = 1,
-        DIGIT = 4,
+        DIGIT = 5,
     },
     FLAGS = {
         PREFIX = {"undefined", "beginner", "normal", "hyper", "another", "insane"},
@@ -302,7 +250,8 @@ local JUDGE = {
     },
 
     NUM = {
-        DIGIT = 4,
+        DIGIT = 4, -- コースリザルト時は5桁
+        EL_DIGIT = 4,
         X = 340,
         EARLY_X = 458,
         LATE_X = 520,
@@ -418,72 +367,6 @@ local TIMING = {
 TIMING.DOT_X = TIMING.NUM.X + TIMING.DOT_X
 TIMING.NUM_AFTER_DOT.X = TIMING.DOT_X + TIMING.NUM_AFTER_DOT.X
 
-local GRAPH = {
-    WND_GAUGE = {
-        X = RIGHT_X,
-        Y = 474,
-        W = WND_WIDTH,
-        H = 340,
-        EDGE = 10,
-        SHADOW = 15,
-    },
-    WND_JUDGE = {
-        X = RIGHT_X,
-        Y = 116,
-        W = WND_WIDTH,
-        H = 336,
-        EDGE = 10,
-        SHADOW = 15,
-    },
-
-    GAUGE = {
-        X = 10,
-        Y = 10,
-        W = WND_WIDTH - 20, -- 20はEDGE * 2
-        H = 320,
-        EDGE = 25,
-    },
-
-    JUDGE_TEXT = {
-        X = 7,
-        Y = 75,
-        W = 189,
-        H = 22,
-    },
-
-    GROOVE_TEXT = {
-        X = 7,
-        Y = 5,
-        W = 189,
-        H = 22,
-    },
-
-    GROOVE_NUM = {
-        X = 586, -- グラフエリアからの値
-        Y = 295,
-        DOT = 1, -- x からの差分 あとでグラフからの差分に再計算
-        AF_X = 20, -- x からの差分 あとでグラフからの差分に再計算
-        SYMBOL_X = 20, -- x からの差分 あとでグラフからの差分に再計算
-    },
-
-    JUDGE_GRAPH = {
-        X = 10,
-        Y = 224,
-        INTERVAL_Y = -107,
-        W = WND_WIDTH - 20,
-        H = 102,
-    },
-
-    DESCRIPTION = {
-        X = 404, -- 各グラフからの差分
-        Y = 83, -- 各グラフからの差分
-        W = 219,
-        H = 12,
-    },
-
-    PREFIX = {"notes", "judges", "el", "timing"}
-}
-
 local OPTIONS = {
     IMG = {
         X = 1201,
@@ -493,10 +376,6 @@ local OPTIONS = {
         -- OPS= {126, 127, 128, 129, 130, 131, 1128, 1129, 1130, 1131},
     }
 }
-
-GRAPH.GROOVE_NUM.DOT = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.DOT
-GRAPH.GROOVE_NUM.AF_X = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.AF_X
-GRAPH.GROOVE_NUM.SYMBOL_X = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.SYMBOL_X
 
 local LARGE_LAMP = {
     SIZE = 71,
@@ -624,28 +503,18 @@ local NEW_RECORD = {
 }
 
 local FADEOUT_ANIM_TIME = 300
+local FADEIN_ANIM_TIME = 150
 
 local isCourseResult = false
 local function setIsCourseResult(b)
     isCourseResult = b
 end
 
---[[
-    グルーヴゲージ下の各種グラフの種類を取得
-
-    @param  int pos 上から何番目か 1が一番上
-    @return int 1:ノーツ数分布 2:判定分布 3:EARLY/LATE分布(棒グラフ) 4:タイミング可視化グラフ
-]]
-local function getGraphType(pos)
-    if pos < 1 or 3 < pos then return 0 end
-    local def = 930
-    if pos == 2 then def = 936
-    elseif pos == 3 then def = 942
-    end
-    return (getTableValue(skin_config.option, "各種グラフ" .. pos .. "個目", def) % 5) + 1
-end
-
 local function setProperties(skin)
+    table.insert(skin.property, {
+        name = "各種グラフ グルーヴゲージ部分", item = {{name = "ノーツ数分布", op = 945}, {name = "判定分布", op = 946}, {name = "EARLY/LATE分布(棒グラフ)", op = 947}, {name = "無し", op = 949}}, def = "無し"
+    })
+
     if isCourseResult then
         table.insert(skin.property, {
             name = "各種グラフ1個目", item = {{name = "ノーツ数分布", op = 930}, {name = "判定分布", op = 931}, {name = "EARLY/LATE分布(棒グラフ)", op = 932}}, def = "ノーツ数分布"
@@ -691,6 +560,9 @@ function makeHeader()
             {
                 name = "経験値等画面遷移", item = {{name = "右キー", op = 925}, {name = "左キー", op = 926}, {name = "決定ボタン(一定時間表示)", op = 927}, {name = "無し", op = 928}}, def = "右キー"
             },
+            {
+                name = "グルーヴゲージ部分のラベル", item = {{name = "ON", op = 950}, {name = "OFF", op = 951}}, def = 950,
+            },
         },
         filepath = {
             {name = "NoImage画像(png)", path = "../result/noimage/*.png", def = "default"},
@@ -719,6 +591,8 @@ function makeHeader()
         },
         offset = {
             {name = "経験値等画面表示秒数 (決定キーの場合, 最小1秒)", x = 0},
+            {name = "グルーヴゲージ部分のノーツグラフの透明度 (255で透明)", a = 0},
+            {name = "グルーヴゲージ部分のノーツグラフの高さ (既定値30 単位%)", h = 0},
         },
     }
     setProperties(header)
@@ -784,8 +658,7 @@ local function initialize(skin)
         SCORE.WND.X = RIGHT_X
         COMBO.WND.X = RIGHT_X
         JUDGE.WND.X = RIGHT_X
-        GRAPH.WND_GAUGE.X = LEFT_X
-        GRAPH.WND_JUDGE.X = LEFT_X
+        graphs.change2p()
         DIR_BAR.WND.X = LEFT_X
         RANKS.X = SCORE.WND.X + 491
         NEW_RECORD.SCORE.X = SCORE.WND.X + 310
@@ -802,6 +675,10 @@ local function initialize(skin)
             order[#order+1] = i - 1
         end
         table.shuffle(order)
+    end
+
+    if isCourseResult then
+        JUDGE.NUM.DIGIT = 5
     end
 end
 
@@ -944,19 +821,6 @@ local function main()
         {id = "lampOld", src = 0, x = 845, y = 0, w = LAMP.OLD.W, h = LAMP.OLD.H * 11, len = 11, divy = 11, ref = 371},
         {id = "lampNow", src = 0, x = 845 + LAMP.OLD.W, y = 0, w = LAMP.NOW.W, h = LAMP.NOW.H * 11, len = 11, divy = 11, ref = 370},
 
-        -- グラフ
-        {id = "grooveGaugeFrame", src = 0, x = 0, y = TEXTURE_SIZE - 371, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW*2},
-        {id = "judgeFrame", src = 0, x = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, y = TEXTURE_SIZE - 367, w = GRAPH.WND_JUDGE.W + GRAPH.WND_JUDGE.SHADOW*2, h = GRAPH.WND_JUDGE.H + GRAPH.WND_JUDGE.SHADOW*2},
-        {id = "notesDescription"  , src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*0, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
-        {id = "judgesDescription" , src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*1, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
-        {id = "elDescription"     , src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*2, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
-        {id = "timingDescription" , src = 999, x = 0, y = 0, w = 1, h = 1},
-        {id = "notesGraphText"  , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*0, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
-        {id = "judgesGraphText" , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*1, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
-        {id = "elGraphText"     , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*2, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
-        {id = "timingGraphText" , src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.JUDGE_TEXT.H*3, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
-        {id = "grooveGaugeText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 432 + GRAPH.GROOVE_TEXT.H*4, w = GRAPH.GROOVE_TEXT.W ,h = GRAPH.GROOVE_TEXT.H},
-
         -- ランク
         {id = "rankShine", src = 1, x = 0, y = 0, w = RANKS.SHINE.W, h = RANKS.SHINE.H},
         {id = "rankShineCircle", src = 2, x = 0, y = 0, w = RANKS.SHINE.W, h = RANKS.SHINE.H},
@@ -1033,24 +897,9 @@ local function main()
     --     })
     -- end
 
-    -- 各種グラフ
-    skin.gaugegraph = {
-		{id = "grooveGaugeGraph", assistClearBGColor = "440044cc", assistAndEasyFailBGColor = "004444cc", grooveFailBGColor = "004400cc", grooveClearAndHardBGColor = "440000cc", exHardBGColor = "444400cc", hazardBGColor = "444444cc", borderColor = "440000cc"}
-    }
-
-    skin.judgegraph = {
-        {id = "notesGraph", noGap = 1, orderReverse = 0, type = 0, backTexOff = 1},
-        {id = "judgesGraph", noGap = 1, orderReverse = 1, type = 1, backTexOff = 1},
-        {id = "elGraph", noGap = 1, orderReverse = 1, type = 2, backTexOff = 1},
-    }
-
-    skin.timingdistributiongraph = {
-		{id = "timingGraph", graphColor = "88FF88FF"},
-	}
-
     skin.value = {
         {id = "difficultyValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 2, ref = 96, align = 0},
-        {id = "totalNotesValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 4, ref = 106, align = 0},
+        {id = "totalNotesValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = DIFFICULTY_INFO.TOTAL_NOTES.DIGIT, ref = 106, align = 0},
         -- スコア部分
         {id = "exScoreValue"    , src = 0, x = 1784, y = 106, w = SCORE.EXSCORE.NUM_W*11, h = SCORE.EXSCORE.NUM_H, divx = 11, digit = SCORE.EXSCORE.DIGIT, ref = 71},
         {id = "hiScoreValue"    , src = 0, x = 1808, y = 80, w = SCORE.HISCORE.NUM_W*11, h = SCORE.HISCORE.NUM_H, divx = 11, digit = SCORE.HISCORE.DIGIT, ref = 170},
@@ -1075,9 +924,6 @@ local function main()
         {id = "standardValueAfterDot", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = TIMING.NUM_AFTER_DOT.DIGIT, ref = 377, align = 0, padding = 1},
         {id = "averageValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = TIMING.NUM.DIGIT, ref = 374, align = 0},
         {id = "averageValueAfterDot", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = TIMING.NUM_AFTER_DOT.DIGIT, ref = 375, align = 0, padding = 1},
-        -- groove gaugeの値
-        {id = "grooveGaugeValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = 185, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 3, ref = 107, align = 0},
-        {id = "grooveGaugeValueAfterDot", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = 185, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 1, ref = 407, align = 0, padding = 1},
     }
 
     -- 判定読み込み
@@ -1095,11 +941,11 @@ local function main()
         })
         -- early
         table.insert(skin.value, {
-            id = text .. "EarlyValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 11, h = NUM_24PX.H, divx = 11, digit = JUDGE.NUM.DIGIT, ref = divRef, align = 0
+            id = text .. "EarlyValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 11, h = NUM_24PX.H, divx = 11, digit = JUDGE.NUM.EL_DIGIT, ref = divRef, align = 0
         })
         -- late
         table.insert(skin.value, {
-            id = text .. "LateValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 11, h = NUM_24PX.H, divx = 11, digit = JUDGE.NUM.DIGIT, ref = divRef + 1, align = 0
+            id = text .. "LateValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 11, h = NUM_24PX.H, divx = 11, digit = JUDGE.NUM.EL_DIGIT, ref = divRef + 1, align = 0
         })
     end
 
@@ -1116,6 +962,7 @@ local function main()
     }
 
     resultObtained.load(skin)
+    mergeSkin(skin, graphs.load())
 
     skin.destination = {
         -- 背景
@@ -1144,39 +991,8 @@ local function main()
         },
     }
 
-    -- groove gauge出力
-    local grooveX = GRAPH.WND_GAUGE.X + GRAPH.GAUGE.X
-    local grooveY = GRAPH.WND_GAUGE.Y + GRAPH.GAUGE.Y
-    table.insert(skin.destination, {
-        id = "grooveGaugeGraph", dst = {
-            {x = grooveX, y = grooveY, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H}
-        }
-    })
-    table.insert(skin.destination, {
-        id = "grooveGaugeText", dst = {
-            {x = grooveX + GRAPH.GROOVE_TEXT.X, y = grooveY + GRAPH.GROOVE_TEXT.Y, w = GRAPH.GROOVE_TEXT.W, h = GRAPH.GROOVE_TEXT.H}
-        },
-    })
-    dstNumberRightJustify(skin, "grooveGaugeValue", grooveX + GRAPH.GROOVE_NUM.X, grooveY + GRAPH.GROOVE_NUM.Y, NUM_24PX.W, NUM_24PX.H, 3)
-    table.insert(skin.destination, {
-        id = "dotFor24PxWhite", dst = {
-            {x = grooveX + GRAPH.GROOVE_NUM.DOT, y = grooveY + GRAPH.GROOVE_NUM.Y, w = NUM_24PX.DOT_SIZE, h = NUM_24PX.DOT_SIZE}
-        }
-    })
-    dstNumberRightJustify(skin, "grooveGaugeValueAfterDot", grooveX + GRAPH.GROOVE_NUM.AF_X, grooveY + GRAPH.GROOVE_NUM.Y, NUM_24PX.W, NUM_24PX.H, 1)
-    table.insert(skin.destination, {
-        id = "percentageFor24PxWhite", dst = {
-            {x = grooveX + GRAPH.GROOVE_NUM.SYMBOL_X, y = grooveY + GRAPH.GROOVE_NUM.Y, w = NUM_24PX.PERCENT.W, h = NUM_24PX.PERCENT.H}
-        }
-    })
-    table.insert(skin.destination, {
-        id = "grooveGaugeFrame", dst = {
-            {
-                x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.SHADOW,
-                w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW * 2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW * 2
-            }
-        }
-    })
+    mergeSkin(skin, graphs.dst())
+
     -- オプション出力
     -- for i, op in pairs(OPTIONS.IMG.OPS) do
     --     table.insert(skin.destination, {
@@ -1185,50 +1001,6 @@ local function main()
     --         }
     --     })
     -- end
-
-    -- グラフ出力
-    for i = 1, #GRAPH.PREFIX do
-        local type = getGraphType(i)
-        if 0 < type and type < 5 then
-            local x = GRAPH.WND_JUDGE.X + GRAPH.JUDGE_GRAPH.X
-            local y = GRAPH.WND_JUDGE.Y + GRAPH.JUDGE_GRAPH.Y + GRAPH.JUDGE_GRAPH.INTERVAL_Y * (i - 1)
-            local prefix = GRAPH.PREFIX[type]
-            local alpha = type == 4 and 255 or 255
-            -- 黒背景
-            table.insert(skin.destination, {
-                id = "black", dst = {
-                    {x = x, y = y, w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.JUDGE_GRAPH.H, a = 128}
-                }
-            })
-            -- グラフ本体
-            table.insert(skin.destination, {
-                id = prefix .. "Graph", blend = type == 4 and 2 or 1, dst = {
-                    {x = x, y = y, w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.JUDGE_GRAPH.H, a = alpha}
-                }
-            })
-            -- グラフ種別文字
-            table.insert(skin.destination, {
-                id = prefix .. "GraphText", dst = {
-                    {x = x + GRAPH.JUDGE_TEXT.X, y = y + GRAPH.JUDGE_TEXT.Y, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H}
-                }
-            })
-            -- グラフ項目
-            table.insert(skin.destination, {
-                id = prefix .. "Description", dst = {
-                    {x = x + GRAPH.DESCRIPTION.X, y = y + GRAPH.DESCRIPTION.Y, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H}
-                }
-            })
-        end
-    end
-    -- グラフフレーム
-    table.insert(skin.destination, {
-        id = "judgeFrame", dst = {
-            {
-                x = GRAPH.WND_JUDGE.X - GRAPH.WND_JUDGE.SHADOW, y = GRAPH.WND_JUDGE.Y - GRAPH.WND_JUDGE.SHADOW,
-                w = GRAPH.WND_JUDGE.W + GRAPH.WND_JUDGE.SHADOW * 2, h = GRAPH.WND_JUDGE.H + GRAPH.WND_JUDGE.SHADOW * 2
-            }
-        }
-    })
 
     -- タイトル部分
     destinationStaticBaseWindowResult(skin, TITLE_BAR.WND.X, TITLE_BAR.WND.Y, TITLE_BAR.WND.W, TITLE_BAR.WND.H)
@@ -1487,8 +1259,8 @@ local function main()
         -- 判定合計値
         dstNumberRightJustifyWithColor(skin, text .. "Value", x + JUDGE.NUM.X, y, NUM_36PX.W, NUM_36PX.H, JUDGE.NUM.DIGIT, 0, 0, 0)
         -- early late
-        dstNumberRightJustify(skin, text .. "EarlyValue", x + JUDGE.NUM.EARLY_X, y, NUM_24PX.W, NUM_24PX.H, JUDGE.NUM.DIGIT)
-        dstNumberRightJustify(skin, text .. "LateValue" , x + JUDGE.NUM.LATE_X , y, NUM_24PX.W, NUM_24PX.H, JUDGE.NUM.DIGIT)
+        dstNumberRightJustify(skin, text .. "EarlyValue", x + JUDGE.NUM.EARLY_X, y, NUM_24PX.W, NUM_24PX.H, JUDGE.NUM.EL_DIGIT)
+        dstNumberRightJustify(skin, text .. "LateValue" , x + JUDGE.NUM.LATE_X , y, NUM_24PX.W, NUM_24PX.H, JUDGE.NUM.EL_DIGIT)
 
         -- slash
         table.insert(skin.destination, {
@@ -2002,8 +1774,15 @@ local function main()
         })
     end
 
+    -- フェードイン
+    table.insert(skin.destination, {
+        id = "black", loop = -1, dst = {
+            {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 255},
+            {time = FADEIN_ANIM_TIME, a = 0}
+        }
+    })
+
     -- フェードアウト
-    print(skin.fadeout)
     table.insert(skin.destination, {
         id = "black", timer = 2, loop = skin.fadeout, dst = {
             {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 0},

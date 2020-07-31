@@ -51,56 +51,6 @@ local STAGE_FILE = {
     H = 192,
 }
 
-local NUM_24PX = {
-    SRC = 0,
-    SRC_X = 1880,
-    SRC_Y = 36,
-    W = 14,
-    H = 18,
-
-    PERCENT = {
-        W = 17,
-        H = 14,
-    },
-    DOT_SIZE = 4,
-}
-
-local NUM_36PX = {
-    SRC = 0,
-    SRC_X = 1808,
-    SRC_Y = 54,
-    W = 20,
-    H = 26,
-
-    DOT_SIZE = 5,
-}
-
-local NUM_18PX = {
-    SRC = 0,
-    SRC_X = 1928,
-    SRC_Y = 172,
-    W = 10,
-    H = 13,
-
-    DOT_SIZE = 3,
-}
-
-local NUM_30PX = {
-    SRC = 0,
-    SRC_X = 1856,
-    SRC_Y = 203,
-    W = 16,
-    H = 22,
-}
-
-local SLASH_30PX = {
-    SRC = 0,
-    SRC_X = 1799,
-    SRC_Y = 56,
-    W = 9,
-    H = 24,
-}
-
 local DEVIDING_LINE_BASE = {
     OFFSET_Y = -6,
     H = 2,
@@ -243,7 +193,7 @@ local JUDGE = {
     },
 
     NUM = {
-        DIGIT = 4,
+        DIGIT = 4, -- コース時は5桁
         X = 340,
         EARLY_X = 458,
         LATE_X = 520,
@@ -506,6 +456,9 @@ local NEW_RECORD = {
     }
 }
 
+local FADEOUT_ANIM_TIME = 300
+local FADEIN_ANIM_TIME = 150
+
 local isCourseResult = false
 local function setIsCourseResult(b)
     isCourseResult = b
@@ -615,6 +568,10 @@ local function initialize(skin)
             order[#order+1] = i - 1
         end
         table.shuffle(order)
+    end
+
+    if isCourseResult then
+        JUDGE.NUM.DIGIT = 5
     end
 end
 
@@ -1536,6 +1493,22 @@ local function main()
             }
         })
     end
+    -- フェードイン
+    table.insert(skin.destination, {
+        id = "black", loop = -1, dst = {
+            {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 255},
+            {time = FADEIN_ANIM_TIME, a = 0}
+        }
+    })
+
+    -- フェードアウト
+    table.insert(skin.destination, {
+        id = "black", timer = 2, loop = skin.fadeout, dst = {
+            {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 0},
+            {time = skin.fadeout - FADEOUT_ANIM_TIME},
+            {time = skin.fadeout, a = 255}
+        }
+    })
 
     return skin
 end

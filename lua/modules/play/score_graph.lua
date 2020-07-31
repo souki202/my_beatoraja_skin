@@ -10,20 +10,23 @@ local scoreGraph = {
 local SCORE = {
     AREA = {
         X = function() return lanes.getAreaX() end,
-        Y = function() return 99-7 end,
+        Y = function() return 84-7 end,
         W = 432,
-        H = 98,
+        IMG_H = 98,
+        TOP_H = 45,
+        MIDDLE_H = 59,
+        BOTTOM_H = 9,
     },
     NUM = {
         X = function (self) return self.AREA.X() + 370 - self.NUM.W * self.NUM.DIGIT end,
-        Y = function (self) return self.AREA.Y() + 64 end,
+        Y = function (self) return self.AREA.Y() + 77 end,
         W = 14,
         H = 18,
         DIGIT = 5,
     },
     P_NUM = {
         X = function (self) return self.AREA.X() + 395 - self.P_NUM.W * self.P_NUM.DIGIT end,
-        Y = function (self) return self.AREA.Y() + 64 end,
+        Y = function (self) return self.AREA.Y() + 77 end,
         DOT_X = function (self) return self.P_NUM.X(self) + self.P_NUM.W * self.P_NUM.DIGIT + 1 end,
         A_X = function (self) return self.P_NUM.DOT_X(self) + 18 - self.P_NUM.W * self.P_NUM.A_DIGIT end,
         P_X = function (self) return self.P_NUM.A_X(self) + self.P_NUM.W * self.P_NUM.A_DIGIT + 1 end,
@@ -37,23 +40,24 @@ local SCORE = {
     GRAPH = {
         ID_PREFIX = "scoreGraph",
         X = function (self) return self.AREA.X() + 2 end,
-        Y = function (self) return self.AREA.Y() + 39 end,
-        INTERVAL_Y = 15,
-        H = 14,
+        Y = function (self) return self.AREA.Y() + 49 end,
+        INTERVAL_Y = 20,
+        H = 19,
         W = 428,
-        COLORS = {{0, 128, 255}, {0, 192, 64}, {192, 0, 0}}
+        COLORS = {{0, 128, 255}, {0, 192, 64}, {255, 64, 64}},
+        TOTAL_COLORS = {{0, 43, 85}, {0, 64, 21}, {85, 21, 21}},
     },
     TEXT = {
         X = function (self) return self.AREA.X() + 4 end,
-        Y = function (self) return self.AREA.Y() + 58 end,
+        Y = function (self) return self.AREA.Y() + 73 end,
         W = 89,
         H = 18,
     },
 
     DIFF = {
-        X = function (self) return self.AREA.X() + 427 - self.DIFF.DIGIT * self.DIFF.W end,
-        BEST_Y = function (self) return self.AREA.Y() + 25 end,
-        TARGET_Y = function (self) return self.AREA.Y() + 10 end,
+        X = function (self) return self.AREA.X() + 430 - self.DIFF.DIGIT * self.DIFF.W end,
+        BEST_Y = function (self) return self.AREA.Y() + 33 end,
+        TARGET_Y = function (self) return self.AREA.Y() + 13 end,
         W = 9,
         H = 11,
         DIGIT = 5,
@@ -64,14 +68,16 @@ local SCORE = {
     },
     SEPARATOR = {
         Y = function (self) return self.AREA.Y() + 9 end,
-        H = 44
     }
 }
 
 scoreGraph.functions.load = function ()
     return {
         image = {
-            {id = "scoreFrame", src = 0, x = 0, y = PARTS_TEXTURE_SIZE - SCORE.AREA.H, w = SCORE.AREA.W, h = SCORE.AREA.H},
+            {id = "scoreFrame", src = 0, x = 0, y = PARTS_TEXTURE_SIZE - SCORE.AREA.IMG_H, w = SCORE.AREA.W, h = SCORE.AREA.IMG_H},
+            {id = "scoreFrameTop", src = 0, x = 0, y = PARTS_TEXTURE_SIZE - SCORE.AREA.IMG_H, w = SCORE.AREA.W, h = SCORE.AREA.TOP_H},
+            {id = "scoreFrameMiddle", src = 0, x = 0, y = PARTS_TEXTURE_SIZE - SCORE.AREA.BOTTOM_H - 1, w = SCORE.AREA.W, h = 1},
+            {id = "scoreFrameBottom", src = 0, x = 0, y = PARTS_TEXTURE_SIZE - SCORE.AREA.BOTTOM_H, w = SCORE.AREA.W, h = SCORE.AREA.BOTTOM_H},
             {id = "scoreGraphGlass", src = 0, x = 458, y = PARTS_TEXTURE_SIZE - SCORE.GRAPH.H, w = 1, h = SCORE.GRAPH.H},
             {id = "graphRankA", src = 0, x = 0, y = 0, w = SCORE.RANK_TEXT.W, h = SCORE.RANK_TEXT.H},
             {id = "graphRankAa", src = 0, x = 0, y = SCORE.RANK_TEXT.H, w = SCORE.RANK_TEXT.W, h = SCORE.RANK_TEXT.H},
@@ -84,6 +90,9 @@ scoreGraph.functions.load = function ()
             {id = SCORE.GRAPH.ID_PREFIX .. "Now", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 110},
             {id = SCORE.GRAPH.ID_PREFIX .. "Best", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 112},
             {id = SCORE.GRAPH.ID_PREFIX .. "Target", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 114},
+            {id = SCORE.GRAPH.ID_PREFIX .. "NowTotal", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 111},
+            {id = SCORE.GRAPH.ID_PREFIX .. "BestTotal", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 113},
+            {id = SCORE.GRAPH.ID_PREFIX .. "TargetTotal", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 115},
         },
         value = {
             {id = "scoreValue", src = 0, x = 1880, y = 76, w = SCORE.NUM.W * 10, h = SCORE.NUM.H, divx = 10, digit = SCORE.NUM.DIGIT, ref = 101},
@@ -115,6 +124,19 @@ scoreGraph.functions.dst = function ()
                     }
                 }
             }
+            -- 終了時点での値
+                local colorBg = SCORE.GRAPH.TOTAL_COLORS[i]
+
+                dst[#dst+1] = {
+                    id = SCORE.GRAPH.ID_PREFIX .. IDS[i] .. "Total", dst = {
+                        {
+                            x = SCORE.GRAPH.X(SCORE),
+                            y = SCORE.GRAPH.Y(SCORE) - SCORE.GRAPH.INTERVAL_Y * (i - 1),
+                            w = SCORE.GRAPH.W, h = SCORE.GRAPH.H,
+                            r = colorBg[1], g = colorBg[2], b = colorBg[3]
+                        }
+                    }
+                }
             -- 本体
             dst[#dst+1] = {
                 id = SCORE.GRAPH.ID_PREFIX .. IDS[i], dst = {
@@ -150,8 +172,18 @@ scoreGraph.functions.dst = function ()
     end
     -- フレーム
     dst[#dst+1] = {
-        id = "scoreFrame", dst = {
-            {x = SCORE.AREA.X(), y = SCORE.AREA.Y(), w = SCORE.AREA.W, h = SCORE.AREA.H}
+        id = "scoreFrameBottom", dst = {
+            {x = SCORE.AREA.X(), y = SCORE.AREA.Y(), w = SCORE.AREA.W, h = SCORE.AREA.BOTTOM_H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "scoreFrameMiddle", dst = {
+            {x = SCORE.AREA.X(), y = SCORE.AREA.Y() + SCORE.AREA.BOTTOM_H, w = SCORE.AREA.W, h = SCORE.AREA.MIDDLE_H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "scoreFrameTop", dst = {
+            {x = SCORE.AREA.X(), y = SCORE.AREA.Y() + SCORE.AREA.BOTTOM_H + SCORE.AREA.MIDDLE_H, w = SCORE.AREA.W, h = SCORE.AREA.TOP_H}
         }
     }
     -- 文字EXSCORE
@@ -208,7 +240,7 @@ scoreGraph.functions.dst = function ()
             -- 線
             dst[#dst+1] = {
                 id = "white", dst = {
-                    {x = lineX, y = SCORE.SEPARATOR.Y(SCORE), w = 1, h = SCORE.SEPARATOR.H}
+                    {x = lineX, y = SCORE.SEPARATOR.Y(SCORE), w = 1, h = SCORE.AREA.MIDDLE_H}
                 }
             }
             -- マーク

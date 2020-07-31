@@ -110,10 +110,10 @@ function hsvToRgb(h, s, v)
 end
 
 SKIN_INFO = {
-    SELECT_VRESION = "2.25",
-    RESULT_VERSION = "2.10",
+    SELECT_VRESION = "2.27",
+    RESULT_VERSION = "2.20",
     DECIDE_VERSION = "1.01",
-    PLAY_VERSION = "0.91",
+    PLAY_VERSION = "0.98",
 }
 
 BASE_WIDTH = 1920

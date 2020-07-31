@@ -20,7 +20,9 @@ local SELECT = {
         H = 15,
     },
     NUM_24PX = {
-        W = 14,
+        SRC_X = 1434,
+        SRC_Y = PARTS_OFFSET + 421,
+        W = 13,
         H = 18,
     }
 }

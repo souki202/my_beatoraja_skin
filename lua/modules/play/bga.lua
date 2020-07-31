@@ -1,3 +1,7 @@
+require("modules.commons.define")
+local commons = require("modules.play.commons")
+local main_state = require("main_state")
+
 local bga = {
     functions = {}
 }

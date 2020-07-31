@@ -95,6 +95,16 @@ local LIFE = {
             ANIM_TIME = 500,
         },
     },
+    PARTICLE = {
+        LEFT_X = function (self) return self.GAUGE.X(self) - 24 end,
+        RIGHT_X = function (self) return self.GAUGE.X(self) + self.GAUGE.W + 24 end,
+        TOP_Y = function (self) return self.GAUGE.Y(self) + self.GAUGE.H + 24 end,
+        BOTTOM_Y = function (self) return self.GAUGE.Y(self) - 24 end,
+        SIZE = 16,
+        LOOP_TIME = 1000,
+        ALPHA = 255,
+        ALPHA_VAR = 128,
+    },
 }
 
 life.functions.load = function ()
@@ -119,6 +129,9 @@ life.functions.load = function ()
 
             -- 10%ごとのエフェクト
             {id = "lightIndicator", src = 0, x = 22, y = 0, w = LIFE.GAUGE.LIGHT.SIZE, h = LIFE.GAUGE.LIGHT.SIZE},
+
+            -- 100%時のキラ
+            {id = "gauge100Particle", src = 27, x = 0, y = 0, w = -1, h = -1},
         },
         value = {
             {id = "grooveValue", src = 0, x = 1880, y = 76, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = LIFE.NUM.DIGIT, ref = 107},
@@ -416,7 +429,25 @@ life.functions.dst = function ()
     }
 
     -- 100%時のキラキラ
-
+    if isDrawGauge100Particle() then
+        local size = LIFE.PARTICLE.SIZE
+        local loopTime = LIFE.PARTICLE.LOOP_TIME
+        local n = getNumOfGauge100Particles()
+        for i = 1, n do
+            local x = math.random(LIFE.PARTICLE.LEFT_X(LIFE), LIFE.PARTICLE.RIGHT_X(LIFE)) - size / 2
+            local y = math.random(LIFE.PARTICLE.BOTTOM_Y(LIFE), LIFE.PARTICLE.TOP_Y(LIFE)) - size / 2
+            local a = LIFE.PARTICLE.ALPHA - math.random(0, LIFE.PARTICLE.ALPHA_VAR)
+            local dt = math.random(0, loopTime)
+            dst[#dst+1] = {
+                id = "gauge100Particle", loop = dt, op = {240}, dst = {
+                    {time = 0, x = x, y = y, w = size, h = size, a = 0},
+                    {time = dt},
+                    {time = dt + loopTime / 2, a = 255},
+                    {time = dt + loopTime, a = 0}
+                }
+            }
+        end
+    end
 
     -- n%ごとの通知読み込み
     do
