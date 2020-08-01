@@ -6,7 +6,7 @@ local logger = {
     isSaved = false,
     data = {
         {
-            time = 0, -- ms
+            time = 0, -- micro sec
             judges = {
                 sumJudges = 0,
                 early = {0, 0, 0, 0, 0, 0}, -- pg, gr, gd, bd, pr, ms
@@ -30,8 +30,28 @@ local LOGGER = {
 
 logger.functions.saveLog = function ()
     logger.isSaved = true
-    myPrint("プレイログ保存開始")
-    local fp = fopen
+    myPrint("プレイログ保存開始: " .. PLAY_LOG_PATH)
+    local data = logger.data
+    local fp = io.open(PLAY_LOG_PATH, "w")
+    local str = "time, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, combo, exscore, best, target"
+
+    for i = 1, #data do
+        local nowData = data[i]
+        local line = nowData.time .. " "
+        -- 判定出力
+        for j = 1, 6 do
+            line = line .. nowData.judges.early[j] .. " " .. nowData.judges.late[j] .. " "
+        end
+        -- combo
+        line = line .. nowData.combo .. " "
+        -- score
+        line = line .. nowData.exscore.you .. " " .. nowData.exscore.best .. " " .. nowData.exscore.target
+        str = str .. "\n" .. line
+    end
+    fp:write(str)
+    -- print(str)
+    fp:close()
+    myPrint("プレイログ保存完了")
     return 0
 end
 
@@ -63,12 +83,14 @@ logger.functions.load = function ()
                                 local l = main_state.number(idx + 1)
                                 early[i] = e
                                 late[i] = l
-                                sumJudges = e + l
+                                local de = e - lastData.judges.early[i]
+                                local dl = l - lastData.judges.late[i]
+                                sumJudges = sumJudges + e + l
                                 if i == 5 then -- prを処理した時点でノーツの処理数を入れる
                                     numOfProcessedExistNotes = sumJudges
                                 end
                                 if i <= 3 then
-                                    addCombo = addCombo + e + l
+                                    addCombo = addCombo + de + dl
                                 elseif i == 4 or i == 5 then
                                     -- bdかprが0以上ならコンボが切れたと処理
                                     -- 最下ノーツ判定ができないので実際の値とズレる可能性あり
@@ -78,7 +100,7 @@ logger.functions.load = function ()
                                 end
                             end
                             -- 合計判定数に変化がなければ他の値も変化がないので終了
-                            if lastData.sumJudges == sumJudges then
+                            if lastData.judges.sumJudges == sumJudges then
                                 return
                             end
 
@@ -112,7 +134,8 @@ logger.functions.load = function ()
             },
             {
                 id = 10120, timer = function () -- save
-                    if main_state.timer(2) >= 0 and logger.isSaved == false then
+                    if (main_state.timer(2) >= 0 or main_state.timer(3) >= 0) and logger.isSaved == false then
+                        logger.functions.saveLog()
                         pcall(logger.functions.saveLog)
                     end
                     return 1

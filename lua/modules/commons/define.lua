@@ -111,7 +111,7 @@ end
 
 SKIN_INFO = {
     SELECT_VRESION = "2.27",
-    RESULT_VERSION = "2.20",
+    RESULT_VERSION = "2.23",
     DECIDE_VERSION = "1.01",
     PLAY_VERSION = "0.98",
 }
@@ -126,6 +126,8 @@ PARTS_TEXTURE_SIZE = 2048
 NORMAL_TEXT_SIZE = 32
 LARGE_TITLE_TEXT_SIZE = NORMAL_TEXT_SIZE * 2
 NORMAL_DESCENDER_LINE = 3 -- フォントサイズ64
+
+PLAY_LOG_PATH = ""
 
 function globalInitialize(skin)
     -- skinの要素をとりあえず空で入れておく. エラー防止
@@ -150,6 +152,7 @@ function globalInitialize(skin)
     myPrint("使用不能文字置換後: " .. userData.escapedName)
     userData.filePath = skin_config.get_path("../userdata/data") .. "_" .. userData.escapedName
     userData.backupPath = skin_config.get_path("../userdata/backup/data") .. "_" .. userData.escapedName .. string.format("%10d", os.time())
+    PLAY_LOG_PATH = skin_config.get_path("../userdata/playlog.log")
     print("使用ファイルパス: " .. userData.filePath)
     -- 読み込み
     pcall(userData.load)

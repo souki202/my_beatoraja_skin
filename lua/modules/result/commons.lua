@@ -54,7 +54,15 @@ NUM_18PX = {
 }
 
 function isDrawGrooveGaugeLabel()
-	return getTableValue(skin_config.option, "グルーヴゲージ部分のラベル", 950) == 950
+	return getTableValue(skin_config.option, "グルーヴゲージ部分のラベル表示", 950) == 950
+end
+
+function isDrawPlayOption()
+	return getTableValue(skin_config.option, "譜面オプションの表示", 960) == 960
+end
+
+function getDrawLabelAtTop()
+	return getTableValue(skin_config.option, "グルーヴゲージ部分のラベル位置", 955) == 956
 end
 
 function getGrooveNotesGraphSizePercentage()

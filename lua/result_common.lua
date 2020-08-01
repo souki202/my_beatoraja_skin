@@ -3,7 +3,7 @@ require("modules.commons.my_window")
 require("modules.result.commons")
 local main_state = require("main_state")
 local resultObtained = require("modules.result.result_obtained")
-local graphs = require("modules.result.notesgraph")
+local graphs = require("modules.result.graphs")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048
@@ -561,7 +561,13 @@ function makeHeader()
                 name = "経験値等画面遷移", item = {{name = "右キー", op = 925}, {name = "左キー", op = 926}, {name = "決定ボタン(一定時間表示)", op = 927}, {name = "無し", op = 928}}, def = "右キー"
             },
             {
-                name = "グルーヴゲージ部分のラベル", item = {{name = "ON", op = 950}, {name = "OFF", op = 951}}, def = 950,
+                name = "グルーヴゲージ部分のラベル位置", item = {{name = "下", op = 955}, {name = "上", op = 956}}, def = 955,
+            },
+            {
+                name = "グルーヴゲージ部分のラベル表示", item = {{name = "ON", op = 950}, {name = "OFF", op = 951}}, def = "ON"
+            },
+            {
+                name = "譜面オプションの表示", item = {{name = "ON", op = 960}, {name = "OFF", op = 961}}, def = "ON"
             },
         },
         filepath = {
@@ -890,13 +896,6 @@ local function main()
         })
     end
 
-    -- オプション読み込み
-    -- for i, op in pairs(OPTIONS.IMG.OPS) do
-    --     table.insert(skin.image, {
-    --         id = "option" .. op, src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 566 + (i - 1) * OPTIONS.IMG.H, w = OPTIONS.IMG.W, h = OPTIONS.IMG.H
-    --     })
-    -- end
-
     skin.value = {
         {id = "difficultyValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 2, ref = 96, align = 0},
         {id = "totalNotesValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = DIFFICULTY_INFO.TOTAL_NOTES.DIGIT, ref = 106, align = 0},
@@ -992,15 +991,6 @@ local function main()
     }
 
     mergeSkin(skin, graphs.dst())
-
-    -- オプション出力
-    -- for i, op in pairs(OPTIONS.IMG.OPS) do
-    --     table.insert(skin.destination, {
-    --         id = "option" .. op, op = {op}, dst = {
-    --             {x = OPTIONS.IMG.X, y = OPTIONS.IMG.Y, w = OPTIONS.IMG.W, h = OPTIONS.IMG.H}
-    --         }
-    --     })
-    -- end
 
     -- タイトル部分
     destinationStaticBaseWindowResult(skin, TITLE_BAR.WND.X, TITLE_BAR.WND.Y, TITLE_BAR.WND.W, TITLE_BAR.WND.H)

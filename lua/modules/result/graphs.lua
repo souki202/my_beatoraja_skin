@@ -25,8 +25,8 @@ local GRAPH = {
     },
 
     GAUGE = {
-        X = 10,
-        Y = 10,
+        X = function (self) return self.WND_GAUGE.X + 10 end,
+        Y = function (self) return self.WND_GAUGE.Y + 10 end,
         W = WND_WIDTH - 20, -- 20はEDGE * 2
         H = 320,
         EDGE = 25,
@@ -40,7 +40,9 @@ local GRAPH = {
     },
 
     GROOVE_TEXT = {
-        X = 7,
+        X = function (self) return self.GAUGE.X(self) + 7 end,
+        TOP_Y = function (self) return self.GAUGE.Y(self) + self.GAUGE.H - 5 - self.GROOVE_TEXT.H end,
+        BOTTOM_Y = function (self) return self.GAUGE.Y(self) + 5 end,
         Y = 5,
         W = 189,
         H = 22,
@@ -76,6 +78,15 @@ GRAPH.GROOVE_NUM.DOT = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.DOT
 GRAPH.GROOVE_NUM.AF_X = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.AF_X
 GRAPH.GROOVE_NUM.SYMBOL_X = GRAPH.GROOVE_NUM.X + GRAPH.GROOVE_NUM.SYMBOL_X
 
+local OPTIONS = {
+    IMG = {
+        X = function () return GRAPH.GAUGE.X(GRAPH) + 7 end,
+        DY_WHEN_DRAW_LABEL = 27,
+        W = 147,
+        H = 22,
+    }
+}
+
 --[[
     グルーヴゲージ下の各種グラフの種類を取得
 
@@ -105,7 +116,7 @@ NOTESGRAPH.functions.change2p = function ()
 end
 
 NOTESGRAPH.functions.load = function ()
-    return {
+    local skin = {
         image = {
             -- グラフ
             {id = "grooveGaugeFrame", src = 0, x = 0, y = TEXTURE_SIZE - 371, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW*2},
@@ -114,12 +125,15 @@ NOTESGRAPH.functions.load = function ()
             {id = "judgesDescription" , src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*1, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
             {id = "elDescription"     , src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*2, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
             {id = "timingDescription" , src = 999, x = 0, y = 0, w = 1, h = 1},
-            {id = "notesGraphText"  , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*0, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
-            {id = "judgesGraphText" , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*1, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
-            {id = "elGraphText"     , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*2, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
-            {id = "timingGraphText" , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*3, w = GRAPH.JUDGE_TEXT.W ,h = GRAPH.JUDGE_TEXT.H},
-            {id = "grooveGaugeText", src = 0, x = 199, y = 432 + GRAPH.GROOVE_TEXT.H*4, w = GRAPH.GROOVE_TEXT.W ,h = GRAPH.GROOVE_TEXT.H},
+            {id = "notesGraphText"  , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*0, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
+            {id = "judgesGraphText" , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*1, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
+            {id = "elGraphText"     , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*2, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
+            {id = "timingGraphText" , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*3, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
+            {id = "grooveGaugeText", src = 0, x = 199, y = 432 + GRAPH.GROOVE_TEXT.H*4, w = GRAPH.GROOVE_TEXT.W, h = GRAPH.GROOVE_TEXT.H},
+            -- ランダムオプションはグラフ上に表示
+            {id = "randomOptionImgs", src = 0, x = 199, y = 566, w = OPTIONS.IMG.W, h = OPTIONS.IMG.H * 10, divy = 10, ref = 42},
         },
+        imageset = {},
         value = {
              -- groove gaugeの値
             {id = "grooveGaugeValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = 185, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 3, ref = 107, align = 0},
@@ -138,13 +152,25 @@ NOTESGRAPH.functions.load = function ()
             {id = "timingGraph", graphColor = "88FF88FF"},
         }
     }
+
+    local imgs = skin.image
+
+    -- オプション読み込み
+    local opImgs = {}
+    for i = 1, 10 do
+        imgs[#imgs+1] = {id = "randomOptionImgs" .. i, src = 0, x = 199, y = 566 + OPTIONS.IMG.H * (i - 1), w = OPTIONS.IMG.W, h = OPTIONS.IMG.H}
+        opImgs[#opImgs+1] = "randomOptionImgs" .. i
+    end
+    skin.imageset[#skin.imageset+1] = {id = "randomOptionImageSet", ref = 42, images = opImgs}
+
+    return skin
 end
 
 NOTESGRAPH.functions.dstGrooveGaugeArea = function ()
     local skin = {destination = {}}
     -- groove gauge出力
-    local grooveX = GRAPH.WND_GAUGE.X + GRAPH.GAUGE.X
-    local grooveY = GRAPH.WND_GAUGE.Y + GRAPH.GAUGE.Y
+    local grooveX = GRAPH.GAUGE.X(GRAPH)
+    local grooveY = GRAPH.GAUGE.Y(GRAPH)
     table.insert(skin.destination, {
         id = "grooveGaugeGraphBg", dst = {
             {x = grooveX, y = grooveY, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H}
@@ -169,12 +195,28 @@ NOTESGRAPH.functions.dstGrooveGaugeArea = function ()
         }
     })
 
-    if isDrawGrooveGaugeLabel() then
-        table.insert(skin.destination, {
-            id = "grooveGaugeText", dst = {
-                {x = grooveX + GRAPH.GROOVE_TEXT.X, y = grooveY + GRAPH.GROOVE_TEXT.Y, w = GRAPH.GROOVE_TEXT.W, h = GRAPH.GROOVE_TEXT.H}
-            },
-        })
+    do
+        -- GROOVE GAUGEラベルの出力
+        local labelY = getDrawLabelAtTop() and GRAPH.GROOVE_TEXT.TOP_Y(GRAPH) or GRAPH.GROOVE_TEXT.BOTTOM_Y(GRAPH)
+        if isDrawGrooveGaugeLabel() then
+            table.insert(skin.destination, {
+                id = "grooveGaugeText", dst = {
+                    {x = GRAPH.GROOVE_TEXT.X(GRAPH), y = labelY, w = GRAPH.GROOVE_TEXT.W, h = GRAPH.GROOVE_TEXT.H}
+                },
+            })
+        end
+        -- ランダムオプションの出力
+        if isDrawPlayOption() then
+            local opY = labelY
+            if isDrawGrooveGaugeLabel() then
+                opY = labelY + OPTIONS.IMG.DY_WHEN_DRAW_LABEL * (getDrawLabelAtTop() and -1 or 1)
+            end
+            table.insert(skin.destination, {
+                id = "randomOptionImageSet", dst = {
+                    {x = OPTIONS.IMG.X(), y = opY, w = OPTIONS.IMG.W, h = OPTIONS.IMG.H}
+                }
+            })
+        end
     end
     dstNumberRightJustify(skin, "grooveGaugeValue", grooveX + GRAPH.GROOVE_NUM.X, grooveY + GRAPH.GROOVE_NUM.Y, NUM_24PX.W, NUM_24PX.H, 3)
     table.insert(skin.destination, {
