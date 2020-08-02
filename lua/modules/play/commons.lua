@@ -228,6 +228,10 @@ function slowBpmCalcType()
 	return getTableValue(skin_config.option, "低速時のEARLY, LATE位置変更基準", 10077) - 10075
 end
 
+function getKeyBeamTransparency()
+	return getOffsetValueWithDefault("キービームの透明度(既定値64 255で透明)", {a = 64}).a
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)

@@ -1,8 +1,11 @@
 require("modules.commons.define")
 require("modules.result.commons")
 local main_state = require("main_state")
+local playLog = require("modules.commons.playlog")
 
-local NOTESGRAPH = {
+
+local notesGraph = {
+    didLoadPlayData = false,
     functions = {}
 }
 
@@ -87,13 +90,17 @@ local OPTIONS = {
     }
 }
 
+local scoreGraph = {
+    
+}
+
 --[[
     グルーヴゲージ下の各種グラフの種類を取得
 
     @param  int pos 上から何番目か 1,2,3は下部分の枠目, 4はグルーヴゲージ部分
     @return int 1:ノーツ数分布, 2:判定分布, 3:EARLY/LATE分布(棒グラフ), 4:タイミング可視化グラフ, 5:無し
 ]]
-NOTESGRAPH.functions.getGraphType = function (pos)
+notesGraph.functions.getGraphType = function (pos)
     if pos == 4 then
         return (getTableValue(skin_config.option, "各種グラフ グルーヴゲージ部分", 949) % 5) + 1
     end
@@ -106,16 +113,23 @@ NOTESGRAPH.functions.getGraphType = function (pos)
     return (getTableValue(skin_config.option, "各種グラフ" .. pos .. "個目", def) % 5) + 1
 end
 
-NOTESGRAPH.functions.getGrooveNotesGraphTransparency = function ()
+notesGraph.functions.getGrooveNotesGraphTransparency = function ()
 	return 255 - getOffsetValueWithDefault("グルーヴゲージ部分のノーツグラフの透明度 (255で透明)", {a = 0}).a
 end
 
-NOTESGRAPH.functions.change2p = function ()
+notesGraph.functions.change2p = function ()
     GRAPH.WND_GAUGE.X = LEFT_X
     GRAPH.WND_JUDGE.X = LEFT_X
 end
 
-NOTESGRAPH.functions.load = function ()
+notesGraph.functions.loadScoreGraph = function ()
+    local data = playLog.loadLog()
+    if #data == 0 then return 0 end
+
+    return 0
+end
+
+notesGraph.functions.load = function ()
     local skin = {
         image = {
             -- グラフ
@@ -163,10 +177,11 @@ NOTESGRAPH.functions.load = function ()
     end
     skin.imageset[#skin.imageset+1] = {id = "randomOptionImageSet", ref = 42, images = opImgs}
 
+    notesGraph.functions.loadScoreGraph()
     return skin
 end
 
-NOTESGRAPH.functions.dstGrooveGaugeArea = function ()
+notesGraph.functions.dstGrooveGaugeArea = function ()
     local skin = {destination = {}}
     -- groove gauge出力
     local grooveX = GRAPH.GAUGE.X(GRAPH)
@@ -178,13 +193,13 @@ NOTESGRAPH.functions.dstGrooveGaugeArea = function ()
     })
 
     -- グラフ本体
-    local type = NOTESGRAPH.functions.getGraphType(4)
+    local type = notesGraph.functions.getGraphType(4)
     if 0 < type and type < 5 then
         local prefix = GRAPH.PREFIX[type]
         local p = getGrooveNotesGraphSizePercentage()
         table.insert(skin.destination, {
             id = prefix .. "Graph", blend = type == 4 and 2 or 1, dst = {
-                {x = grooveX, y = grooveY, w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.GAUGE.H * p, a = NOTESGRAPH.functions.getGrooveNotesGraphTransparency()}
+                {x = grooveX, y = grooveY, w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.GAUGE.H * p, a = notesGraph.functions.getGrooveNotesGraphTransparency()}
             }
         })
     end
@@ -241,11 +256,11 @@ NOTESGRAPH.functions.dstGrooveGaugeArea = function ()
     return skin
 end
 
-NOTESGRAPH.functions.dstJudgeGaugeArea = function ()
+notesGraph.functions.dstJudgeGaugeArea = function ()
     local skin = {destination = {}}
     -- グラフ出力
     for i = 1, 3 do
-        local type = NOTESGRAPH.functions.getGraphType(i)
+        local type = notesGraph.functions.getGraphType(i)
         if 0 < type and type < 5 then
             local x = GRAPH.WND_JUDGE.X + GRAPH.JUDGE_GRAPH.X
             local y = GRAPH.WND_JUDGE.Y + GRAPH.JUDGE_GRAPH.Y + GRAPH.JUDGE_GRAPH.INTERVAL_Y * (i - 1)
@@ -288,11 +303,11 @@ NOTESGRAPH.functions.dstJudgeGaugeArea = function ()
     return skin
 end
 
-NOTESGRAPH.functions.dst= function ()
+notesGraph.functions.dst= function ()
     local skin = {destination = {}}
-    mergeSkin(skin, NOTESGRAPH.functions.dstGrooveGaugeArea())
-    mergeSkin(skin, NOTESGRAPH.functions.dstJudgeGaugeArea())
+    mergeSkin(skin, notesGraph.functions.dstGrooveGaugeArea())
+    mergeSkin(skin, notesGraph.functions.dstJudgeGaugeArea())
     return skin
 end
 
-return NOTESGRAPH.functions
+return notesGraph.functions

@@ -10,23 +10,25 @@ local KEY_BEAM = {
     HEIGHTS = {0, 160, 350, 564, 720},
     BACK_H = {80, 60},
     ANIMATION_TIMES = {0, 50, 100, 200, 350},
-    ALPHA = 192,
+    ALPHA = 192, -- 後で初期化
 }
 
 -- 皿もこれ
 local function getWhiteBeamColor()
 	local dif = getDifficultyValueForColor()
-	local colors = {{183, 183, 183}, {151, 190, 151}, {151, 190, 190}, {218, 180, 151}, {218, 64, 64}, {255, 81, 200}}
+	local colors = {{183, 183, 183}, {151, 190, 151}, {151, 190, 190}, {218, 180, 151}, {255, 192, 192}, {255, 81, 200}}
 	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 
 local function getBlueBeamColor()
 	local dif = getDifficultyValueForColor()
-	local colors = {{128, 128, 128}, {64, 255, 66}, {66, 66, 255}, {255, 128, 64}, {218, 0, 0}, {204, 102, 153}}
+	local colors = {{128, 128, 128}, {64, 255, 66}, {66, 66, 255}, {255, 128, 64}, {255, 128, 128}, {204, 102, 153}}
 	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 
 keyBeam.functions.load = function ()
+    KEY_BEAM.ALPHA = 255 - getKeyBeamTransparency()
+    print("toumeido: " .. KEY_BEAM.ALPHA)
     return {
         image = {
             {id = "keyBeam", src = 0, x = 18, y = 30, w = 1, h = 80}
@@ -67,7 +69,7 @@ keyBeam.functions.dst = function ()
             if atime == 0 then
                 dst[#dst+1] = {
                     id = "keyBeam", offst = 3, timer = myTimer,
-                    dst = {{x = x, y = y, w = w, h = h, r = r, g = g, b = b}}
+                    dst = {{x = x, y = y, w = w, h = h, r = r, g = g, b = b, a = KEY_BEAM.ALPHA}}
                 }
                 dst[#dst+1] = {
                     id = "keyBeam", offset = 3, timer = myTimer,

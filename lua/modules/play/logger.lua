@@ -1,26 +1,10 @@
 require("modules.commons.define")
+local playLog = require("modules.commons.playlog")
 local commons = require("modules.play.commons")
 local main_state = require("main_state")
 
 local logger = {
-    isSaved = false,
-    data = {
-        {
-            time = 0, -- micro sec
-            judges = {
-                sumJudges = 0,
-                early = {0, 0, 0, 0, 0, 0}, -- pg, gr, gd, bd, pr, ms
-                late  = {0, 0, 0, 0, 0, 0}
-            },
-            combo = 0,
-            notes = 0,
-            exscore = {
-                you = 0,
-                best = 0,
-                target = 0,
-            },
-        }
-    },
+    didSave = false,
     functions = {}
 }
 
@@ -28,44 +12,16 @@ local LOGGER = {
 
 }
 
-logger.functions.saveLog = function ()
-    logger.isSaved = true
-    myPrint("プレイログ保存開始: " .. PLAY_LOG_PATH)
-    local data = logger.data
-    local fp = io.open(PLAY_LOG_PATH, "w")
-    local str = "time, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, combo, exscore, best, target"
-
-    for i = 1, #data do
-        local nowData = data[i]
-        local line = nowData.time .. " "
-        -- 判定出力
-        for j = 1, 6 do
-            line = line .. nowData.judges.early[j] .. " " .. nowData.judges.late[j] .. " "
-        end
-        -- combo
-        line = line .. nowData.combo .. " "
-        -- score
-        line = line .. nowData.exscore.you .. " " .. nowData.exscore.best .. " " .. nowData.exscore.target
-        str = str .. "\n" .. line
-    end
-    fp:write(str)
-    -- print(str)
-    fp:close()
-    myPrint("プレイログ保存完了")
-    return 0
-end
-
 logger.functions.load = function ()
-    local dataArray = logger.data
     return {
         customTimers = {
             {
-                id = 11332, timer = function () -- ログ取得
+                id = 12000, timer = function () -- ログ取得
                     local t = main_state.timer(41)
                     if t >= 0 then
                         -- 現在の時刻を取得
                         local data = {time = getElapsedTime() - t}
-                        local lastData = dataArray[#dataArray]
+                        local lastData = playLog.getLastTimeData()
 
                         -- 判定数全部取る
                         do
@@ -127,16 +83,16 @@ logger.functions.load = function ()
                                 target = main_state.number(121),
                             }
                         end
-
-                        dataArray[#dataArray+1] = data
+                        playLog.addData(data)
                     end
+                    return 1
                 end
             },
             {
-                id = 10120, timer = function () -- save
-                    if (main_state.timer(2) >= 0 or main_state.timer(3) >= 0) and logger.isSaved == false then
-                        logger.functions.saveLog()
-                        pcall(logger.functions.saveLog)
+                id = 12001, timer = function () -- save
+                    if (main_state.timer(2) >= 0 or main_state.timer(3) >= 0) and logger.didSave == false then
+                        logger.didSave = true -- いちいち関数呼ぶのはオーバーヘッドがでかいのでこっちでも管理
+                        pcall(playLog.saveLog)
                     end
                     return 1
                 end

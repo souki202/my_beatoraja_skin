@@ -74,6 +74,20 @@ function mergeSkin(skin, addSkin)
     end
 end
 
+function split(str, delim)
+    -- 引数がないときは分割しない
+    if delim == nil then return {str} end
+
+    local t = {}
+    local i = 1
+    for s in string.gmatch(str, "([^"..delim.."]+)") do
+      t[i] = s
+      i = i + 1
+    end
+
+    return t
+end
+
 --[[
     hsvをrgbに変換する
     @param  int h Hue 0 <= h <= 360
