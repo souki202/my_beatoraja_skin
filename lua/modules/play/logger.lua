@@ -14,8 +14,8 @@ local LOGGER = {
 
 local EXSCORE_RATE = {
     SAMPLES = {
-        NOTES = 20,
-        MICRO_SEC = 1000000,
+        NOTES = 100,
+        MICRO_SEC = 5000000 * 10000, -- 要は今は使わない
     }
 }
 
@@ -27,12 +27,13 @@ logger.functions.load = function ()
     local getNumber = main_state.number -- 先に持っておく
     local getLastTime = playLog.getLastTimeData
     local playTimerTime = -1
-
+    
     local rateRange = {
         sumExScores = {you = 0, best = 0, target = 0}, notes = 0, microSec = 0, startIdx = 1, endIdx = 1,
     }
     local rateSampleNotes = EXSCORE_RATE.SAMPLES.NOTES
     local rateSampleMs = EXSCORE_RATE.SAMPLES.MICRO_SEC
+    local rangeExScores = rateRange.sumExScores
 
     return {
         customTimers = {
@@ -112,22 +113,42 @@ logger.functions.load = function ()
                             -- exscore rateの処理
                             -- 前回からのノーツ数と時間経過を取得
                             local rangeExScore = {}
+                            -- 今回の分を追加
                             rateRange.notes = rateRange.notes + numOfProcessedExistNotes - lastData.notes
                             rateRange.microSec = rateRange.microSec + data.time - lastData.time
                             rateRange.endIdx = playLog.getNumOfData() + 1
-                            rateRange.sumExScores.you = rateRange.sumExScores.you + data.exscore.you
-                            rateRange.sumExScores.best = rateRange.sumExScores.best + data.exscore.best
-                            rateRange.sumExScores.target = rateRange.sumExScores.target + data.exscore.target
+                            rangeExScores.you = rangeExScores.you + data.exscore.you - lastData.exscore.you
+                            rangeExScores.best = rangeExScores.best + data.exscore.best - lastData.exscore.best
+                            rangeExScores.target = rangeExScores.target + data.exscore.target - lastData.exscore.target
+
                             -- 閾値内に収まるように範囲を狭める
                             -- 尺取法 範囲は[rateRange.startIdx, rateRange.endIdx]
                             -- どれだけ多くても通常100ループには収まる
-                            while rateRange.notes > rateSampleNotes or rateRange.microSec > rateSampleMs do
+                            while rateRange.notes > rateSampleNotes or rateRange.microSec > rateSampleMs and rateRange.startIdx < rateRange.endIdx do
                                 -- 1つ狭める
                                 local leftData = playLog.getDataByIdx(rateRange.startIdx)
                                 local leftData2 = playLog.getDataByIdx(rateRange.startIdx - 1)
                                 rateRange.notes = rateRange.notes - (leftData.notes - leftData2.notes)
                                 rateRange.microSec = rateRange.microSec - (leftData.time - leftData2.time)
+                                rangeExScores.you = rangeExScores.you - (leftData.exscore.you - leftData2.exscore.you)
+                                rangeExScores.best = rangeExScores.best - (leftData.exscore.best - leftData2.exscore.best)
+                                rangeExScores.target = rangeExScores.target - (leftData.exscore.target - leftData2.exscore.target)
+                                rateRange.startIdx = rateRange.startIdx + 1
                             end
+
+                            -- 値をdeepcopy
+                            rangeExScore.theoretical = rateRange.notes * 2
+                            local theoretical = rangeExScore.theoretical
+                            if theoretical > 0 then
+                                rangeExScore.you = rangeExScores.you / theoretical
+                                rangeExScore.best = rangeExScores.best / theoretical
+                                rangeExScore.target = rangeExScores.target / theoretical
+                            else
+                                rangeExScore.you = 0
+                                rangeExScore.best = 0
+                                rangeExScore.target = 0
+                            end
+                            data.rangeExScore = rangeExScore
                         end
                         playLog.addData(data)
                     end

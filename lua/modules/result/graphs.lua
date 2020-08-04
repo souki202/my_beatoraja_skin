@@ -92,9 +92,9 @@ local OPTIONS = {
 
 local SCORE_GRAPH = {
     RES = {1, 2, 3, 5, 6},
-    RES_IDX = 3,
+    RES_IDX = 2,
     LINE = {
-        MIN_H = 2,
+        MIN_H = 1,
         EXSCORE = {
             COLOR = {
                 you = {64, 64, 255},
@@ -107,15 +107,7 @@ local SCORE_GRAPH = {
     EXSCORE_KEYS = {"best", "target", "you"},
 }
 
-local exScores = {
-    {
-        you = 0,
-        best = 0,
-        target = 0,
-    }
-}
-
-local exScoreRates = {
+local exScores = { -- レートも今はこれを使う
     {
         you = 0,
         best = 0,
@@ -146,6 +138,10 @@ notesGraph.functions.getGrooveNotesGraphTransparency = function ()
 	return 255 - getOffsetValueWithDefault("グルーヴゲージ部分のノーツグラフの透明度 (255で透明)", {a = 0}).a
 end
 
+notesGraph.functions.getScoreGraphType = function ()
+    return getTableValue(skin_config.option, "スコアグラフ(プレイスキン併用時のみ)", 966) - 965 + 1
+end
+
 notesGraph.functions.change2p = function ()
     GRAPH.WND_GAUGE.X = LEFT_X
     GRAPH.WND_JUDGE.X = LEFT_X
@@ -155,13 +151,15 @@ notesGraph.functions.dstScoreGraph = function ()
     local skin = {destination = {
         {
             id = "white", dst = {
-                {x = GRAPH.GAUGE.X(GRAPH), y = GRAPH.GAUGE.Y(GRAPH), w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H, r = 0, g = 0, b = 0, a = 128}
+                {x = GRAPH.GAUGE.X(GRAPH), y = GRAPH.GAUGE.Y(GRAPH), w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H, r = 0, g = 0, b = 0, a = 196}
             }
         }
     }}
     local dst = skin.destination
     local data = playLog.loadLog()
     if #data == 0 then return skin end
+
+    local scoreGraphType = notesGraph.functions.getScoreGraphType()
 
     -- バー周りの情報
     local totalMicroSec = math.max(data[#data].time, math.max(1, playLog.getSongLength()) * 1000000)
@@ -170,6 +168,8 @@ notesGraph.functions.dstScoreGraph = function ()
     local timeLenParBar = totalMicroSec / GRAPH.GAUGE.W * barW
     local numOfBar = GRAPH.GAUGE.W / barW
     local maxBarIdx = 0
+    local hasBestScore = main_state.number(150) > 0
+    -- local maxRate, minRate = 0, 1
 
     myPrint("totalMicroSec: " .. totalMicroSec)
     myPrint("timeLenParBar: " .. timeLenParBar)
@@ -181,7 +181,7 @@ notesGraph.functions.dstScoreGraph = function ()
             local barIdx = math.floor(now.time / timeLenParBar) + 1 -- forの都合で1から開始するために1ずらす
 
             -- スコア周りのグラフ集計
-            do
+            if scoreGraphType == 1 then
                 exScores[barIdx] = now.exscore
                 -- 前のbarを現在の場所の直前まで埋める
                 if i > 1 then
@@ -192,12 +192,25 @@ notesGraph.functions.dstScoreGraph = function ()
                         fillBarIdx = fillBarIdx + 1
                     end
                 end
+            elseif scoreGraphType == 2 then
+                -- スコアレート周りのグラフ集計
+                do
+                    local theoretical = now.rangeExScore.theoretical
+                    if theoretical > 0 then
+                        local tmpExScore = now.rangeExScore
+                        exScores[barIdx] = now.rangeExScore
+                        if i > 1 then
+                            local last = data[i - 1]
+                            local fillBarIdx = math.floor(last.time / timeLenParBar) + 2
+                            while fillBarIdx < barIdx do
+                                exScores[fillBarIdx] = last.rangeExScore
+                                fillBarIdx = fillBarIdx + 1
+                            end
+                        end
+                    end
+                end
             end
 
-            -- スコアレート周りのグラフ集計
-            do
-            end
-            -- myPrint(barIdx .. " " .. now.exscore.you)
             maxBarIdx = barIdx
         end
     end
@@ -209,9 +222,10 @@ notesGraph.functions.dstScoreGraph = function ()
         local maxExScore = main_state.number(74) * 2
         local fitstX = GRAPH.GAUGE.X(GRAPH)
         local bottomY = GRAPH.GAUGE.Y(GRAPH)
-        local areaH = GRAPH.GAUGE.H
+        local areaH = GRAPH.GAUGE.H - barH -- 引かないとはみ出す
         local colors = SCORE_GRAPH.LINE.EXSCORE.COLOR
-        local calcY = function (s) return bottomY + math.ceil(areaH * s / maxExScore) end
+        local calcExScoreY = function (s) return bottomY + math.ceil(areaH * s / maxExScore) end
+        local calcRateY    = function (s) return bottomY + math.ceil(areaH * s) end
         for i, exScore in ipairs(exScores) do
             local targetIdx = i
             if maxBarIdx == i then
@@ -226,14 +240,27 @@ notesGraph.functions.dstScoreGraph = function ()
                 for j = 1, #SCORE_GRAPH.EXSCORE_KEYS do
                     local key = SCORE_GRAPH.EXSCORE_KEYS[j]
                     local color = colors[key]
-                    local lastY = calcY(lastExScore[key])
-                    local y = calcY(exScore[key])
+                    local lastY, y = 0, 0
+
+                    if scoreGraphType == 1 then
+                        lastY = calcExScoreY(lastExScore[key])
+                        y = calcExScoreY(exScore[key])
+                    elseif scoreGraphType == 2 then
+                        lastY = calcRateY(lastExScore[key])
+                        y = calcRateY(exScore[key])
+                    end
 
                     -- 今回のスコアを描画する
                     if nowIdx + 1 == i then
+                        local h = y - lastY
+                        if h >= 0 then h = h + 1
+                        else
+                            lastY = lastY + 1
+                            h = h - 1
+                        end
                         dst[#dst+1] = {
                             id = "white", dst = {
-                                {x = x, y = lastY, w = barW, h = y - lastY + barH, r = color[1], g = color[2], b = color[3]}
+                                {x = x, y = lastY, w = barW, h = h, r = color[1], g = color[2], b = color[3]}
                             }
                         }
                     else

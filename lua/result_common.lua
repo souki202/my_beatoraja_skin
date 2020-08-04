@@ -558,6 +558,9 @@ function makeHeader()
                 name = "スコア位置", item = {{name = "左", op = 920}, {name = "右", op = 921}}, def = "左"
             },
             {
+                name = "スコアグラフ(プレイスキン併用時のみ)", item = {{name = "累積スコア", op = 965}, {name = "一定区間のレート", op = 966}}, def = "一定区間のレート"
+            },
+            {
                 name = "経験値等画面遷移", item = {{name = "右キー", op = 925}, {name = "左キー", op = 926}, {name = "決定ボタン(一定時間表示)", op = 927}, {name = "無し", op = 928}}, def = "右キー"
             },
             {

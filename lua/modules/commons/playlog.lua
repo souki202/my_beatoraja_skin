@@ -42,7 +42,7 @@ logger.functions.saveLog = function ()
     myPrint("プレイログ保存開始: " .. PLAY_LOG_PATH)
     local data = logger.data
     local fp = io.open(PLAY_LOG_PATH, "w")
-    local str = "time, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, sumJudges, combo, notes, exscore, best, target\n"
+    local str = "time, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, sumJudges, combo, notes, exscore, best, target, rangeTheoretical, rangeYou, rangeBest, rangeTarget\n"
     str = str .. logger.songLengthSec
 
     for i = 1, #data do
@@ -58,7 +58,10 @@ logger.functions.saveLog = function ()
         -- notes
         line = line .. nowData.notes .. " "
         -- score
-        line = line .. nowData.exscore.you .. " " .. nowData.exscore.best .. " " .. nowData.exscore.target
+        local exScore = nowData.exscore
+        line = line .. exScore.you .. " " .. exScore.best .. " " .. exScore.target .. " "
+        local range = nowData.rangeExScore
+        line = line .. range.theoretical .. " " .. range.you .. " " .. range.best .. " " .. range.target
         str = str .. "\n" .. line
     end
     fp:write(str)
@@ -83,7 +86,7 @@ logger.functions.loadLog = function ()
         if cnt > 1 then
             local data = table.deepcopy(logger.data[1])
             local splited = split(line, " ")
-            if #splited >= 19 then
+            if #splited >= 23 then
                 data.time = splited[1]
                 for i = 1, 6 do
                     data.judges.early[i] = splited[2 + (i - 1) * 2]
@@ -95,7 +98,10 @@ logger.functions.loadLog = function ()
                 data.exscore.you = splited[17]
                 data.exscore.best = splited[18]
                 data.exscore.target = splited[19]
-
+                data.rangeExScore.theoretical = splited[20]
+                data.rangeExScore.you = splited[21]
+                data.rangeExScore.best = splited[22]
+                data.rangeExScore.target = splited[23]
                 dataArray[cnt - 1] = data
             end
         elseif cnt == 1 then
