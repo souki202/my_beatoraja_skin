@@ -1,5 +1,7 @@
 /select/parts/コメント*
-/userdata/data_*
+/userdata/*
 /userdata/playlog.log
 /userdata/backup/data_*
 /select/background/slideshow/*
+userdata/data_souki
+userdata/data_test user

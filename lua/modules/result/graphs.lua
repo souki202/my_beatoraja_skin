@@ -90,8 +90,37 @@ local OPTIONS = {
     }
 }
 
-local scoreGraph = {
-    
+local SCORE_GRAPH = {
+    RES = {1, 2, 3, 5, 6},
+    RES_IDX = 3,
+    LINE = {
+        MIN_H = 2,
+        EXSCORE = {
+            COLOR = {
+                you = {64, 64, 255},
+                best = {64, 255, 64},
+                target = {255, 0, 0},
+            }
+        }
+    },
+
+    EXSCORE_KEYS = {"best", "target", "you"},
+}
+
+local exScores = {
+    {
+        you = 0,
+        best = 0,
+        target = 0,
+    }
+}
+
+local exScoreRates = {
+    {
+        you = 0,
+        best = 0,
+        target = 0,
+    }
 }
 
 --[[
@@ -122,11 +151,106 @@ notesGraph.functions.change2p = function ()
     GRAPH.WND_JUDGE.X = LEFT_X
 end
 
-notesGraph.functions.loadScoreGraph = function ()
+notesGraph.functions.dstScoreGraph = function ()
+    local skin = {destination = {
+        {
+            id = "white", dst = {
+                {x = GRAPH.GAUGE.X(GRAPH), y = GRAPH.GAUGE.Y(GRAPH), w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H, r = 0, g = 0, b = 0, a = 128}
+            }
+        }
+    }}
+    local dst = skin.destination
     local data = playLog.loadLog()
-    if #data == 0 then return 0 end
+    if #data == 0 then return skin end
 
-    return 0
+    -- バー周りの情報
+    local totalMicroSec = math.max(data[#data].time, math.max(1, playLog.getSongLength()) * 1000000)
+    local barW = SCORE_GRAPH.RES[SCORE_GRAPH.RES_IDX]
+    local barH = SCORE_GRAPH.LINE.MIN_H
+    local timeLenParBar = totalMicroSec / GRAPH.GAUGE.W * barW
+    local numOfBar = GRAPH.GAUGE.W / barW
+    local maxBarIdx = 0
+
+    myPrint("totalMicroSec: " .. totalMicroSec)
+    myPrint("timeLenParBar: " .. timeLenParBar)
+    -- スコア周りの情報集計
+    do
+        local lastBarIdx = 0
+        for i = 1, #data do
+            local now = data[i]
+            local barIdx = math.floor(now.time / timeLenParBar) + 1 -- forの都合で1から開始するために1ずらす
+
+            -- スコア周りのグラフ集計
+            do
+                exScores[barIdx] = now.exscore
+                -- 前のbarを現在の場所の直前まで埋める
+                if i > 1 then
+                    local last = data[i - 1]
+                    local fillBarIdx = math.floor(last.time / timeLenParBar) + 2
+                    while fillBarIdx < barIdx do
+                        exScores[fillBarIdx] = last.exscore
+                        fillBarIdx = fillBarIdx + 1
+                    end
+                end
+            end
+
+            -- スコアレート周りのグラフ集計
+            do
+            end
+            -- myPrint(barIdx .. " " .. now.exscore.you)
+            maxBarIdx = barIdx
+        end
+    end
+
+    -- スコア描画
+    do
+        local nowIdx = 0
+        local lastExScore = exScores[1]
+        local maxExScore = main_state.number(74) * 2
+        local fitstX = GRAPH.GAUGE.X(GRAPH)
+        local bottomY = GRAPH.GAUGE.Y(GRAPH)
+        local areaH = GRAPH.GAUGE.H
+        local colors = SCORE_GRAPH.LINE.EXSCORE.COLOR
+        local calcY = function (s) return bottomY + math.ceil(areaH * s / maxExScore) end
+        for i, exScore in ipairs(exScores) do
+            local targetIdx = i
+            if maxBarIdx == i then
+                -- 端まで埋める
+                targetIdx = numOfBar
+            end
+
+            -- myPrint("now score: " .. i, exScore.you, exScore.best, exScore.target)
+            while nowIdx < targetIdx do
+                local x = fitstX + nowIdx * barW
+
+                for j = 1, #SCORE_GRAPH.EXSCORE_KEYS do
+                    local key = SCORE_GRAPH.EXSCORE_KEYS[j]
+                    local color = colors[key]
+                    local lastY = calcY(lastExScore[key])
+                    local y = calcY(exScore[key])
+
+                    -- 今回のスコアを描画する
+                    if nowIdx + 1 == i then
+                        dst[#dst+1] = {
+                            id = "white", dst = {
+                                {x = x, y = lastY, w = barW, h = y - lastY + barH, r = color[1], g = color[2], b = color[3]}
+                            }
+                        }
+                    else
+                        -- 最後の部分までのfill中
+                        dst[#dst+1] = {
+                            id = "white", dst = {
+                                {x = x, y = y, w = barW, h = barH, r = color[1], g = color[2], b = color[3]}
+                            }
+                        }
+                    end
+                end
+                nowIdx = nowIdx + 1
+            end
+            lastExScore = exScore
+        end
+    end
+    return skin
 end
 
 notesGraph.functions.load = function ()
@@ -176,8 +300,6 @@ notesGraph.functions.load = function ()
         opImgs[#opImgs+1] = "randomOptionImgs" .. i
     end
     skin.imageset[#skin.imageset+1] = {id = "randomOptionImageSet", ref = 42, images = opImgs}
-
-    notesGraph.functions.loadScoreGraph()
     return skin
 end
 
@@ -253,6 +375,8 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
             }
         }
     })
+
+    mergeSkin(skin, notesGraph.functions.dstScoreGraph())
     return skin
 end
 
