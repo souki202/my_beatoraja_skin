@@ -23,6 +23,14 @@ function isRightClicking()
     return Gdx.input:isButtonPressed(Input.Buttons.RIGHT)
 end
 
+function isPressedUp()
+    return Gdx.input:isKeyJustPressed(Input.Keys.UP)
+end
+
+function isPressedDown()
+    return Gdx.input:isKeyJustPressed(Input.Keys.DOWN)
+end
+
 function getDeltaY()
     return Gdx.input:getDeltaY()
 end

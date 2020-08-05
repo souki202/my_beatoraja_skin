@@ -14,12 +14,16 @@ local LOGGER = {
 
 local EXSCORE_RATE = {
     SAMPLES = {
-        NOTES = 100,
-        MICRO_SEC = 5000000 * 10000, -- 要は今は使わない
+        NOTES = 50,
+        MICRO_SEC = 1000000 * 10,
     }
 }
 
 logger.functions.load = function ()
+    -- ログ出力しないなら終了
+    if not isOutputLog() then
+        return {}
+    end
     -- local totalSec = (main_state.number(163) * 60 + main_state.number(164))
     local totalSec = (main_state.number(1163) * 60 + main_state.number(1164))
     playLog.setSongLength(totalSec)
@@ -27,7 +31,7 @@ logger.functions.load = function ()
     local getNumber = main_state.number -- 先に持っておく
     local getLastTime = playLog.getLastTimeData
     local playTimerTime = -1
-    
+
     local rateRange = {
         sumExScores = {you = 0, best = 0, target = 0}, notes = 0, microSec = 0, startIdx = 1, endIdx = 1,
     }
@@ -127,12 +131,14 @@ logger.functions.load = function ()
                             while rateRange.notes > rateSampleNotes or rateRange.microSec > rateSampleMs and rateRange.startIdx < rateRange.endIdx do
                                 -- 1つ狭める
                                 local leftData = playLog.getDataByIdx(rateRange.startIdx)
+                                local leftEx = leftData.exscore
                                 local leftData2 = playLog.getDataByIdx(rateRange.startIdx - 1)
+                                local leftEx2 = leftData2.exscore
                                 rateRange.notes = rateRange.notes - (leftData.notes - leftData2.notes)
                                 rateRange.microSec = rateRange.microSec - (leftData.time - leftData2.time)
-                                rangeExScores.you = rangeExScores.you - (leftData.exscore.you - leftData2.exscore.you)
-                                rangeExScores.best = rangeExScores.best - (leftData.exscore.best - leftData2.exscore.best)
-                                rangeExScores.target = rangeExScores.target - (leftData.exscore.target - leftData2.exscore.target)
+                                rangeExScores.you = rangeExScores.you - (leftEx.you - leftEx2.you)
+                                rangeExScores.best = rangeExScores.best - (leftEx.best - leftEx2.best)
+                                rangeExScores.target = rangeExScores.target - (leftEx.target - leftEx2.target)
                                 rateRange.startIdx = rateRange.startIdx + 1
                             end
 

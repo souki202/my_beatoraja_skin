@@ -9,24 +9,6 @@ local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048
 local BG_ID = "background"
 
-
-local CLEAR_TYPE = 0 -- 後で初期化
--- local CLEAR_TYPE = 6
-
-local LAMPS = {
-    NO_PLAY = 0,
-    FAILED = 1,
-    A_EASY = 2,
-    LA_EASY = 3,
-    EASY = 4,
-    NORMAL = 5,
-    HARD = 6,
-    EX_HARD = 7,
-    FULLCOMBO = 8,
-    PERFECT = 9,
-    MAX = 10,
-}
-
 local STAGE_FILE = {
     X = 79,
     Y = 834,
@@ -61,7 +43,7 @@ local TITLE_BAR = {
     },
     TITLE = {
         FONT_SIZE = 36,
-        W = 1070,
+        W = 1150,
         Y = 43,
     },
 
@@ -602,6 +584,8 @@ function makeHeader()
             {name = "経験値等画面表示秒数 (決定キーの場合, 最小1秒)", x = 0},
             {name = "グルーヴゲージ部分のノーツグラフの透明度 (255で透明)", a = 0},
             {name = "グルーヴゲージ部分のノーツグラフの高さ (既定値30 単位%)", h = 0},
+            {name = "スコアグラフの1マスの高さ (既定値2)", h = 0},
+            {name = "スコアグラフの細かさ (既定値2 1~5 小さいほど細かい)", w = 0},
         },
     }
     setProperties(header)
@@ -625,32 +609,9 @@ end
 
 -- ランプやクリアかどうかに応じて適切な背景を1枚だけ読み込む
 local function loadBackground(skin)
-    if getTableValue(skin_config.option, "背景の分類", 910) == 910 then
-        -- クリアかどうかの背景時
-        if CLEAR_TYPE ~= LAMPS.FAILED then
-            table.insert(skin.image, {
-                id = BG_ID, src = 100, x = 0, y = 0, w = -1, h = -1
-            })
-        else
-            table.insert(skin.image, {
-                id = BG_ID, src = 101, x = 0, y = 0, w = -1, h = -1
-            })
-        end
-    elseif getTableValue(skin_config.option, "背景の分類", 910) == 911 then
-        -- スコア0のOPTION_RESULT_0_1Pはヌルポなので見ない
-        for i = 1, 8 do
-            if main_state.option(300 + (i - 1)) then
-                table.insert(skin.image, {
-                    id = BG_ID, src = 110 + (i - 1), x = 0, y = 0, w = -1, h = -1
-                })
-            end
-        end
-    elseif getTableValue(skin_config.option, "背景の分類", 910) == 912 then
-        local id = 120 + CLEAR_TYPE - 1
-        table.insert(skin.image, {
-            id = BG_ID, src = id, x = 0, y = 0, w = -1, h = -1
-        })
-    end
+    table.insert(skin.image, {
+        id = BG_ID, src = getBgSrc(), x = 0, y = 0, w = -1, h = -1
+    })
 end
 
 local function initialize(skin)
@@ -957,7 +918,7 @@ local function main()
 	}
 
     skin.text = {
-        {id = "title", font = 0, size = TITLE_BAR.TITLE.FONT_SIZE, ref = 12, align = 1},
+        {id = "title", font = 0, size = TITLE_BAR.TITLE.FONT_SIZE, ref = 12, align = 1, overflow = 1},
 		{id = "artist", font = 0, size = TITLE_BAR.ARTIST.FONT_SIZE, ref = 14, align = 1, overflow = 1},
         {id = "subArtist", font = 0, size = TITLE_BAR.ARTIST.FONT_SIZE, ref = 15, align = 1, overflow = 1},
         {id = "tableName", font = 0, size = DIR_BAR.TEXT.SIZE, ref = 1003, align = 0, overflow = 1},

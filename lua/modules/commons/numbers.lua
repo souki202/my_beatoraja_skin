@@ -50,12 +50,23 @@ local myNumber = {
     isStatic = {},
 }
 
-
-
 -- xは右端の座標
 function dstNumberRightJustify(skin, id, x, y, w, h, digit)
     table.insert(skin.destination, {
         id = id, dst = {
+            {
+                x = x - w * digit,
+                y = y,
+                w = w, h = h
+            }
+        }
+    })
+end
+
+-- xは右端の座標
+function dstNumberRightJustifyWithDrawFunc(skin, id, x, y, w, h, digit, draw)
+    table.insert(skin.destination, {
+        id = id, draw = draw, dst = {
             {
                 x = x - w * digit,
                 y = y,

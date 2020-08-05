@@ -28,8 +28,15 @@ local logger = {
             },
         }
     },
+    outputData = {},
     songLengthSec = 1,
+    songLengthMicroSec = 1,
+    microSecPerIdx = 1,
     functions = {}
+}
+
+local LOGGER = {
+    NUM_OF_SAVE_LOGS = 631,
 }
 
 --[[
@@ -40,29 +47,32 @@ logger.functions.saveLog = function ()
 
     logger.didSave = true
     myPrint("プレイログ保存開始: " .. PLAY_LOG_PATH)
-    local data = logger.data
+    local data = logger.outputData
     local fp = io.open(PLAY_LOG_PATH, "w")
-    local str = "time, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, sumJudges, combo, notes, exscore, best, target, rangeTheoretical, rangeYou, rangeBest, rangeTarget\n"
+    -- local str = "time, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, sumJudges, combo, notes, exscore, best, target, rangeTheoretical, rangeYou, rangeBest, rangeTarget\n"
+    local str = "time, sumJudges, combo, notes, exscore, best, target, rangeTheoretical, rangeYou, rangeBest, rangeTarget\n"
     str = str .. logger.songLengthSec
 
-    for i = 1, #data do
+    for i = 1, LOGGER.NUM_OF_SAVE_LOGS do
         local nowData = data[i]
-        local line = nowData.time .. " "
-        -- 判定出力
-        for j = 1, 6 do
-            line = line .. nowData.judges.early[j] .. " " .. nowData.judges.late[j] .. " "
+        if nowData ~= nil then
+            local line = nowData.time .. " "
+            -- -- 判定出力
+            -- for j = 1, 6 do
+            --     line = line .. nowData.judges.early[j] .. " " .. nowData.judges.late[j] .. " "
+            -- end
+            line = line .. nowData.judges.sumJudges .. " "
+            -- combo
+            line = line .. nowData.combo .. " "
+            -- notes
+            line = line .. nowData.notes .. " "
+            -- score
+            local exScore = nowData.exscore
+            line = line .. exScore.you .. " " .. exScore.best .. " " .. exScore.target .. " "
+            local range = nowData.rangeExScore
+            line = line .. range.theoretical .. " " .. range.you .. " " .. range.best .. " " .. range.target
+            str = str .. "\n" .. line
         end
-        line = line .. nowData.judges.sumJudges .. " "
-        -- combo
-        line = line .. nowData.combo .. " "
-        -- notes
-        line = line .. nowData.notes .. " "
-        -- score
-        local exScore = nowData.exscore
-        line = line .. exScore.you .. " " .. exScore.best .. " " .. exScore.target .. " "
-        local range = nowData.rangeExScore
-        line = line .. range.theoretical .. " " .. range.you .. " " .. range.best .. " " .. range.target
-        str = str .. "\n" .. line
     end
     fp:write(str)
     -- print(str)
@@ -86,22 +96,22 @@ logger.functions.loadLog = function ()
         if cnt > 1 then
             local data = table.deepcopy(logger.data[1])
             local splited = split(line, " ")
-            if #splited >= 23 then
+            if #splited >= 11 then
                 data.time = splited[1]
-                for i = 1, 6 do
-                    data.judges.early[i] = splited[2 + (i - 1) * 2]
-                    data.judges.late[i] = splited[3 + (i - 1) * 2]
-                end
-                data.judges.sumJudges = splited[14]
-                data.combo = splited[15]
-                data.notes = splited[16]
-                data.exscore.you = splited[17]
-                data.exscore.best = splited[18]
-                data.exscore.target = splited[19]
-                data.rangeExScore.theoretical = splited[20]
-                data.rangeExScore.you = splited[21]
-                data.rangeExScore.best = splited[22]
-                data.rangeExScore.target = splited[23]
+                -- for i = 1, 6 do
+                --     data.judges.early[i] = splited[2 + (i - 1) * 2]
+                --     data.judges.late[i] = splited[3 + (i - 1) * 2]
+                -- end
+                data.judges.sumJudges = splited[2]
+                data.combo = splited[3]
+                data.notes = splited[4]
+                data.exscore.you = splited[5]
+                data.exscore.best = splited[6]
+                data.exscore.target = splited[7]
+                data.rangeExScore.theoretical = splited[8]
+                data.rangeExScore.you = splited[9]
+                data.rangeExScore.best = splited[10]
+                data.rangeExScore.target = splited[11]
                 dataArray[cnt - 1] = data
             end
         elseif cnt == 1 then
@@ -127,6 +137,7 @@ end
 logger.functions.addData = function (data)
     local d = logger.data
     d[#d+1] = data
+    logger.outputData[math.floor(data.time / logger.microSecPerIdx) + 1] = data
 end
 
 --[[
@@ -135,6 +146,8 @@ end
 ]]
 logger.functions.setSongLength = function (sec)
     logger.songLengthSec = sec
+    logger.songLengthMicroSec = sec * 1000000
+    logger.microSecPerIdx = logger.songLengthMicroSec / 630
 end
 
 logger.functions.getSongLength = function ()

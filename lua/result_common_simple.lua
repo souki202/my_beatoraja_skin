@@ -8,25 +8,8 @@ local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048
 local BG_ID = "background"
 
-local CLEAR_TYPE = 0 -- 後で初期化
--- local CLEAR_TYPE = 6
-
 local LEFT_X = 80
 local RIGHT_X = 1190
-
-local LAMPS = {
-    NO_PLAY = 0,
-    FAILED = 1,
-    A_EASY = 2,
-    LA_EASY = 3,
-    EASY = 4,
-    NORMAL = 5,
-    HARD = 6,
-    EX_HARD = 7,
-    FULLCOMBO = 8,
-    PERFECT = 9,
-    MAX = 10,
-}
 
 local BASE_WINDOW = {
     SHADOW_LEN = 14,
@@ -523,32 +506,9 @@ end
 
 -- ランプやクリアかどうかに応じて適切な背景を1枚だけ読み込む
 local function loadBackground(skin)
-    if getTableValue(skin_config.option, "背景の分類", 910) == 910 then
-        -- クリアかどうかの背景時
-        if CLEAR_TYPE ~= LAMPS.FAILED then
-            table.insert(skin.image, {
-                id = BG_ID, src = 100, x = 0, y = 0, w = -1, h = -1
-            })
-        else
-            table.insert(skin.image, {
-                id = BG_ID, src = 101, x = 0, y = 0, w = -1, h = -1
-            })
-        end
-    elseif getTableValue(skin_config.option, "背景の分類", 910) == 911 then
-        -- スコア0のOPTION_RESULT_0_1Pはヌルポなので見ない
-        for i = 1, 8 do
-            if main_state.option(300 + (i - 1)) then
-                table.insert(skin.image, {
-                    id = BG_ID, src = 110 + (i - 1), x = 0, y = 0, w = -1, h = -1
-                })
-            end
-        end
-    elseif getTableValue(skin_config.option, "背景の分類", 910) == 912 then
-        local id = 120 + CLEAR_TYPE - 1
-        table.insert(skin.image, {
-            id = BG_ID, src = id, x = 0, y = 0, w = -1, h = -1
-        })
-    end
+    table.insert(skin.image, {
+        id = BG_ID, src = getBgSrc(), x = 0, y = 0, w = -1, h = -1
+    })
 end
 
 local function initialize(skin)

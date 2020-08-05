@@ -232,6 +232,10 @@ function getKeyBeamTransparency()
 	return getOffsetValueWithDefault("キービームの透明度(既定値64 255で透明)", {a = 64}).a
 end
 
+function isOutputLog()
+	return getTableValue(skin_config.option, "リザルト用ログ出力", 10085) == 10085
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)

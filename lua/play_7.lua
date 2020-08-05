@@ -30,7 +30,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10080まで
+    property = { -- 使用済み 10085まで
         {
             name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
@@ -135,6 +135,9 @@ local header = {
         },
         {
             name = "ビジュアライザー1の奥側の反射", item = {{name = "ON", op = 10060}, {name = "OFF", op = 10061}}, def = "ON"
+        },
+        {
+            name = "リザルト用ログ出力", item = {{name = "ON", op = 10085}, {name = "OFF", op = 10086}}, def = "ON"
         },
     },
     filepath = {
