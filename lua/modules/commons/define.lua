@@ -1,3 +1,19 @@
+-- Copyright 2019-2020 tori-blog.net.
+-- This file is part of SocialSkin.
+
+-- SocialSkin is free program: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+
+-- SocialSkin is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+
+-- You should have received a copy of the GNU General Public License
+-- along with SocialSkin.  If not, see <http://www.gnu.org/licenses/>.
+
 local main_state = require("main_state")
 require("modules.commons.userdata")
 require("modules.commons.numbers")
@@ -125,9 +141,9 @@ end
 
 SKIN_INFO = {
     SELECT_VRESION = "2.27",
-    RESULT_VERSION = "2.23",
-    DECIDE_VERSION = "1.01",
-    PLAY_VERSION = "0.98",
+    RESULT_VERSION = "2.30",
+    DECIDE_VERSION = "1.10",
+    PLAY_VERSION = "1.20",
 }
 
 BASE_WIDTH = 1920

@@ -232,6 +232,22 @@ function getKeyBeamTransparency()
 	return getOffsetValueWithDefault("キービームの透明度(既定値64 255で透明)", {a = 64}).a
 end
 
+function getKeyBeamWhiteBrightness()
+	return getOffsetValueWithDefault("白鍵キービームの明るさ(単位% 既定値100)", {x = 100}).x
+end
+
+function getKeyBeamWhiteSaturation()
+	return getOffsetValueWithDefault("白鍵キービームの彩度(単位% 既定値30)", {x = 30}).x
+end
+
+function getKeyBeamBlueBrightness()
+	return getOffsetValueWithDefault("青鍵キービームの明るさ(単位% 既定値100)", {x = 100}).x
+end
+
+function getKeyBeamBlueSaturation()
+	return getOffsetValueWithDefault("青鍵キービームの彩度(単位% 既定値60)", {x = 60}).x
+end
+
 function isOutputLog()
 	return getTableValue(skin_config.option, "リザルト用ログ出力", 10085) == 10085
 end

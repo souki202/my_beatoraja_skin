@@ -117,6 +117,13 @@ local CURTAIN = {
 	OVERALL_FADEOUT_START = FADEOUT * 0.8,
 }
 
+local TILE = {
+	DIV_X = 16,
+	DIV_Y = 12,
+	ANIM_TIME = 400,
+	ANIM_START_TIME_VAR = 200,
+}
+
 local FOV = 90
 
 -- @param  int t アニメーション開始からの時間
@@ -172,6 +179,10 @@ local function getDifficultyValueForColor()
 	return dif
 end
 
+local function getAnimationType()
+	return getTableValue(skin_config.option, "アニメーションタイプ", 960) - 960 + 1
+end
+
 -- 難易度と設定に適した色を取得する
 -- @return int, int, int r, g, b
 local function getDifficultyColor()
@@ -221,6 +232,9 @@ local header = {
 		},
 		{--  950番台すべて
 			name = "パーティクル数", item = {{name = "0", op = 950}, {name = "0.25倍", op = 951}, {name = "0.5倍", op = 952}, {name = "1倍", op = 953}, {name = "1.5倍", op = 954}, {name = "2倍", op = 955}, {name = "3倍", op = 956}}, def = "1倍"
+		},
+		{
+			name = "アニメーションタイプ", item = {{name = "1", op = 960}, {name = "2", op = 961}}, def = "1"
 		}
 	},
     filepath = {
@@ -241,18 +255,29 @@ local function init(skin)
 	for i = 935, 939 do
 		if getTableValue(skin_config.option, "アニメーション時間", 936) == i then
 			local mul = mulTable[i - 934]
-			FADEOUT = FADEOUT * mul
-			skin.fadeout = FADEOUT
-			CURTAIN.LINE.APPEAR_TIME_VAR = FADEOUT / 7
-			CURTAIN.PARTICLE.LOOP_TIME = FADEOUT / 50
-			CURTAIN.PARTICLE.FADEOUT_TIME = FADEOUT / 3
-			CURTAIN.PARTICLE.FADEOUT_TIME_VAR = FADEOUT / 7
-			CURTAIN.TEXT.COLORED_DELAY_TIME = FADEOUT / 10
-			CURTAIN.TEXT.APPEAR_TIME = FADEOUT / 15
-			CURTAIN.CLOSE_TIME = FADEOUT / 3
-			CURTAIN.TEXT.RICH_APPEAR_TIME = FADEOUT / 30
-			CURTAIN.REVERSE_TIME = FADEOUT * 0.9
-			CURTAIN.OVERALL_FADEOUT_START = FADEOUT * 0.85
+			if getAnimationType() == 1 then
+				-- カーテンの設定
+				FADEOUT = FADEOUT * mul
+				skin.fadeout = FADEOUT
+				CURTAIN.LINE.APPEAR_TIME_VAR = FADEOUT / 7
+				CURTAIN.PARTICLE.LOOP_TIME = FADEOUT / 50
+				CURTAIN.PARTICLE.FADEOUT_TIME = FADEOUT / 3
+				CURTAIN.PARTICLE.FADEOUT_TIME_VAR = FADEOUT / 7
+				CURTAIN.TEXT.COLORED_DELAY_TIME = FADEOUT / 10
+				CURTAIN.TEXT.APPEAR_TIME = FADEOUT / 15
+				CURTAIN.CLOSE_TIME = FADEOUT / 3
+				CURTAIN.TEXT.RICH_APPEAR_TIME = FADEOUT / 30
+				CURTAIN.REVERSE_TIME = FADEOUT * 0.9
+				CURTAIN.OVERALL_FADEOUT_START = FADEOUT * 0.85
+			elseif getAnimationType() == 2 then
+				-- タイルの設定
+				TILE.ANIM_TIME = TILE.ANIM_TIME * mul
+				TILE.ANIM_START_TIME_VAR = TILE.ANIM_START_TIME_VAR * mul
+				FADEOUT = (TILE.ANIM_TIME + TILE.ANIM_START_TIME_VAR)
+				skin.fadeout = FADEOUT
+			end
+
+
 		end
 	end
 	mulTable = {0, 0.25, 0.5, 1, 1.5, 2, 3}
@@ -416,7 +441,7 @@ local function main()
 	end
 
 	-- ここからfadeoutアニメーション
-	do
+	if getAnimationType() == 1 then
 		-- まずカーテンが閉まる
 		dst[#dst+1] = { -- カーテン上
 			id = "curtainEdge", timer = 2, loop = CURTAIN.CLOSE_TIME, dst = {
@@ -628,21 +653,41 @@ local function main()
 
 		end
 
-
 		-- 手前に飛んでくるパーティクルを入れる
 		for i = 1, #frontParticleDsts do
 			dst[#dst+1] = frontParticleDsts[i]
 		end
-	end
 
-	-- 全体のフェードアウト
-	dst[#dst+1] = {
-		id = "black", timer = 2, loop = FADEOUT, dst = {
-			{time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 0},
-			{time = CURTAIN.OVERALL_FADEOUT_START},
-			{time = FADEOUT, a = 255}
+		-- 全体のフェードアウト
+		dst[#dst+1] = {
+			id = "black", timer = 2, loop = FADEOUT, dst = {
+				{time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 0},
+				{time = CURTAIN.OVERALL_FADEOUT_START},
+				{time = FADEOUT, a = 255}
+			}
 		}
-	}
+	elseif getAnimationType() == 2 then
+		local animTime = TILE.ANIM_TIME
+		local startTimeVar = TILE.ANIM_START_TIME_VAR
+		local perW = WIDTH / TILE.DIV_X
+		local perH = HEIGHT / TILE.DIV_Y
+		for i = 1, TILE.DIV_Y do
+			for j = 1, TILE.DIV_X do
+				local x = math.floor(perW * (j - 1))
+				local y = math.floor(perH * (i - 1))
+				local nx = math.floor(perW * j)
+				local ny = math.floor(perH * i)
+				local st = math.random(0, startTimeVar)
+				dst[#dst+1] = {
+					id = "black", timer = 2, loop = st + animTime, dst = {
+						{time = 0, x = x, y = y, w = nx - x, h = ny - y, a = 0, acc = 2},
+						{time = st},
+						{time = st + animTime, a = 255}
+					}
+				}
+			end
+		end
+	end
 
     return skin
 end

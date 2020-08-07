@@ -24,6 +24,11 @@ local BOMB = {
         N = 7,
         TIME = 300,
         TYPE = 0,
+        FLOW_H = 100,
+        SPREAD_X = 100,
+        SPREAD_Y = 100,
+        APPEAR_RANGE_X = 30,
+        APPEAR_RANGE_Y = 30,
     },
     P2 = {
         W = 16,
@@ -31,6 +36,11 @@ local BOMB = {
         N = 7,
         TIME = 300,
         TYPE = 0,
+        FLOW_H = 100,
+        SPREAD_X = 100,
+        SPREAD_Y = 100,
+        APPEAR_RANGE_X = 30,
+        APPEAR_RANGE_Y = 30,
     },
     ANIM1 = {
         W = 300,
@@ -51,24 +61,24 @@ local BOMB = {
 bomb.functions.load = function ()
     -- 大きさを初期化
     local m = 0
-    m = getOffsetValueWithDefault("ボムのwave1の大きさ(単位10% 既定値10)", {w = 10, h = 10})
-    BOMB.WAVE1.W = BOMB.WAVE1.W * m.w / 10
-    BOMB.WAVE1.H = BOMB.WAVE1.H * m.h / 10
-    m = getOffsetValueWithDefault("ボムのwave2の大きさ(単位10% 既定値10)", {w = 10, h = 10})
-    BOMB.WAVE2.W = BOMB.WAVE2.W * m.w / 10
-    BOMB.WAVE2.H = BOMB.WAVE2.H * m.h / 10
-    m = getOffsetValueWithDefault("ボムのparticle1の大きさ(単位10% 既定値10)", {w = 10, h = 10})
-    BOMB.P1.W = BOMB.P1.W * m.w / 10
-    BOMB.P1.H = BOMB.P1.H * m.h / 10
-    m = getOffsetValueWithDefault("ボムのparticle2の大きさ(単位10% 既定値10)", {w = 10, h = 10})
-    BOMB.P2.W = BOMB.P2.W * m.w / 10
-    BOMB.P2.H = BOMB.P2.H * m.h / 10
-    m = getOffsetValueWithDefault("ボムのanimation1の大きさ(単位10% 既定値10)", {w = 10, h = 10})
-    BOMB.ANIM1.W = BOMB.ANIM1.W * m.w / 10
-    BOMB.ANIM1.H = BOMB.ANIM1.H * m.h / 10
-    m = getOffsetValueWithDefault("ボムのanimation2の大きさ(単位10% 既定値10)", {w = 10, h = 10})
-    BOMB.ANIM2.W = BOMB.ANIM2.W * m.w / 10
-    BOMB.ANIM2.H = BOMB.ANIM2.H * m.h / 10
+    m = getOffsetValueWithDefault("ボムのwave1の大きさ倍率(単位%)", {w = 0, h = 0})
+    BOMB.WAVE1.W = BOMB.WAVE1.W * (100 + m.w) / 100
+    BOMB.WAVE1.H = BOMB.WAVE1.H * (100 + m.h) / 100
+    m = getOffsetValueWithDefault("ボムのwave2の大きさ倍率(単位%)", {w = 0, h = 0})
+    BOMB.WAVE2.W = BOMB.WAVE2.W * (100 + m.w) / 100
+    BOMB.WAVE2.H = BOMB.WAVE2.H * (100 + m.h) / 100
+    m = getOffsetValueWithDefault("ボムのparticle1の大きさ倍率(単位%)", {w = 0, h = 0})
+    BOMB.P1.W = BOMB.P1.W * (100 + m.w) / 100
+    BOMB.P1.H = BOMB.P1.H * (100 + m.h) / 100
+    m = getOffsetValueWithDefault("ボムのparticle2の大きさ倍率(単位%)", {w = 0, h = 0})
+    BOMB.P2.W = BOMB.P2.W * (100 + m.w) / 100
+    BOMB.P2.H = BOMB.P2.H * (100 + m.h) / 100
+    m = getOffsetValueWithDefault("ボムのanimation1の大きさ倍率(単位%)", {w = 0, h = 0})
+    BOMB.ANIM1.W = BOMB.ANIM1.W * (100 + m.w) / 100
+    BOMB.ANIM1.H = BOMB.ANIM1.H * (100 + m.h) / 100
+    m = getOffsetValueWithDefault("ボムのanimation2の大きさ倍率(単位%)", {w = 0, h = 0})
+    BOMB.ANIM2.W = BOMB.ANIM2.W * (100 + m.w) / 100
+    BOMB.ANIM2.H = BOMB.ANIM2.H * (100 + m.h) / 100
     m = getOffsetValueWithDefault("ボムのanimation1の画像分割数", {x = 1, y = 1})
     BOMB.ANIM1.DIV_X = m.x
     BOMB.ANIM1.DIV_Y = m.y
@@ -91,6 +101,22 @@ bomb.functions.load = function ()
     BOMB.ANIM1.TIME = m.x * 100
     m = getOffsetValueWithDefault("ボムのanimation2の描画時間(単位100ms 既定値3)", {x = 3})
     BOMB.ANIM2.TIME = m.x * 100
+    m = getOffsetValueWithDefault("ボムのparticle1のフローの高さ倍率差分(単位%)", {h = 0})
+    BOMB.P1.FLOW_H = math.floor(BOMB.P1.FLOW_H * (100 + m.h) / 100)
+    m = getOffsetValueWithDefault("ボムのparticle2のフローの高さ倍率差分(単位%)", {h = 0})
+    BOMB.P2.FLOW_H = math.floor(BOMB.P2.FLOW_H * (100 + m.h) / 100)
+    m = getOffsetValueWithDefault("ボムのparticle1の拡散の広さ倍率差分(単位%)", {w = 0, h = 0})
+    BOMB.P1.SPREAD_X = math.floor(BOMB.P1.SPREAD_X * (100 + m.w) / 100)
+    BOMB.P1.SPREAD_Y = math.floor(BOMB.P1.SPREAD_Y * (100 + m.h) / 100)
+    m = getOffsetValueWithDefault("ボムのparticle2の拡散の広さ倍率差分(単位%)", {w = 0, h = 0})
+    BOMB.P2.SPREAD_X = math.floor(BOMB.P2.SPREAD_X * (100 + m.w) / 100)
+    BOMB.P2.SPREAD_Y = math.floor(BOMB.P2.SPREAD_Y * (100 + m.h) / 100)
+    m = getOffsetValueWithDefault("ボムのparticle1の出現範囲倍率差分(単位%)", {w = 0, h = 0})
+    BOMB.P1.APPEAR_RANGE_X = math.floor(BOMB.P1.APPEAR_RANGE_X * (100 + m.w) / 100)
+    BOMB.P1.APPEAR_RANGE_Y = math.floor(BOMB.P1.APPEAR_RANGE_Y * (100 + m.h) / 100)
+    m = getOffsetValueWithDefault("ボムのparticle2の出現範囲倍率差分(単位%)", {w = 0, h = 0})
+    BOMB.P2.APPEAR_RANGE_X = math.floor(BOMB.P2.APPEAR_RANGE_X * (100 + m.w) / 100)
+    BOMB.P2.APPEAR_RANGE_Y = math.floor(BOMB.P2.APPEAR_RANGE_Y * (100 + m.h) / 100)
 
     BOMB.P1.TYPE = getParticle1AnimationType()
     BOMB.P2.TYPE = getParticle2AnimationType()
@@ -138,14 +164,17 @@ bomb.functions.addParticle = function (skin, number, cx, y, timer, isLn)
     if not isDrawBombParticle() then return end
     local dst = skin.destination
     local particle = number == 1 and BOMB.P1 or BOMB.P2
+    local flowH = particle.FLOW_H
+    local spreadX, spreadY = particle.SPREAD_X, particle.SPREAD_Y
+    local appearRangeX, appearRangeY = particle.APPEAR_RANGE_X, particle.APPEAR_RANGE_Y
     local loop = isLn and 0 or -1
     cx = cx - particle.W / 2
     y = y - particle.H / 2
     for j = 1, BOMB.P1.N do
         if particle.TYPE == 0 then
-            local sx = cx + math.random(-30, 30)
-            local sy = y + math.random(-10, 10)
-            local vy = math.random(-10, 100)
+            local sx = cx + math.random(-appearRangeX, appearRangeX)
+            local sy = y + math.random(-appearRangeY, appearRangeY)
+            local vy = math.random(math.floor(flowH / (-10)), flowH)
             local t = particle.TIME + math.random(-50, 50)
             -- flow
             dst[#dst+1] = {
@@ -157,9 +186,10 @@ bomb.functions.addParticle = function (skin, number, cx, y, timer, isLn)
         elseif particle.TYPE == 1 then
             -- 拡散
             local r = math.random(0, 360) / 180 * math.pi
-            local v = math.random(10, 100)
+            local vx = math.random(spreadX / 10, spreadX)
+            local vy = math.random(spreadY / 10, spreadY)
             local t = particle.TIME + math.random(-50, 50)
-            local tx, ty = cx + math.cos(r) * v, y + math.sin(r) * v
+            local tx, ty = cx + math.cos(r) * vx, y + math.sin(r) * vy
             dst[#dst+1] = {
                 id = "bombParticle" .. number, offset = 3, timer = timer, loop = loop, dst = {
                     {time = 0, x = cx, y = y, w = particle.W, h = particle.H, a = 255, acc = 2},
@@ -168,8 +198,8 @@ bomb.functions.addParticle = function (skin, number, cx, y, timer, isLn)
             }
         elseif particle.TYPE == 2 then
             -- static
-            local sx = cx + math.random(-30, 30)
-            local sy = y + math.random(-30, 30)
+            local sx = cx + math.random(-appearRangeX, appearRangeX)
+            local sy = y + math.random(-appearRangeY, appearRangeY)
             local t = particle.TIME + math.random(-50, 50)
             dst[#dst+1] = {
                 id = "bombParticle" .. number, offset = 3, timer = timer, loop = loop, dst = {

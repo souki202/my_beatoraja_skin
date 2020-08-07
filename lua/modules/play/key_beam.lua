@@ -11,24 +11,34 @@ local KEY_BEAM = {
     BACK_H = {80, 60},
     ANIMATION_TIMES = {0, 50, 100, 200, 350},
     ALPHA = 192, -- 後で初期化
+
+    WHITE_SATURATION = 0.3,
+    WHITE_BRIGHTNESS = 1,
+    BLUE_SATURATION = 0.6,
+    BLUE_BRIGHTNESS = 1,
+    HUES = {0, 120, 240, 25, 0, 320}
 }
 
 -- 皿もこれ
 local function getWhiteBeamColor()
-	local dif = getDifficultyValueForColor()
-	local colors = {{183, 183, 183}, {151, 190, 151}, {151, 190, 190}, {218, 180, 151}, {255, 192, 192}, {255, 81, 200}}
-	return colors[dif][1], colors[dif][2], colors[dif][3]
+    local dif = getDifficultyValueForColor()
+    if dif == 0 then return hsvToRgb(0, 0, KEY_BEAM.WHITE_BRIGHTNESS) end
+	return hsvToRgb(KEY_BEAM.HUES[dif], KEY_BEAM.WHITE_SATURATION, KEY_BEAM.WHITE_BRIGHTNESS)
 end
 
 local function getBlueBeamColor()
-	local dif = getDifficultyValueForColor()
-	local colors = {{128, 128, 128}, {64, 255, 66}, {66, 66, 255}, {255, 128, 64}, {255, 128, 128}, {204, 102, 153}}
-	return colors[dif][1], colors[dif][2], colors[dif][3]
+    local dif = getDifficultyValueForColor()
+    if dif == 0 then return hsvToRgb(0, 0, KEY_BEAM.BLUE_BRIGHTNESS) end
+	return hsvToRgb(KEY_BEAM.HUES[dif], KEY_BEAM.BLUE_SATURATION, KEY_BEAM.BLUE_BRIGHTNESS)
 end
 
 keyBeam.functions.load = function ()
     KEY_BEAM.ALPHA = 255 - getKeyBeamTransparency()
-    print("toumeido: " .. KEY_BEAM.ALPHA)
+    KEY_BEAM.WHITE_BRIGHTNESS = math.max(0, math.min(getKeyBeamWhiteBrightness(), 100)) / 100
+    KEY_BEAM.WHITE_SATURATION = math.max(0, math.min(getKeyBeamWhiteSaturation(), 100)) / 100
+    KEY_BEAM.BLUE_BRIGHTNESS = math.max(0, math.min(getKeyBeamBlueBrightness(), 100)) / 100
+    KEY_BEAM.BLUE_SATURATION = math.max(0,math.min( getKeyBeamBlueSaturation(), 100)) / 100
+
     return {
         image = {
             {id = "keyBeam", src = 0, x = 18, y = 30, w = 1, h = 80}

@@ -32,6 +32,12 @@ local header = {
 
     property = { -- 使用済み 10085まで
         {
+            name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
+        },
+        {
+            name = "----------------------------------", item = {{name = "-", op = 19999}}
+        },
+        {
             name = "プレイ位置", item = {{name = "1P", op = 900}, {name = "2P", op = 901}}, def = "1P"
         },
         {
@@ -62,16 +68,40 @@ local header = {
             name = "ノートの画像", item = {{name = "通常形式", op = 10030}, {name = "独自形式", op = 10031}}, def = "通常形式"
         },
         {
+            name = "BGA枠", item = {{name = "横上部", op = 940}, {name = "横全体", op = 941}, {name = "画面全体", op = 942}}, def = "横上部"
+        },
+        {
+            name = "黒帯部分のBGA表示", item = {{name = "ON", op = 945}, {name = "OFF", op = 946}}, def = "ON"
+        },
+        {
+            name = "グルーヴゲージの通知エフェクトの基準", item = {{name = "5%毎", op = 10065}, {name = "10%毎", op = 10066}, {name = "20%毎", op = 10067}, {name = "30%毎", op = 10068}, {name = "無し", op = 10069}}, def = "10%毎"
+        },
+        {
+            name = "サイド部分のグラフ", item = {{name = "無し", op = 10000}, {name = "判定分布", op = 10001}, {name = "EARLY, LATE分布", op = 10002}}, def = "判定分布"
+        },
+        {
+            name = "ゲージ100%時のキラキラ", item = {{name = "ON", op = 10070}, {name = "OFF", op = 10071}}, def = "ON"
+        },
+        { -- 961まで使用
+            name = "難易度毎の色変化", item = {{name = "あり", op = 955}, {name = "灰固定", op = 956}, {name = "緑固定", op = 957}, {name = "青固定", op = 958}, {name = "橙固定", op = 959}, {name = "赤固定", op = 960}, {name = "紫固定", op = 961}}, def = "あり"
+        },
+        {
+            name = "レーン------------------------------", item = {{name = "-", op = 19999}}
+        },
+        {
             name = "レーン色分け", item = {{name = "ON", op = 910}, {name = "OFF", op = 911}}, def = "ON"
         },
         {
             name = "レーン区切り線", item = {{name = "ON", op = 915}, {name = "OFF", op = 916}}, def = "ON"
         },
         {
+            name = "レーンのシンボル", item = {{name = "ON", op = 965}, {name = "OFF", op = 966}}, def = "ON"
+        },
+        {
             name = "判定ライン", item = {{name = "ON", op = 920}, {name = "OFF", op = 921}}, def = "ON"
         },
         {
-            name = "レーンのシンボル", item = {{name = "ON", op = 965}, {name = "OFF", op = 966}}, def = "ON"
+            name = "キービーム--------------------------", item = {{name = "-", op = 19999}}
         },
         {
             name = "キービーム長さ", item = {{name = "無し", op = 925}, {name = "とても短め", op = 926}, {name = "短め", op = 927}, {name = "普通", op = 928}, {name = "長め", op = 929}}, def = "普通"
@@ -92,22 +122,7 @@ local header = {
             name = "後方キービーム", item = {{name = "ON", op = 935}, {name = "OFF", op = 936}}, def = "ON"
         },
         {
-            name = "BGA枠", item = {{name = "横上部", op = 940}, {name = "横全体", op = 941}, {name = "画面全体", op = 942}}, def = "横上部"
-        },
-        {
-            name = "黒帯部分のBGA表示", item = {{name = "ON", op = 945}, {name = "OFF", op = 946}}, def = "ON"
-        },
-        {
-            name = "グルーヴゲージの通知エフェクトの基準", item = {{name = "5%毎", op = 10065}, {name = "10%毎", op = 10066}, {name = "20%毎", op = 10067}, {name = "30%毎", op = 10068}, {name = "無し", op = 10069}}, def = "10%毎"
-        },
-        {
-            name = "サイド部分のグラフ", item = {{name = "無し", op = 10000}, {name = "判定分布", op = 10001}, {name = "EARLY, LATE分布", op = 10002}}, def = "判定分布"
-        },
-        {
-            name = "ゲージ100%時のキラキラ", item = {{name = "ON", op = 10070}, {name = "OFF", op = 10071}}, def = "ON"
-        },
-        { -- 961まで使用
-            name = "難易度毎の色変化", item = {{name = "あり", op = 955}, {name = "灰固定", op = 956}, {name = "緑固定", op = 957}, {name = "青固定", op = 958}, {name = "橙固定", op = 959}, {name = "赤固定", op = 960}, {name = "紫固定", op = 961}}, def = "あり"
+            name = "ボム------------------------------", item = {{name = "-", op = 19999}}
         },
         {
             name = "ボムのパーティクル", item = {{name = "ON", op = 10005}, {name = "OFF", op = 10006}}, def = "ON"
@@ -120,6 +135,9 @@ local header = {
         },
         {
             name = "ボムのanimation1と2の黒背景透過", item = {{name = "ON", op = 10020}, {name = "OFF", op = 10021}}, def = "ON"
+        },
+        {
+            name = "ビジュアライザー-------------------", item = {{name = "-", op = 19999}}
         },
         {
             name = "ビジュアライザー1", item = {{name = "ON", op = 10055}, {name = "OFF", op = 10056}}, def = "ON"
@@ -169,27 +187,47 @@ local header = {
         {name = "レーンの黒背景(255で透明)", a = 0},
         {name = "グルーブゲージの通知エフェクトの大きさ差分(%)", y = 0},
         {name = "ゲージ100%時のキラキラの数(既定値20)", x = 0},
+
+        {name = "キービーム関連------------------------", x = 0},
         {name = "キービームの透明度(既定値64 255で透明)", a = 0},
+        {name = "白鍵キービームの明るさ(単位% 既定値100)", x = 0},
+        {name = "白鍵キービームの彩度(単位% 既定値30)", x = 0},
+        {name = "青鍵キービームの明るさ(単位% 既定値100)", x = 0},
+        {name = "青鍵キービームの彩度(単位% 既定値60)", x = 0},
+
         {name = "ボム関連------------------------", x = 0},
         {name = "100%の描画縦横はwave 500px, anim 300px, particle 16px", x = 0},
-        {name = "ボムのwave1の大きさ(単位10% 既定値10)", w = 0, h = 0},
-        {name = "ボムのwave2の大きさ(単位10% 既定値10)", w = 0, h = 0},
-        {name = "ボムのparticle1の大きさ(単位10% 既定値10)", w = 0, h = 0},
-        {name = "ボムのparticle2の大きさ(単位10% 既定値10)", w = 0, h = 0},
-        {name = "ボムのanimation1の大きさ(単位10% 既定値10)", w = 0, h = 0},
-        {name = "ボムのanimation2の大きさ(単位10% 既定値10)", w = 0, h = 0},
-        {name = "ボムのanimation1の画像分割数", x = 0, y = 0},
-        {name = "ボムのanimation2の画像分割数", x = 0, y = 0},
-        {name = "ボムのparticle1の描画数(既定値7)", x = 0},
-        {name = "ボムのparticle2の描画数(既定値7)", x = 0},
+        {name = "倍率差分は, -100で0%相当, 100で200%相当", x = 0},
+
+        {name = "ボムのwave1の大きさ倍率(単位%)", w = 0, h = 0},
         {name = "ボムのwave1の描画時間(単位100ms 既定値3)", x = 0},
+        {name = "ボムのwave2の大きさ倍率(単位%)", w = 0, h = 0},
         {name = "ボムのwave2の描画時間(単位100ms 既定値3)", x = 0},
+
+        {name = "ボムのparticle1の大きさ倍率(単位%)", w = 0, h = 0},
+        {name = "ボムのparticle1の描画数(既定値7)", x = 0},
         {name = "ボムのparticle1の描画時間(単位100ms 既定値3)", x = 0},
+        {name = "ボムのparticle1のフローの高さ倍率差分(単位%)", h = 0},
+        {name = "ボムのparticle1の拡散の広さ倍率差分(単位%)", w = 0, h = 0},
+        {name = "ボムのparticle1の出現範囲倍率差分(単位%)", w = 0, h = 0},
+
+        {name = "ボムのparticle2の大きさ倍率(単位%)", w = 0, h = 0},
+        {name = "ボムのparticle2の描画数(既定値7)", x = 0},
         {name = "ボムのparticle2の描画時間(単位100ms 既定値3)", x = 0},
+        {name = "ボムのparticle2のフローの高さ倍率差分(単位%)", h = 0},
+        {name = "ボムのparticle2の拡散の広さ倍率差分(単位%)", w = 0, h = 0},
+        {name = "ボムのparticle2の出現範囲倍率差分(単位%)", w = 0, h = 0},
+
+        {name = "ボムのanimation1の大きさ倍率(単位%)", w = 0, h = 0},
+        {name = "ボムのanimation1の画像分割数", x = 0, y = 0},
         {name = "ボムのanimation1の描画時間(単位100ms 既定値3)", x = 0},
-        {name = "ボムのanimation2の描画時間(単位100ms 既定値3)", x = 0},
         {name = "ボムのanimation1の描画座標差分", id = 40, x = 0, y = 0},
+
+        {name = "ボムのanimation2の大きさ倍率(単位%)", w = 0, h = 0},
+        {name = "ボムのanimation2の画像分割数", x = 0, y = 0},
+        {name = "ボムのanimation2の描画時間(単位100ms 既定値3)", x = 0},
         {name = "ボムのanimation2の描画座標差分", id = 41, x = 0, y = 0},
+
         {name = "ビジュアライザー関連---------", x = 0},
         {name = "ビジュアライザー1のバーの透明度(既定値64 255で透明)", a = 0},
         {name = "ビジュアライザー1の反射の透明度(既定値196 255で透明)", a = 0},

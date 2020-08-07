@@ -4,6 +4,7 @@ LEFT_X = 64
 RIGHT_X = 1206
 WND_WIDTH = 650
 CLEAR_TYPE = 0
+
 LAMPS = {
     NO_PLAY = 0,
     FAILED = 1,
