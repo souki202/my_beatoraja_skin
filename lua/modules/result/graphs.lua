@@ -133,7 +133,30 @@ local SCORE_GRAPH = {
         }
     },
 
+    SMOOTH = {
+        SMA_N = 7,
+        EMA_P = 0.4,
+        SMMA_N = 7,
+        LWMA_N = 7,
+    },
+
     EXSCORE_KEYS = {"best", "target", "you"},
+
+    SUB = function (lhs, rhs)
+        return {you = lhs.you - rhs.you, best = lhs.best - rhs.best, target = lhs.target - rhs.target}
+    end,
+    ADD = function (lhs, rhs)
+        return {you = lhs.you + rhs.you, best = lhs.best + rhs.best, target = lhs.target + rhs.target}
+    end,
+    DIV = function (lhs, scalar)
+        return {you = lhs.you / scalar, best = lhs.best / scalar, target = lhs.target / scalar}
+    end,
+    MUL = function(lhs, scalar)
+        return {you = lhs.you * scalar, best = lhs.best * scalar, target = lhs.target * scalar}
+    end,
+    COPY = function (val)
+        return {you = val.you, best = val.best, target = val.target}
+    end
 }
 
 local exScores = { -- レートも今はこれを使う
@@ -169,6 +192,14 @@ end
 
 notesGraph.functions.getScoreGraphType = function ()
     return getTableValue(skin_config.option, "スコアグラフ(プレイスキン併用時のみ)", 966) - 965 + 1
+end
+
+--[[
+    スコアグラフの移動平均タイプを取得
+    @return int 1:無し 2:MA 3:EMA 4:SMMA 4:LWMA
+]]
+notesGraph.functions.getSmoothType = function ()
+    return getTableValue(skin_config.option, "スコアグラフ平滑化", 970) - 970 + 1
 end
 
 notesGraph.functions.change2p = function ()
@@ -210,33 +241,97 @@ notesGraph.functions.dstScoreGraph = function ()
             -- スコア周りのグラフ集計
             if scoreGraphType == 1 then
                 exScores[barIdx] = now.exscore
-                -- 前のbarを現在の場所の直前まで埋める
-                -- if i > 1 then
-                --     local last = data[i - 1]
-                --     local fillBarIdx = math.floor(last.time / timeLenParBar) + 2
-                --     while fillBarIdx < barIdx do
-                --         exScores[fillBarIdx] = last.exscore
-                --         fillBarIdx = fillBarIdx + 1
-                --     end
-                -- end
             elseif scoreGraphType == 2 then
                 -- スコアレート周りのグラフ集計
                 do
                     exScores[barIdx] = now.rangeExScore
-                    -- if i > 1 then
-                    --     local last = data[i - 1]
-                    --     local fillBarIdx = math.floor(last.time / timeLenParBar) + 2
-                    --     while fillBarIdx < barIdx do
-                    --         exScores[fillBarIdx] = last.rangeExScore
-                    --         fillBarIdx = fillBarIdx + 1
-                    --     end
-                    -- end
                 end
             end
 
             maxBarIdx = barIdx
         end
+
+        -- 隙間埋め
+        do
+            local lastExScore = exScores[1]
+            for i = 1, numOfBar do
+                local exScore = exScores[i]
+                if exScore ~= nil then
+                    lastExScore = exScore
+                else
+                    exScores[i] = lastExScore
+                end
+            end
+        end
     end
+
+    -- 移動平均出す
+    do
+        local smoothed = {}
+        local type = notesGraph.functions.getSmoothType()
+        local scoreAdd = SCORE_GRAPH.ADD
+        local scoreSub = SCORE_GRAPH.SUB
+        local scoreMul = SCORE_GRAPH.MUL
+        local scoreDiv = SCORE_GRAPH.DIV
+        local scoreCopy = SCORE_GRAPH.COPY
+        if type == 2 then
+            -- SMA
+            local range = SCORE_GRAPH.SMOOTH.SMA_N
+            local rangeSum = {exScores = {you = 0, best = 0, target = 0}, n = 0}
+            for i = 1, numOfBar do
+                rangeSum.exScores = scoreAdd(rangeSum.exScores, exScores[i])
+                rangeSum.n = rangeSum.n + 1
+                if rangeSum.n > range then
+                    rangeSum.exScores = scoreSub(rangeSum.exScores, exScores[i - range])
+                    rangeSum.n = range
+                end
+                smoothed[i] = scoreDiv(rangeSum.exScores, rangeSum.n)
+            end
+            exScores = smoothed
+        elseif type == 3 then
+            -- EMA
+            local p = SCORE_GRAPH.SMOOTH.EMA_P
+            smoothed[0] = exScores[1]
+            for i = 1, numOfBar do
+                smoothed[i] =
+                    scoreAdd(
+                        scoreMul(exScores[i], p), scoreMul(smoothed[i - 1], (1 - p))
+                    )
+            end
+            exScores = smoothed
+        elseif type == 4 then
+            -- SMMA
+            local n = SCORE_GRAPH.SMOOTH.SMMA_N
+            smoothed[0] = exScores[1]
+            for i = 1, numOfBar do
+                smoothed[i] =
+                    scoreDiv(
+                        scoreAdd(
+                            scoreMul(
+                                smoothed[i - 1], (n - 1)
+                            ), exScores[i]
+                        ), n)
+            end
+            exScores = smoothed
+        elseif type == 5 then
+            -- LWMA
+            local range = SCORE_GRAPH.SMOOTH.LWMA_N
+            -- 平均を出すため, マイナス方面に少し追加する
+            for i = 1, range do
+                exScores[-i + 1] = exScores[1]
+            end
+            local numN = ((range + 1) * range / 2)
+            for i = 1, numOfBar do
+                local sum = {you = 0, best = 0, target = 0}
+                for j = 1, range do
+                    sum = scoreAdd(sum, scoreMul(exScores[i - j + 1], range - j + 1))
+                end
+                smoothed[i] = scoreDiv(sum, numN)
+            end
+            exScores = smoothed
+        end
+    end
+
 
     -- 背景描画
     -- aaa ~ fまで
@@ -337,6 +432,13 @@ notesGraph.functions.load = function ()
     SCORE_GRAPH.LINE.MIN_H = getOffsetValueWithDefault("スコアグラフの1マスの高さ (既定値2)", {h = 2}).h
     SCORE_GRAPH.RES_IDX = getOffsetValueWithDefault("スコアグラフの細かさ (既定値2 1~5 小さいほど細かい)", {w = 2}).w
     SCORE_GRAPH.RES_IDX = math.max(1, math.min(SCORE_GRAPH.RES_IDX, 5))
+    -- 平滑化期間設定を取る
+    local numOfBar = GRAPH.GAUGE.W / SCORE_GRAPH.RES[SCORE_GRAPH.RES_IDX]
+    SCORE_GRAPH.SMOOTH.SMA_N = math.max(1, math.min(getOffsetValueWithDefault("単純移動平均の期間 (既定値7)", {x = 7}).x, numOfBar - 1))
+    SCORE_GRAPH.SMOOTH.EMA_P = math.max(1, math.min(getOffsetValueWithDefault("指数移動平均の最新データの重視率 (既定値40 0<x<100)", {x = 40}).x, 99)) / 100
+    SCORE_GRAPH.SMOOTH.SMMA_N = math.max(1, math.min(getOffsetValueWithDefault("平滑移動平均 (既定値7)", {x = 7}).x, numOfBar - 1))
+    SCORE_GRAPH.SMOOTH.LWMA_N = math.max(1, math.min(getOffsetValueWithDefault("線形加重移動平均 (既定値7)", {x = 7}).x, numOfBar - 1))
+
     local skin = {
         image = {
             -- グラフ
@@ -424,8 +526,10 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
     -- スコアグラフを描画
     do
         local e, s = pcall(notesGraph.functions.dstScoreGraph)
-        if s then
+        if e and s then
             mergeSkin(skin, s)
+        else
+            print(s)
         end
     end
 

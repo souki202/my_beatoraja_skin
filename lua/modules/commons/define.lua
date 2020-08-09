@@ -141,7 +141,7 @@ end
 
 SKIN_INFO = {
     SELECT_VRESION = "2.27",
-    RESULT_VERSION = "2.30",
+    RESULT_VERSION = "2.35",
     DECIDE_VERSION = "1.10",
     PLAY_VERSION = "1.20",
 }
