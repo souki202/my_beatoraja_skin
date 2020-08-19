@@ -1,5 +1,7 @@
 require("modules.commons.define")
+local main_state = require("main_state")
 local playCommons = require("modules.play.commons")
+local songInfo = require("modules.commons.songinfo")
 local lanes = require("modules.play.lanes")
 local judges = require("modules.play.judges")
 local life = require("modules.play.life")
@@ -30,7 +32,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10085まで
+    property = { -- 使用済み 10090まで
         {
             name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
         },
@@ -48,6 +50,9 @@ local header = {
         },
         {
             name = "コンボ位置", item = {{name = "判定横", op = 970}, {name = "判定下", op = 971}, {name = "レーン右上(1P), 左上(2P)", op = 973}}, def = "判定下"
+        },
+        {
+            name = "判定画像分類", item = {{name = "通常", op = 10090}, {name = "EARLY/LATE分割", op = 10091}}, def = "通常"
         },
         {
             name = "EARLY, LATE表示", item = {{name = "OFF", op = 905}, {name = "EARLY/LATE", op = 906}, {name = "+-ms", op = 907}, {name = "+-ms(PG時非表示)", op = 908}}, def = "EARLY/LATE"
@@ -171,6 +176,8 @@ local header = {
         {name = "レーンカバー", path = "../play/parts/lanecover/*.png", def = "default"},
         {name = "リフトカバー", path = "../play/parts/liftcover/*.png", def = "default"},
         {name = "判定画像", path = "../play/parts/judges/*.png", def = "default"},
+        {name = "判定画像(EARLY)", path = "../play/parts/judges/early/*.png", def = "text"},
+        {name = "判定画像(LATE)", path = "../play/parts/judges/late/*.png", def = "text"},
         {name = "コンボ画像", path = "../play/parts/combo/*.png", def = "default"},
         {name = "グルーヴゲージのインディケーター", path = "../play/parts/indicators/*.png", def = "default"},
         {name = "ボム関連画像---------", path = "../dummy/*"},
@@ -242,6 +249,7 @@ local function main()
     end
 
     globalInitialize(skin)
+    songInfo.loadSongInfo(main_state.text(10))
 
     skin.source = {
         {id = 0, path = "../play/parts/parts.png"},
@@ -251,6 +259,8 @@ local function main()
         {id = 3, path = "../play/parts/lanesymbols/blue/*.png"},
         {id = 4, path = "../play/parts/lanesymbols/turntable/*.png"},
         {id = 5, path = "../play/parts/judges/*.png"},
+        {id = 28, path = "../play/parts/judges/early/*.png"},
+        {id = 29, path = "../play/parts/judges/late/*.png"},
         {id = 6, path = "../play/parts/combo/*.png"},
         {id = 7, path = "../play/parts/indicators/*.png"},
         {id = 8, path = "../play/parts/bgamask/default.png"},
@@ -284,6 +294,14 @@ local function main()
     skin.font = {
 		{id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
     }
+
+    -- skin.customTimers = {
+    --     {id = 10002, timer = function ()
+    --         print(main_state.text(12))
+    --         songInfo.loadSongInfo(main_state.text(10))
+    --         return main_state.timer_off_value
+    --     end}
+    -- }
 
 
     -- 各種読み込み

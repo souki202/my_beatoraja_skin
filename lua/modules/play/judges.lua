@@ -104,7 +104,28 @@ judges.functions.load = function ()
                 images = {},
                 numbers = {},
                 shift = isDrawComboNextToTheJudge()
-            }
+            },
+            {
+                id = "judgesPerfect",
+                index = 0,
+                images = {},
+                numbers = {},
+                shift = isDrawComboNextToTheJudge()
+            },
+            {
+                id = "judgesEarly",
+                index = 0,
+                images = {},
+                numbers = {},
+                shift = isDrawComboNextToTheJudge()
+            },
+            {
+                id = "judgesLate",
+                index = 0,
+                images = {},
+                numbers = {},
+                shift = isDrawComboNextToTheJudge()
+            },
         }
     }
     local imgs = skin.image
@@ -112,11 +133,18 @@ judges.functions.load = function ()
     -- 判定読み込み
     for i = 1, #JUDGES.IDS do
         imgs[#imgs+1] = {id = JUDGES.ID_PREFIX .. JUDGES.IDS[i], src = 5, x = 0, y = JUDGES.H * (i - 1), w = JUDGES.W, h = JUDGES.H}
+        if isEarlyLateJudgeImage() then
+            imgs[#imgs+1] = {id = JUDGES.ID_PREFIX .. JUDGES.IDS[i] .. "Early", src = 28, x = 0, y = JUDGES.H * (i - 1), w = JUDGES.W, h = JUDGES.H}
+            imgs[#imgs+1] = {id = JUDGES.ID_PREFIX .. JUDGES.IDS[i] .. "Late", src = 29, x = 0, y = JUDGES.H * (i - 1), w = JUDGES.W, h = JUDGES.H}
+        end
     end
 
     -- 判定出力を入れる
     do
         local judgeImgs = skin.judge[1].images
+        local pfImgs = skin.judge[2].images
+        local earlyImgs = skin.judge[3].images
+        local lateImgs = skin.judge[4].images
         for i = 1, #JUDGES.IDS do
             judgeImgs[#judgeImgs+1] = {
                 id = JUDGES.ID_PREFIX .. JUDGES.IDS[i], loop = -1, timer = 46, offsets = {3, 32}, dst = {
@@ -125,12 +153,38 @@ judges.functions.load = function ()
                     {time = JUDGES.DRAW_TIME}
                 }
             }
+            if isEarlyLateJudgeImage() then
+                pfImgs[#pfImgs+1] = {
+                    id = JUDGES.ID_PREFIX .. JUDGES.IDS[i], loop = -1, timer = 46, offsets = {3, 32}, op = {241}, dst = {
+                        {time = 0, x = JUDGES.X() + JUDGES.W * (1 - JUDGES.INIT_MUL_SIZE) / 2, y = JUDGES.Y() + JUDGES.H * (1 - JUDGES.INIT_MUL_SIZE) / 2, w = JUDGES.W * JUDGES.INIT_MUL_SIZE, h = JUDGES.H * JUDGES.INIT_MUL_SIZE},
+                        {time = JUDGES.APPEAR_TIME, x = JUDGES.X(), y = JUDGES.Y(), w = JUDGES.W, h = JUDGES.H},
+                        {time = JUDGES.DRAW_TIME}
+                    }
+                }
+                earlyImgs[#earlyImgs+1] = {
+                    id = JUDGES.ID_PREFIX .. JUDGES.IDS[i] .. "Early", loop = -1, timer = 46, offsets = {3, 32}, op = {1242}, dst = {
+                        {time = 0, x = JUDGES.X() + JUDGES.W * (1 - JUDGES.INIT_MUL_SIZE) / 2, y = JUDGES.Y() + JUDGES.H * (1 - JUDGES.INIT_MUL_SIZE) / 2, w = JUDGES.W * JUDGES.INIT_MUL_SIZE, h = JUDGES.H * JUDGES.INIT_MUL_SIZE},
+                        {time = JUDGES.APPEAR_TIME, x = JUDGES.X(), y = JUDGES.Y(), w = JUDGES.W, h = JUDGES.H},
+                        {time = JUDGES.DRAW_TIME}
+                    }
+                }
+                lateImgs[#lateImgs+1] = {
+                    id = JUDGES.ID_PREFIX .. JUDGES.IDS[i] .. "Late", loop = -1, timer = 46, offsets = {3, 32}, op = {1243}, dst = {
+                        {time = 0, x = JUDGES.X() + JUDGES.W * (1 - JUDGES.INIT_MUL_SIZE) / 2, y = JUDGES.Y() + JUDGES.H * (1 - JUDGES.INIT_MUL_SIZE) / 2, w = JUDGES.W * JUDGES.INIT_MUL_SIZE, h = JUDGES.H * JUDGES.INIT_MUL_SIZE},
+                        {time = JUDGES.APPEAR_TIME, x = JUDGES.X(), y = JUDGES.Y(), w = JUDGES.W, h = JUDGES.H},
+                        {time = JUDGES.DRAW_TIME}
+                    }
+                }
+            end
         end
     end
 
     -- 判定数を入れる
     do
         local judgeNums = skin.judge[1].numbers
+        local judgeNumsPf = skin.judge[2].numbers
+        local judgeNumsEarly = skin.judge[3].numbers
+        local judgeNumsLate = skin.judge[4].numbers
         local x = 0
         local y = 0
         local x2 = 0
@@ -161,6 +215,29 @@ judges.functions.load = function ()
                     {time = COMBO.DRAW_TIME}
                 }
             }
+            if isEarlyLateJudgeImage() then
+                judgeNumsPf[#judgeNumsPf+1] = {
+                    id = "nowCombo", loop = -1, offsets = {3, 32}, timer = 46, op = {241}, dst = {
+                        {time = 0, x = x - COMBO.W * 3, y = y + COMBO.H * (1 - JUDGES.INIT_MUL_SIZE) * 0.75, w = COMBO.W * JUDGES.INIT_MUL_SIZE, h = COMBO.H * JUDGES.INIT_MUL_SIZE},
+                        {time = JUDGES.APPEAR_TIME, x = x2, y = y2, w = COMBO.W, h = COMBO.H},
+                        {time = COMBO.DRAW_TIME}
+                    }
+                }
+                judgeNumsEarly[#judgeNumsEarly+1] = {
+                    id = "nowCombo", loop = -1, offsets = {3, 32}, timer = 46, op = {1242}, dst = {
+                        {time = 0, x = x - COMBO.W * 3, y = y + COMBO.H * (1 - JUDGES.INIT_MUL_SIZE) * 0.75, w = COMBO.W * JUDGES.INIT_MUL_SIZE, h = COMBO.H * JUDGES.INIT_MUL_SIZE},
+                        {time = JUDGES.APPEAR_TIME, x = x2, y = y2, w = COMBO.W, h = COMBO.H},
+                        {time = COMBO.DRAW_TIME}
+                    }
+                }
+                judgeNumsLate[#judgeNumsLate+1] = {
+                    id = "nowCombo", loop = -1, offsets = {3, 32}, timer = 46, op = {1243}, dst = {
+                        {time = 0, x = x - COMBO.W * 3, y = y + COMBO.H * (1 - JUDGES.INIT_MUL_SIZE) * 0.75, w = COMBO.W * JUDGES.INIT_MUL_SIZE, h = COMBO.H * JUDGES.INIT_MUL_SIZE},
+                        {time = JUDGES.APPEAR_TIME, x = x2, y = y2, w = COMBO.W, h = COMBO.H},
+                        {time = COMBO.DRAW_TIME}
+                    }
+                }
+            end
         end
     end
 
@@ -218,7 +295,13 @@ judges.functions.dst = function ()
             }
         end
     end
-    dst[#dst+1] = {id = "judges"}
+    if isEarlyLateJudgeImage() then
+        dst[#dst+1] = {id = "judgesEarly"}
+        dst[#dst+1] = {id = "judgesLate"}
+        dst[#dst+1] = {id = "judgesPerfect"}
+    else
+        dst[#dst+1] = {id = "judges"}
+    end
 
     do
         local elBottomY = JUDGES.TIMING.TEXT.BOTTOM_Y1(JUDGES)

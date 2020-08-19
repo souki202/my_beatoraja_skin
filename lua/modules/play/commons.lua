@@ -252,6 +252,10 @@ function isOutputLog()
 	return getTableValue(skin_config.option, "リザルト用ログ出力", 10085) == 10085
 end
 
+function isEarlyLateJudgeImage()
+	return getTableValue(skin_config.option, "判定画像分類", 10090) == 10091
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)
