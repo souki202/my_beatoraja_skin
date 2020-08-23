@@ -66,6 +66,8 @@ local SONG_LIST = {
         H = 22,
     },
     CENTER_FRAME = {
+        X = 1143,
+        Y = 503,
         W = 714,
         H = 154,
     },
@@ -73,22 +75,22 @@ local SONG_LIST = {
 
 local SONG_LIST_THIN = {
     LABEL = {
-        X = 370,
-        Y = 11,
-        W = 50,
-        H = 22,
+        X = 580,
+        Y = 7,
+        W = 20,
+        H = 36,
     },
     BAR = {
         N = 25,
         W = 607,
         H = 50,
 
-        PREV_CENTER_X = 1197 - 11.2 * 1.75 + 4,
-        PREV_CENTER_Y = 571 - 80 + 1.75 - 32,
-        CENTER_X = 1197,
-        CENTER_Y = 571,
-        NEXT_CENTER_X = 1197 + 11.2,
-        NEXT_CENTER_Y = 571 + 80,
+        PREV_CENTER_X = 1196 - 11.2 * 1.75 + 4,
+        PREV_CENTER_Y = 573 - 80 + 1.75 - 34,
+        CENTER_X = 1196,
+        CENTER_Y = 573,
+        NEXT_CENTER_X = 1196 + 7.7,
+        NEXT_CENTER_Y = 573 + 57,
 
         CENTER_IDX = 12,
 
@@ -109,13 +111,13 @@ local SONG_LIST_THIN = {
         TEXT = {
             X = 570,
             Y = 11,
-            W = 350,
+            W = 380,
         },
         GRAPH = {
-            X = 182,
-            Y = 9,
-            W = 397,
-            H = 8,
+            X = 179,
+            Y = 8,
+            W = 403,
+            H = 4,
         },
     },
     LAMP = {
@@ -133,8 +135,10 @@ local SONG_LIST_THIN = {
         H = 22,
     },
     CENTER_FRAME = {
+        X = 1143,
+        Y = 503,
         W = 714,
-        H = 154,
+        H = 130,
     },
 }
 
@@ -166,12 +170,6 @@ songlist.functions.load = function ()
             {id = "judgeNormal"  , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 1, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
             {id = "judgeHard"    , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 2, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
             {id = "judgeVeryhard", src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 3, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
-            -- 選曲バーLN表示
-            {id = "barLn"    , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*0, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-            {id = "barRandom", src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*1, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-            {id = "barBomb"  , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*2, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-            {id = "barCn"    , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*3, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
-            {id = "barHcn"   , src = 0, x = 607, y = commons.PARTS_OFFSET + 16 + SONG_LIST.LABEL.H*4, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
             -- トロフィー
             {id ="goldTrophy"  , src = 0, x = 1896, y = commons.PARTS_OFFSET + SONG_LIST.BAR.TROPHY.H*0, w = SONG_LIST.BAR.TROPHY.W, h = SONG_LIST.BAR.TROPHY.H},
             {id ="silverTrophy", src = 0, x = 1896, y = commons.PARTS_OFFSET + SONG_LIST.BAR.TROPHY.H*1, w = SONG_LIST.BAR.TROPHY.W, h = SONG_LIST.BAR.TROPHY.H},
@@ -217,6 +215,12 @@ songlist.functions.load = function ()
             {id = "barFolderWithLamp" , src = 10, x = 0, y = SONG_LIST.BAR.H*6, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
             {id = "barTableWithLamp"  , src = 10, x = 0, y = SONG_LIST.BAR.H*7, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
             {id = "barCommandWithLamp", src = 10, x = 0, y = SONG_LIST.BAR.H*8, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+            -- 選曲バーLN表示
+            {id = "barLn"    , src = 10, x = 974, y = SONG_LIST.LABEL.H*0, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+            {id = "barRandom", src = 10, x = 974, y = SONG_LIST.LABEL.H*1, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+            {id = "barBomb"  , src = 10, x = 974, y = SONG_LIST.LABEL.H*2, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+            {id = "barCn"    , src = 10, x = 974, y = SONG_LIST.LABEL.H*3, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
+            {id = "barHcn"   , src = 10, x = 974, y = SONG_LIST.LABEL.H*4, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H},
         }})
 
         table.insert(skin.image,
@@ -238,6 +242,12 @@ songlist.functions.load = function ()
             {id = "barFolderWithLamp" , src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*6, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
             {id = "barTableWithLamp"  , src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*7, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
             {id = "barCommandWithLamp", src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*8, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+            -- 選曲バーLN表示
+            {id = "barLn"    , src = 11, x = 1024 - SONG_LIST_THIN.LABEL.W, y = SONG_LIST_THIN.LABEL.H*0, w = SONG_LIST_THIN.LABEL.W, h = SONG_LIST_THIN.LABEL.H},
+            {id = "barRandom", src = 11, x = 1024 - SONG_LIST_THIN.LABEL.W, y = SONG_LIST_THIN.LABEL.H*1, w = SONG_LIST_THIN.LABEL.W, h = SONG_LIST_THIN.LABEL.H},
+            {id = "barBomb"  , src = 11, x = 1024 - SONG_LIST_THIN.LABEL.W, y = SONG_LIST_THIN.LABEL.H*2, w = SONG_LIST_THIN.LABEL.W, h = SONG_LIST_THIN.LABEL.H},
+            {id = "barCn"    , src = 11, x = 1024 - SONG_LIST_THIN.LABEL.W, y = SONG_LIST_THIN.LABEL.H*3, w = SONG_LIST_THIN.LABEL.W, h = SONG_LIST_THIN.LABEL.H},
+            {id = "barHcn"   , src = 11, x = 1024 - SONG_LIST_THIN.LABEL.W, y = SONG_LIST_THIN.LABEL.H*4, w = SONG_LIST_THIN.LABEL.W, h = SONG_LIST_THIN.LABEL.H},
         }})
         table.insert(skin.image,
             {id = "barCenterFrame", src = 11, x = 0, y = 1024 - SONG_LIST_THIN.CENTER_FRAME.H, w = SONG_LIST_THIN.CENTER_FRAME.W, h = SONG_LIST_THIN.CENTER_FRAME.H}
@@ -500,13 +510,18 @@ songlist.functions.loadSongListBar = function ()
 end
 
 songlist.functions.dst = function ()
+    local params = SONG_LIST
+    if not isThickSongList() then
+        params = SONG_LIST_THIN
+    end
+
     return {
         destination = {
             {id = "songlist"},
             -- 選曲バー中央
             {
                 id = "barCenterFrame", dst = {
-                    {x = 1143, y = 503, w = SONG_LIST.CENTER_FRAME.W, h = SONG_LIST.CENTER_FRAME.H}
+                    {x = 1143, y = 503, w = params.CENTER_FRAME.W, h = params.CENTER_FRAME.H}
                 }
             },
             -- アーティスト
