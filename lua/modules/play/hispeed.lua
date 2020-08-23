@@ -48,7 +48,7 @@ local HISPEED = {
                 Y = function () return HEIGHT + 10 end,
             },
             LIFT = {
-                Y = function () return lanes.getAreaY() - 32 end
+                Y = function () return lanes.getAreaNormalY() - 32 end
             },
             W = 17,
             H = 22,

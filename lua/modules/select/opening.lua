@@ -215,8 +215,6 @@ opening.functions.init = function()
 end
 
 opening.functions.load = function(skin)
-    table.insert(skin.source, {id = 5, path = "../select/parts/meteor.png"})
-
     local imgs = skin.image
     imgs[#imgs+1] = {id = "forOpeningSquare", src = 1, x = PARTS_TEXTURE_SIZE - 3, y = PARTS_TEXTURE_SIZE - 3, w = 3, h = 3}
     imgs[#imgs+1] = {id = "meteorBody", src = 5, x = 0, y = 0, w = 256, h = 256}

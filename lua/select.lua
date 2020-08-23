@@ -230,7 +230,7 @@ local header = {
     fadeout = 500,
     scene = 3000,
     input = commons.INPUT_WAIT,
-    -- 使用済みリスト 910 915 920 925 930 935 940 945 950 955 960
+    -- 使用済み 965まで
     property = {
         {
             name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}, def = "画像(png)"
@@ -255,6 +255,9 @@ local header = {
         },
         {
             name = "曲情報表示形式", item = {{name = "難易度リスト", op = 935}, {name = "密度", op = 936}}, def = "密度"
+        },
+        {
+            name = "選曲バーの太さ", item = {{name = "太い", op = 965}, {name = "細い", op = 966}}, def = "太い"
         },
         {
             name = "密度の標準桁数", item = {{name = "1桁", op = 938}, {name = "2桁", op = 939}}, def = "1桁"
@@ -284,6 +287,8 @@ local header = {
         {name = "背景(mp4)", path = "../select/background/*.mp4"},
         {name = "他画像-----------------------------------------", path="../dummy/*"},
         {name = "NoImage画像", path = "../select/noimage/*.png", def = "default"},
+        {name = "曲リストバーの画像(太い)", path = "../select/parts/songlist/thick/*.png", def = "default"},
+        {name = "曲リストバーの画像(細い)", path = "../select/parts/songlist/thin/*.png", def = "default"},
     },
     offset = {
         {name = "各種数値設定項目群----------------", x = 0},
@@ -582,19 +587,24 @@ local function main()
     end
 
     skin.source = {
+        {id = 1, path = "../select/background/*.png"},
+        {id = 101, path = "../select/background/*.mp4"},
         {id = 0, path = "../select/parts/parts.png"},
         {id = 8, path = "../select/parts/parts2.png"},
         {id = 2, path = "../select/parts/option.png"},
         {id = 3, path = "../select/parts/help.png"},
+        {id = 4, path = "../select/parts/stagefile_frame.png"},
+        {id = 5, path = "../select/parts/meteor.png"},
+        {id = 6, path = "../select/parts/lamp_gauge_rainbow.png"},
         {id = 7, path = "../select/noimage/*.png"},
+        {id = 10, path = "../select/parts/songlist/thick/*.png"},
+        {id = 11, path = "../select/parts/songlist/thin/*.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
 
     -- 10000, 10001はタイマ周り
-    table.insert(skin.customTimers, {id = 10002, timer = "calcStamina"})
     table.insert(skin.customTimers, {id = 10003, timer = "updateStamina"})
     table.insert(skin.customTimers, {id = 10006, timer = "updateStaminaGauge"}) -- スタミナゲージ表示用タイマー
-    table.insert(skin.customTimers, {id = 10007, timer = "updateUseStamina"}) -- スタミナ使用量更新用タイマー
     table.insert(skin.customTimers, {id = 10008, timer = "newVersionAnimation"}) -- 新バージョンがある時の文字表示用
     table.insert(skin.customTimers, {id = 10009, timer = "helpTimer"}) -- ヘルプ画面全体のタイマー
     table.insert(skin.customTimers, {id = 12000, timer = "keyInput"})

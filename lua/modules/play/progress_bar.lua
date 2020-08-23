@@ -9,11 +9,11 @@ local progress = {
 
 local PROGRESS = {
     X_1 = function () return 0 end,
-    X_2 = function () return lanes.getAreaX() + lanes.getAreaY() + 2 end,
+    X_2 = function () return lanes.getAreaX() + lanes.getAreaNormalY() + 2 end,
     W_1 = function () return lanes.getSideSpace() - 2 end,
     W_2 = function () return lanes.getSideSpace() - 2 end,
-    Y = function () return lanes.getAreaY() end,
-    H = function () return HEIGHT - lanes.getAreaY() end,
+    Y = function () return lanes.getAreaNormalY() end,
+    H = function () return HEIGHT - lanes.getAreaNormalY() end,
     BAR_H = 2
 }
 
@@ -63,6 +63,14 @@ progress.functions.dst = function ()
     --         {time = musicTime * 1000, y = HEIGHT - PROGRESS.H() - PROGRESS.BAR_H / 2}
     --     }
     -- }
+    do
+        local r, g, b = getSimpleLineColor()
+        dst[#dst+1] = {
+            id = "white", dst = {
+                {x = x, y = lanes.getAreaNormalY() - 2, w = w, h = 2, r = r, g = g, b = b}
+            }
+        }
+    end
     return skin
 end
 

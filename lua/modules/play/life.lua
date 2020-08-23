@@ -47,6 +47,11 @@ local LIFE = {
         W = 147,
         H = 18,
     },
+    HIDDEN = {
+        FONT_SIZE = 18,
+        X = function (self) return self.GAUGE.X(self) + 4 end,
+        Y = function (self) return self.GAUGE.Y(self) end,
+    },
     GAUGE = {
         ID_PREFIX = "grooveGauge",
         X = function (self) return self.AREA.X() + 2 end,
@@ -138,6 +143,9 @@ life.functions.load = function ()
             {id = "grooveValueAfterDot", src = 0, x = 1880, y = 76, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = 1, ref = 407},
         },
         graph = {},
+        text = {
+            {id = "hiddenText", font = 0, size = LIFE.HIDDEN.FONT_SIZE, constantText = "HIDDEN"},
+        },
         customTimers = {
             {
                 id = 10010, timer = function()
@@ -190,16 +198,27 @@ life.functions.load = function ()
     return skin
 end
 
-life.functions.dst = function ()
+life.functions.dstNormal = function ()
     local skin = {destination = {}}
     local dst = skin.destination
+    local isHiddenSetting = isHiddenGrooveGauge()
+    local getTimer = main_state.timer -- cache
+    local getIsShowNow = function () return not isHiddenSetting or (isHiddenSetting and getTimer(143) > 0) end
 
-    -- ゲージ背景の白
+    -- ゲージ背景の黒
     dst[#dst+1] = {
-        id = "white", dst = {
-            {x = LIFE.GAUGE.X(LIFE), y = LIFE.GAUGE.Y(LIFE), w = LIFE.GAUGE.W, h = LIFE.GAUGE.H, a = 96}
+        id = "black", dst = {
+            {x = LIFE.GAUGE.X(LIFE), y = LIFE.GAUGE.Y(LIFE), w = LIFE.GAUGE.W, h = LIFE.GAUGE.H, a = 192}
         }
     }
+
+    -- hidden文字
+    dst[#dst+1] = {
+        id = "hiddenText", draw = function () return not getIsShowNow() end, dst = {
+            {x = LIFE.HIDDEN.X(LIFE), y = LIFE.HIDDEN.Y(LIFE), w = 128, h = LIFE.HIDDEN.FONT_SIZE, a = 228}
+        }
+    }
+
     -- ゲージ
     for i = 1, #LIFE.TYPES do
         local border = LIFE.GAUGE.COLOR_BORDERS[i]
@@ -212,7 +231,7 @@ life.functions.dst = function ()
         -- 多い部分
         dst[#dst+1] = {
             id = "white",
-            draw = function () return life.gaugeType+1 == i end,
+            draw = function () return getIsShowNow() and life.gaugeType+1 == i end,
             dst = {
                 {x = LIFE.GAUGE.X(LIFE), y = LIFE.GAUGE.Y(LIFE), w = LIFE.GAUGE.W, h = LIFE.GAUGE.H, r = bgHighColor[1], g = bgHighColor[2], b = bgHighColor[3]}
             }
@@ -220,7 +239,7 @@ life.functions.dst = function ()
         -- 少ない部分
         dst[#dst+1] = {
             id = "white",
-            draw = function () return life.gaugeType+1 == i end,
+            draw = function () return getIsShowNow() and life.gaugeType+1 == i end,
             dst = {
                 {x = LIFE.GAUGE.X(LIFE), y = LIFE.GAUGE.Y(LIFE), w = LIFE.GAUGE.W * border / 100, h = LIFE.GAUGE.H, r = bgLowColor[1], g = bgLowColor[2], b = bgLowColor[3]}
             }
@@ -230,7 +249,7 @@ life.functions.dst = function ()
         -- 多い時
         dst[#dst+1] = {
             id = LIFE.GAUGE.ID_PREFIX .. LIFE.TYPES[i] .. "High",
-            draw = function () return life.value > border and life.gaugeType+1 == i end,
+            draw = function () return getIsShowNow() and life.value > border and life.gaugeType+1 == i end,
             dst = {
                 {x = LIFE.GAUGE.X(LIFE), y = LIFE.GAUGE.Y(LIFE), w = LIFE.GAUGE.W, h = LIFE.GAUGE.H, r = highColor[1], g = highColor[2], b = highColor[3]}
             }
@@ -238,7 +257,7 @@ life.functions.dst = function ()
         -- 少ない部分の色
         dst[#dst+1] = {
             id = LIFE.GAUGE.ID_PREFIX .. LIFE.TYPES[i] .. "Low",
-            draw = function () return life.gaugeType+1 == i end,
+            draw = function () return getIsShowNow() and life.gaugeType+1 == i end,
             dst = {
                 {x = LIFE.GAUGE.X(LIFE), y = LIFE.GAUGE.Y(LIFE), w = LIFE.GAUGE.W * border / 100, h = LIFE.GAUGE.H, r = lowColor[1], g = lowColor[2], b = lowColor[3]}
             }
@@ -259,7 +278,7 @@ life.functions.dst = function ()
     -- ゲージ種類
     for i = 1, #LIFE.TYPES do
         dst[#dst+1] = {
-            id = LIFE.TEXT.ID_PREFIX .. LIFE.TYPES[i], draw = function () return life.gaugeType+1 == i end, dst = {
+            id = LIFE.TEXT.ID_PREFIX .. LIFE.TYPES[i], draw = function () return getIsShowNow() and life.gaugeType+1 == i end, dst = {
                 {x = LIFE.TEXT.X(LIFE), y = LIFE.TEXT.Y(LIFE), w = LIFE.TEXT.W, h = LIFE.TEXT.H}
             }
         }
@@ -278,7 +297,7 @@ life.functions.dst = function ()
         dst[#dst+1] = {
             id = "grooveIndicatorSafe", timer = 44, loop = 0,
             draw = function ()
-                return life.gaugeType+1 == i
+                return getIsShowNow() and life.gaugeType+1 == i
             end,
             dst = {
                 {time = 0, x = LIFE.INDICATOR.X(LIFE), y = LIFE.INDICATOR.Y(LIFE), w = LIFE.INDICATOR.W, h = LIFE.INDICATOR.H, a = 255, acc = 2},
@@ -291,7 +310,7 @@ life.functions.dst = function ()
             id = "grooveIndicatorSafe",
             draw = function ()
                 if life.gaugeType+1 ~= i then return false end
-                return life.value >= borderSafe
+                return getIsShowNow() and life.value >= borderSafe
             end,
             dst = {
                 {x = LIFE.INDICATOR.X(LIFE), y = LIFE.INDICATOR.Y(LIFE), w = LIFE.INDICATOR.W, h = LIFE.INDICATOR.H}
@@ -301,7 +320,7 @@ life.functions.dst = function ()
             id = "grooveIndicatorWarn",
             draw = function ()
                 if life.gaugeType+1 ~= i then return false end
-                return borderDanger <= life.value and life.value < borderSafe
+                return getIsShowNow() and borderDanger <= life.value and life.value < borderSafe
             end,
             dst = {
                 {x = LIFE.INDICATOR.X(LIFE), y = LIFE.INDICATOR.Y(LIFE), w = LIFE.INDICATOR.W, h = LIFE.INDICATOR.H}
@@ -313,7 +332,7 @@ life.functions.dst = function ()
             id = "grooveIndicatorDanger", loop = 0,
             draw = function ()
                 if life.gaugeType+1 ~= i then return false end
-                return life.value < borderDanger
+                return getIsShowNow() and life.value < borderDanger
             end,
             dst = {
                 {time = 0, x = LIFE.INDICATOR.X(LIFE), y = LIFE.INDICATOR.Y(LIFE), w = LIFE.INDICATOR.W, h = LIFE.INDICATOR.H, a = 255, acc = 2},
@@ -325,7 +344,7 @@ life.functions.dst = function ()
             id = "grooveIndicatorDanger",
             draw = function ()
                 if life.gaugeType+1 ~= i then return false end
-                return life.value < borderDanger
+                return getIsShowNow() and life.value < borderDanger
             end,
             dst = {
                 {x = LIFE.INDICATOR.X(LIFE), y = LIFE.INDICATOR.Y(LIFE), w = LIFE.INDICATOR.W, h = LIFE.INDICATOR.H}
@@ -340,7 +359,7 @@ life.functions.dst = function ()
             id = "warnLeft", loop = 0,
             draw = function ()
                 if life.gaugeType+1 ~= i then return false end
-                return life.value < borderDanger
+                return getIsShowNow() and life.value < borderDanger
             end,
             dst = {
                 {time = 0, x = LIFE.GAUGE.X(LIFE) - LIFE.GAUGE.WARN.SHADOW, y = LIFE.GAUGE.Y(LIFE) - LIFE.GAUGE.WARN.SHADOW, w = LIFE.GAUGE.WARN.SHADOW, h = LIFE.GAUGE.WARN.H, a = 0, acc = 2, r = lowColor[1], g = lowColor[2], b = lowColor[3]},
@@ -353,7 +372,7 @@ life.functions.dst = function ()
             id = "warnLeft", loop = 0,
             draw = function ()
                 if life.gaugeType+1 ~= i then return false end
-                return life.value < borderDanger
+                return getIsShowNow() and life.value < borderDanger
             end,
             dst = {
                 {time = 0, x = LIFE.GAUGE.X(LIFE) - LIFE.GAUGE.WARN.SHADOW, y = LIFE.GAUGE.Y(LIFE) - LIFE.GAUGE.WARN.SHADOW, w = LIFE.GAUGE.WARN.SHADOW, h = LIFE.GAUGE.WARN.H, a = 0, acc = 1, r = lowColor[1], g = lowColor[2], b = lowColor[3]},
@@ -366,7 +385,7 @@ life.functions.dst = function ()
             id = LIFE.GAUGE.ID_PREFIX .. LIFE.TYPES[i] .. "warn", loop = 0,
             draw = function ()
                 if life.gaugeType+1 ~= i then return false end
-                return life.value < borderDanger
+                return getIsShowNow() and life.value < borderDanger
             end,
             dst = {
                 {
@@ -387,7 +406,7 @@ life.functions.dst = function ()
             id = LIFE.GAUGE.ID_PREFIX .. LIFE.TYPES[i] .. "warn", loop = 0,
             draw = function ()
                 if life.gaugeType+1 ~= i then return false end
-                return life.value < borderDanger
+                return getIsShowNow() and life.value < borderDanger
             end,
             dst = {
                 {
@@ -408,28 +427,29 @@ life.functions.dst = function ()
 
     -- 値
     dst[#dst+1] = {
-        id = "grooveValue", dst = {
+        id = "grooveValue", draw = function () return getIsShowNow() end, dst = {
             {x = LIFE.NUM.X(LIFE), y = LIFE.NUM.Y(LIFE), w = LIFE.NUM.W, h = LIFE.NUM.H}
         }
     }
     dst[#dst+1] = {
-        id = "grooveValueDot", dst = {
+        id = "grooveValueDot", draw = function () return getIsShowNow() end, dst = {
             {x = LIFE.NUM.DOT_X(LIFE), y = LIFE.NUM.Y(LIFE), w = LIFE.NUM.W, h = LIFE.NUM.H}
         }
     }
     dst[#dst+1] = {
-        id = "grooveValueAfterDot", dst = {
+        id = "grooveValueAfterDot", draw = function () return getIsShowNow() end, dst = {
             {x = LIFE.NUM.AFTER_DOT_X(LIFE), y = LIFE.NUM.Y(LIFE), w = LIFE.NUM.W, h = LIFE.NUM.H}
         }
     }
     dst[#dst+1] = {
-        id = "percent24px", dst = {
+        id = "percent24px", draw = function () return getIsShowNow() end, dst = {
             {x = LIFE.NUM.P_X(LIFE), y = LIFE.NUM.Y(LIFE), w = LIFE.NUM.P_W, h = LIFE.NUM.P_H}
         }
     }
 
     -- 100%時のキラキラ
     if isDrawGauge100Particle() then
+        local getOp = main_state.option -- cache
         local size = LIFE.PARTICLE.SIZE
         local loopTime = LIFE.PARTICLE.LOOP_TIME
         local n = getNumOfGauge100Particles()
@@ -439,7 +459,7 @@ life.functions.dst = function ()
             local a = LIFE.PARTICLE.ALPHA - math.random(0, LIFE.PARTICLE.ALPHA_VAR)
             local dt = math.random(0, loopTime)
             dst[#dst+1] = {
-                id = "gauge100Particle", loop = dt, op = {240}, dst = {
+                id = "gauge100Particle", loop = dt, draw = function () return getIsShowNow() and getOp(240) end, dst = {
                     {time = 0, x = x, y = y, w = size, h = size, a = 0},
                     {time = dt},
                     {time = dt + loopTime / 2, a = 255},
@@ -450,7 +470,7 @@ life.functions.dst = function ()
     end
 
     -- n%ごとの通知読み込み
-    do
+    if not isHiddenSetting then
         local size = LIFE.GAUGE.LIGHT.SIZE
         local cy = LIFE.GAUGE.LIGHT.CY(LIFE)
         local maxH = LIFE.GAUGE.LIGHT.MAX_H
@@ -474,6 +494,18 @@ life.functions.dst = function ()
         end
     end
     return skin
+end
+
+life.functions.dstVertical = function ()
+    
+end
+
+life.functions.dst = function ()
+    if isVerticalGrooveGauge() then
+        return life.functions.dstVertical()
+    else
+        return life.functions.dstNormal()
+    end
 end
 
 return life.functions

@@ -33,10 +33,6 @@ end
 
 background.functions.load = function ()
     local skin = {
-        source = {
-            {id = 1, path = "../select/background/*.png"},
-            {id = 101, path = "../select/background/*.mp4"},
-        },
         image = {}
     }
 

@@ -1,6 +1,7 @@
 require("modules.commons.define")
 local songInfo = require("modules.commons.songinfo")
 local commons = require("modules.play.commons")
+local lanes = require("modules.play.lanes")
 local main_state = require("main_state")
 
 local bga = {
@@ -81,6 +82,10 @@ bga.functions.load = function ()
         BGA = _BGA.FULL
     elseif isBgaOnLeftUpper() then
         BGA = _BGA.LEFT_UPPER
+        if isVerticalGrooveGauge() then
+            BGA.Y = lanes.getAreaY()
+            BGA.H = lanes.getLaneHeight()
+        end
     elseif isBgaOnLeft() then
         BGA = _BGA.LEFT
     end
@@ -220,6 +225,16 @@ bga.functions.dst = function ()
             {time = 500, a = 0}
         }
     }
+
+    -- BGAの区切り線
+    if isBgaOnLeftUpper() then
+        local r, g, b = getSimpleLineColor()
+        dst[#dst+1] = {
+            id = "white", dst = {
+                {x = bgaX, y = BGA.Y - 2, w = BGA.W, h = 2, r = r, g = g, b = b}
+            }
+        }
+    end
 
     return skin
 end

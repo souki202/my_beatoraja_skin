@@ -27,4 +27,8 @@ local SELECT = {
     }
 }
 
+function isThickSongList()
+    return getTableValue(skin_config.option, "選曲バーの太さ", 965) == 965
+end
+
 return SELECT

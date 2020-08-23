@@ -256,6 +256,22 @@ function isEarlyLateJudgeImage()
 	return getTableValue(skin_config.option, "判定画像分類", 10090) == 10091
 end
 
+function isHiddenGrooveGauge()
+	return getTableValue(skin_config.option, "グルーヴゲージ隠し", 10096) == 10095
+end
+
+function isVerticalGrooveGauge()
+	return getTableValue(skin_config.option, "グルーヴゲージ位置", 10100) == 10101
+end
+
+function getScoreRateSampleNotes()
+	return getOffsetValueWithDefault("スコアレートのサンプルノーツ数(既定値50)", {x = 50}).x
+end
+
+function getScoreRateSampleMicroSec()
+	return getOffsetValueWithDefault("スコアレートのサンプル取得の最大時間(単位秒 既定値10)", {x = 10}).x * 1000 * 1000
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)
@@ -272,6 +288,12 @@ function getDifficultyValueForColor()
 		end
 	end
 	return dif
+end
+
+function getSimpleLineColor()
+	local dif = getDifficultyValueForColor()
+	local colors = {{255, 255, 255}, {137, 204, 137}, {137, 204, 204}, {204, 164, 108}, {204, 104, 104}, {204, 102, 153}}
+	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 
 return commons

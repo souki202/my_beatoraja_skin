@@ -31,6 +31,8 @@ local LANES = {
         X_1 = function (self) return self.AREA.SPACE end,
         X_2 = function (self) return WIDTH - self.AREA.W - self.AREA.SPACE end,
         Y = 357,
+        EXTEND_Y = 357 - 84,
+        EXTEND_H = 723 + 84,
         SPACE = 75,
     },
     EDGE = {
@@ -51,12 +53,6 @@ local SYMBOL = {
     BLUE = 42,
     TURNTABLE = 91,
 }
-
-local function getDifficultyColor()
-	local dif = getDifficultyValueForColor()
-	local colors = {{255, 255, 255}, {137, 204, 137}, {137, 204, 204}, {204, 164, 108}, {204, 104, 104}, {204, 102, 153}}
-	return colors[dif][1], colors[dif][2], colors[dif][3]
-end
 
 local function getJudgeLineColor()
 	local dif = getDifficultyValueForColor()
@@ -83,16 +79,20 @@ notes.functions.getAreaX = function ()
     end
 end
 
-notes.functions.getAreaY = function ()
+notes.functions.getAreaNormalY = function ()
     return LANES.AREA.Y
 end
 
+notes.functions.getAreaY = function ()
+    return isVerticalGrooveGauge() and LANES.AREA.EXTEND_Y or LANES.AREA.Y
+end
+
 notes.functions.getInnerAreaY = function ()
-    return LANES.AREA.Y + LANES.JUDGE_LINE.H
+    return notes.functions.getAreaY() + LANES.JUDGE_LINE.H
 end
 
 notes.functions.getOurterAreaY = function ()
-    return LANES.AREA.Y - 2
+    return notes.functions.getAreaY() - 2
 end
 
 notes.functions.getAreaW = function ()
@@ -116,8 +116,12 @@ notes.functions.getLaneCenterX = function (key)
     return x + w / 2
 end
 
-notes.functions.getLaneHeight = function ()
+notes.functions.getLaneNormalHeight = function ()
     return LANES.AREA.H
+end
+
+notes.functions.getLaneHeight = function ()
+    return isVerticalGrooveGauge() and LANES.AREA.EXTEND_H or LANES.AREA.H
 end
 
 notes.functions.getSideSpace = function ()
@@ -136,7 +140,7 @@ notes.functions.load = function ()
     local nx = NOTES.SIZES.X
     local skin = {
         image = {
-            {id = "laneEdge", src = 0, x = 0, y = 30, w = LANES.EDGE.W, h = LANES.EDGE.H},
+            {id = "laneEdge", src = 0, x = 0, y = 30, w = LANES.EDGE.W, h = 1},
 
             -- シンボル
             {id = "whiteSymbol", src = 2, x = 0, y = 0, w = -1, h = -1},
@@ -313,22 +317,22 @@ notes.functions.load = function ()
             -- 小節線配置 offset3指定でliftの値を考慮した座標になる
             group = {
                 {id = "white", offset = 3, dst = {
-                    {x = laneX, y = LANES.AREA.Y, w = LANES.AREA.W, h = 3, r = 128, g = 128, b = 128}
+                    {x = laneX, y = notes.functions.getAreaY(), w = LANES.AREA.W, h = 3, r = 128, g = 128, b = 128}
                 }}
             },
             time = {
                 {id = "white", offset = 3, dst = {
-                    {x = laneX, y = LANES.AREA.Y, w = LANES.AREA.W, h = 3, r = 64, g = 192, b = 192}
+                    {x = laneX, y = notes.functions.getAreaY(), w = LANES.AREA.W, h = 3, r = 64, g = 192, b = 192}
                 }}
             },
             bpm = {
                 {id = "white", offset = 3, dst = {
-                    {x = laneX, y = LANES.AREA.Y, w = LANES.AREA.W, h = 6, r = 0, g = 192, b = 0}
+                    {x = laneX, y = notes.functions.getAreaY(), w = LANES.AREA.W, h = 6, r = 0, g = 192, b = 0}
                 }}
             },
             stop = {
                 {id = "white", offset = 3, dst = {
-                    {x = laneX, y = LANES.AREA.Y, w = LANES.AREA.W, h = 6, r = 192, g = 192, b = 0}
+                    {x = laneX, y = notes.functions.getAreaY(), w = LANES.AREA.W, h = 6, r = 192, g = 192, b = 0}
                 }}
             }
         }
@@ -359,22 +363,22 @@ notes.functions.load = function ()
                 local dx = (i % 2 == 1) and NOTES.DX[2] or NOTES.DX[3]
                 local size = (i % 2 == 1) and NOTES.SIZES.W[2] or NOTES.SIZES.W[3]
                 notesDst[#notesDst+1] = {
-                    x = NOTES.X[i] - dx, y = LANES.AREA.Y - NOTES.DY, w = size, h = LANES.AREA.H + NOTES.DY
+                    x = NOTES.X[i] - dx, y = notes.functions.getAreaY() - NOTES.DY, w = size, h = notes.functions.getLaneHeight() + NOTES.DY
                 }
             end
             -- 皿
             notesDst[#notesDst+1] = {
-                x = NOTES.X[commons.keys+1] - NOTES.DX[1], y = LANES.AREA.Y - NOTES.DY, w = NOTES.SIZES.W[1], h = LANES.AREA.H + NOTES.DY
+                x = NOTES.X[commons.keys+1] - NOTES.DX[1], y = notes.functions.getAreaY() - NOTES.DY, w = NOTES.SIZES.W[1], h = notes.functions.getLaneHeight() + NOTES.DY
             }
         else
             for i = 1, commons.keys do
                 notesDst[#notesDst+1] = {
-                    x = NOTES.X[i], y = LANES.AREA.Y, w = NOTES.W[i], h = LANES.AREA.H
+                    x = NOTES.X[i], y = notes.functions.getAreaY(), w = NOTES.W[i], h = notes.functions.getLaneHeight()
                 }
             end
             -- 皿
             notesDst[#notesDst+1] = {
-                x = NOTES.X[commons.keys+1], y = LANES.AREA.Y, w = NOTES.SCRATCH_W, h = LANES.AREA.H
+                x = NOTES.X[commons.keys+1], y = notes.functions.getAreaY(), w = NOTES.SCRATCH_W, h = notes.functions.getLaneHeight()
             }
         end
         -- 出力
@@ -397,13 +401,13 @@ notes.functions.dst = function ()
     --レーン全体の背景
     dst[#dst+1] = {
         id = "black", dst = {
-            {x = laneX, y = LANES.AREA.Y, w = LANES.AREA.W, h = LANES.AREA.H, a = 255 - getLaneAlpha()}
+            {x = laneX, y = notes.functions.getAreaY(), w = LANES.AREA.W, h = notes.functions.getLaneHeight(), a = 255 - getLaneAlpha()}
         }
     }
 
     -- レーンの左右
     do
-        local r, g, b = getDifficultyColor()
+        local r, g, b = getSimpleLineColor()
         dst[#dst+1] = {
             id = "laneEdge", dst = {
                 {x = laneX - LANES.EDGE.W, y = 0, w = LANES.EDGE.W, h = LANES.EDGE.H, r = r, g = g, b = b}
@@ -421,7 +425,7 @@ notes.functions.dst = function ()
         for i = 2, commons.keys, 2 do
             dst[#dst+1] = {
                 id = "white", dst = {
-                    {x = NOTES.X[i], y = LANES.AREA.Y, w = NOTES.W[i], h = LANES.AREA.H, a = 24}
+                    {x = NOTES.X[i], y = notes.functions.getAreaY(), w = NOTES.W[i], h = notes.functions.getLaneHeight(), a = 24}
                 }
             }
         end
@@ -436,7 +440,7 @@ notes.functions.dst = function ()
             if (isLeftScratch() and i ~= commons.keys+1) or (not isLeftScratch() and i ~= 1) then
                 dst[#dst+1] = {
                     id = "white", dst = {
-                        {x = NOTES.X[i] - 1, y = LANES.AREA.Y, w = 1, h = LANES.AREA.H, a = 96}
+                        {x = NOTES.X[i] - 1, y = notes.functions.getAreaY(), w = 1, h = notes.functions.getLaneHeight(), a = 96}
                     }
                 }
             end
@@ -445,24 +449,12 @@ notes.functions.dst = function ()
 
     -- アンダーライン
     do
-        local r, g, b = getDifficultyColor()
-        if isFullScreenBga() or isBgaOnLeft() then
-            local x = 0
-            if not is1P() then
-                x = laneX
-            end
-            dst[#dst+1] = {
-                id = "white", dst = {
-                    {x = x, y = LANES.AREA.Y - 2, w = LANES.AREA.W + 75, h = 2, r = r, g = g, b = b}
-                }
+        local r, g, b = getSimpleLineColor()
+        dst[#dst+1] = {
+            id = "white", dst = {
+                {x = laneX, y = notes.functions.getAreaY() - 2, w = LANES.AREA.W, h = 2, r = r, g = g, b = b}
             }
-        else
-            dst[#dst+1] = {
-                id = "white", dst = {
-                    {x = 0, y = LANES.AREA.Y - 2, w = WIDTH, h = 2, r = r, g = g, b = b}
-                }
-            }
-        end
+        }
     end
 
     dst[#dst+1] = {id = "notes"}
@@ -473,14 +465,14 @@ notes.functions.dst = function ()
         local r, g, b = getJudgeLineColor()
         dst[#dst+1] = {
             id = "white", offsets = {3}, dst = {
-                {x = laneX, y = LANES.AREA.Y, w = LANES.AREA.W, h = LANES.JUDGE_LINE.H, r = r, g = g, b = b}
+                {x = laneX, y = notes.functions.getAreaY(), w = LANES.AREA.W, h = LANES.JUDGE_LINE.H, r = r, g = g, b = b}
             }
         }
     end
 
     -- レーンのシンボル
     if isDrawLaneSymbol() then
-        local r, g, b = getDifficultyColor()
+        local r, g, b = getSimpleLineColor()
         for i = 1, commons.keys+1 do
             local id = "turntable"
             local s = SYMBOL.TURNTABLE
@@ -494,7 +486,7 @@ notes.functions.dst = function ()
             end
             dst[#dst+1] = {
                 id = id .. "Symbol", dst = {
-                    {x = NOTES.X[i], y = LANES.AREA.Y - s / 2, w = s, h = s, r = r, g = g, b = b}
+                    {x = NOTES.X[i], y = notes.functions.getAreaY() - s / 2, w = s, h = s, r = r, g = g, b = b}
                 }
             }
         end

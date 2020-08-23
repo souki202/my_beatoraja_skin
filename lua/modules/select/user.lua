@@ -161,16 +161,6 @@ local MONEY = {
     },
 }
 
-function calcStamina()
-    local tn = main_state.number(74)
-    if tn > 0 then
-        switchVisibleNumber("useStaminaValue", true)
-        setValue("useStaminaValue", userData.calcUseStamina(tn))
-    else
-        switchVisibleNumber("useStaminaValue", false)
-    end
-end
-
 function updateStamina()
     if getFrame() % 60 == 0 then -- 単なる負荷軽減
         userData.updateRemainingStamina()
@@ -181,19 +171,6 @@ function updateStaminaGauge()
     local p = userData.stamina.now / userData.stamina.tbl[userData.rank.rank]
     p = math.max(0, math.min(p, 1))
     return main_state.time() - p * 20 * 1000 * 1000
-end
-
-function updateUseStamina()
-    if getFrame() % 20 == 0 then -- 単なる負荷軽減
-        local tn = main_state.number(106)
-        if tn > 0 then
-            local requireStamina = userData.calcUseStamina(tn)
-            setValue("useStaminaValue", requireStamina)
-            switchVisibleNumber("useStaminaValue", true)
-        else
-            switchVisibleNumber("useStaminaValue", false)
-        end
-    end
 end
 
 selectUserdata.functions.init = function ()

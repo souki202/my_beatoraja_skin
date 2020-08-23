@@ -24,6 +24,10 @@ logger.functions.load = function ()
     if not isOutputLog() then
         return {}
     end
+    EXSCORE_RATE.SAMPLES.NOTES = getScoreRateSampleNotes()
+    EXSCORE_RATE.SAMPLES.MICRO_SEC = getScoreRateSampleMicroSec()
+    myPrint("レートのサンプルノーツ数: " .. EXSCORE_RATE.SAMPLES.NOTES)
+    myPrint("レートのサンプル時間: " .. EXSCORE_RATE.SAMPLES.MICRO_SEC)
     -- local totalSec = (main_state.number(163) * 60 + main_state.number(164))
     local totalSec = (main_state.number(1163) * 60 + main_state.number(1164))
     playLog.setSongLength(totalSec)
@@ -128,7 +132,7 @@ logger.functions.load = function ()
                             -- 閾値内に収まるように範囲を狭める
                             -- 尺取法 範囲は[rateRange.startIdx, rateRange.endIdx]
                             -- どれだけ多くても通常100ループには収まる
-                            while rateRange.notes > rateSampleNotes or rateRange.microSec > rateSampleMs and rateRange.startIdx < rateRange.endIdx do
+                            while (rateRange.notes > rateSampleNotes or rateRange.microSec > rateSampleMs) and rateRange.startIdx < rateRange.endIdx do
                                 -- 1つ狭める
                                 local leftData = playLog.getDataByIdx(rateRange.startIdx)
                                 local leftEx = leftData.exscore

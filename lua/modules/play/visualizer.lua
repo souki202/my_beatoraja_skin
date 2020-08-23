@@ -34,7 +34,7 @@ local VISUALIZER = {
     AREA = {
         FULL_X = function () return is1P() and lanes.getAreaX() + lanes.getAreaW() + 2 or 0 end,
         X = function () return is1P() and lanes.getAreaX() + lanes.getAreaW() + 67 or 67 end,
-        Y = function () return 0 end,
+        Y = function () return isVerticalGrooveGauge() and -84 or 0 end,
         W = function () return 1280 end,
         FULL_W = function () return 1411 end,
         LEFT_START_X = function (self) return self.BAR.CX(self) - self.BAR.LIGHT end,
@@ -90,12 +90,12 @@ local VISUALIZER = {
         X = function (self) return self.AREA.FULL_X() end,
         Y = function (self) return self.BAR.Y(self) end,
         W = function (self) return self.AREA.FULL_W() end,
-        H = function (self) return lanes.getAreaY() - self.BAR.Y(self) end,
+        H = function (self) return lanes.getAreaY() - self.BAR.Y(self) - 2 end,
     },
     MASK2 = {
         X = function (self) return is1P() and 0 or lanes.getAreaX() end,
         Y = function (self) return 0 end,
-        W = function (self) return lanes.getSideSpace() + 4 + lanes.getAreaW() end,
+        W = function (self) return lanes.getSideSpace() + 2 + lanes.getAreaW() end,
         H = function (self) return lanes.getAreaY() end,
     }
 }
@@ -333,7 +333,7 @@ visualizer.functions.load = function ()
     }
     -- 反射のマスク用
     imgs[#imgs+1] = {
-        id = "barReflectionMask", src = 18, x = VISUALIZER.MASK1.X(VISUALIZER), y = HEIGHT - lanes.getAreaY(),
+        id = "barReflectionMask", src = 18, x = VISUALIZER.MASK1.X(VISUALIZER), y = HEIGHT - lanes.getAreaY() + 2,
         w = VISUALIZER.MASK1.W(VISUALIZER), h = VISUALIZER.MASK1.H(VISUALIZER)
     }
     imgs[#imgs+1] = {

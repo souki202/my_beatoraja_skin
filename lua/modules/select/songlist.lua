@@ -12,22 +12,50 @@ local SONG_LIST = {
         H = 22,
     },
     BAR = {
+        N = 17,
         W = 607,
         H = 78,
+
+        PREV_CENTER_X = 1197 - 11.2 * 1.75,
+        PREV_CENTER_Y = 571 - 80 * 1.75,
+        CENTER_X = 1197,
+        CENTER_Y = 571,
+        NEXT_CENTER_X = 1197 + 11.2,
+        NEXT_CENTER_Y = 571 + 80,
+
+        CENTER_IDX = 8,
+
+        INTERVAL_Y = 80,
         FONT_SIZE = 32,
+        ANIM_INTERVAL = 20,
 
         DIFFICULTY = {
+            X = 18,
+            Y = 12,
             W = 16,
             H = 21,
         },
         TROPHY = {
             W = 56,
             H = 56,
-        }
+        },
+        TEXT = {
+            X = 570,
+            Y = 21,
+            W = 397,
+        },
+        GRAPH = {
+            X = 170,
+            Y = 9,
+            W = 397,
+            H = 8,
+        },
     },
     LAMP = {
         W = 110,
-        H = 28
+        H = 28,
+        X = 17,
+        Y = 41,
     },
     TEXT = {
         ARTIST_SIZE = 24,
@@ -36,7 +64,78 @@ local SONG_LIST = {
     ITEM_TEXT = {
         W = 168,
         H = 22,
-    }
+    },
+    CENTER_FRAME = {
+        W = 714,
+        H = 154,
+    },
+}
+
+local SONG_LIST_THIN = {
+    LABEL = {
+        X = 370,
+        Y = 11,
+        W = 50,
+        H = 22,
+    },
+    BAR = {
+        N = 25,
+        W = 607,
+        H = 50,
+
+        PREV_CENTER_X = 1197 - 11.2 * 1.75 + 4,
+        PREV_CENTER_Y = 571 - 80 + 1.75 - 32,
+        CENTER_X = 1197,
+        CENTER_Y = 571,
+        NEXT_CENTER_X = 1197 + 11.2,
+        NEXT_CENTER_Y = 571 + 80,
+
+        CENTER_IDX = 12,
+
+        INTERVAL_Y = 50,
+        FONT_SIZE = 24,
+        ANIM_INTERVAL = 15,
+
+        DIFFICULTY = {
+            X = 143,
+            Y = 14,
+            W = 16,
+            H = 21,
+        },
+        TROPHY = {
+            W = 56,
+            H = 56,
+        },
+        TEXT = {
+            X = 570,
+            Y = 11,
+            W = 350,
+        },
+        GRAPH = {
+            X = 182,
+            Y = 9,
+            W = 397,
+            H = 8,
+        },
+    },
+    LAMP = {
+        W = 110,
+        H = 28,
+        X = 17,
+        Y = 11,
+    },
+    TEXT = {
+        ARTIST_SIZE = 24,
+        SUBARTIST_SIZE = 18,
+    },
+    ITEM_TEXT = {
+        W = 168,
+        H = 22,
+    },
+    CENTER_FRAME = {
+        W = 714,
+        H = 154,
+    },
 }
 
 local FAVORITE = {
@@ -61,25 +160,7 @@ end
 
 songlist.functions.load = function ()
     local skin = {
-        source = {
-            {id = 6, path = "../select/parts/lamp_gauge_rainbow.png"},
-        },
         image = {
-            -- 選曲バー種類
-            {id = "barSong"   , src = 0, x = 0, y = commons.PARTS_OFFSET, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
-            {id = "barNosong" , src = 0, x = 0, y = commons.PARTS_OFFSET + SONG_LIST.BAR.H*1, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
-            {id = "barGrade"  , src = 0, x = 0, y = commons.PARTS_OFFSET + SONG_LIST.BAR.H*2, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
-            {id = "barNograde", src = 0, x = 0, y = commons.PARTS_OFFSET + SONG_LIST.BAR.H*2, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
-            {id = "barFolder" , src = 0, x = 0, y = commons.PARTS_OFFSET + SONG_LIST.BAR.H*3, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
-            {id = "barFolderWithLamp" , src = 0, x = 0, y = commons.PARTS_OFFSET + SONG_LIST.BAR.H*7, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
-            {id = "barTable"  , src = 0, x = 0, y = commons.PARTS_OFFSET + SONG_LIST.BAR.H*4, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
-            {id = "barTableWithLamp"  , src = 0, x = 0, y = commons.PARTS_OFFSET + SONG_LIST.BAR.H*8, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
-            {id = "barCommand", src = 0, x = 0, y = commons.PARTS_OFFSET + SONG_LIST.BAR.H*5, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
-            {id = "barCommandWithLamp", src = 0, x = 0, y = commons.PARTS_OFFSET + SONG_LIST.BAR.H*9, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
-            {id = "barSearch" , src = 0, x = 0, y = commons.PARTS_OFFSET, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
-            -- 選曲バークリアランプはimagesの後
-            -- 選曲バー中央
-            {id = "barCenterFrame", src = 0, x = 0, y = commons.PARTS_OFFSET + 782, w = 714, h = 154},
             -- 判定難易度
             {id = "judgeEasy"    , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 0, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
             {id = "judgeNormal"  , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 1, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
@@ -99,11 +180,10 @@ songlist.functions.load = function ()
             -- ふぁぼ
             -- {id = "favoriteButton", src = 0, x = 1563, y = commons.PARTS_OFFSET + 263, w = FAVORITE.W*2, h = FAVORITE.H, divx = 2, act = 89},
             -- {id = "favoriteButton", src = 0, x = 1563, y = commons.PARTS_OFFSET + 263, w = FAVORITE.W, h = FAVORITE.H, act = 89},
-    },
+        },
         text = {
             {id = "artist", font = 0, size = SONG_LIST.TEXT.ARTIST_SIZE, ref = 14, align = 2, overflow = 1},
             {id = "subArtist", font = 0, size = SONG_LIST.TEXT.SUBARTIST_SIZE, ref = 15, align = 2, overflow = 1},
-            {id = "bartext", font = 0, size = SONG_LIST.BAR.FONT_SIZE, align = 2, overflow = 1},
         },
         value = {
             -- 選曲バー難易度数値
@@ -115,14 +195,57 @@ songlist.functions.load = function ()
             {id = "barPlayLevelInsane",   src = 0, x = 771, y = commons.PARTS_OFFSET + SONG_LIST.BAR.DIFFICULTY.H*5, w = SONG_LIST.BAR.DIFFICULTY.W*10, h = SONG_LIST.BAR.DIFFICULTY.H, divx = 10, digit = 2, align = 2},
             {id = "barPlayLevelUnknown2", src = 0, x = 771, y = commons.PARTS_OFFSET + SONG_LIST.BAR.DIFFICULTY.H*6, w = SONG_LIST.BAR.DIFFICULTY.W*10, h = SONG_LIST.BAR.DIFFICULTY.H, divx = 10, digit = 2, align = 2},
         },
-        songlist = {
-            id = "songlist",
-            center = 8,
-            clickable = {8},
-            listoff = {},
-            liston = {},
-        }
+        -- songlist = {
+        --     id = "songlist",
+        --     center = 8,
+        --     clickable = {8},
+        --     listoff = {},
+        --     liston = {},
+        -- }
     }
+
+    if isThickSongList() then
+        mergeSkin(skin, {image = {
+            {id = "barSong"   , src = 10, x = 0, y = 0, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+            {id = "barNosong" , src = 10, x = 0, y = SONG_LIST.BAR.H*1, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+            {id = "barGrade"  , src = 10, x = 0, y = SONG_LIST.BAR.H*2, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+            {id = "barNograde", src = 10, x = 0, y = SONG_LIST.BAR.H*2, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+            {id = "barFolder" , src = 10, x = 0, y = SONG_LIST.BAR.H*3, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+            {id = "barTable"  , src = 10, x = 0, y = SONG_LIST.BAR.H*4, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+            {id = "barCommand", src = 10, x = 0, y = SONG_LIST.BAR.H*5, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+            {id = "barSearch" , src = 10, x = 0, y = 0, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+            {id = "barFolderWithLamp" , src = 10, x = 0, y = SONG_LIST.BAR.H*6, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+            {id = "barTableWithLamp"  , src = 10, x = 0, y = SONG_LIST.BAR.H*7, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+            {id = "barCommandWithLamp", src = 10, x = 0, y = SONG_LIST.BAR.H*8, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H},
+        }})
+
+        table.insert(skin.image,
+            {id = "barCenterFrame", src = 10, x = 0, y = 1024 - SONG_LIST.CENTER_FRAME.H, w = SONG_LIST.CENTER_FRAME.W, h = SONG_LIST.CENTER_FRAME.H}
+        )
+        table.insert(skin.text, 
+            {id = "bartext", font = 0, size = SONG_LIST.BAR.FONT_SIZE, align = 2, overflow = 1}
+        )
+    else
+        mergeSkin(skin, {image = {
+            {id = "barSong"   , src = 11, x = 0, y = 0, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+            {id = "barNosong" , src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*1, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+            {id = "barGrade"  , src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*2, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+            {id = "barNograde", src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*2, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+            {id = "barFolder" , src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*3, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+            {id = "barTable"  , src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*4, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+            {id = "barCommand", src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*5, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+            {id = "barSearch" , src = 11, x = 0, y = 0, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+            {id = "barFolderWithLamp" , src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*6, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+            {id = "barTableWithLamp"  , src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*7, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+            {id = "barCommandWithLamp", src = 11, x = 0, y = SONG_LIST_THIN.BAR.H*8, w = SONG_LIST_THIN.BAR.W, h = SONG_LIST_THIN.BAR.H},
+        }})
+        table.insert(skin.image,
+            {id = "barCenterFrame", src = 11, x = 0, y = 1024 - SONG_LIST_THIN.CENTER_FRAME.H, w = SONG_LIST_THIN.CENTER_FRAME.W, h = SONG_LIST_THIN.CENTER_FRAME.H}
+        )
+        table.insert(skin.text, 
+            {id = "bartext", font = 0, size = SONG_LIST_THIN.BAR.FONT_SIZE, align = 2, overflow = 1}
+        )
+    end
 
     -- 選曲バーのクリアランプ
     for i, lamp in ipairs(LAMP_NAMES) do
@@ -140,37 +263,6 @@ songlist.functions.load = function ()
             id = "barLampRivalTarget" .. lamp, src = 0,
             x = 657, y = commons.PARTS_OFFSET + SONG_LIST.LAMP.H * (i - 1) + SONG_LIST.LAMP.H / 2,
             w = SONG_LIST.LAMP.W, h = SONG_LIST.LAMP.H / 2
-        })
-    end
-
-    for i = 1, 17 do
-        local idx = i
-        if i > skin.songlist.center + 1 then
-            idx = idx + 0.75 -- BPM等を入れる部分の高さだけ下にずらす
-        end
-        local posX = math.floor(1184 + (skin.songlist.center - idx + 2) * 12)
-        local posY = math.floor(491 + (skin.songlist.center - idx + 2) * 80)
-        local INTERVAL = 20
-        -- ぽわんと1回跳ねる感じ
-        table.insert(skin.songlist.listoff, {
-            id = "bar", loop = 250 + i * INTERVAL,
-            dst = {
-                {time = 0                 , x = posX + 800, y = posY, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H, acc = 2},
-                {time = i * INTERVAL      , x = posX + 800, y = posY, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H, acc = 2},
-                {time = 200 + i * INTERVAL, x = posX -  50, y = posY, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H, acc = 1},
-                {time = 225 + i * INTERVAL, x = posX -  25, y = posY, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H, acc = 2},
-                {time = 250 + i * INTERVAL, x = posX      , y = posY, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H, acc = 2}
-            }
-        })
-        table.insert(skin.songlist.liston, {
-            id = "bar", loop = 250 + i * INTERVAL,
-            dst = {
-                {time = 0                 , x = posX + 800, y = posY, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H, acc = 2},
-                {time = i * INTERVAL      , x = posX + 800, y = posY, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H, acc = 2},
-                {time = 200 + i * INTERVAL, x = posX -  50, y = posY, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H, acc = 1},
-                {time = 225 + i * INTERVAL, x = posX -  25, y = posY, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H, acc = 2},
-                {time = 250 + i * INTERVAL, x = posX      , y = posY, w = SONG_LIST.BAR.W, h = SONG_LIST.BAR.H, acc = 2}
-            }
         })
     end
 
@@ -208,30 +300,93 @@ songlist.functions.load = function ()
         }
     end
 
+    mergeSkin(skin, songlist.functions.loadSongListBar())
+
+    return skin
+end
+
+songlist.functions.loadSongListBar = function ()
+    local params = SONG_LIST
+    if not isThickSongList() then
+        params = SONG_LIST_THIN
+    end
+
+    local skin = {
+        songlist = {
+            id = "songlist",
+            center = params.BAR.CENTER_IDX,
+            clickable = {params.BAR.CENTER_IDX},
+            listoff = {},
+            liston = {},
+        }
+    }
+
+    do
+        local timeInterval = params.BAR.ANIM_INTERVAL
+        local centerIdx = skin.songlist.center
+        local intervalY = params.BAR.INTERVAL_Y
+        for i = 1, params.BAR.N do
+            local idx = params.BAR.N - i
+            local posX = 0
+            local posY = 0
+            if idx < centerIdx then
+                posX = math.floor(params.BAR.PREV_CENTER_X + (idx - centerIdx + 1) * intervalY * 0.14)
+                posY = math.floor(params.BAR.PREV_CENTER_Y + (idx - centerIdx + 1) * intervalY)
+            elseif idx > centerIdx then
+                posX = math.floor(params.BAR.NEXT_CENTER_X + (idx - centerIdx - 1) * intervalY * 0.14)
+                posY = math.floor(params.BAR.NEXT_CENTER_Y + (idx - centerIdx - 1) * intervalY)
+            elseif idx == centerIdx then
+                posX = math.floor(params.BAR.CENTER_X)
+                posY = math.floor(params.BAR.CENTER_Y)
+            end
+            -- ぽわんと1回跳ねる感じ
+            table.insert(skin.songlist.listoff, {
+                id = "bar", loop = 250 + i * timeInterval,
+                dst = {
+                    {time = 0                 , x = posX + 800, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
+                    {time = i * timeInterval      , x = posX + 800, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
+                    {time = 200 + i * timeInterval, x = posX -  50, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 1},
+                    {time = 225 + i * timeInterval, x = posX -  25, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
+                    {time = 250 + i * timeInterval, x = posX      , y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2}
+                }
+            })
+            table.insert(skin.songlist.liston, {
+                id = "bar", loop = 250 + i * timeInterval,
+                dst = {
+                    {time = 0                 , x = posX + 800, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
+                    {time = i * timeInterval      , x = posX + 800, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
+                    {time = 200 + i * timeInterval, x = posX -  50, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 1},
+                    {time = 225 + i * timeInterval, x = posX -  25, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
+                    {time = 250 + i * timeInterval, x = posX      , y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2}
+                }
+            })
+        end
+    end
+
     skin.songlist.label = {
         {
             id = "barLn", dst = {
-                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
+                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H}
             }
         },
         {
             id = "barRandom", dst = {
-                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
+                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H}
             }
         },
         {
             id = "barBomb", dst = {
-                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
+                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H}
             }
         },
         {
             id = "barCn", dst = {
-                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
+                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H}
             }
         },
         {
             id = "barHcn", dst = {
-                {x = SONG_LIST.LABEL.X, y = SONG_LIST.LABEL.Y, w = SONG_LIST.LABEL.W, h = SONG_LIST.LABEL.H}
+                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H}
             }
         },
     }
@@ -249,116 +404,98 @@ songlist.functions.load = function ()
     -- skin.songlist.trophy = {
     --     {
     --         id = "bronzeTrophy", dst = {
-    --             {x = 146, y = 11, w = SONG_LIST.BAR.TROPHY.W, h = SONG_LIST.BAR.TROPHY.H}
+    --             {x = 146, y = 11, w = params.BAR.TROPHY.W, h = params.BAR.TROPHY.H}
     --         }
     --     },
     --     {
     --         id = "silverTrophy", dst = {
-    --             {x = 146, y = 11, w = SONG_LIST.BAR.TROPHY.W, h = SONG_LIST.BAR.TROPHY.H}
+    --             {x = 146, y = 11, w = params.BAR.TROPHY.W, h = params.BAR.TROPHY.H}
     --         }
     --     },
     --     {
     --         id = "goldTrophy", dst = {
-    --             {x = 146, y = 11, w = SONG_LIST.BAR.TROPHY.W, h = SONG_LIST.BAR.TROPHY.H}
+    --             {x = 146, y = 11, w = params.BAR.TROPHY.W, h = params.BAR.TROPHY.H}
     --         }
     --     },
     -- }
 
     -- 曲名等
-    skin.songlist.text = {
-        {
-            id = "bartext", filter = 1,
-            dst = {
-                {x = 570, y = 21, w = 397, h = SONG_LIST.BAR.FONT_SIZE, r = 0, g = 0, b = 0, filter = 1}
-            }
-        },
-        {
-            id = "bartext", filter = 1,
-            dst = {
-                {x = 570, y = 21, w = 397, h = SONG_LIST.BAR.FONT_SIZE, r = 200, g = 0, b = 0, filter = 1}
-            }
-        },
-    }
+    do
+        local text = params.BAR.TEXT
+        skin.songlist.text = {
+            {
+                id = "bartext", filter = 1,
+                dst = {
+                    {x = text.X, y = text.Y, w = text.W, h = params.BAR.FONT_SIZE, r = 0, g = 0, b = 0, filter = 1}
+                }
+            },
+            {
+                id = "bartext", filter = 1,
+                dst = {
+                    {x = text.X, y = text.Y, w = text.W, h = params.BAR.FONT_SIZE, r = 200, g = 0, b = 0, filter = 1}
+                }
+            },
+        }
+    end
 
     if isViewFolderLampGraph() then
         skin.songlist.graph = {
             id = "lampGraph", dst = {
-                {x = 170, y = 9, w = 397, h = 8}
+                {x = params.BAR.GRAPH.X, y = params.BAR.GRAPH.Y, w = params.BAR.GRAPH.W, h = params.BAR.GRAPH.H}
             }
         }
     end
 
-    local levelPosX = 19
-    local levelPosY = 12
-    skin.songlist.level = {
-        {
-            id = "barPlayLevelUnknown",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelBeginner",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelNormal",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelHyper",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelAnother",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelInsane",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-        {
-            id = "barPlayLevelUnknown2",
-            dst = {
-                {x = levelPosX, y = levelPosY, w = 16, h = 21}
-            }
-        },
-    }
-    local lampPosX = 17
-    local lampPosY = 41;
-
-    skin.songlist.lamp = {}
-    skin.songlist.playerlamp = {}
-    skin.songlist.rivallamp = {}
-
-    for i, lamp in ipairs(LAMP_NAMES) do
-        table.insert(skin.songlist.lamp, 1, {
-            id = "barLamp" .. lamp, dst = {
-                {x = lampPosX, y = lampPosY, w = SONG_LIST.LAMP.W, h = SONG_LIST.LAMP.H}
-            }
-        })
-        table.insert(skin.songlist.playerlamp, 1, {
-            id = "barLampRivalPlayer" .. lamp, dst = {
-                {x = lampPosX, y = lampPosY + SONG_LIST.LAMP.H / 2, w = SONG_LIST.LAMP.W, h = SONG_LIST.LAMP.H / 2}
-            }
-        })
-        table.insert(skin.songlist.rivallamp, 1, {
-            id = "barLampRivalTarget" .. lamp, dst = {
-                {x = lampPosX, y = lampPosY, w = SONG_LIST.LAMP.W, h = SONG_LIST.LAMP.H / 2}
-            }
-        })
+    -- 難易度表記
+    do
+        local list = {
+            "barPlayLevelUnknown",
+            "barPlayLevelBeginner",
+            "barPlayLevelNormal",
+            "barPlayLevelHyper",
+            "barPlayLevelAnother",
+            "barPlayLevelInsane",
+            "barPlayLevelUnknown2",
+        }
+        skin.songlist.level = {}
+        for i = 1, #list do
+            table.insert(skin.songlist.level, {
+                id = list[i],
+                dst = {
+                    {x = params.BAR.DIFFICULTY.X, y = params.BAR.DIFFICULTY.Y, w = params.BAR.DIFFICULTY.W, h = params.BAR.DIFFICULTY.H}
+                }
+            })
+        end
     end
 
+    do
+        local x = params.LAMP.X
+        local y = params.LAMP.Y
+        local w = params.LAMP.W
+        local h = params.LAMP.H
+
+        skin.songlist.lamp = {}
+        skin.songlist.playerlamp = {}
+        skin.songlist.rivallamp = {}
+
+        for i, lamp in ipairs(LAMP_NAMES) do
+            table.insert(skin.songlist.lamp, 1, {
+                id = "barLamp" .. lamp, dst = {
+                    {x = x, y = y, w = w, h = h}
+                }
+            })
+            table.insert(skin.songlist.playerlamp, 1, {
+                id = "barLampRivalPlayer" .. lamp, dst = {
+                    {x = x, y = y + h / 2, w = w, h = h / 2}
+                }
+            })
+            table.insert(skin.songlist.rivallamp, 1, {
+                id = "barLampRivalTarget" .. lamp, dst = {
+                    {x = x, y = y, w = w, h = h / 2}
+                }
+            })
+        end
+    end
     return skin
 end
 
@@ -369,18 +506,18 @@ songlist.functions.dst = function ()
             -- 選曲バー中央
             {
                 id = "barCenterFrame", dst = {
-                    {x = 1143, y = 503, w = 714, h = 154, filter = 1}
+                    {x = 1143, y = 503, w = SONG_LIST.CENTER_FRAME.W, h = SONG_LIST.CENTER_FRAME.H}
                 }
             },
             -- アーティスト
             {
                 id = "artist", filter = 1, dst = {
-                    {x = 1800, y = 543, w = 370, h = SONG_LIST.TEXT.ARTIST_SIZE, r = 0, g = 0, b = 0, filter = 1}
+                    {x = 1800, y = 543, w = 370, h = SONG_LIST.TEXT.ARTIST_SIZE, r = 0, g = 0, b = 0}
                 }
             },
             {
                 id = "subArtist", filter = 1, dst = {
-                    {x = 1800, y = 516, w = 310, h = SONG_LIST.TEXT.SUBARTIST_SIZE, r = 0, g = 0, b = 0, filter = 1}
+                    {x = 1800, y = 516, w = 310, h = SONG_LIST.TEXT.SUBARTIST_SIZE, r = 0, g = 0, b = 0}
                 }
             },
             -- BPM

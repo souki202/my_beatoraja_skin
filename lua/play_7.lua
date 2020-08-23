@@ -32,7 +32,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10090まで
+    property = { -- 使用済み 10100まで
         {
             name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
         },
@@ -79,16 +79,25 @@ local header = {
             name = "黒帯部分のBGA表示", item = {{name = "ON", op = 945}, {name = "OFF", op = 946}}, def = "ON"
         },
         {
-            name = "グルーヴゲージの通知エフェクトの基準", item = {{name = "5%毎", op = 10065}, {name = "10%毎", op = 10066}, {name = "20%毎", op = 10067}, {name = "30%毎", op = 10068}, {name = "無し", op = 10069}}, def = "10%毎"
-        },
-        {
             name = "サイド部分のグラフ", item = {{name = "無し", op = 10000}, {name = "判定分布", op = 10001}, {name = "EARLY, LATE分布", op = 10002}}, def = "判定分布"
-        },
-        {
-            name = "ゲージ100%時のキラキラ", item = {{name = "ON", op = 10070}, {name = "OFF", op = 10071}}, def = "ON"
         },
         { -- 961まで使用
             name = "難易度毎の色変化", item = {{name = "あり", op = 955}, {name = "灰固定", op = 956}, {name = "緑固定", op = 957}, {name = "青固定", op = 958}, {name = "橙固定", op = 959}, {name = "赤固定", op = 960}, {name = "紫固定", op = 961}}, def = "あり"
+        },
+        {
+            name = "グルーヴゲージ-----------------------", item = {{name = "-", op = 19999}}
+        },
+        {
+            name = "グルーヴゲージ隠し", item = {{name = "ON", op = 10095}, {name = "OFF", op = 10096}}, def = "OFF"
+        },
+        {
+            name = "グルーヴゲージの通知エフェクトの基準", item = {{name = "5%毎", op = 10065}, {name = "10%毎", op = 10066}, {name = "20%毎", op = 10067}, {name = "30%毎", op = 10068}, {name = "無し", op = 10069}}, def = "10%毎"
+        },
+        {
+            name = "グルーヴゲージ位置", item = {{name = "レーン下", op = 10100}, {name = "レーン左右", op = 10101}}, def = "レーン下"
+        },
+        {
+            name = "ゲージ100%時のキラキラ", item = {{name = "ON", op = 10070}, {name = "OFF", op = 10071}}, def = "ON"
         },
         {
             name = "レーン------------------------------", item = {{name = "-", op = 19999}}
@@ -145,7 +154,7 @@ local header = {
             name = "ビジュアライザー-------------------", item = {{name = "-", op = 19999}}
         },
         {
-            name = "ビジュアライザー1", item = {{name = "ON", op = 10055}, {name = "OFF", op = 10056}}, def = "ON"
+            name = "ビジュアライザー1", item = {{name = "ON", op = 10055}, {name = "OFF", op = 10056}}, def = "OFF"
         },
         {
             name = "ビジュアライザー1の棒線タイプ", item = {{name = "太い", op = 10035}, {name = "細い", op = 10036}}, def = "細い"
@@ -194,6 +203,10 @@ local header = {
         {name = "レーンの黒背景(255で透明)", a = 0},
         {name = "グルーブゲージの通知エフェクトの大きさ差分(%)", y = 0},
         {name = "ゲージ100%時のキラキラの数(既定値20)", x = 0},
+
+        {name = "スコアログ周り------------------", x = 0},
+        {name = "スコアレートのサンプルノーツ数(既定値50)", x = 0},
+        {name = "スコアレートのサンプル取得の最大時間(単位秒 既定値10)", x = 0},
 
         {name = "キービーム関連------------------------", x = 0},
         {name = "キービームの透明度(既定値64 255で透明)", a = 0},
@@ -334,10 +347,10 @@ local function main()
     end
     mergeSkin(skin, progress.dst())
     mergeSkin(skin, sideInfo.dst())
+    mergeSkin(skin, hispeed.dst())
     mergeSkin(skin, lanes.dst()) -- キービームとリフト, レーンカバーはここの中でmergeSkin
     mergeSkin(skin, grow.dst())
     mergeSkin(skin, bomb.dst())
-    mergeSkin(skin, hispeed.dst())
     mergeSkin(skin, judges.dst())
     mergeSkin(skin, life.dst())
     mergeSkin(skin, scoreGraph.dst())
