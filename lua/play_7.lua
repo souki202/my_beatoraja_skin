@@ -32,7 +32,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10100まで
+    property = { -- 使用済み 10105まで
         {
             name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
         },
@@ -77,6 +77,9 @@ local header = {
         },
         {
             name = "黒帯部分のBGA表示", item = {{name = "ON", op = 945}, {name = "OFF", op = 946}}, def = "ON"
+        },
+        {
+            name = "黒帯部分のBGA表示のぼかし", item = {{name = "ON", op = 10105}, {name = "OFF", op = 10106}}, def = "OFF"
         },
         {
             name = "サイド部分のグラフ", item = {{name = "無し", op = 10000}, {name = "判定分布", op = 10001}, {name = "EARLY, LATE分布", op = 10002}}, def = "判定分布"
@@ -177,6 +180,7 @@ local header = {
         {name = "背景画像", path = "../play/parts/background/*.png", def = "default"},
         {name = "汎用画像(png)", path = "../play/parts/versatilitybga/*.png", def = "default"},
         {name = "汎用画像(mp4)", path = "../play/parts/versatilitybga/*.mp4", def = "default"},
+        {name = "黒帯部分BGAのマスク", path = "../play/parts/bgamask/*.png", def = "default"},
         {name = "ノート画像(通常形式)", path = "../play/parts/notes/normal/*.png", def = "default"},
         {name = "ノート画像(独自形式)", path = "../play/parts/notes/original/*.png", def = "default"},
         {name = "レーンのシンボル(白鍵)", path = "../play/parts/lanesymbols/white/*.png", def = "dia"},
@@ -276,7 +280,7 @@ local function main()
         {id = 29, path = "../play/parts/judges/late/*.png"},
         {id = 6, path = "../play/parts/combo/*.png"},
         {id = 7, path = "../play/parts/indicators/*.png"},
-        {id = 8, path = "../play/parts/bgamask/default.png"},
+        {id = 8, path = "../play/parts/bgamask/*.png"},
         {id = 9, path = "../play/parts/lanecover/default.png"},
         {id = 10, path = "../play/parts/liftcover/default.png"},
         {id = 11, path = "../play/parts/bombs/wave1/*.png"},

@@ -33,6 +33,7 @@ end
 
 background.functions.load = function ()
     local skin = {
+        source = {},
         image = {}
     }
 

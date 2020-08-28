@@ -213,15 +213,15 @@ function loadWindow(skin, ids, x, y, edgeSize, shadow)
 end
 
 function destinationStaticBaseWindow(skin, x, y, w, h)
-    destinationStaticWindowBg(skin, BASE_WINDOW.ID, x, y, w, h, BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN * 2, {})
+    destinationStaticWindowBg(skin, BASE_WINDOW.ID, x, y, w, h, BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN * 2, {}, nil)
 end
 
 function destinationStaticBaseWindowSelect(skin, x, y, w, h)
-    destinationStaticWindowBg(skin, BASE_WINDOW.ID, x, y, w, h, BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN, {})
+    destinationStaticWindowBg(skin, BASE_WINDOW.ID, x, y, w, h, BASE_WINDOW.EDGE_SIZE, BASE_WINDOW.SHADOW_LEN, {}, nil)
 end
 
 function destinationStaticBaseWindowResult(skin, x, y, w, h)
-    destinationStaticWindowBg(skin, RESULT_BASE_WINDOW.ID, x, y, w, h, RESULT_BASE_WINDOW.EDGE_SIZE, RESULT_BASE_WINDOW.SHADOW_LEN, {})
+    destinationStaticWindowBg(skin, RESULT_BASE_WINDOW.ID, x, y, w, h, RESULT_BASE_WINDOW.EDGE_SIZE, RESULT_BASE_WINDOW.SHADOW_LEN, {}, nil)
 end
 
 -- ウィンドウを描画
@@ -235,56 +235,56 @@ end
 -- @param  number shadow 影の長さ
 -- @param  array op
 -- それぞれ影を除いた座標
-function destinationStaticWindowBg(skin, ids, x, y, w, h, edgeSize, shadow, op)
+function destinationStaticWindowBg(skin, ids, x, y, w, h, edgeSize, shadow, op, draw)
     local sumEdgeSize = edgeSize + shadow
 
     -- 四隅
     table.insert(skin.destination, {
-        id = ids.UPPER_LEFT, op = op, dst = {
+        id = ids.UPPER_LEFT, op = op, draw = draw, dst = {
             {x = x - shadow, y = y + h - edgeSize, w = sumEdgeSize, h = sumEdgeSize}
         }
     })
     table.insert(skin.destination, {
-        id = ids.UPPER_RIGHT, op = op, dst = {
+        id = ids.UPPER_RIGHT, op = op, draw = draw, dst = {
             {x = x + w - edgeSize, y = y + h - edgeSize, w = sumEdgeSize, h = sumEdgeSize}
         }
     })
     table.insert(skin.destination, {
-        id = ids.BOTTOM_RIGHT, op = op, dst = {
+        id = ids.BOTTOM_RIGHT, op = op, draw = draw, dst = {
             {x = x + w - edgeSize, y = y - shadow, w = sumEdgeSize, h = sumEdgeSize}
         }
     })
     table.insert(skin.destination, {
-        id = ids.BOTTOM_LEFT, op = op, dst = {
+        id = ids.BOTTOM_LEFT, op = op, draw = draw, dst = {
             {x = x - shadow, y = y - shadow, w = sumEdgeSize, h = sumEdgeSize}
         }
     })
 
     -- 各辺
     table.insert(skin.destination, {
-        id = ids.TOP, op = op, dst = {
+        id = ids.TOP, op = op, draw = draw, dst = {
             {x = x + edgeSize, y = y + h - edgeSize, w = w - edgeSize * 2, h = sumEdgeSize}
         }
     })
     table.insert(skin.destination, {
-        id = ids.LEFT, op = op, dst = {
+        id = ids.LEFT, op = op, draw = draw, dst = {
             {x = x + w - edgeSize, y = y + edgeSize, w = sumEdgeSize, h = h - edgeSize * 2}
         }
     })
     table.insert(skin.destination, {
-        id = ids.BOTTOM, op = op, dst = {
+        id = ids.BOTTOM, op = op, draw = draw, dst = {
             {x = x + edgeSize, y = y - shadow, w = w - edgeSize * 2, h = sumEdgeSize}
         }
     })
     table.insert(skin.destination, {
-        id = ids.RIGHT, op = op, dst = {
+        id = ids.RIGHT, op = op, draw = draw, dst = {
             {x = x - shadow, y = y + edgeSize, w = sumEdgeSize, h = h - edgeSize * 2}
         }
     })
 
     -- 本体
     table.insert(skin.destination, {
-        id = ids.BODY, op = op, dst = {
+        id = ids.BODY, op = op, draw = draw, dst = {
             {x = x + edgeSize, y = y + edgeSize, w = w - edgeSize * 2, h = h - edgeSize * 2}
         }
     })

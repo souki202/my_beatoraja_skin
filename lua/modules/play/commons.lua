@@ -272,6 +272,10 @@ function getScoreRateSampleMicroSec()
 	return getOffsetValueWithDefault("スコアレートのサンプル取得の最大時間(単位秒 既定値10)", {x = 10}).x * 1000 * 1000
 end
 
+function isEnableBackBgaBokeh()
+	return getTableValue(skin_config.option, "黒帯部分のBGA表示のぼかし", 10106) == 10105
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)

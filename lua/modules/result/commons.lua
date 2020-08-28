@@ -69,6 +69,27 @@ NUM_18PX = {
     DOT_SIZE = 3,
 }
 
+-- EXSCORE以外
+VALUE_ITEM_TEXT = {
+    SRC_X = 199,
+    SRC_Y = 31,
+    W = 221,
+    H = 27,
+}
+
+CHANGE_ARROW = {
+    W = 27,
+    H = 21,
+}
+
+function isOldLayout()
+    return getTableValue(skin_config.option, "レイアウト", 915) == 915
+end
+
+function is2P()
+    return getTableValue(skin_config.option, "スコア位置", 920) == 921
+end
+
 function isDrawGrooveGaugeLabel()
 	return getTableValue(skin_config.option, "グルーヴゲージ部分のラベル表示", 950) == 950
 end

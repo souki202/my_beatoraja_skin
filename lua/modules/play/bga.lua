@@ -10,6 +10,12 @@ local bga = {
 
 local BGA = {}
 
+local BOKEH = {
+    R = 30,
+    QUALITY1 = 15, -- %
+    QUALITY_SKIP = 5,
+}
+
 local _BGA = {
     LEFT_UPPER = {
         X_1 = 509,
@@ -137,7 +143,9 @@ bga.functions.dst = function ()
 
     if isDrawLargeBga() then
         local backBgaX = is1P() and BGA.BACK.X_1 or BGA.BACK.X_2
+        local backBgaY = BGA.BACK.Y
         local w = BGA.BACK.W
+        local h = BGA.BACK.H
         local maskBgaX = backBgaX
         local maskW = w
         if isBgaOnLeft() then
@@ -147,19 +155,69 @@ bga.functions.dst = function ()
 
         dst[#dst+1] = {
             id = versatilityBgaId, op = {170}, timer = 41, stretch = 1, filter = 1, dst = {
-                {x = backBgaX, y = BGA.BACK.Y, w = w, h = BGA.BACK.H}
+                {x = backBgaX, y = backBgaY, w = w, h = h}
             }
         }
 
         dst[#dst+1] = {
             id = "bga", op = {171}, dst = {
-                {x = backBgaX, y = BGA.BACK.Y, w = w, h = BGA.BACK.H}
+                {x = backBgaX, y = backBgaY, w = w, h = h}
             }
         }
 
+        if isEnableBackBgaBokeh() then
+            local numOfBga = 0
+            local hasBga = main_state.option(171)
+            local quality = BOKEH.QUALITY1 / 100
+            local rand = math.random
+            local start = BOKEH.R / 2
+            start = 1
+            for r = start, BOKEH.R, BOKEH.QUALITY_SKIP do
+                local n = math.floor(2 * r * math.pi)
+                local radianOffset = math.random(0, 359) / 180 * math.pi
+                -- local maxAlpha = 255 * r / BOKEH.R
+                local maxAlpha = 255 * gaussian(r, 1, 0, BOKEH.R / 2)
+                -- local a = math.min(maxAlpha, maxAlpha / n / quality) / math.sqrt(math.max(1, BOKEH.R / BOKEH.QUALITY_SKIP))
+                local a = math.min(maxAlpha, maxAlpha / n / quality)
+                myPrint("numOfBga: " .. n * quality)
+                myPrint("maxAlpha: " .. maxAlpha, "alpha: " .. a)
+                local idxes = {}
+                for i = 1, n do
+                    idxes[i] = i
+                end
+                table.shuffle(idxes)
+                if a >= 1 then
+                    for i = 1, n do
+                        local idx = idxes[i]
+                        -- ディザ
+                        if rand() < quality then
+                            local radian = (idx / n) * 2 * math.pi + radianOffset
+                            local x = backBgaX + r * math.cos(radian)
+                            local y = backBgaY + r * math.sin(radian)
+                            if hasBga then
+                                dst[#dst+1] = {
+                                    id = "bga", dst = {
+                                        {x = x, y = y, w = w, h = h, a = a}
+                                    }
+                                }
+                            else
+                                dst[#dst+1] = {
+                                    id = versatilityBgaId, dst = {
+                                        {x = x, y = y, w = w, h = h, a = a}
+                                    }
+                                }
+                            end
+                            numOfBga = numOfBga + 1
+                        end
+                    end
+                end
+            end
+            myPrint("BGA描画枚数: " .. numOfBga)
+        end
+
         dst[#dst+1] = {
             id = "bgaMask", dst = {
-                {x = maskBgaX, y = BGA.BACK.Y, w = maskW, h = BGA.BACK.H}
+                {x = maskBgaX, y = backBgaY, w = maskW, h = h}
             }
         }
     end

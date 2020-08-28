@@ -139,9 +139,13 @@ function hsvToRgb(h, s, v)
     return r, g, b
 end
 
+function gaussian(x, a, avg, v)
+    return a * math.exp(-((x - avg) ^ 2) / (2 * v ^ 2))
+end
+
 SKIN_INFO = {
-    SELECT_VRESION = "2.27",
-    RESULT_VERSION = "2.35",
+    SELECT_VRESION = "2.40",
+    RESULT_VERSION = "2.50",
     DECIDE_VERSION = "1.10",
     PLAY_VERSION = "1.35",
 }

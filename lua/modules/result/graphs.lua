@@ -3,6 +3,7 @@ require("modules.result.commons")
 require("modules.commons.input")
 local main_state = require("main_state")
 local playLog = require("modules.commons.playlog")
+local ranking = require("modules.result.ranking")
 
 
 local notesGraph = {
@@ -78,15 +79,16 @@ local GRAPH = {
 
     TAB = {
         X = function (self) return self.WND_GAUGE.X + self.WND_GAUGE.W end,
-        START_Y = function (self) return self.WND_GAUGE.Y + self.WND_GAUGE.H - self.TAB.H - 14 end,
-        INTERVAL_Y = 154,
+        START_Y = function (self) return self.WND_GAUGE.Y + self.WND_GAUGE.H - self.TAB.H - 1 end,
+        INTERVAL_Y = 106,
         W = 45,
-        H = 158,
+        H = 126,
         TYPES = {
             GROOVE = 1,
             SCORE = 2,
+            RANKING = 3,
         },
-        PREFIX = {"grooveGauge", "scoreGauge"}
+        PREFIX = {"grooveGauge", "scoreGauge", "ranking"}
     },
 
     PREFIX = {"notes", "judges", "el", "timing"}
@@ -131,6 +133,13 @@ local SCORE_GRAPH = {
             {0, 0, 0}, -- f
             {0, 0, 0}, -- f_2
         }
+    },
+
+    CANT_USE_MSG = {
+        SIZE = 24,
+        X = function () return GRAPH.WND_GAUGE.X + 24 end,
+        Y = function () return GRAPH.WND_GAUGE.Y + 290 end,
+        W = 587,
     },
 
     SMOOTH = {
@@ -205,16 +214,20 @@ end
 notesGraph.functions.change2p = function ()
     GRAPH.WND_GAUGE.X = LEFT_X
     GRAPH.WND_JUDGE.X = LEFT_X
+    ranking.change2p()
 end
 
 notesGraph.functions.dstScoreGraph = function ()
+    local data = playLog.loadLog()
     local skin = {destination = {
         {id = "white", dst = {
             {x = GRAPH.GAUGE.X(GRAPH), y = GRAPH.GAUGE.Y(GRAPH), w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H, r = 0, g = 0, b = 0, a = 96}
-        }}
+        }},
+        {id = "noScoreGraphMsg", draw = function () return #data == 0 end, dst = {
+            {x = SCORE_GRAPH.CANT_USE_MSG.X(), y = SCORE_GRAPH.CANT_USE_MSG.Y(), w = SCORE_GRAPH.CANT_USE_MSG.W, h = SCORE_GRAPH.CANT_USE_MSG.SIZE}
+        }},
     }}
     local dst = skin.destination
-    local data = playLog.loadLog()
     if #data == 0 then return skin end
 
     local scoreGraphType = notesGraph.functions.getScoreGraphType()
@@ -458,6 +471,7 @@ notesGraph.functions.load = function ()
             -- tab
             {id = "grooveGaugeTab", src = 0, x = 0, y = 93, w = GRAPH.TAB.W, h = GRAPH.TAB.H},
             {id = "scoreGaugeTab", src = 0, x = 0, y = 93 + GRAPH.TAB.H, w = GRAPH.TAB.W, h = GRAPH.TAB.H},
+            {id = "rankingTab", src = 0, x = 0, y = 93 + GRAPH.TAB.H * 2, w = GRAPH.TAB.W, h = GRAPH.TAB.H},
             -- スコアグラフを隠すための背景
             {id = "scoreGraphMaskBg", src = getBgSrc(), x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = HEIGHT - GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.H - GRAPH.WND_GAUGE.SHADOW, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW*2},
         },
@@ -466,6 +480,9 @@ notesGraph.functions.load = function ()
              -- groove gaugeの値
             {id = "grooveGaugeValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = 185, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 3, ref = 107, align = 0},
             {id = "grooveGaugeValueAfterDot", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = 185, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = 1, ref = 407, align = 0, padding = 1},
+        },
+        text = {
+            {id = "noScoreGraphMsg", font = 0, size = 24, constantText = "スコアグラフは, プレイスキン併用かつプレイスキンで\nログ出力時のみ利用可能です.\nまた, コースリザルトでは表示することができません."}
         },
         gaugegraph = {
             {id = "grooveGaugeGraphBg", assistClearBGColor = "440044aa", assistAndEasyFailBGColor = "004444aa", grooveFailBGColor = "004400aa", grooveClearAndHardBGColor = "440000aa", exHardBGColor = "444400aa", hazardBGColor = "444444aa"},
@@ -483,20 +500,20 @@ notesGraph.functions.load = function ()
             {
                 id = 10102, timer = function ()
                     -- タブ切り替え
-                    if notesGraph.didLoadPlayData then
-                        if isPressedUp() then
-                            myPrint("move tab up")
-                            notesGraph.activeTabIdx = notesGraph.activeTabIdx + 1
-                            if notesGraph.activeTabIdx > #GRAPH.TAB.PREFIX then
-                                notesGraph.activeTabIdx = 1
-                            end
-                        elseif isPressedDown() then
-                            myPrint("move tab down")
-                            notesGraph.activeTabIdx = notesGraph.activeTabIdx - 1
-                            if notesGraph.activeTabIdx < 1 then
-                                notesGraph.activeTabIdx = #GRAPH.TAB.PREFIX
-                            end
+                    if isPressedUp() then
+                        myPrint("move tab up")
+                        notesGraph.activeTabIdx = notesGraph.activeTabIdx - 1
+                        if notesGraph.activeTabIdx < 1 then
+                            notesGraph.activeTabIdx = #GRAPH.TAB.PREFIX
                         end
+                        myPrint("nowTab: " .. notesGraph.activeTabIdx)
+                    elseif isPressedDown() then
+                        myPrint("move tab down")
+                        notesGraph.activeTabIdx = notesGraph.activeTabIdx + 1
+                        if notesGraph.activeTabIdx > #GRAPH.TAB.PREFIX then
+                            notesGraph.activeTabIdx = 1
+                        end
+                        myPrint("nowTab: " .. notesGraph.activeTabIdx)
                     end
                     return 1
                 end
@@ -513,6 +530,8 @@ notesGraph.functions.load = function ()
         opImgs[#opImgs+1] = "randomOptionImgs" .. i
     end
     skin.imageset[#skin.imageset+1] = {id = "randomOptionImageSet", ref = 42, images = opImgs}
+
+    mergeSkin(skin, ranking.load(function () return notesGraph.activeTabIdx == 3 end))
     return skin
 end
 
@@ -600,31 +619,33 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
         }
     })
 
-    -- 非アクティブタブを下に
+    mergeSkin(skin, ranking.dstMaskBg())
+
+    -- 非アクティブタブをフレームの下に
     for i = 1, #GRAPH.TAB.PREFIX do
-        table.insert(skin.destination,{
-            id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx ~= i and notesGraph.didLoadPlayData end, dst = {
-                {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.START_Y(GRAPH) - GRAPH.TAB.INTERVAL_Y * (i - 1), w = GRAPH.TAB.W, h = GRAPH.TAB.H}
-            }
-        })
+        local idPrefix = GRAPH.TAB.PREFIX[i]
+        if idPrefix == "scoreGauge" and not notesGraph.didLoadPlayData then
+            table.insert(skin.destination,{
+                id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx ~= i end, dst = {
+                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.START_Y(GRAPH) - GRAPH.TAB.INTERVAL_Y * (i - 1), w = GRAPH.TAB.W, h = GRAPH.TAB.H, r = 128, g = 128, b = 128}
+                }
+            })
+        else
+            table.insert(skin.destination,{
+                id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx ~= i end, dst = {
+                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.START_Y(GRAPH) - GRAPH.TAB.INTERVAL_Y * (i - 1), w = GRAPH.TAB.W, h = GRAPH.TAB.H}
+                }
+            })
+        end
     end
     table.insert(skin.destination, {
-        id = "grooveGaugeFrame", dst = {
+        id = "grooveGaugeFrame", draw = function () return notesGraph.activeTabIdx == 1 or notesGraph.activeTabIdx == 2 end, dst = {
             {
                 x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.SHADOW,
                 w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW * 2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW * 2
             }
         }
     })
-    -- アクティブタブを上に
-    for i = 1, #GRAPH.TAB.PREFIX do
-        table.insert(skin.destination,{
-            id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx == i and notesGraph.didLoadPlayData end, dst = {
-                {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.START_Y(GRAPH) - GRAPH.TAB.INTERVAL_Y * (i - 1), w = GRAPH.TAB.W, h = GRAPH.TAB.H}
-            }
-        })
-    end
-
     return skin
 end
 
@@ -675,10 +696,34 @@ notesGraph.functions.dstJudgeGaugeArea = function ()
     return skin
 end
 
+notesGraph.functions.dstActiveTab = function ()
+    local skin = {destination = {}}
+    -- アクティブタブを上に
+    for i = 1, #GRAPH.TAB.PREFIX do
+        local idPrefix = GRAPH.TAB.PREFIX[i]
+        if idPrefix == "scoreGauge" and not notesGraph.didLoadPlayData then
+            table.insert(skin.destination,{
+                id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx == i end, dst = {
+                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.START_Y(GRAPH) - GRAPH.TAB.INTERVAL_Y * (i - 1), w = GRAPH.TAB.W, h = GRAPH.TAB.H, r = 128, g = 128, b = 128}
+                }
+            })
+        else
+            table.insert(skin.destination,{
+                id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx == i end, dst = {
+                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.START_Y(GRAPH) - GRAPH.TAB.INTERVAL_Y * (i - 1), w = GRAPH.TAB.W, h = GRAPH.TAB.H}
+                }
+            })
+        end
+    end
+    return skin
+end
+
 notesGraph.functions.dst= function ()
     local skin = {destination = {}}
-    mergeSkin(skin, notesGraph.functions.dstGrooveGaugeArea())
     mergeSkin(skin, notesGraph.functions.dstJudgeGaugeArea())
+    mergeSkin(skin, notesGraph.functions.dstGrooveGaugeArea())
+    mergeSkin(skin, ranking.dst())
+    mergeSkin(skin, notesGraph.functions.dstActiveTab())
     return skin
 end
 

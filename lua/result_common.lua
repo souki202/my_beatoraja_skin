@@ -4,6 +4,7 @@ require("modules.result.commons")
 local main_state = require("main_state")
 local resultObtained = require("modules.result.result_obtained")
 local graphs = require("modules.result.graphs")
+local ir = require("modules.result.ir")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048
@@ -19,19 +20,6 @@ local STAGE_FILE = {
 local DEVIDING_LINE_BASE = {
     OFFSET_Y = -6,
     H = 2,
-}
-
--- EXSCORE以外
-local VALUE_ITEM_TEXT = {
-    SRC_X = 199,
-    SRC_Y = 31,
-    W = 221,
-    H = 27,
-}
-
-local CHANGE_ARROW = {
-    W = 27,
-    H = 21,
 }
 
 local TITLE_BAR = {
@@ -245,50 +233,6 @@ local JUDGE = {
     },
 
     PREFIX = {"perfect", "great", "good", "bad", "poor", "epoor"},
-}
-
-local IR = {
-    WND = {
-        X = 734,
-        Y = 744,
-        W = 290,
-        H = 70,
-    },
-
-    SUFFIX_S_TEXT = {
-        Y = 10,
-        W = 18,
-        H = 17,
-    },
-    SUFFIX_L_TEXT = {
-        Y = 10,
-        W = 23,
-        H = 23,
-    },
-
-    TEXT = {
-        X = 90,
-        Y = 42,
-        W = 110,
-        H = 22
-    },
-
-    ARROW = {
-        X = 120,
-        Y = 9,
-    },
-
-    NUM = {
-        DIGIT = 5,
-        OLD = {
-            X = 85, -- windowへの相対座標
-            Y = 12, -- これも
-        },
-        NOW = {
-            X = 231,
-            Y = 12,
-        },
-    },
 }
 
 local LAMP = {
@@ -600,14 +544,6 @@ function makeHeader()
     return header
 end
 
-local function isOldLayout()
-    return getTableValue(skin_config.option, "レイアウト", 915) == 915
-end
-
-local function is2P()
-    return getTableValue(skin_config.option, "スコア位置", 920) == 921
-end
-
 local function easeOut(t, s, e, d)
     local c = e - s
     local t2 = t / d
@@ -624,8 +560,6 @@ end
 
 local function initialize(skin)
     if isOldLayout() == false then
-        IR.WND.X = LEFT_X
-        IR.WND.Y = 564
         LAMP.WND.X = LEFT_X + 360
         LAMP.WND.Y = 564
         COMBO.WND.Y = 384
@@ -641,7 +575,6 @@ local function initialize(skin)
         RANKS.X = SCORE.WND.X + 491
         NEW_RECORD.SCORE.X = SCORE.WND.X + 310
         -- ranking, lampは左右反転
-        IR.WND.X = WIDTH - IR.WND.X - IR.WND.W
         LAMP.WND.X = WIDTH - LAMP.WND.X - LAMP.WND.W
         TIMING.WND.X = WIDTH - TIMING.WND.X - TIMING.WND.W
     end
@@ -729,6 +662,9 @@ local function main()
         {id = 0, path = "../result/parts/parts.png"},
         {id = 1, path = "../result/parts/shine.png"},
         {id = 2, path = "../result/parts/shine_circle.png"},
+        {id = 3, path = "../result/parts/largelamp/" .. LARGE_LAMP.PREFIX[CLEAR_TYPE] .. ".png"},
+        {id = 4, path = "../result/parts/ranking/ranks.png"},
+        {id = 5, path = "../result/parts/ranking/active.png"},
         {id = 20, path = "../result/noimage/*.png"},
         {id = 100, path = "../result/background/isclear/clear/*.png"},
         {id = 101, path = "../result/background/isclear/failed/*.png"},
@@ -754,9 +690,6 @@ local function main()
         {id = 128, path = "../result/background/lamps/perfect/*.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
-    table.insert(skin.source, {
-        id = 3, path = "../result/parts/largelamp/" .. LARGE_LAMP.PREFIX[CLEAR_TYPE] .. ".png"
-    })
 
     skin.image = {
         {id = "noImage", src = 20, x = 0, y = 0, w = -1, h = -1},
@@ -790,12 +723,8 @@ local function main()
         {id = "earlyText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 396, w = JUDGE.EL_TEXT.W, h = JUDGE.EL_TEXT.H},
         {id = "lateText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 396 + JUDGE.EL_TEXT.H, w = JUDGE.EL_TEXT.W, h = JUDGE.EL_TEXT.H},
 
-        {id = "irSuffix18px", src = 0, x = 0, y = 70, w = IR.SUFFIX_S_TEXT.W, h = IR.SUFFIX_S_TEXT.H},
-        {id = "irSuffix24px", src = 0, x = 18, y = 70, w = IR.SUFFIX_L_TEXT.W, h = IR.SUFFIX_L_TEXT.H},
-        {id = "irText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 352, w = IR.TEXT.W, h = IR.TEXT.H},
-
         -- ランプ
-        {id = "lampText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 352 + IR.TEXT.H, w = LAMP.TEXT.W, h = LAMP.TEXT.H},
+        {id = "lampText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 374, w = LAMP.TEXT.W, h = LAMP.TEXT.H},
         {id = "lampOld", src = 0, x = 845, y = 0, w = LAMP.OLD.W, h = LAMP.OLD.H * 11, len = 11, divy = 11, ref = 371},
         {id = "lampNow", src = 0, x = 845 + LAMP.OLD.W, y = 0, w = LAMP.NOW.W, h = LAMP.NOW.H * 11, len = 11, divy = 11, ref = 370},
 
@@ -887,9 +816,6 @@ local function main()
         {id = "comboOldValue"     , src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 11, h = NUM_24PX.H, divx = 11, digit = COMBO.DIGIT, ref = 173, align = 0},
         {id = "comboDiffValue"    , src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = 0             , w = NUM_24PX.W * 12, h = NUM_24PX.H*2, divx = 12, divy = 2, digit = COMBO.DIGIT+1, ref = 175, align = 1, zeropadding = 0},
         {id = "comboBreakValue"   , src = NUM_36PX.SRC, x = NUM_36PX.SRC_X, y = NUM_36PX.SRC_Y, w = NUM_36PX.W * 11, h = NUM_36PX.H, divx = 11, digit = COMBO.DIGIT, ref = 425, align = 0},
-        -- IR
-        {id = "irOldValue", src = NUM_18PX.SRC, x = NUM_18PX.SRC_X, y = NUM_18PX.SRC_Y, w = NUM_18PX.W * 11, h = NUM_18PX.H, divx = 11, digit = IR.NUM.DIGIT, ref = 182, align = 0},
-        {id = "irNowValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 11, h = NUM_24PX.H, divx = 11, digit = IR.NUM.DIGIT, ref = 179, align = 0},
         -- タイミング周り
         {id = "standardValue", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = TIMING.NUM.DIGIT, ref = 376, align = 0},
         {id = "standardValueAfterDot", src = NUM_24PX.SRC, x = NUM_24PX.SRC_X, y = NUM_24PX.SRC_Y, w = NUM_24PX.W * 10, h = NUM_24PX.H, divx = 10, digit = TIMING.NUM_AFTER_DOT.DIGIT, ref = 377, align = 0, padding = 1},
@@ -934,6 +860,7 @@ local function main()
 
     resultObtained.load(skin)
     mergeSkin(skin, graphs.load())
+    mergeSkin(skin, ir.load())
 
     skin.destination = {
         -- 背景
@@ -963,6 +890,7 @@ local function main()
     }
 
     mergeSkin(skin, graphs.dst())
+    mergeSkin(skin, ir.dst())
 
     -- タイトル部分
     destinationStaticBaseWindowResult(skin, TITLE_BAR.WND.X, TITLE_BAR.WND.Y, TITLE_BAR.WND.W, TITLE_BAR.WND.H)
@@ -1244,32 +1172,6 @@ local function main()
             }
         })
     end
-
-
-    -- IR
-    destinationStaticBaseWindowResult(skin, IR.WND.X, IR.WND.Y, IR.WND.W, IR.WND.H)
-    table.insert(skin.destination, {
-        id = "irText", dst = {
-            {x = IR.WND.X + IR.TEXT.X, y = IR.WND.Y + IR.TEXT.Y, w = IR.TEXT.W, h = IR.TEXT.H}
-        }
-    })
-    dstNumberRightJustify(skin, "irOldValue", IR.WND.X + IR.NUM.OLD.X, IR.WND.Y + IR.NUM.OLD.Y, NUM_18PX.W, NUM_18PX.H, IR.NUM.DIGIT)
-    table.insert(skin.destination, {
-        id = "irSuffix18px", dst = {
-            {x = IR.WND.X + IR.NUM.OLD.X, y = IR.WND.Y + IR.SUFFIX_S_TEXT.Y, w = IR.SUFFIX_S_TEXT.W, h = IR.SUFFIX_S_TEXT.H}
-        }
-    })
-    table.insert(skin.destination, {
-        id = "changeArrow", dst = {
-            {x = IR.WND.X + IR.ARROW.X, y = IR.WND.Y + IR.ARROW.Y, w = CHANGE_ARROW.W, h = CHANGE_ARROW.H}
-        }
-    })
-    dstNumberRightJustify(skin, "irNowValue", IR.WND.X + IR.NUM.NOW.X, IR.WND.Y + IR.NUM.NOW.Y, NUM_24PX.W, NUM_24PX.H, IR.NUM.DIGIT)
-    table.insert(skin.destination, {
-        id = "irSuffix24px", dst = {
-            {x = IR.WND.X + IR.NUM.NOW.X, y = IR.WND.Y + IR.SUFFIX_L_TEXT.Y, w = IR.SUFFIX_L_TEXT.W, h = IR.SUFFIX_L_TEXT.H}
-        }
-    })
 
     -- lamp
     destinationStaticBaseWindowResult(skin, LAMP.WND.X, LAMP.WND.Y, LAMP.WND.W, LAMP.WND.H)

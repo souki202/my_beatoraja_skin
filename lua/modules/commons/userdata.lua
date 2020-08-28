@@ -50,10 +50,10 @@ function createRankAndStaminaTable()
             sumStamina = sumStamina + 1
         elseif i <= 100 then
             next = f2(i)
-            sumStamina = sumStamina + 0.6
+            sumStamina = sumStamina + 0.5
         elseif i <= 300 then
             next = f3(i)
-            sumStamina = sumStamina + 0.3
+            sumStamina = sumStamina + 0.25
         elseif i < 500 then
             next = f4(i)
         else

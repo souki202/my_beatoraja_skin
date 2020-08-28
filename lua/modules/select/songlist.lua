@@ -226,7 +226,7 @@ songlist.functions.load = function ()
         table.insert(skin.image,
             {id = "barCenterFrame", src = 10, x = 0, y = 1024 - SONG_LIST.CENTER_FRAME.H, w = SONG_LIST.CENTER_FRAME.W, h = SONG_LIST.CENTER_FRAME.H}
         )
-        table.insert(skin.text, 
+        table.insert(skin.text,
             {id = "bartext", font = 0, size = SONG_LIST.BAR.FONT_SIZE, align = 2, overflow = 1}
         )
     else
