@@ -18,6 +18,7 @@ local densityGraph = require("modules.select.density_graph")
 local searchBox = require("modules.select.search_box")
 local menu = require("modules.select.menu")
 local clock = require("modules.select.clock")
+local ir = require("modules.select.ir")
 
 local main_state = require("main_state")
 
@@ -60,9 +61,15 @@ local EXSCORE_AREA = {
 
     RANKING_NUMBER_W = commons.NUM_28PX.W,
     RANKING_NUMBER_H = commons.NUM_28PX.H,
-    IR_Y = 311,
-    IR_W = 26,
-    IR_H = 22,
+    IR = {
+        Y = 311,
+        W = 26,
+        H = 22,
+        NUM = {
+            W = 11,
+            H = 15,
+        }
+    },
 }
 
 local RIVAL = {
@@ -125,40 +132,6 @@ local DENSITY_INFO = {
         H = 21,
     }
 }
-
--- IR
-local IR = {
-    TEXT_W = 99,
-    TEXT_H = 18,
-    NUMBER_NUM_W = 11,
-    NUMBER_NUM_H = 15,
-    NUMBER_PERCENT_W = 7,
-    NUMBER_PERCENT_H = 9,
-    PERCENT_W = 9,
-    PERCENT_H = 9,
-    DIGIT = 5,
-
-    X = 701,
-    Y = 229,
-    INTERVAL_X = 198,
-    INTERVAL_Y = 25,
-
-    LOADING = {
-        FRAME_W = 249,
-        FRAME_H = 62,
-        FRAME_X = 681,
-        FRAME_Y = 3,
-        WAVE_LEVEL = 5,
-        WAVE_W = 4,
-        WAVE_H = 25,
-        WAVE_TIME_INTERVAL = 500, -- ms
-        WAITING_TEXT_W = 138,
-        WAITING_TEXT_H = 21,
-        LOADING_TEXT_W = 181,
-        LOADING_TEXT_H = 21,
-    },
-}
-
 
 -- オプションウィンドウ
 local OPTION_INFO = {
@@ -619,6 +592,8 @@ local function main()
 
     skin.image = {
         {id = "baseFrame", src = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT},
+        -- IR用文字画像
+        {id = "irRankingText", src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + 22 * 4, w = EXSCORE_AREA.IR.W, h = EXSCORE_AREA.IR.H},
         -- レベルアイコン
         {id = "nonActiveBeginnerIcon", src = 0, x = LARGE_LEVEL.SRC_X, y = commons.PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
         {id = "nonActiveNormalIcon"  , src = 0, x = LARGE_LEVEL.SRC_X + LARGE_LEVEL.ICON_W*1, y = commons.PARTS_OFFSET, w = LARGE_LEVEL.ICON_W, h = LARGE_LEVEL.NONACTIVE_ICON_H},
@@ -759,22 +734,6 @@ local function main()
         {id = "helpPlayKey", src = 3, x = 397, y = 30, w = HELP_TEXT2_W, h = HELP_TEXT_H},
         {id = "helpDetailReplayKey", src = 3, x = 397, y = 398, w = HELP_TEXT2_W, h = 248},
 
-
-        -- IR用ドットと%
-        {id = "irDot", src = 0, x = commons.NUM_28PX.SRC_X + IR.NUMBER_PERCENT_W * 10 + 15, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H},
-        {id = "irPercent", src = 0, x = commons.NUM_28PX.SRC_X + IR.NUMBER_PERCENT_W * 11 + 15, y = commons.PARTS_OFFSET + 68, w = IR.PERCENT_W, h = IR.PERCENT_H},
-        -- IR用文字画像
-        {id = "irRankingText", src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + 22 * 4, w = EXSCORE_AREA.IR_W, h = EXSCORE_AREA.IR_H},
-        -- IR loading
-        {id = "irLoadingFrame"   , src = 0, x = 965, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.FRAME_W, h = IR.LOADING.FRAME_H},
-        {id = "irLoadingWave1"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*0, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
-        {id = "irLoadingWave2"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*1, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
-        {id = "irLoadingWave3"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*2, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
-        {id = "irLoadingWave4"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*3, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
-        {id = "irLoadingWave5"   , src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*4, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
-        {id = "irLoadingWaitText", src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*5, y = commons.PARTS_OFFSET + 771, w = IR.LOADING.WAITING_TEXT_W, h = IR.LOADING.WAITING_TEXT_H},
-        {id = "irLoadingLoadText", src = 0, x = 965 + IR.LOADING.FRAME_W + IR.LOADING.WAVE_W*5, y = commons.PARTS_OFFSET + 771 + IR.LOADING.WAITING_TEXT_H, w = IR.LOADING.LOADING_TEXT_W, h = IR.LOADING.LOADING_TEXT_H},
-
         -- 注目アイコン
         {id = "attensionIcon", src = 0, x = 1846, y = commons.PARTS_OFFSET + 874, w = ATTENSION_SIZE, h = ATTENSION_SIZE},
 
@@ -795,20 +754,8 @@ local function main()
     -- オプションはrefactorしたいけどtimerの都合上リファクタリングはしんどい
     loadBaseSelect(skin)
 
-
-    -- IR部分の文字の画像読み込み
-    local irTexts = {
-        "Max", "Perfect", "Fullcombo", "Exhard", "Hard", "Clear", "Easy", "Lassist", "Aassist", "Failed", "Player", "NumOfFullcombo", "NumOfClear"
-    }
-    for i, t in ipairs(irTexts) do
-        table.insert(skin.image, {
-            id = "ir" .. t .. "Text", src = 0, x = 1603, y = commons.PARTS_OFFSET + 531 + IR.TEXT_H * (i - 1), w = IR.TEXT_W, h = IR.TEXT_H
-        })
-    end
-
     -- 汎用的な24px数値
     loadNumbers(skin, NUMBERS_24PX.ID, 0, 1434, commons.PARTS_OFFSET + 421, NUMBERS_24PX.W * 10, NUMBERS_24PX.H, 10, 1)
-
 
     -- 密度グラフ
     skin.judgegraph = {
@@ -926,37 +873,13 @@ local function main()
         -- exscore用
         {id = "richExScore",  src = 0, x = 771, y = commons.PARTS_OFFSET + 347, w = EXSCORE_AREA.NUMBER_W * 10, h = EXSCORE_AREA.NUMBER_H, divx = 10, digit = 5, ref = 71, align = 0},
         {id = "rivalExScore", src = 0, x = 771, y = commons.PARTS_OFFSET + 347, w = EXSCORE_AREA.NUMBER_W * 10, h = EXSCORE_AREA.NUMBER_H, divx = 10, digit = 5, ref = 271, align = 0},
-        -- IR
+        -- IR(EXSCORE周辺の表示)
         {id = "irRanking"         , src = 0, x = commons.NUM_28PX.SRC_X, y = commons.NUM_28PX.SRC_Y, w = commons.NUM_28PX.W*10, h = commons.NUM_28PX.H, divx = 10, digit = 5, ref = 179, align = 0},
-        {id = "irPlayerForRanking", src = 0, x = commons.NUM_28PX.SRC_X, y = commons.PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, digit = 5, ref = 200, align = 0},
+        {id = "irPlayerForRanking", src = 0, x = commons.NUM_28PX.SRC_X, y = commons.PARTS_OFFSET + 89, w = EXSCORE_AREA.IR.NUM.W * 10, h = EXSCORE_AREA.IR.NUM.H, divx = 10, digit = 5, ref = 200, align = 0},
         -- オプション
         {id = "notesDisplayTime", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H, w = OPTION_INFO.NUMBER_W * 10, h = OPTION_INFO.NUMBER_H, divx = 10, digit = 4, ref = 312},
         {id = "judgeTiming", src = 2, x = 1111, y = PARTS_TEXTURE_SIZE - OPTION_INFO.NUMBER_H * 2, w = OPTION_INFO.NUMBER_W * 12, h = OPTION_INFO.NUMBER_H * 2, divx = 12, divy = 2, digit = 4, ref = 12},
     }
-    -- IR irTextsに対応する値を入れていく
-    -- {人数, percentage, afterdot} で, irTextsに対応するrefsを入れる
-    local irNumbers = {
-        -- MAXから
-        {224, 225, 240}, {222, 223, 239}, {218, 219, 238}, {208, 209, 233}, {216, 217, 237}, {214, 215, 236},
-        -- ここからEASY
-        {212, 213, 235}, {206, 207, 232}, {204, 205, 231}, {210, 211, 234},
-        -- ここからplayer
-        {200, 0, 0}, {228, 229, 242}, {226, 227, 241}
-    }
-    for i, refs in ipairs(irNumbers) do
-        local type = irTexts[i]
-        table.insert(skin.value, {
-            id = "ir" .. type .. "Number", src = 0, x = commons.NUM_28PX.SRC_X, y = commons.PARTS_OFFSET + 89, w = IR.NUMBER_NUM_W * 10, h = IR.NUMBER_NUM_H, divx = 10, divy = 1, digit = IR.DIGIT, ref = refs[1]
-        })
-        if refs[2] ~= 0 then
-            table.insert(skin.value, {
-                id = "ir" .. type .. "Percentage", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 3, ref = refs[2]
-            })
-            table.insert(skin.value, {
-                id = "ir" .. type .. "PercentageAfterDot", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W, y = commons.PARTS_OFFSET + 68, w = IR.NUMBER_PERCENT_W * 10, h = IR.NUMBER_PERCENT_H, divx = 10, divy = 1, digit = 1, ref = refs[3], padding = 1
-            })
-        end
-    end
 
     -- 各種ステータス用数値(パーツ共通)
     local commonStatusTexts = {
@@ -1039,6 +962,7 @@ local function main()
     mergeSkin(skin, searchBox.load())
     mergeSkin(skin, menu.load())
     mergeSkin(skin, clock.load())
+    mergeSkin(skin, ir.load())
 
     skin.destination = {}
 
@@ -1072,6 +996,7 @@ local function main()
 
     -- ユーザ情報出力周り
     user.dst(skin)
+    mergeSkin(skin, ir.dst())
 
     -- 選曲スライダー
     table.insert(skin.destination, {
@@ -1249,22 +1174,22 @@ local function main()
     })
     table.insert(skin.destination, {
         id = "irRankingText", dst = {
-            {x = EXSCORE_AREA.TEXT_X, y = EXSCORE_AREA.IR_Y, w = EXSCORE_AREA.IR_W, h = EXSCORE_AREA.IR_H}
+            {x = EXSCORE_AREA.TEXT_X, y = EXSCORE_AREA.IR.Y, w = EXSCORE_AREA.IR.W, h = EXSCORE_AREA.IR.H}
         }
     })
     table.insert(skin.destination, {
         id = "irRanking", dst = {
-            {x = EXSCORE_AREA.NUMBER_X - IR.NUMBER_NUM_W * 5 - commons.NUM_28PX.W * 6, y = EXSCORE_AREA.IR_Y, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H}
+            {x = EXSCORE_AREA.NUMBER_X - EXSCORE_AREA.IR.NUM.W * 5 - commons.NUM_28PX.W * 6, y = EXSCORE_AREA.IR.Y, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H}
         }
     })
     table.insert(skin.destination, {
         id = "slashForRanking", op = {-606}, dst = {
-            {x = EXSCORE_AREA.NUMBER_X - IR.NUMBER_NUM_W * 5 - commons.NUM_28PX.W * 1, y = EXSCORE_AREA.IR_Y, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H}
+            {x = EXSCORE_AREA.NUMBER_X - EXSCORE_AREA.IR.NUM.W * 5 - commons.NUM_28PX.W * 1, y = EXSCORE_AREA.IR.Y, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H}
         }
     })
     table.insert(skin.destination, {
-        id = "irPlayerNumber", dst = {
-            {x = EXSCORE_AREA.NUMBER_X - IR.NUMBER_NUM_W * 5, y = EXSCORE_AREA.IR_Y, w = IR.NUMBER_NUM_W, h = IR.NUMBER_NUM_H}
+        id = "irPlayerForRanking", dst = {
+            {x = EXSCORE_AREA.NUMBER_X - EXSCORE_AREA.IR.NUM.W * 5, y = EXSCORE_AREA.IR.Y, w = EXSCORE_AREA.IR.NUM.W, h = EXSCORE_AREA.IR.NUM.H}
         }
     })
     -- ライバル名とexScore
@@ -1367,75 +1292,6 @@ local function main()
                 })
             end
         end
-    end
-
-    -- IR
-    local irTextOrder = {
-        {"Max", "Perfect", "Fullcombo", "Exhard", "Hard", "Clear", "Easy",},
-        {"Player", "NumOfFullcombo", "NumOfClear", "", "Lassist", "Aassist", "Failed"}
-    }
-    for i, _ in ipairs(irTextOrder) do
-        for j, type in ipairs(irTextOrder[i]) do
-            if irTextOrder[i][j] ~= "" then
-                local baseX = IR.X + IR.INTERVAL_X * (i - 1)
-                local baseY = IR.Y - IR.INTERVAL_Y * (j - 1)
-                -- 画像
-                table.insert(skin.destination, {
-                    id = "ir" .. type .. "Text", dst = {
-                        {x = baseX, y = baseY, w = IR.TEXT_W, h = IR.TEXT_H}
-                    }
-                })
-                -- 数値
-                table.insert(skin.destination, {
-                    id = "ir" .. type .. "Number", dst = {
-                        {x = baseX + 146 - IR.NUMBER_NUM_W * IR.DIGIT, y = baseY + 1, w = IR.NUMBER_NUM_W, h = IR.NUMBER_NUM_H}
-                    }
-                })
-                -- player以外はパーセンテージも
-                if irTextOrder[i][j] ~= "Player" then
-                    table.insert(skin.destination, {
-                        id = "ir" .. type .. "Percentage", dst = {
-                            {x = baseX + 168 - IR.NUMBER_PERCENT_W * 3, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
-                        }
-                    })
-                    table.insert(skin.destination, {
-                        id = "irDot", op = {-606}, dst = {
-                            {x = baseX + 168, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
-                        }
-                    })
-                    table.insert(skin.destination, {
-                        id = "ir" .. type .. "PercentageAfterDot", dst = {
-                            {x = baseX + 178 - IR.NUMBER_PERCENT_W * 1, y = baseY + 1, w = IR.NUMBER_PERCENT_W, h = IR.NUMBER_PERCENT_H}
-                        }
-                    })
-                    table.insert(skin.destination, {
-                        id = "irPercent", op = {-606}, dst = {
-                            {x = baseX + 179, y = baseY + 1, w = IR.PERCENT_W, h = IR.PERCENT_H}
-                        }
-                    })
-                end
-            end
-        end
-    end
-    -- IRロード表示
-    table.insert(skin.destination, {
-        id = "irLoadingFrame", op = {606, -1, -1030}, dst = {
-            {x = IR.LOADING.FRAME_X, y = IR.LOADING.FRAME_Y, w = IR.LOADING.FRAME_W, h = IR.LOADING.FRAME_H}
-        }
-    })
-    table.insert(skin.destination, {
-        id = "irLoadingLoadText", op = {606, -1, -1030}, dst = {
-            {x = IR.LOADING.FRAME_X + 49, y = IR.LOADING.FRAME_Y + 20, w = IR.LOADING.LOADING_TEXT_W, h = IR.LOADING.LOADING_TEXT_H}
-        }
-    })
-    for i = 1, IR.LOADING.WAVE_LEVEL do
-        table.insert(skin.destination, {
-            id = "irLoadingWave" .. i, op = {606, -1, -1030}, loop = 0, timer = 11, dst = {
-                {time = 0, a = 0, acc = 3, x = IR.LOADING.FRAME_X + 19 + IR.LOADING.WAVE_W * (i - 1), y = IR.LOADING.FRAME_Y + 18, w = IR.LOADING.WAVE_W, h = IR.LOADING.WAVE_H},
-                {time = IR.LOADING.WAVE_TIME_INTERVAL * i, a = 255},
-                {time = IR.LOADING.WAVE_TIME_INTERVAL * (IR.LOADING.WAVE_LEVEL + 1)}
-            }
-        })
     end
 
     -- ボタン

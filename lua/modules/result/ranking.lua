@@ -34,7 +34,7 @@ local RANKING = {
             H = 24,
         },
         NUM = {
-            X = function (self) return self.TOP3.AREA.X(self) + 498 end,
+            X = function (self) return self.TOP3.AREA.X(self) + 470 end,
             Y = function (self, idx) return self.TOP3.AREA.Y(self, idx) + 27 end,
             W = 28,
             H = 37,
@@ -64,7 +64,7 @@ local RANKING = {
            Y = function (self, idx) return self.TOP10.AREA.Y(self, idx) + 16 end,
         },
         NUM = {
-            X = function (self) return self.TOP10.AREA.X(self) + 528 end,
+            X = function (self) return self.TOP10.AREA.X(self) + 508 end,
             Y = function (self, idx) return self.TOP10.AREA.Y(self, idx) + 18 end,
             W = 20,
             H = 26,
@@ -150,13 +150,13 @@ ranking.functions.load = function (isShowRankingFunc)
             value = function () return getNum(390 + (i - 1)) end,
             images = largeLamps
         }
-        vals[#vals+1] = {id = RANKING.ID_PREFIX .. i .. "ExScore", src = 4, x = 0, y = 234, w = RANKING.TOP3.NUM.W * 10, h = RANKING.TOP3.NUM.H, divx = 10, ref = 380 + (i - 1), digit = 4}
+        vals[#vals+1] = {id = RANKING.ID_PREFIX .. i .. "ExScore", src = 4, x = 0, y = 234, w = RANKING.TOP3.NUM.W * 10, h = RANKING.TOP3.NUM.H, divx = 10, ref = 380 + (i - 1), digit = 5}
         texts[#texts+1] = {id = RANKING.ID_PREFIX .. i .. "Name", font = 0, size = RANKING.TOP3.NAME.SIZE, ref = 120 + (i - 1)}
     end
     for i = 1, 7 do
         imgs[#imgs+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "Symbol", src = 4, x = 124, y = RANKING.TOP10.SYMBOL.H * (i - 1), w = RANKING.TOP10.SYMBOL.W, h = RANKING.TOP10.SYMBOL.H}
         imagesets[#imagesets+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "Lamp", value = function () return getNum(390 + (i + 2)) end, images = smallLamps}
-        vals[#vals+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "ExScore", src = 4, x = 0, y = 271, w = RANKING.TOP10.NUM.W * 10, h = RANKING.TOP10.NUM.H, divx = 10, ref = 380 + (i + 2), digit = 4}
+        vals[#vals+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "ExScore", src = 4, x = 0, y = 271, w = RANKING.TOP10.NUM.W * 10, h = RANKING.TOP10.NUM.H, divx = 10, ref = 380 + (i + 2), digit = 5}
         texts[#texts+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "Name", font = 0, size = RANKING.TOP10.NAME.SIZE, ref = 120 + (i + 2)}
     end
 
@@ -255,7 +255,6 @@ ranking.functions.dst = function ()
                 {x = params.SYMBOL.X(RANKING), y = params.SYMBOL.Y(RANKING, i), w = params.SYMBOL.W, h = params.SYMBOL.H}
             }
         }
-        -- imagesetでうまく表示されないのでdrawでゴリ押し
         dst[#dst+1] = {
             id = RANKING.ID_PREFIX .. i .. "Lamp", draw = function () return isDrawFunc(i) end, dst = {
                 {x = params.LAMP.X(RANKING), y = params.LAMP.Y(RANKING, i), w = params.LAMP.W, h = params.LAMP.H}

@@ -152,7 +152,7 @@ statistics.functions.load = function(skin)
             digit = 5
             padding = 0
         end
-        values[#values + 1] = {id = statistics.ID_PREFIX .. statistics.PLAYTIME.IDS[i], src = 0, x = numSrcX, y = numSrcY, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = digit, align = 0, ref = statistics.PLAYTIME.REFS[i], padding = padding}
+        values[#values + 1] = {id = statistics.ID_PREFIX .. statistics.PLAYTIME.IDS[i], src = 0, x = numSrcX, y = numSrcY, w = commons.NUM_24PX.W * 10, h = commons.NUM_24PX.H, divx = 10, digit = digit, align = 0, ref = statistics.PLAYTIME.REFS[i], padding = padding}
         if i <= 2 then
             texts[#texts + 1] = {id = statistics.PLAYTIME.TEXTS[i], font = 0, size = statistics.FONT_SIZE, align = 0, constantText = statistics.PLAYTIME.TEXTS[i]}
         end
@@ -160,7 +160,7 @@ statistics.functions.load = function(skin)
 
     -- プレイ周り
     for i = 1, #statistics.PLAY.IDS do
-        values[#values + 1] = {id = statistics.ID_PREFIX .. statistics.PLAY.IDS[i], src = 0, x = numSrcX, y = numSrcY, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = 9, align = 0, ref = statistics.PLAY.REFS[i]}
+        values[#values + 1] = {id = statistics.ID_PREFIX .. statistics.PLAY.IDS[i], src = 0, x = numSrcX, y = numSrcY, w = commons.NUM_24PX.W * 10, h = commons.NUM_24PX.H, divx = 10, digit = 9, align = 0, ref = statistics.PLAY.REFS[i]}
         texts[#texts + 1] = {id = statistics.PLAY.TEXTS[i], font = 0, size = statistics.FONT_SIZE, align = 0, constantText = statistics.PLAY.TEXTS[i]}
     end
 
@@ -173,7 +173,7 @@ statistics.functions.load = function(skin)
     for i = 1, #statistics.USER.VALUES do
         texts[#texts + 1] = {id = statistics.USER.TEXTS[i], font = 0, size = statistics.FONT_SIZE, align = 0, constantText = statistics.USER.TEXTS[i]}
         values[#values + 1] = {
-            id = statistics.ID_PREFIX .. statistics.USER.TEXTS[i], src = 0, x = numSrcX, y = numSrcY, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = 9, align = 0,
+            id = statistics.ID_PREFIX .. statistics.USER.TEXTS[i], src = 0, x = numSrcX, y = numSrcY, w = commons.NUM_24PX.W * 10, h = commons.NUM_24PX.H, divx = 10, digit = 9, align = 0,
             value = function() return statistics.USER.VALUES[i] end
         }
     end
@@ -229,7 +229,7 @@ statistics.functions.destinationWindow = function(skin)
         -- 数値
         table.insert(skin.destination, {
             id = statistics.ID_PREFIX .. statistics.USER.TEXTS[i], timer = timer, loop = atime, dst = {
-                {time = atime, x = numX1 - NUMBERS_24PX.W * 9, y = nowY + numOffsetY, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+                {time = atime, x = numX1 - commons.NUM_24PX.W * 9, y = nowY + numOffsetY, w = commons.NUM_24PX.W, h = commons.NUM_24PX.H}
             }
         })
         nowY = nowY - interval
@@ -252,7 +252,7 @@ statistics.functions.destinationWindow = function(skin)
         -- 秒
         local dst = {
             init,
-            {time = atime, x = numX1, y = nowY + numOffsetY, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+            {time = atime, x = numX1, y = nowY + numOffsetY, w = commons.NUM_24PX.W, h = commons.NUM_24PX.H}
         }
         dstNumberRightJustifyByDst(skin, statistics.ID_PREFIX .. statistics.PLAYTIME.IDS[ni+2], {}, timer, atime, dst, 2)
         -- コロン
@@ -265,7 +265,7 @@ statistics.functions.destinationWindow = function(skin)
         -- 分
         dst = {
             init,
-            {time = atime, x = numX1 - 35, y = nowY + numOffsetY, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+            {time = atime, x = numX1 - 35, y = nowY + numOffsetY, w = commons.NUM_24PX.W, h = commons.NUM_24PX.H}
         }
         dstNumberRightJustifyByDst(skin, statistics.ID_PREFIX .. statistics.PLAYTIME.IDS[ni+1], {}, timer, atime, dst, 2)
         -- コロン
@@ -278,7 +278,7 @@ statistics.functions.destinationWindow = function(skin)
         -- 時
         dst = {
             init,
-            {time = atime, x = numX1 - 69, y = nowY + numOffsetY, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+            {time = atime, x = numX1 - 69, y = nowY + numOffsetY, w = commons.NUM_24PX.W, h = commons.NUM_24PX.H}
         }
         dstNumberRightJustifyByDst(skin, statistics.ID_PREFIX .. statistics.PLAYTIME.IDS[ni], {}, timer, atime, dst, 5)
         nowY = nowY - interval
@@ -311,7 +311,7 @@ statistics.functions.destinationWindow = function(skin)
         end
         local dst = {
             init,
-            {time = atime, x = numX1 - numOffsetX, y = nowY + numOffsetY, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+            {time = atime, x = numX1 - numOffsetX, y = nowY + numOffsetY, w = commons.NUM_24PX.W, h = commons.NUM_24PX.H}
         }
         dstNumberRightJustifyByDst(skin, statistics.ID_PREFIX .. statistics.PLAY.IDS[i], {}, timer, atime, dst, 9)
 
