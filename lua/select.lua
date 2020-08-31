@@ -572,6 +572,7 @@ local function main()
         {id = 7, path = "../select/noimage/*.png"},
         {id = 10, path = "../select/parts/songlist/thick/*.png"},
         {id = 11, path = "../select/parts/songlist/thin/*.png"},
+        {id = 12, path = "../select/parts/ir/default.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
 
