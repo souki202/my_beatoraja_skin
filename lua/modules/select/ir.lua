@@ -194,7 +194,8 @@ ir.functions.load = function ()
         local lamps = {}
         local maxScoreCache = 0
         for i = 1, 11 do
-            lamps[i] = "ir" .. irTexts[i] .. "Text"
+            -- 画像の都合で逆順
+            lamps[12 - i] = "ir" .. irTexts[i] .. "Text"
         end
         for i = 1, RANKING.NUM_OF_VIEW do
             vals[#vals+1] = {
@@ -204,8 +205,7 @@ ir.functions.load = function ()
                 id = "ranking" .. i .. "Name", font = 0, size = RANKING.LINE.NAME.SIZE, ref = 120 + (i - 1), overflow = 1,
             }
             imgsets[#imgsets+1] = {
-                id = "ranking" .. i .. "Lamp",
-                value = function () return 10 - getNum(390 + (i - 1)) end,
+                id = "ranking" .. i .. "Lamp", ref = 390 + (i - 1),
                 images = lamps
             }
             vals[#vals+1] = {

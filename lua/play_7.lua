@@ -88,6 +88,9 @@ local header = {
             name = "難易度毎の色変化", item = {{name = "あり", op = 955}, {name = "灰固定", op = 956}, {name = "緑固定", op = 957}, {name = "青固定", op = 958}, {name = "橙固定", op = 959}, {name = "赤固定", op = 960}, {name = "紫固定", op = 961}}, def = "あり"
         },
         {
+            name = "リザルト用ログ出力", item = {{name = "ON", op = 10085}, {name = "OFF", op = 10086}}, def = "ON"
+        },
+        {
             name = "グルーヴゲージ-----------------------", item = {{name = "-", op = 19999}}
         },
         {
@@ -170,9 +173,6 @@ local header = {
         },
         {
             name = "ビジュアライザー1の奥側の反射", item = {{name = "ON", op = 10060}, {name = "OFF", op = 10061}}, def = "ON"
-        },
-        {
-            name = "リザルト用ログ出力", item = {{name = "ON", op = 10085}, {name = "OFF", op = 10086}}, def = "ON"
         },
     },
     filepath = {

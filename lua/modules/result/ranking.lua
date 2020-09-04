@@ -146,8 +146,9 @@ ranking.functions.load = function (isShowRankingFunc)
 
         imagesets[#imagesets+1] = {
             id = RANKING.ID_PREFIX .. i .. "Lamp",
+            ref = 390 + (i - 1),
             -- どうして
-            value = function () return getNum(390 + (i - 1)) end,
+            -- value = function () return getNum(390 + (i - 1)) end,
             images = largeLamps
         }
         vals[#vals+1] = {id = RANKING.ID_PREFIX .. i .. "ExScore", src = 4, x = 0, y = 234, w = RANKING.TOP3.NUM.W * 10, h = RANKING.TOP3.NUM.H, divx = 10, ref = 380 + (i - 1), digit = 5}
@@ -155,7 +156,11 @@ ranking.functions.load = function (isShowRankingFunc)
     end
     for i = 1, 7 do
         imgs[#imgs+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "Symbol", src = 4, x = 124, y = RANKING.TOP10.SYMBOL.H * (i - 1), w = RANKING.TOP10.SYMBOL.W, h = RANKING.TOP10.SYMBOL.H}
-        imagesets[#imagesets+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "Lamp", value = function () return getNum(390 + (i + 2)) end, images = smallLamps}
+        imagesets[#imagesets+1] = {
+            id = RANKING.ID_PREFIX .. (i + 3) .. "Lamp",
+            ref = 390 + (i + 2),
+            -- value = function () return getNum(390 + (i + 2)) end,
+            images = smallLamps}
         vals[#vals+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "ExScore", src = 4, x = 0, y = 271, w = RANKING.TOP10.NUM.W * 10, h = RANKING.TOP10.NUM.H, divx = 10, ref = 380 + (i + 2), digit = 5}
         texts[#texts+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "Name", font = 0, size = RANKING.TOP10.NAME.SIZE, ref = 120 + (i + 2), overflow = 1}
     end
