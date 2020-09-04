@@ -31,4 +31,24 @@ function isThickSongList()
     return getTableValue(skin_config.option, "選曲バーの太さ", 965) == 965
 end
 
+function getOverallSongListAlphaRaito()
+    return (255 - getOffsetValueWithDefault("選曲バー全体の透明度(255で透明)", {a = 0}).a) / 255.0
+end
+
+function getCommonSongListAlpha()
+    return 255 * getOverallSongListAlphaRaito()
+end
+
+function getSongListAlpha()
+    return getOverallSongListAlphaRaito() * (255 - getOffsetValueWithDefault("選曲バーフレームの透明度(255で透明)", {a = 0}).a)
+end
+
+function getCenterSongFrameAlpha()
+    return getOverallSongListAlphaRaito() * (255 - getOffsetValueWithDefault("選択中の曲のフレームの透明度(255で透明)", {a = 0}).a)
+end
+
+function getSongListBgAlpha()
+    return getOverallSongListAlphaRaito() * (255 - getOffsetValueWithDefault("選曲バー背景の透明度(255で透明)", {a = 0}).a)
+end
+
 return SELECT

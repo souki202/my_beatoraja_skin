@@ -5,12 +5,6 @@ local songlist = {
 }
 
 local SONG_LIST = {
-    LABEL = {
-        X = 70,
-        Y = 11,
-        W = 50,
-        H = 22,
-    },
     BAR = {
         N = 17,
         W = 607,
@@ -51,6 +45,12 @@ local SONG_LIST = {
             H = 8,
         },
     },
+    LABEL = {
+        X = 70,
+        Y = 11,
+        W = 50,
+        H = 22,
+    },
     LAMP = {
         W = 110,
         H = 28,
@@ -74,12 +74,6 @@ local SONG_LIST = {
 }
 
 local SONG_LIST_THIN = {
-    LABEL = {
-        X = 580,
-        Y = 7,
-        W = 20,
-        H = 36,
-    },
     BAR = {
         N = 25,
         W = 607,
@@ -119,6 +113,12 @@ local SONG_LIST_THIN = {
             W = 403,
             H = 4,
         },
+    },
+    LABEL = {
+        X = 580,
+        Y = 0,
+        W = 20,
+        H = 50,
     },
     LAMP = {
         W = 110,
@@ -165,6 +165,7 @@ end
 songlist.functions.load = function ()
     local skin = {
         image = {
+            {id = "songlistBg", src = 13, x = 0, y = 0, w = -1, h = -1},
             -- 判定難易度
             {id = "judgeEasy"    , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 0, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
             {id = "judgeNormal"  , src = 0, x = 1298, y = commons.PARTS_OFFSET + 361 + JUDGE_DIFFICULTY.H * 1, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H},
@@ -335,6 +336,7 @@ songlist.functions.loadSongListBar = function ()
         local timeInterval = params.BAR.ANIM_INTERVAL
         local centerIdx = skin.songlist.center
         local intervalY = params.BAR.INTERVAL_Y
+        local alpha = getSongListAlpha()
         for i = 1, params.BAR.N do
             local idx = params.BAR.N - i
             local posX = 0
@@ -353,21 +355,21 @@ songlist.functions.loadSongListBar = function ()
             table.insert(skin.songlist.listoff, {
                 id = "bar", loop = 250 + i * timeInterval,
                 dst = {
-                    {time = 0                 , x = posX + 800, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
-                    {time = i * timeInterval      , x = posX + 800, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
-                    {time = 200 + i * timeInterval, x = posX -  50, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 1},
-                    {time = 225 + i * timeInterval, x = posX -  25, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
-                    {time = 250 + i * timeInterval, x = posX      , y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2}
+                    {time = 0                 , x = posX + 800, y = posY, w = params.BAR.W, h = params.BAR.H, a = alpha, acc = 2},
+                    {time = i * timeInterval      , x = posX + 800, acc = 2},
+                    {time = 200 + i * timeInterval, x = posX -  50, acc = 1},
+                    {time = 225 + i * timeInterval, x = posX -  25, acc = 2},
+                    {time = 250 + i * timeInterval, x = posX      , acc = 2}
                 }
             })
             table.insert(skin.songlist.liston, {
                 id = "bar", loop = 250 + i * timeInterval,
                 dst = {
-                    {time = 0                 , x = posX + 800, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
-                    {time = i * timeInterval      , x = posX + 800, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
-                    {time = 200 + i * timeInterval, x = posX -  50, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 1},
-                    {time = 225 + i * timeInterval, x = posX -  25, y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2},
-                    {time = 250 + i * timeInterval, x = posX      , y = posY, w = params.BAR.W, h = params.BAR.H, acc = 2}
+                    {time = 0                 , x = posX + 800, y = posY, w = params.BAR.W, h = params.BAR.H, a = alpha, acc = 2},
+                    {time = i * timeInterval      , x = posX + 800, acc = 2},
+                    {time = 200 + i * timeInterval, x = posX -  50, acc = 1},
+                    {time = 225 + i * timeInterval, x = posX -  25, acc = 2},
+                    {time = 250 + i * timeInterval, x = posX      , acc = 2}
                 }
             })
         end
@@ -376,38 +378,38 @@ songlist.functions.loadSongListBar = function ()
     skin.songlist.label = {
         {
             id = "barLn", dst = {
-                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H}
+                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H, a = getSongListAlpha()}
             }
         },
         {
             id = "barRandom", dst = {
-                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H}
+                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H, a = getSongListAlpha()}
             }
         },
         {
             id = "barBomb", dst = {
-                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H}
+                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H, a = getSongListAlpha()}
             }
         },
         {
             id = "barCn", dst = {
-                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H}
+                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H, a = getSongListAlpha()}
             }
         },
         {
             id = "barHcn", dst = {
-                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H}
+                {x = params.LABEL.X, y = params.LABEL.Y, w = params.LABEL.W, h = params.LABEL.H, a = getSongListAlpha()}
             }
         },
     }
 
     if isDefaultLampGraphColor() then
         skin.graph = {
-            {id = "lampGraph", src = 0, x = 607, y = commons.PARTS_OFFSET, w = 11, h = 16, divx = 11, divy = 2, cycle = 16.6*4, type = -1}
+            {id = "lampGraph", src = 0, x = 607, y = commons.PARTS_OFFSET, w = 11, h = 16, divx = 11, divy = 2, cycle = 16.6*4, type = -1, a = getSongListAlpha()}
         }
     else
         skin.graph = {
-            {id = "lampGraph", src = 6, x = 0, y = 0, w = 1408, h = 256, divx = 11, divy = 256, cycle = 2000, type = -1},
+            {id = "lampGraph", src = 6, x = 0, y = 0, w = 1408, h = 256, divx = 11, divy = 256, cycle = 2000, type = -1, a = getSongListAlpha()},
         }
     end
 
@@ -436,13 +438,13 @@ songlist.functions.loadSongListBar = function ()
             {
                 id = "bartext", filter = 1,
                 dst = {
-                    {x = text.X, y = text.Y, w = text.W, h = params.BAR.FONT_SIZE, r = 0, g = 0, b = 0, filter = 1}
+                    {x = text.X, y = text.Y, w = text.W, h = params.BAR.FONT_SIZE, r = 0, g = 0, b = 0, filter = 1, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "bartext", filter = 1,
                 dst = {
-                    {x = text.X, y = text.Y, w = text.W, h = params.BAR.FONT_SIZE, r = 200, g = 0, b = 0, filter = 1}
+                    {x = text.X, y = text.Y, w = text.W, h = params.BAR.FONT_SIZE, r = 200, g = 0, b = 0, filter = 1, a = getCommonSongListAlpha()}
                 }
             },
         }
@@ -451,7 +453,7 @@ songlist.functions.loadSongListBar = function ()
     if isViewFolderLampGraph() then
         skin.songlist.graph = {
             id = "lampGraph", dst = {
-                {x = params.BAR.GRAPH.X, y = params.BAR.GRAPH.Y, w = params.BAR.GRAPH.W, h = params.BAR.GRAPH.H}
+                {x = params.BAR.GRAPH.X, y = params.BAR.GRAPH.Y, w = params.BAR.GRAPH.W, h = params.BAR.GRAPH.H, a = getSongListAlpha()}
             }
         }
     end
@@ -472,7 +474,7 @@ songlist.functions.loadSongListBar = function ()
             table.insert(skin.songlist.level, {
                 id = list[i],
                 dst = {
-                    {x = params.BAR.DIFFICULTY.X, y = params.BAR.DIFFICULTY.Y, w = params.BAR.DIFFICULTY.W, h = params.BAR.DIFFICULTY.H}
+                    {x = params.BAR.DIFFICULTY.X, y = params.BAR.DIFFICULTY.Y, w = params.BAR.DIFFICULTY.W, h = params.BAR.DIFFICULTY.H, a = getSongListAlpha()}
                 }
             })
         end
@@ -491,17 +493,17 @@ songlist.functions.loadSongListBar = function ()
         for i, lamp in ipairs(LAMP_NAMES) do
             table.insert(skin.songlist.lamp, 1, {
                 id = "barLamp" .. lamp, dst = {
-                    {x = x, y = y, w = w, h = h}
+                    {x = x, y = y, w = w, h = h, a = getSongListAlpha()}
                 }
             })
             table.insert(skin.songlist.playerlamp, 1, {
                 id = "barLampRivalPlayer" .. lamp, dst = {
-                    {x = x, y = y + h / 2, w = w, h = h / 2}
+                    {x = x, y = y + h / 2, w = w, h = h / 2, a = getSongListAlpha()}
                 }
             })
             table.insert(skin.songlist.rivallamp, 1, {
                 id = "barLampRivalTarget" .. lamp, dst = {
-                    {x = x, y = y, w = w, h = h / 2}
+                    {x = x, y = y, w = w, h = h / 2, a = getSongListAlpha()}
                 }
             })
         end
@@ -517,114 +519,119 @@ songlist.functions.dst = function ()
 
     return {
         destination = {
+            {
+                id = "songlistBg", dst = {
+                    {x = 0, y = 0, w = WIDTH, h = HEIGHT, a = getSongListBgAlpha()}
+                }
+            },
             {id = "songlist"},
             -- 選曲バー中央
             {
                 id = "barCenterFrame", dst = {
-                    {x = 1143, y = 503, w = params.CENTER_FRAME.W, h = params.CENTER_FRAME.H}
+                    {x = 1143, y = 503, w = params.CENTER_FRAME.W, h = params.CENTER_FRAME.H, a = getCenterSongFrameAlpha()}
                 }
             },
             -- アーティスト
             {
                 id = "artist", filter = 1, dst = {
-                    {x = 1800, y = 543, w = 370, h = SONG_LIST.TEXT.ARTIST_SIZE, r = 0, g = 0, b = 0}
+                    {x = 1800, y = 543, w = 370, h = SONG_LIST.TEXT.ARTIST_SIZE, r = 0, g = 0, b = 0, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "subArtist", filter = 1, dst = {
-                    {x = 1800, y = 516, w = 310, h = SONG_LIST.TEXT.SUBARTIST_SIZE, r = 0, g = 0, b = 0}
+                    {x = 1800, y = 516, w = 310, h = SONG_LIST.TEXT.SUBARTIST_SIZE, r = 0, g = 0, b = 0, a = getCommonSongListAlpha()}
                 }
             },
             -- BPM
             {
                 id = "bpmTextImg", op = {2}, dst = {
-                    {x = 1207, y = 547, w = SONG_LIST.ITEM_TEXT.W, h = SONG_LIST.ITEM_TEXT.H}
+                    {x = 1207, y = 547, w = SONG_LIST.ITEM_TEXT.W, h = SONG_LIST.ITEM_TEXT.H, a = getCommonSongListAlpha()}
                 }
             },
             -- BPM変化なし
             {
                 id = "bpm", op = {176}, dst = {
-                    {x = 1380 - commons.NUM_28PX.W * 7, y = 547, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H}
+                    {x = 1380 - commons.NUM_28PX.W * 7, y = 547, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H, a = getCommonSongListAlpha()}
                 }
             },
             -- BPM変化あり
             {
                 id = "bpmMax", op = {177}, dst = {
-                    {x = 1380 - commons.NUM_28PX.W * 3, y = 547, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H}
+                    {x = 1380 - commons.NUM_28PX.W * 3, y = 547, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "bpmTilda", op = {177}, dst = {
-                    {x = 1380 - commons.NUM_28PX.W * 4, y = 547, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H}
+                    {x = 1380 - commons.NUM_28PX.W * 4, y = 547, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "bpmMin", op = {177}, dst = {
-                    {x = 1380 - commons.NUM_28PX.W * 7, y = 547, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H}
+                    {x = 1380 - commons.NUM_28PX.W * 7, y = 547, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H, a = getCommonSongListAlpha()}
                 }
             },
             -- keys
             {
                 id = "keysTextImg", op = {2}, dst = {
-                    {x = 1207, y = 517, w = SONG_LIST.ITEM_TEXT.W, h = SONG_LIST.ITEM_TEXT.H}
+                    {x = 1207, y = 517, w = SONG_LIST.ITEM_TEXT.W, h = SONG_LIST.ITEM_TEXT.H, a = getCommonSongListAlpha()}
                 }
             },
             -- 楽曲keys ゴリ押し
             {
                 id = "music7keys", op = {160}, dst = {
-                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H}
+                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "music5keys", op = {161}, dst = {
-                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H}
+                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "music14keys", op = {162}, dst = {
-                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H}
+                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "music10keys", op = {163}, dst = {
-                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H}
+                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "music9keys", op = {164}, dst = {
-                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H}
+                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "music24keys", op = {1160}, dst = {
-                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H}
+                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "music48keys", op = {1161}, dst = {
-                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H}
+                    {x = 1207 + 70, y = 517, w = commons.NUM_28PX.W * 2, h = commons.NUM_28PX.H, a = getCommonSongListAlpha()}
                 }
             },
 
             -- 判定難易度
             {
                 id = "judgeEasy", op = {183}, dst = {
-                    {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
+                    {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "judgeNormal", op = {182}, dst = {
-                    {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
+                    {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "judgeHard", op = {181}, dst = {
-                    {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
+                    {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H, a = getCommonSongListAlpha()}
                 }
             },
             {
                 id = "judgeVeryhard", op = {180}, dst = {
-                    {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H}
+                    {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H, a = getCommonSongListAlpha()}
                 }
             },
         }
