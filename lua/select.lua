@@ -203,7 +203,7 @@ local header = {
     fadeout = 500,
     scene = 3000,
     input = commons.INPUT_WAIT,
-    -- 使用済み 965まで
+    -- 使用済み 970まで
     property = {
         {
             name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}, def = "画像(png)"
@@ -243,6 +243,9 @@ local header = {
         },
         {
             name = "上部プレイヤー情報仕様", item = {{name = "リザルト連携版", op = 950}, {name = "旧仕様(プレイ時間とプレイ回数等)", op = 951}}, def = "リザルト連携版"
+        },
+        {
+            name = "IR部分のデフォルトのアクティブタブ", item = {{name = "IR統計", op = 970}, {name = "ランキング", op = 971}}, def = "IR統計"
         },
         {
             name = "新バージョン確認", item = {{name = "する", op = 998}, {name = "しない", op = 999}}, def = "する",

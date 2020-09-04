@@ -1,6 +1,7 @@
 
 require("modules.commons.numbers")
 require("modules.commons.my_window")
+require("modules.result.commons")
 local main_state = require("main_state")
 local resultObtained = require("modules.result.result_obtained")
 

@@ -126,6 +126,8 @@ ir.functions.isShowRanking = function ()
 end
 
 ir.functions.load = function ()
+    ir.activeTab = isDefaultIrStatistics() and TABS.ID_LIST.STATISTICS or TABS.ID_LIST.RANKING
+
     local skin = {
         image = {
             -- IR用ドットと%
@@ -169,22 +171,24 @@ ir.functions.load = function ()
         -- MAXから
         {224, 225, 240}, {222, 223, 239}, {218, 219, 238}, {208, 209, 233}, {216, 217, 237}, {214, 215, 236},
         -- ここからEASY
-        {212, 213, 235}, {206, 207, 232}, {204, 205, 231}, {210, 211, 234},
+        {212, 213, 235}, {206, 207, 232}, {204, 205, 231}, {210, 211, 234}, {0, 0, 0},
         -- ここからplayer
         {200, 0, 0}, {228, 229, 242}, {226, 227, 241}
     }
     for i, refs in ipairs(irNumbers) do
-        local type = irTexts[i]
-        vals[#vals+1] = {
-            id = "ir" .. type .. "Number", src = 0, x = commons.NUM_28PX.SRC_X, y = commons.PARTS_OFFSET + 89, w = IR.NUM.W * 10, h = IR.NUM.H, divx = 10, divy = 1, digit = IR.DIGIT, ref = refs[1]
-        }
-        if refs[2] ~= 0 then
+        if refs[1] ~= 0 then
+            local type = irTexts[i]
             vals[#vals+1] = {
-                id = "ir" .. type .. "Percentage", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W, y = commons.PARTS_OFFSET + 68, w = IR.P_NUM.W * 10, h = IR.P_NUM.H, divx = 10, divy = 1, digit = 3, ref = refs[2]
+                id = "ir" .. type .. "Number", src = 0, x = commons.NUM_28PX.SRC_X, y = commons.PARTS_OFFSET + 89, w = IR.NUM.W * 10, h = IR.NUM.H, divx = 10, divy = 1, digit = IR.DIGIT, ref = refs[1]
             }
-            vals[#vals+1] = {
-                id = "ir" .. type .. "PercentageAfterDot", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W, y = commons.PARTS_OFFSET + 68, w = IR.P_NUM.W * 10, h = IR.P_NUM.H, divx = 10, divy = 1, digit = 1, ref = refs[3], padding = 1
-            }
+            if refs[2] ~= 0 then
+                vals[#vals+1] = {
+                    id = "ir" .. type .. "Percentage", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W, y = commons.PARTS_OFFSET + 68, w = IR.P_NUM.W * 10, h = IR.P_NUM.H, divx = 10, divy = 1, digit = 3, ref = refs[2]
+                }
+                vals[#vals+1] = {
+                    id = "ir" .. type .. "PercentageAfterDot", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W, y = commons.PARTS_OFFSET + 68, w = IR.P_NUM.W * 10, h = IR.P_NUM.H, divx = 10, divy = 1, digit = 1, ref = refs[3], padding = 1
+                }
+            end
         end
     end
 

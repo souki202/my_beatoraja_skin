@@ -78,6 +78,7 @@ local RANKING = {
         NAME = {
             X = function (self) return self.TOP10.AREA.X(self) + 157 end,
             Y = function (self, idx) return self.TOP10.AREA.Y(self, idx) + 27 end,
+            W = 323,
             SIZE = 24,
         },
         OWN_BG = {

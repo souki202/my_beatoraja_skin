@@ -31,6 +31,10 @@ function isThickSongList()
     return getTableValue(skin_config.option, "選曲バーの太さ", 965) == 965
 end
 
+function isDefaultIrStatistics()
+    return getTableValue(skin_config.option, "IR部分のデフォルトのアクティブタブ", 970) == 970
+end
+
 function getOverallSongListAlphaRaito()
     return (255 - getOffsetValueWithDefault("選曲バー全体の透明度(255で透明)", {a = 0}).a) / 255.0
 end
