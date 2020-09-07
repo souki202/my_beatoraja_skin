@@ -67,4 +67,8 @@ function getStageFileMaskAlpha()
     return 255 - getOffsetValueWithDefault("ステージファイルの暗転の黒マスクの透明度(255で透明 既定値128)", {a = 128}).a
 end
 
+function isShowScoreRate()
+    return getTableValue(skin_config.option, "EXSCORE下の表示種類", 981) == 981
+end
+
 return SELECT

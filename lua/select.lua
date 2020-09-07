@@ -119,7 +119,7 @@ local header = {
     fadeout = 500,
     scene = 3000,
     input = commons.INPUT_WAIT,
-    -- 使用済み 975まで
+    -- 使用済み 980まで
     property = {
         {
             name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}, def = "画像(png)"
@@ -150,6 +150,9 @@ local header = {
         },
         {
             name = "選曲バーの太さ", item = {{name = "太い", op = 965}, {name = "細い", op = 966}}, def = "太い"
+        },
+        {
+            name = "EXSCORE下の表示種類", item = {{name = "次のランク", op = 980}, {name = "スコアレート", op = 981}}, def = "スコアレート"
         },
         {
             name = "密度の標準桁数", item = {{name = "1桁", op = 938}, {name = "2桁", op = 939}}, def = "1桁"
@@ -537,8 +540,6 @@ local function main()
 
         -- 空プア表記用スラッシュ
         {id = "slashForEmptyPoor", src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W * 11, y = commons.NUM_28PX.SRC_Y, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H},
-        -- ランキング用スラッシュ(同じ)
-        {id = "slashForRanking"  , src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W * 11, y = commons.NUM_28PX.SRC_Y, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H},
         -- BPM用チルダ
         {id = "bpmTilda", src = 0, x = commons.NUM_28PX.SRC_X, y = commons.PARTS_OFFSET + 68, w = commons.NUM_28PX.W, h = commons.NUM_28PX.H},
         -- アクティブなオブション用背景
