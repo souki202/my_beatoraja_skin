@@ -7,6 +7,17 @@ local commons = {
 	calcTimeLeftSecond = function () return main_state.number(163) * 60 + main_state.number(164) end,
 }
 
+CUSTOM_TIMERS = {
+	LIFE = 10010,
+	JUDGE = 10101,
+	VISUALIZER = 10200,
+	SCORE_VALUE = 11100,
+	SCORE_VALUE_INITIAL = 11101,
+	LOGGER = 11000,
+	LOGGER_SAVE = 11001,
+	LOGGER_UPDATE = 12001
+}
+
 function setKeys(keys)
     commons.keys = keys
 end
@@ -274,6 +285,10 @@ end
 
 function isEnableBackBgaBokeh()
 	return getTableValue(skin_config.option, "黒帯部分のBGA表示のぼかし", 10106) == 10105
+end
+
+function getTargetRateType()
+	return getTableValue(skin_config.option, "ターゲットスコアのレート変動(ログ出力有効時)", 10110) - 10110
 end
 
 function getDifficultyValueForColor()

@@ -1,5 +1,6 @@
 require("modules.commons.define")
 local commons = require("modules.play.commons")
+local scores = require("modules.play.score")
 local lanes = require("modules.play.lanes")
 local main_state = require("main_state")
 
@@ -89,10 +90,12 @@ scoreGraph.functions.load = function ()
         graph = {
             {id = SCORE.GRAPH.ID_PREFIX .. "Now", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 110},
             {id = SCORE.GRAPH.ID_PREFIX .. "Best", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 112},
-            {id = SCORE.GRAPH.ID_PREFIX .. "Target", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 114},
+            -- {id = SCORE.GRAPH.ID_PREFIX .. "Target", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 114},
+            {id = SCORE.GRAPH.ID_PREFIX .. "Target", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, value = scores.getTargetScoreRate},
             {id = SCORE.GRAPH.ID_PREFIX .. "NowTotal", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 111},
             {id = SCORE.GRAPH.ID_PREFIX .. "BestTotal", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 113},
-            {id = SCORE.GRAPH.ID_PREFIX .. "TargetTotal", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 115},
+            -- {id = SCORE.GRAPH.ID_PREFIX .. "TargetTotal", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 115},
+            {id = SCORE.GRAPH.ID_PREFIX .. "TargetTotal", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, value = scores.getTargetWholeScoreRate},
         },
         value = {
             {id = "scoreValue", src = 0, x = 1880, y = 76, w = SCORE.NUM.W * 10, h = SCORE.NUM.H, divx = 10, digit = SCORE.NUM.DIGIT, ref = 101},
@@ -100,7 +103,8 @@ scoreGraph.functions.load = function ()
             {id = "scorePercentageAfterDot", src = 0, x = NUMBERS_14PX.SRC_X, y = NUMBERS_14PX.SRC_Y, w = NUMBERS_14PX.W * 10, h = NUMBERS_14PX.H, divx = 10, digit = SCORE.P_NUM.A_DIGIT, ref = 103, padding = 1},
 
             {id = "scoreDiffMyBest", src = 0, x = 1940, y = 0, w = SCORE.DIFF.W * 12, h = SCORE.DIFF.H * 2, divx = 12, divy = 2, digit = SCORE.DIFF.DIGIT, ref = 152, padding = 0, space = -1},
-            {id = "scoreDiffTarget", src = 0, x = 1940, y = 0, w = SCORE.DIFF.W * 12, h = SCORE.DIFF.H * 2, divx = 12, divy = 2, digit = SCORE.DIFF.DIGIT, ref = 153, padding = 0, space = -1},
+            -- {id = "scoreDiffTarget", src = 0, x = 1940, y = 0, w = SCORE.DIFF.W * 12, h = SCORE.DIFF.H * 2, divx = 12, divy = 2, digit = SCORE.DIFF.DIGIT, ref = 153, padding = 0, space = -1},
+            {id = "scoreDiffTarget", src = 0, x = 1940, y = 0, w = SCORE.DIFF.W * 12, h = SCORE.DIFF.H * 2, divx = 12, divy = 2, digit = SCORE.DIFF.DIGIT, value = scores.getDiffTargetScoreAndNowScore, padding = 0, space = -1},
         }
     }
 end

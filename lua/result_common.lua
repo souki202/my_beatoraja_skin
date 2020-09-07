@@ -5,6 +5,7 @@ local main_state = require("main_state")
 local resultObtained = require("modules.result.result_obtained")
 local graphs = require("modules.result.graphs")
 local ir = require("modules.result.ir")
+local userInfo = require("modules.result.user_info")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048
@@ -571,6 +572,7 @@ local function initialize(skin)
         COMBO.WND.X = RIGHT_X
         JUDGE.WND.X = RIGHT_X
         graphs.change2p()
+        userInfo.change2p()
         DIR_BAR.WND.X = LEFT_X
         RANKS.X = SCORE.WND.X + 491
         NEW_RECORD.SCORE.X = SCORE.WND.X + 310
@@ -861,6 +863,7 @@ local function main()
     resultObtained.load(skin)
     mergeSkin(skin, graphs.load())
     mergeSkin(skin, ir.load())
+    mergeSkin(skin, userInfo.load())
 
     skin.destination = {
         -- 背景
@@ -891,6 +894,7 @@ local function main()
 
     mergeSkin(skin, graphs.dst())
     mergeSkin(skin, ir.dst())
+    mergeSkin(skin, userInfo.dst())
 
     -- タイトル部分
     destinationStaticBaseWindowResult(skin, TITLE_BAR.WND.X, TITLE_BAR.WND.Y, TITLE_BAR.WND.W, TITLE_BAR.WND.H)

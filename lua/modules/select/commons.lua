@@ -55,4 +55,16 @@ function getSongListBgAlpha()
     return getOverallSongListAlphaRaito() * (255 - getOffsetValueWithDefault("選曲バー背景の透明度(255で透明)", {a = 0}).a)
 end
 
+function getStageFileMaskFadeOutStartTime()
+    return getOffsetValueWithDefault("ステージファイルの暗転のフェードアウト開始までの時間(100ms 既定値2)", {x = 2}).x * 100
+end
+
+function getStageFileMaskFadeOutEndTime()
+    return getOffsetValueWithDefault("ステージファイルの暗転のフェードアウト終了までの時間(100ms 既定値3)", {x = 3}).x * 100
+end
+
+function getStageFileMaskAlpha()
+    return 255 - getOffsetValueWithDefault("ステージファイルの暗転の黒マスクの透明度(255で透明 既定値128)", {a = 128}).a
+end
+
 return SELECT

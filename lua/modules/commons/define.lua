@@ -144,10 +144,10 @@ function gaussian(x, a, avg, v)
 end
 
 SKIN_INFO = {
-    SELECT_VRESION = "2.56",
-    RESULT_VERSION = "2.51",
+    SELECT_VRESION = "2.65",
+    RESULT_VERSION = "2.55",
     DECIDE_VERSION = "1.10",
-    PLAY_VERSION = "1.35",
+    PLAY_VERSION = "1.40",
 }
 
 BASE_WIDTH = 1920

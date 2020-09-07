@@ -10,43 +10,58 @@ local STAGE_FILE = {
     Y = 464,
     W = 640,
     H = 480,
-    FRAME_OFFSET = 31,
 
     SHADOW = {
-        X = -12,
-        Y = -12,
+        X = function (self) return self.X - 12 end,
+        Y = function (self) return self.Y - 12 end,
+        W = 640,
+        H = 480,
         A = 102,
     },
+    FRAME = {
+        X = function (self) return self.X + (self.W - self.FRAME.W) / 2 end,
+        Y = function (self) return self.Y + (self.H - self.FRAME.H) / 2 end,
+        W = 800,
+        H = 600,
+    },
+    MASK = {
+        FADEOUT_START = 200,
+        FADEOUT_END = 300,
+        ALPHA = 128,
+    }
 }
 
 stagefile.functions.load = function ()
-    return {
+    STAGE_FILE.MASK.FADEOUT_START = getStageFileMaskFadeOutStartTime()
+    STAGE_FILE.MASK.FADEOUT_END = math.max(STAGE_FILE.MASK.FADEOUT_START, getStageFileMaskFadeOutEndTime())
+    STAGE_FILE.MASK.ALPHA = getStageFileMaskAlpha()
+
+    local skin = {
         image = {
-            {id = "stagefileFrame", src = 4, x = 0, y = 0, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2},
-            {id = "stagefileShadow", src = 4, x = 0, y = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2},
             {id = "noImage", src = 7, x = 0, y = 0, w = -1, h = -1}
         }
     }
+    local imgs = skin.image
+    for i = 1, 6 do
+        imgs[#imgs+1] = {
+            id = "stageFileFrame" .. i, src = 4, x = 0, y = STAGE_FILE.FRAME.H * (i - 1), w = STAGE_FILE.FRAME.W, h = STAGE_FILE.FRAME.H
+        }
+    end
+    return skin
 end
 
 stagefile.functions.dst = function ()
-    return {
+    local skin = {
         destination = {
-            -- stagefile背景
+            { -- stage file影
+                id = "black", op = {2, 945}, dst = {
+                    {x = STAGE_FILE.SHADOW.X(STAGE_FILE), y = STAGE_FILE.SHADOW.Y(STAGE_FILE), w = STAGE_FILE.SHADOW.W, h = STAGE_FILE.SHADOW.H, a = STAGE_FILE.SHADOW.A}
+                }
+            },
+            -- stagefile黒背景
             {
                 id = "black", op = {191, 2}, dst = {
                     {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = 255}
-                }
-            },
-            -- stage file影1
-            {
-                id = "black", op = {2, 947}, offset = 40, dst = {
-                    {x = STAGE_FILE.X + STAGE_FILE.SHADOW.X, y = STAGE_FILE.Y + STAGE_FILE.SHADOW.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = STAGE_FILE.SHADOW.A}
-                }
-            },
-            { -- stage file影2(デフォルト)
-                id = "stagefileShadow", op = {2, 946}, dst = {
-                    {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y = STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2}
                 }
             },
             -- no stagefile
@@ -63,45 +78,23 @@ stagefile.functions.dst = function ()
             },
             -- ステージファイルマスク
             {
-                id = "black", op = {{190, 191}, 2}, timer = 11, loop = 300, dst = {
-                    {time = 0  , a = 128, x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H},
-                    {time = 200, a = 128},
-                    {time = 300, a = 0}
-                }
-            },
-            -- Stage fileフレーム
-            { -- 設定無し
-                id = "stagefileFrame", op = {2, 150, 945}, dst = {
-                    {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y = STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2}
-                }
-            },
-            { -- beginner
-                id = "stagefileFrame", op = {2, 151, 945}, dst = {
-                    {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 153, g = 255, b = 153}
-                }
-            },
-            { -- normal
-                id = "stagefileFrame", op = {2, 152, 945}, dst = {
-                    {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 153, g = 255, b = 255}
-                }
-            },
-            { -- hyper
-                id = "stagefileFrame", op = {2, 153, 945}, dst = {
-                    {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 255, g = 204, b = 102}
-                }
-            },
-            { -- another
-                id = "stagefileFrame", op = {2, 154, 945}, dst = {
-                    {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 255, g = 102, b = 102}
-                }
-            },
-            { -- insane
-                id = "stagefileFrame", op = {2, 155, 945}, dst = {
-                    {x = STAGE_FILE.X - STAGE_FILE.FRAME_OFFSET, y =  STAGE_FILE.Y - STAGE_FILE.FRAME_OFFSET, w = STAGE_FILE.W + STAGE_FILE.FRAME_OFFSET * 2, h = STAGE_FILE.H + STAGE_FILE.FRAME_OFFSET * 2, r = 204, g = 0, b = 102}
+                id = "black", op = {{190, 191}, 2, 975}, timer = 11, loop = STAGE_FILE.MASK.FADEOUT_END, dst = {
+                    {time = 0, x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a =  STAGE_FILE.MASK.ALPHA},
+                    {time = STAGE_FILE.MASK.FADEOUT_START, a = STAGE_FILE.MASK.ALPHA},
+                    {time = STAGE_FILE.MASK.FADEOUT_END, a = 0}
                 }
             },
         }
     }
+    local dst = skin.destination
+    for i = 1, 6 do
+        dst[#dst+1] = {
+            id = "stageFileFrame" .. i, op = {2, 150 + (i - 1)}, dst = {
+                {x = STAGE_FILE.FRAME.X(STAGE_FILE), y = STAGE_FILE.FRAME.Y(STAGE_FILE), w = STAGE_FILE.FRAME.W, h = STAGE_FILE.FRAME.H}
+            }
+        }
+    end
+    return skin
 end
 
 return stagefile.functions

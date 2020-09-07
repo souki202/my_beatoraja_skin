@@ -2,6 +2,7 @@ require("modules.commons.define")
 local main_state = require("main_state")
 local playCommons = require("modules.play.commons")
 local songInfo = require("modules.commons.songinfo")
+local scores = require("modules.play.score")
 local lanes = require("modules.play.lanes")
 local judges = require("modules.play.judges")
 local life = require("modules.play.life")
@@ -32,7 +33,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10105まで
+    property = { -- 使用済み 10110まで
         {
             name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
         },
@@ -80,6 +81,9 @@ local header = {
         },
         {
             name = "黒帯部分のBGA表示のぼかし", item = {{name = "ON", op = 10105}, {name = "OFF", op = 10106}}, def = "OFF"
+        },
+        {
+            name = "ターゲットスコアのレート変動(ログ出力有効時)", item = {{name = "一定", op = 10110}, {name = "自己べ連動", op = 10111}, {name = "CPU風", op = 10112}}, def = "一定"
         },
         {
             name = "サイド部分のグラフ", item = {{name = "無し", op = 10000}, {name = "判定分布", op = 10001}, {name = "EARLY, LATE分布", op = 10002}}, def = "判定分布"
@@ -322,6 +326,7 @@ local function main()
 
 
     -- 各種読み込み
+    mergeSkin(skin, scores.load())
     mergeSkin(skin, logger.load())
     mergeSkin(skin, bga.load())
     mergeSkin(skin, lanes.load())

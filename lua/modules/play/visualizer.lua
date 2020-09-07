@@ -169,6 +169,7 @@ local function updateBarDecay()
         for i = 1, #vals do
             local v = vals[i]
             v = v - subBaseVals[i] / subPerSec * mul
+            -- min maxは重いらしいので
             if v < 0 then v = 0
             elseif v > 1 then v = 1
             end

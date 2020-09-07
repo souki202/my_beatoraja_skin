@@ -80,7 +80,7 @@ local SONG_LIST_THIN = {
         H = 50,
 
         PREV_CENTER_X = 1196 - 11.2 * 1.75 + 4,
-        PREV_CENTER_Y = 573 - 80 + 1.75 - 34,
+        PREV_CENTER_Y = 573 - 50 * 1.75 - 30,
         CENTER_X = 1196,
         CENTER_Y = 573,
         NEXT_CENTER_X = 1196 + 7.7,

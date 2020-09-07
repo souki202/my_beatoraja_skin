@@ -163,12 +163,22 @@ logger.functions.getLastTimeData = function ()
     return d[#d]
 end
 
+logger.functions.twoBeforeData = function ()
+    local d = logger.data
+    if #d >= 2 then
+        return d[#d - 1]
+    else
+        return d[#d]
+    end
+end
+
 logger.functions.getNumOfData = function ()
     return #logger.data
 end
 
 logger.functions.getDataByIdx = function (i)
     local data = logger.data
+    if i < 1 then return data[1] end
     return (i > #data or i == 0) and data[1] or data[i]
 end
 

@@ -382,15 +382,30 @@ notesGraph.functions.dstScoreGraph = function ()
 
     -- スコア描画
     do
-        local nowIdx = 0
-        local lastExScore = exScores[1]
-        local maxExScore = main_state.number(74) * 2
-        local fitstX = GRAPH.GAUGE.X(GRAPH)
+        local colors = SCORE_GRAPH.LINE.EXSCORE.COLOR
         local bottomY = GRAPH.GAUGE.Y(GRAPH)
         local areaH = GRAPH.GAUGE.H - barH -- 引かないとはみ出す
-        local colors = SCORE_GRAPH.LINE.EXSCORE.COLOR
+        local fitstX = GRAPH.GAUGE.X(GRAPH)
+        local maxExScore = main_state.number(74) * 2
         local calcExScoreY = function (s) return bottomY + math.ceil(areaH * s / maxExScore) end
         local calcRateY    = function (s) return bottomY + math.ceil(areaH * s) end
+
+        -- まず最後のスコアで薄く線をかく
+        do
+            local rates = {main_state.float_number(113), main_state.float_number(115), main_state.float_number(111)}
+            for j = 1, #SCORE_GRAPH.EXSCORE_KEYS do
+                local key = SCORE_GRAPH.EXSCORE_KEYS[j]
+                local color = colors[key]
+                local y = calcRateY(rates[j])
+                dst[#dst+1] = {
+                    id = "white", dst = {
+                        {x = GRAPH.GAUGE.X(GRAPH), y = y, w = GRAPH.GAUGE.W, h = barH, r = color[1], g = color[2], b = color[3], a = 96}
+                    }
+                }
+            end
+        end
+
+        local lastExScore = exScores[1]
         for i = 1, numOfBar do
             local exScore = exScores[i]
             local x = fitstX + (i - 1) * barW
@@ -415,6 +430,11 @@ notesGraph.functions.dstScoreGraph = function ()
                         lastY = lastY + 1
                         h = h - 1
                     end
+
+                    if h < 0 then h = math.min(-barH, h)
+                    elseif h >= 0 then h = math.max(barH, h)
+                    end
+
                     dst[#dst+1] = {
                         id = "white", dst = {
                             {x = x, y = lastY, w = barW, h = h, r = color[1], g = color[2], b = color[3]}
