@@ -28,7 +28,7 @@ searchBox.functions.load = function ()
         },
         text = {
             {id = "searchText", font = 0, size = SEARCH_BOX.TEXT.FONT_SIZE, ref = 30},
-        }
+        },
     }
 end
 

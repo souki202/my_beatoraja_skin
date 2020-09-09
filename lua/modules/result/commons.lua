@@ -106,6 +106,10 @@ function getGrooveNotesGraphSizePercentage()
 	return getOffsetValueWithDefault("グルーヴゲージ部分のノーツグラフの高さ (既定値30 単位%)", {h = 30}).h / 100
 end
 
+function isShowOwnPlayerNameInRanking()
+	return getTableValue(skin_config.option, "ランキングの自分の名前表記", 975) == 975
+end
+
 function getBgSrc()
     if getTableValue(skin_config.option, "背景の分類", 910) == 910 then
         -- クリアかどうかの背景時

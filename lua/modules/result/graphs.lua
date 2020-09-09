@@ -494,9 +494,12 @@ notesGraph.functions.load = function ()
             -- ランダムオプションはグラフ上に表示
             {id = "randomOptionImgs", src = 0, x = 199, y = 566, w = OPTIONS.IMG.W, h = OPTIONS.IMG.H * 10, divy = 10, ref = 42},
             -- tab
-            {id = "grooveGaugeTab", src = 0, x = 0, y = 93, w = GRAPH.TAB.W, h = GRAPH.TAB.H, act = function () notesGraph.functions.switchTab(1) end},
-            {id = "scoreGaugeTab", src = 0, x = 0, y = 93 + GRAPH.TAB.H, w = GRAPH.TAB.W, h = GRAPH.TAB.H, act = function () notesGraph.functions.switchTab(2) end},
-            {id = "rankingTab", src = 0, x = 0, y = 93 + GRAPH.TAB.H * 2, w = GRAPH.TAB.W, h = GRAPH.TAB.H, act = function () notesGraph.functions.switchTab(3) end},
+            {id = "grooveGaugeTab", src = 0, x = 0, y = 93, w = GRAPH.TAB.W, h = GRAPH.TAB.H},
+            {id = "scoreGaugeTab", src = 0, x = 0, y = 93 + GRAPH.TAB.H, w = GRAPH.TAB.W, h = GRAPH.TAB.H},
+            {id = "rankingTab", src = 0, x = 0, y = 93 + GRAPH.TAB.H * 2, w = GRAPH.TAB.W, h = GRAPH.TAB.H},
+            {id = "grooveGaugeTabButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = function () notesGraph.functions.switchTab(1) end},
+            {id = "scoreGaugeTabButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = function () notesGraph.functions.switchTab(2) end},
+            {id = "rankingTabButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = function () notesGraph.functions.switchTab(3) end},
             -- スコアグラフを隠すための背景
             {id = "scoreGraphMaskBg", src = getBgSrc(), x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = HEIGHT - GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.H - GRAPH.WND_GAUGE.SHADOW, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW*2},
         },

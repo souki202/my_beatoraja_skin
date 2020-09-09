@@ -474,6 +474,7 @@ function makeHeader()
         fadeout = 500,
         scene = 3600000,
         input = INPUT_WAIT,
+        -- 975まで使用
         property = {
             {
                 name = "背景の分類", item = {{name = "クリアかどうか", op = 910}, {name = "ランク毎", op = 911}, {name = "クリアランプ毎", op = 912}}, def = "クリアかどうか"
@@ -501,6 +502,9 @@ function makeHeader()
             },
             {
                 name = "譜面オプションの表示", item = {{name = "ON", op = 960}, {name = "OFF", op = 961}}, def = "ON"
+            },
+            {
+                name = "ランキングの自分の名前表記", item = {{name = "プレイヤー名", op = 975}, {name = "YOU", op = 976}}, def = "プレイヤー名"
             },
         },
         filepath = {

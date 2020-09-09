@@ -2,6 +2,8 @@ local luajava = require("luajava")
 local File = luajava.bindClass("java.io.File")
 
 local commons = require("modules.select.commons")
+local bokeh = require("modules.commons.bokeh")
+
 local background = {
     numOfFiles = 0,
     filelist = {},

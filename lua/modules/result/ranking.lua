@@ -4,6 +4,7 @@ local main_state = require("main_state")
 
 local ranking = {
     numOfPlayer = 0,
+    isHideName = false,
     functions = {}
 }
 
@@ -16,6 +17,7 @@ local RANKING = {
         SHADOW = 15,
     },
     ID_PREFIX = "ranking",
+    IS_SHOW_PLAYER_NAME = true,
     TOP3 = {
         AREA = {
             X = function (self) return self.WND.X end,
@@ -94,14 +96,22 @@ local RANKING = {
         W = 650,
         H = 264,
     },
+    PRIVACY = {
+        X = function (self) return self.WND.X + self.WND.W + 7 end, -- 2pで関数上書き
+        Y = function (self) return self.WND.Y end,
+        W = 36,
+        H = 36,
+    },
 }
 
 ranking.functions.change2p = function ()
     RANKING.WND.X = LEFT_X
+    RANKING.PRIVACY.X = function (self) return self.WND.X - 7 - self.PRIVACY.W end
 end
 
 ranking.functions.load = function (isShowRankingFunc)
     ranking.functions.isShowRanking = isShowRankingFunc
+    RANKING.IS_SHOW_PLAYER_NAME = isShowOwnPlayerNameInRanking()
     local skin = {
         image = {
             -- スコアグラフを隠すための背景
@@ -109,6 +119,7 @@ ranking.functions.load = function (isShowRankingFunc)
             {id = "nowRankTop3Bg", src = 5, x = 0, y = 0, w = RANKING.TOP3.OWN_BG.W, h = RANKING.TOP3.OWN_BG.H},
             {id = "nowRankTop10Bg", src = 5, x = 0, y = RANKING.TOP3.OWN_BG.H, w = RANKING.TOP10.OWN_BG.W, h = RANKING.TOP10.OWN_BG.H},
             {id = "rankTop3Bg", src = 5, x = 0, y = RANKING.TOP3.OWN_BG.H + RANKING.TOP10.OWN_BG.H, w = RANKING.TOP3BG.W, h = RANKING.TOP3BG.H},
+            {id = "privacyButton", src = 4, x = 0, y = 297, w = RANKING.PRIVACY.W, h = RANKING.PRIVACY.H, act = function () ranking.isHideName = not ranking.isHideName end},
         },
         imageset = {},
         value = {},
@@ -154,6 +165,9 @@ ranking.functions.load = function (isShowRankingFunc)
         }
         vals[#vals+1] = {id = RANKING.ID_PREFIX .. i .. "ExScore", src = 4, x = 0, y = 234, w = RANKING.TOP3.NUM.W * 10, h = RANKING.TOP3.NUM.H, divx = 10, ref = 380 + (i - 1), digit = 5}
         texts[#texts+1] = {id = RANKING.ID_PREFIX .. i .. "Name", font = 0, size = RANKING.TOP3.NAME.SIZE, ref = 120 + (i - 1), overflow = 1}
+        texts[#texts+1] = {id = RANKING.ID_PREFIX .. i .. "PlayerName", font = 0, size = RANKING.TOP3.NAME.SIZE, ref = 2, overflow = 1}
+        texts[#texts+1] = {id = RANKING.ID_PREFIX .. i .. "AnonymousName", font = 0, size = RANKING.TOP3.NAME.SIZE, constantText = "Anonymous", overflow = 1}
+        
     end
     for i = 1, 7 do
         imgs[#imgs+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "Symbol", src = 4, x = 124, y = RANKING.TOP10.SYMBOL.H * (i - 1), w = RANKING.TOP10.SYMBOL.W, h = RANKING.TOP10.SYMBOL.H}
@@ -164,6 +178,8 @@ ranking.functions.load = function (isShowRankingFunc)
             images = smallLamps}
         vals[#vals+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "ExScore", src = 4, x = 0, y = 271, w = RANKING.TOP10.NUM.W * 10, h = RANKING.TOP10.NUM.H, divx = 10, ref = 380 + (i + 2), digit = 5}
         texts[#texts+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "Name", font = 0, size = RANKING.TOP10.NAME.SIZE, ref = 120 + (i + 2), overflow = 1}
+        texts[#texts+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "PlayerName", font = 0, size = RANKING.TOP10.NAME.SIZE, ref = 2, overflow = 1}
+        texts[#texts+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "AnonymousName", font = 0, size = RANKING.TOP10.NAME.SIZE, constantText = "Anonymous", overflow = 1}
     end
 
     return skin
@@ -219,16 +235,31 @@ ranking.functions.dst = function ()
                     {x = params.OWN_BG.X(RANKING), y = params.OWN_BG.Y(RANKING, i), w = params.OWN_BG.W, h = params.OWN_BG.H}
                 }
             }
+            -- 自分以外の名前
             dst[#dst+1] = {
-                id = RANKING.ID_PREFIX .. i .. "Name", draw = function () return isDrawOtherRank(i) end, dst = {
+                id = RANKING.ID_PREFIX .. i .. "Name", draw = function () return isDrawOtherRank(i) and ranking.isHideName == false end, dst = {
                     {x = params.NAME.X(RANKING), y = params.NAME.Y(RANKING, i), w = params.NAME.W, h = params.NAME.SIZE}
                 }
             }
             dst[#dst+1] = {
-                id = RANKING.ID_PREFIX .. i .. "Name", draw = function () return isDrawSelfRank(i) end, dst = {
-                    {x = params.NAME.X(RANKING), y = params.NAME.Y(RANKING, i), w = params.NAME.W, h = params.NAME.SIZE, r = 0, g = 0, b = 0}
+                id = RANKING.ID_PREFIX .. i .. "AnonymousName", draw = function () return isDrawOtherRank(i) and ranking.isHideName end, dst = {
+                    {x = params.NAME.X(RANKING), y = params.NAME.Y(RANKING, i), w = params.NAME.W, h = params.NAME.SIZE}
                 }
             }
+            -- 自分の名前
+            if RANKING.IS_SHOW_PLAYER_NAME then
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "PlayerName", draw = function () return isDrawSelfRank(i) end, dst = {
+                        {x = params.NAME.X(RANKING), y = params.NAME.Y(RANKING, i), w = params.NAME.W, h = params.NAME.SIZE, r = 0, g = 0, b = 0}
+                    }
+                }
+            else
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "Name", draw = function () return isDrawSelfRank(i) end, dst = {
+                        {x = params.NAME.X(RANKING), y = params.NAME.Y(RANKING, i), w = params.NAME.W, h = params.NAME.SIZE, r = 0, g = 0, b = 0}
+                    }
+                }
+            end
             dst[#dst+1] = {
                 id = RANKING.ID_PREFIX .. i .. "ExScore", draw = function () return isDrawOtherRank(i) end, dst = {
                     {x = params.NUM.X(RANKING), y = params.NUM.Y(RANKING, i), w = params.NUM.W, h = params.NUM.H, r = 255, g = 213, b = 230}
@@ -245,11 +276,31 @@ ranking.functions.dst = function ()
                     {x = params.OWN_BG.X(RANKING), y = params.OWN_BG.Y(RANKING, i), w = params.OWN_BG.W, h = params.OWN_BG.H}
                 }
             }
+            -- 自分以外の名前
             dst[#dst+1] = {
-                id = RANKING.ID_PREFIX .. i .. "Name", draw = function () return isDrawFunc(i) end, dst = {
+                id = RANKING.ID_PREFIX .. i .. "AnonymousName", draw = function () return isDrawOtherRank(i) and ranking.isHideName end, dst = {
                     {x = params.NAME.X(RANKING), y = params.NAME.Y(RANKING, i), w = params.NAME.W, h = params.NAME.SIZE, r = 0, g = 0, b = 0}
                 }
             }
+            dst[#dst+1] = {
+                id = RANKING.ID_PREFIX .. i .. "Name", draw = function () return isDrawOtherRank(i) and ranking.isHideName == false end, dst = {
+                    {x = params.NAME.X(RANKING), y = params.NAME.Y(RANKING, i), w = params.NAME.W, h = params.NAME.SIZE, r = 0, g = 0, b = 0}
+                }
+            }
+            -- 自分の名前
+            if RANKING.IS_SHOW_PLAYER_NAME then
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "PlayerName", draw = function () return isDrawSelfRank(i) end, dst = {
+                        {x = params.NAME.X(RANKING), y = params.NAME.Y(RANKING, i), w = params.NAME.W, h = params.NAME.SIZE, r = 0, g = 0, b = 0}
+                    }
+                }
+            else
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "Name", draw = function () return isDrawSelfRank(i) end, dst = {
+                        {x = params.NAME.X(RANKING), y = params.NAME.Y(RANKING, i), w = params.NAME.W, h = params.NAME.SIZE, r = 0, g = 0, b = 0}
+                    }
+                }
+            end
             dst[#dst+1] = {
                 id = RANKING.ID_PREFIX .. i .. "ExScore", draw = function () return isDrawFunc(i) end, dst = {
                     {x = params.NUM.X(RANKING), y = params.NUM.Y(RANKING, i), w = params.NUM.W, h = params.NUM.H, r = 255, g = 0, b = 102}
@@ -267,6 +318,13 @@ ranking.functions.dst = function ()
             }
         }
     end
+
+    -- プライバシーボタン
+    dst[#dst+1] = {
+        id = "privacyButton", draw = function () return isDrawFunc(0) end, dst = {
+            {x = RANKING.PRIVACY.X(RANKING), y = RANKING.PRIVACY.Y(RANKING), w = RANKING.PRIVACY.W, h = RANKING.PRIVACY.H}
+        }
+    }
     return skin
 end
 

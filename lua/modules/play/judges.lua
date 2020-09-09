@@ -1,5 +1,6 @@
 require("modules.commons.define")
 local commons = require("modules.play.commons")
+local scores = require("modules.play.score")
 local lanes = require("modules.play.lanes")
 local main_state = require("main_state")
 
@@ -95,7 +96,7 @@ judges.functions.load = function ()
             {id = "nowCombo", src = 6, x = 0, y = 0, w = COMBO.W * 10, h = COMBO.H, divx = 10, digit = COMBO.DIGIT, ref = 75, align = (isDrawComboNextToTheJudge() and 0 or 2)},
             {id = "judgeTimeError", src = 0, x = 1868, y = 197, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.TIMING.NUM.DIGIT, align = 2, ref = 525},
             {id = "bestDiffValue", src = 0, x = 1868, y = 197, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.SCORE.DIFF.DIGIT, ref = 152, align = drawDiffUpperJudge() and 2 or 1},
-            {id = "targetDiffValue", src = 0, x = 1868, y = 197, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.SCORE.DIFF.DIGIT, ref = 153, align = drawDiffUpperJudge() and 2 or 1},
+            {id = "targetDiffValue", src = 0, x = 1868, y = 197, w = JUDGES.TIMING.NUM.W * 12, h = JUDGES.TIMING.NUM.H * 2, divx = 12, divy = 2, digit = JUDGES.SCORE.DIFF.DIGIT, value = scores.getDiffTargetScoreAndNowScore, align = drawDiffUpperJudge() and 2 or 1},
         },
         judge = {
             {
