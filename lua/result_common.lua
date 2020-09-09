@@ -60,7 +60,7 @@ local DIR_BAR = {
     },
     TEXT = {
         X = 18,
-        Y = 8,
+        Y = 9,
         SIZE = 24,
         W = WND_WIDTH - 18*2
     },

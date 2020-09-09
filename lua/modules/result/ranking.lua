@@ -41,7 +41,7 @@ local RANKING = {
         },
         NUM = {
             X = function (self) return self.TOP3.AREA.X(self) + 470 end,
-            Y = function (self, idx) return self.TOP3.AREA.Y(self, idx) + 27 end,
+            Y = function (self, idx) return self.TOP3.AREA.Y(self, idx) + 26 end,
             W = 28,
             H = 37,
         },
