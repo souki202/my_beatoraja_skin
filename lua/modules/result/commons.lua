@@ -110,6 +110,10 @@ function isShowOwnPlayerNameInRanking()
 	return getTableValue(skin_config.option, "ランキングの自分の名前表記", 975) == 975
 end
 
+function isSimpleRankingInformation()
+	return getTableValue(skin_config.option, "ランキングの情報量", 980) == 981
+end
+
 function getBgSrc()
     if getTableValue(skin_config.option, "背景の分類", 910) == 910 then
         -- クリアかどうかの背景時

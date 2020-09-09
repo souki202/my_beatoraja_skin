@@ -5,6 +5,10 @@ local main_state = require("main_state")
 local ranking = {
     numOfPlayer = 0,
     isHideName = false,
+    maxScoreCache = 0,
+    myScoreCache = 0,
+
+    irScoreCache = {},
     functions = {}
 }
 
@@ -41,10 +45,15 @@ local RANKING = {
             W = 28,
             H = 37,
         },
+        DIFF = {
+            X = function (self) return self.TOP3.AREA.X(self) + 585 end,
+            Y = function (self, idx) return self.TOP3.AREA.Y(self, idx) + 27 end,
+            -- w, hはNUMBERS_18PX
+        },
         NAME = {
             X = function (self) return self.TOP3.AREA.X(self) + 157 end,
             Y = function (self, idx) return self.TOP3.AREA.Y(self, idx) + 42 end,
-            W = 323,
+            W = 290,
             SIZE = 30,
         },
         OWN_BG = {
@@ -52,6 +61,16 @@ local RANKING = {
             Y = function (self, idx) return self.TOP3.AREA.Y(self, idx) end,
             W = 650,
             H = 88
+        },
+        RATE = {
+            SIZE = 24,
+            X = function (self) return self.TOP3.AREA.X(self) + 277 end,
+            X_DOT = function (self) return self.TOP3.RATE.X(self) + 42 end,
+            X_AF_DOT = function (self) return self.TOP3.RATE.X_DOT(self) + 5 end,
+            X_PERCENT = function (self) return self.TOP3.RATE.X_AF_DOT(self) + 29 end,
+            Y = function (self, idx) return self.TOP3.AREA.Y(self, idx) + 17 end,
+            Y_SYMBOL = function (self, idx) return self.TOP3.RATE.Y(self, idx) - 6 end,
+            -- w, hはNUMBERS_xxpx
         },
     },
     TOP10 = {
@@ -71,6 +90,11 @@ local RANKING = {
             W = 20,
             H = 26,
         },
+        DIFF = {
+            X = function (self) return self.TOP10.AREA.X(self) + 585 end,
+            Y = function (self, idx) return self.TOP10.AREA.Y(self, idx) + 18 end,
+            -- w, hはNUMBERS_18PX
+        },
         LAMP = {
             X = function (self) return self.TOP10.AREA.X(self) + 155 end,
             Y = function (self, idx) return self.TOP10.AREA.Y(self, idx) + 8 end,
@@ -80,7 +104,7 @@ local RANKING = {
         NAME = {
             X = function (self) return self.TOP10.AREA.X(self) + 157 end,
             Y = function (self, idx) return self.TOP10.AREA.Y(self, idx) + 27 end,
-            W = 323,
+            W = 290,
             SIZE = 24,
         },
         OWN_BG = {
@@ -88,6 +112,16 @@ local RANKING = {
             Y = function (self, idx) return self.TOP10.AREA.Y(self, idx) end,
             W = 650,
             H = 62
+        },
+        RATE = {
+            SIZE = 18,
+            X = function (self) return self.TOP10.AREA.X(self) + 240 end,
+            X_DOT = function (self) return self.TOP10.RATE.X(self) + 30 end,
+            X_AF_DOT = function (self) return self.TOP10.RATE.X_DOT(self) + 5 end,
+            X_PERCENT = function (self) return self.TOP10.RATE.X_AF_DOT(self) + 21 end,
+            Y = function (self, idx) return self.TOP10.AREA.Y(self, idx) + 11 end,
+            Y_SYMBOL = function (self, idx) return self.TOP10.RATE.Y(self, idx) - 5 end,
+            -- w, hはNUMBERS_xxpx
         },
     },
     TOP3BG = {
@@ -112,6 +146,14 @@ end
 ranking.functions.load = function (isShowRankingFunc)
     ranking.functions.isShowRanking = isShowRankingFunc
     RANKING.IS_SHOW_PLAYER_NAME = isShowOwnPlayerNameInRanking()
+    if not isSimpleRankingInformation() then
+        RANKING.TOP3.NUM.X = function (self) return self.TOP3.AREA.X(self) + 440 end
+        RANKING.TOP10.NUM.X = function (self) return self.TOP10.AREA.X(self) + 480 end
+    end
+    local getNum = main_state.number
+    ranking.maxScoreCache = getNum(74) * 2
+    ranking.myScoreCache = getNum(150)
+
     local skin = {
         image = {
             -- スコアグラフを隠すための背景
@@ -123,15 +165,29 @@ ranking.functions.load = function (isShowRankingFunc)
         },
         imageset = {},
         value = {},
-        text = {},
+        text = {
+            {id = "24pxPercent", font = 0, size = RANKING.TOP3.RATE.SIZE * 2, constantText = "%"},
+            {id = "18pxPercent", font = 0, size = RANKING.TOP10.RATE.SIZE * 2, constantText = "%"},
+            {id = "24pxDot", font = 0, size = RANKING.TOP3.RATE.SIZE * 2, constantText = "."},
+            {id = "18pxDot", font = 0, size = RANKING.TOP10.RATE.SIZE * 2, constantText = "."},
+        },
         customTimers = {
             {
                 id = 10200, timer = function ()
                     -- 複数回更新されたりするので常時取得に一旦変更
-                    ranking.numOfPlayer = main_state.number(180)
+                    ranking.numOfPlayer = getNum(180)
                     -- if ranking.numOfPlayer == nil or ranking.numOfPlayer == 0 then
                     --     ranking.numOfPlayer = main_state.number(180)
                     -- end
+                    return 1
+                end
+            },
+            {
+                id = 10201, timer = function ()
+                    for i = 1, 10 do
+                        ranking.irScoreCache[i] = getNum(380 + (i - 1))
+                    end
+                    return 1
                 end
             },
         }
@@ -142,7 +198,6 @@ ranking.functions.load = function (isShowRankingFunc)
     local smallLamps = {}
     local vals = skin.value
     local texts = skin.text
-    local getNum = main_state.number
     -- 各ランクのランプ用imagesetを作成
     for i = 1, 11 do
         local lid = RANKING.ID_PREFIX .. "LampLargeType" .. i
@@ -154,29 +209,74 @@ ranking.functions.load = function (isShowRankingFunc)
     end
 
     for i = 1, 3 do
-        imgs[#imgs+1] = {id = RANKING.ID_PREFIX .. i .. "Symbol", src = 4, x = 0, y = RANKING.TOP3.SYMBOL.H * (i - 1), w = RANKING.TOP3.SYMBOL.W, h = RANKING.TOP3.SYMBOL.H}
+        local scoreCache = 0
+        local scorePercentageCache = 0
 
-        imagesets[#imagesets+1] = {
-            id = RANKING.ID_PREFIX .. i .. "Lamp",
-            ref = 390 + (i - 1),
-            -- どうして
-            -- value = function () return getNum(390 + (i - 1)) end,
-            images = largeLamps
-        }
+        imgs[#imgs+1] = {id = RANKING.ID_PREFIX .. i .. "Symbol", src = 4, x = 0, y = RANKING.TOP3.SYMBOL.H * (i - 1), w = RANKING.TOP3.SYMBOL.W, h = RANKING.TOP3.SYMBOL.H}
+        imagesets[#imagesets+1] = {id = RANKING.ID_PREFIX .. i .. "Lamp", ref = 390 + (i - 1), images = largeLamps}
         vals[#vals+1] = {id = RANKING.ID_PREFIX .. i .. "ExScore", src = 4, x = 0, y = 234, w = RANKING.TOP3.NUM.W * 10, h = RANKING.TOP3.NUM.H, divx = 10, ref = 380 + (i - 1), digit = 5}
+        vals[#vals+1] = {
+            id = RANKING.ID_PREFIX .. i .. "Diff", src = 4, x = 0, y = 333, w = NUMBERS_18PX.W * 12, h = NUMBERS_18PX.H * 2, divx = 12, divy = 2, digit = 5,
+            value = function ()
+                local s = ranking.irScoreCache[i]
+                if s > 0 then
+                    return ranking.myScoreCache - s
+                end
+                return 0x80000000
+            end
+        }
+        vals[#vals+1] = {
+            id = RANKING.ID_PREFIX .. i .. "Percentage", src = 0, x = 1880, y = 185, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = 3, value = function ()
+                local s = ranking.irScoreCache[i]
+                if s > 0 and ranking.maxScoreCache > 0 then
+                    return math.floor(100 * s / ranking.maxScoreCache)
+                end
+            end
+        }
+        vals[#vals+1] = {
+            id = RANKING.ID_PREFIX ..i .. "PercentageAfterDot", src = 0, x = 1880, y = 185, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = 2, padding = 1, value = function ()
+                local s = ranking.irScoreCache[i]
+                if s > 0 and ranking.maxScoreCache > 0 then
+                    return math.floor(100 * s / ranking.maxScoreCache * 100) % 100
+                end
+            end
+        }
         texts[#texts+1] = {id = RANKING.ID_PREFIX .. i .. "Name", font = 0, size = RANKING.TOP3.NAME.SIZE, ref = 120 + (i - 1), overflow = 1}
         texts[#texts+1] = {id = RANKING.ID_PREFIX .. i .. "PlayerName", font = 0, size = RANKING.TOP3.NAME.SIZE, ref = 2, overflow = 1}
         texts[#texts+1] = {id = RANKING.ID_PREFIX .. i .. "AnonymousName", font = 0, size = RANKING.TOP3.NAME.SIZE, constantText = "Anonymous", overflow = 1}
-        
     end
     for i = 1, 7 do
+        local scoreCache = 0
+        local scorePercentageCache = 0
         imgs[#imgs+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "Symbol", src = 4, x = 124, y = RANKING.TOP10.SYMBOL.H * (i - 1), w = RANKING.TOP10.SYMBOL.W, h = RANKING.TOP10.SYMBOL.H}
-        imagesets[#imagesets+1] = {
-            id = RANKING.ID_PREFIX .. (i + 3) .. "Lamp",
-            ref = 390 + (i + 2),
-            -- value = function () return getNum(390 + (i + 2)) end,
-            images = smallLamps}
+        imagesets[#imagesets+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "Lamp", ref = 390 + (i + 2), images = smallLamps}
         vals[#vals+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "ExScore", src = 4, x = 0, y = 271, w = RANKING.TOP10.NUM.W * 10, h = RANKING.TOP10.NUM.H, divx = 10, ref = 380 + (i + 2), digit = 5}
+        vals[#vals+1] = {
+            id = RANKING.ID_PREFIX .. (i + 3) .. "Diff", src = 4, x = 0, y = 333 + 26, w = NUMBERS_18PX.W * 12, h = NUMBERS_18PX.H * 2, divx = 12, divy = 2, digit = 5,
+            value = function ()
+                local s = ranking.irScoreCache[i + 2]
+                if s > 0 then
+                    return ranking.myScoreCache - s
+                end
+                return 0x80000000
+            end
+        }
+        vals[#vals+1] = {
+            id = RANKING.ID_PREFIX .. (i + 3) .. "Percentage", src = 0, x = 1928, y = 392, w = NUMBERS_18PX.W * 10, h = NUMBERS_18PX.H, divx = 10, digit = 3, value = function ()
+                local s = ranking.irScoreCache[i + 2]
+                if s > 0 and ranking.maxScoreCache > 0 then
+                    return math.floor(100 * s / ranking.maxScoreCache)
+                end
+            end
+        }
+        vals[#vals+1] = {
+            id = RANKING.ID_PREFIX .. (i + 3) .. "PercentageAfterDot", src = 0, x = 1928, y = 392, w = NUMBERS_18PX.W * 10, h = NUMBERS_18PX.H, divx = 10, digit = 2, padding = 1, value = function ()
+                local s = ranking.irScoreCache[i + 2]
+                if s > 0 and ranking.maxScoreCache > 0 then
+                    return math.floor(100 * s / ranking.maxScoreCache * 100) % 100
+                end
+            end
+        }
         texts[#texts+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "Name", font = 0, size = RANKING.TOP10.NAME.SIZE, ref = 120 + (i + 2), overflow = 1}
         texts[#texts+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "PlayerName", font = 0, size = RANKING.TOP10.NAME.SIZE, ref = 2, overflow = 1}
         texts[#texts+1] = {id = RANKING.ID_PREFIX .. (i + 3) .. "AnonymousName", font = 0, size = RANKING.TOP10.NAME.SIZE, constantText = "Anonymous", overflow = 1}
@@ -270,6 +370,55 @@ ranking.functions.dst = function ()
                     {x = params.NUM.X(RANKING), y = params.NUM.Y(RANKING, i), w = params.NUM.W, h = params.NUM.H, r = 255, g = 0, b = 102}
                 }
             }
+            if not isSimpleRankingInformation() then
+                -- 他人は白
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "Percentage", draw = function () return isDrawOtherRank(i) end, dst = {
+                        {x = params.RATE.X(RANKING), y = params.RATE.Y(RANKING, i), w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+                    }
+                }
+                dst[#dst+1] = {
+                    id = "24pxDot", filter = 1, draw = function () return isDrawOtherRank(i) end, dst = {
+                        {x = params.RATE.X_DOT(RANKING), y = params.RATE.Y_SYMBOL(RANKING, i), w = 8, h = params.RATE.SIZE}
+                    }
+                }
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "PercentageAfterDot", draw = function () return isDrawOtherRank(i) end, dst = {
+                        {x = params.RATE.X_AF_DOT(RANKING), y = params.RATE.Y(RANKING, i), w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+                    }
+                }
+                dst[#dst+1] = {
+                    id = "24pxPercent", filter = 1, draw = function () return isDrawOtherRank(i) end, dst = {
+                        {x = params.RATE.X_PERCENT(RANKING), y = params.RATE.Y_SYMBOL(RANKING, i), w = 24, h = params.RATE.SIZE}
+                    }
+                }
+                -- 自分のときは黒
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "Percentage", draw = function () return isDrawSelfRank(i) end, dst = {
+                        {x = params.RATE.X(RANKING), y = params.RATE.Y(RANKING, i), w = NUMBERS_24PX.W, h = NUMBERS_24PX.H, r = 0, g = 0, b = 0}
+                    }
+                }
+                dst[#dst+1] = {
+                    id = "24pxDot", filter = 1, draw = function () return isDrawSelfRank(i) end, dst = {
+                        {x = params.RATE.X_DOT(RANKING), y = params.RATE.Y_SYMBOL(RANKING, i), w = 8, h = params.RATE.SIZE, r = 0, g = 0, b = 0}
+                    }
+                }
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "PercentageAfterDot", draw = function () return isDrawSelfRank(i) end, dst = {
+                        {x = params.RATE.X_AF_DOT(RANKING), y = params.RATE.Y(RANKING, i), w = NUMBERS_24PX.W, h = NUMBERS_24PX.H, r = 0, g = 0, b = 0}
+                    }
+                }
+                dst[#dst+1] = {
+                    id = "24pxPercent", filter = 1, draw = function () return isDrawSelfRank(i) end, dst = {
+                        {x = params.RATE.X_PERCENT(RANKING), y = params.RATE.Y_SYMBOL(RANKING, i), w = 24, h = params.RATE.SIZE, r = 0, g = 0, b = 0}
+                    }
+                }
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "Diff", draw = function () return isDrawOtherRank(i) end, dst = {
+                        {x = params.DIFF.X(RANKING), y = params.DIFF.Y(RANKING, i), w = NUMBERS_18PX.W, h = NUMBERS_18PX.H}
+                    }
+                }
+            end
         else
             dst[#dst+1] = {
                 id = "nowRankTop10Bg", draw = function () return isDrawSelfRank(i) end, dst = {
@@ -306,6 +455,35 @@ ranking.functions.dst = function ()
                     {x = params.NUM.X(RANKING), y = params.NUM.Y(RANKING, i), w = params.NUM.W, h = params.NUM.H, r = 255, g = 0, b = 102}
                 }
             }
+            if not isSimpleRankingInformation() then
+                -- RATEは黒のみ
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "Percentage", draw = function () return isDrawFunc(i) end, dst = {
+                        {x = params.RATE.X(RANKING), y = params.RATE.Y(RANKING, i), w = NUMBERS_18PX.W, h = NUMBERS_18PX.H, r = 0, g = 0, b = 0}
+                    }
+                }
+                dst[#dst+1] = {
+                    id = "18pxDot", filter = 1, draw = function () return isDrawFunc(i) end, dst = {
+                        {x = params.RATE.X_DOT(RANKING), y = params.RATE.Y_SYMBOL(RANKING, i), w = 8, h = params.RATE.SIZE, r = 0, g = 0, b = 0}
+                    }
+                }
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "PercentageAfterDot", draw = function () return isDrawFunc(i) end, dst = {
+                        {x = params.RATE.X_AF_DOT(RANKING), y = params.RATE.Y(RANKING, i), w = NUMBERS_18PX.W, h = NUMBERS_18PX.H, r = 0, g = 0, b = 0}
+                    }
+                }
+                dst[#dst+1] = {
+                    id = "18pxPercent", filter = 1, draw = function () return isDrawFunc(i) end, dst = {
+                        {x = params.RATE.X_PERCENT(RANKING), y = params.RATE.Y_SYMBOL(RANKING, i), w = 24, h = params.RATE.SIZE, r = 0, g = 0, b = 0}
+                    }
+                }
+                -- スコア差分
+                dst[#dst+1] = {
+                    id = RANKING.ID_PREFIX .. i .. "Diff", draw = function () return isDrawOtherRank(i) end, dst = {
+                        {x = params.DIFF.X(RANKING), y = params.DIFF.Y(RANKING, i), w = NUMBERS_18PX.W, h = NUMBERS_18PX.H}
+                    }
+                }
+            end
         end
         dst[#dst+1] = {
             id = RANKING.ID_PREFIX .. i .. "Symbol", draw = function () return isDrawFunc(i) end, dst = {

@@ -77,8 +77,12 @@ local RANKING = {
             Y = function (self, idx) return self.LINE.START_Y(idx) end,
         },
         PERCENTAGE = {
-            X = function () return IR.WND.X + 394 end,
-            Y = function (self, idx) return self.LINE.START_Y(idx) - 3 end,
+            X = function () return IR.WND.X + 348 end,
+            X_DOT = function (self) return self.LINE.PERCENTAGE.X() + 23 end,
+            X_AF_DOT = function (self) return self.LINE.PERCENTAGE.X_DOT(self) + 4 end,
+            X_PERCENT = function (self) return self.LINE.PERCENTAGE.X_AF_DOT(self) + 9 end,
+            Y = function (self, idx) return self.LINE.START_Y(idx) end,
+            Y_SYMBOL = function (self, idx) return self.LINE.PERCENTAGE.Y(self, idx) end,
             SIZE = 13,
             W = 100,
         },
@@ -224,24 +228,35 @@ ir.functions.load = function ()
                         maxScoreCache = getNum(74) * 2
                         local s = getNum(380 + (i - 1))
                         if s > 0 then
-                            local p = 100 * getNum(380 + (i - 1)) / maxScoreCache
-                            return math.floor(p) .. "." .. math.floor((p * 10) % 10) .. "%"
+                            local p = 100 * s / maxScoreCache
+                            return math.floor(p)
                         end
-                        return ""
+                        return 0x80000000
                     end
                 else
                     valueFunc = function ()
                         local s = getNum(380 + (i - 1))
                         if s > 0 then
-                            local p = 100 * getNum(380 + (i - 1)) / maxScoreCache
-                            return math.floor(p) .. "." .. math.floor((p * 10) % 10) .. "%"
+                            local p = 100 * s / maxScoreCache
+                            return math.floor(p)
                         end
-                        return ""
+                        return 0x80000000
                     end
+
                 end
-                texts[#texts+1] = {
+                vals[#vals+1] = {
                     id = "ranking" .. i .. "Percentage",
-                    font = 0, size = RANKING.LINE.PERCENTAGE.SIZE * 2, value = valueFunc, align = 2,
+                    src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W, y = commons.PARTS_OFFSET + 68, w = IR.P_NUM.W * 10, h = IR.P_NUM.H, divx = 10, digit = 3, value = valueFunc
+                }
+                vals[#vals+1] = {
+                    id = "ranking" .. i .. "PercentageAfterDot",
+                    src = 0, x = commons.NUM_28PX.SRC_X + commons.NUM_28PX.W, y = commons.PARTS_OFFSET + 68, w = IR.P_NUM.W * 10, h = IR.P_NUM.H, divx = 10, digit = 1, padding = 1, value = function ()
+                        local s = getNum(380 + (i - 1))
+                        if s > 0 then
+                            return math.floor(100 * s / maxScoreCache * 100) % 100
+                        end
+                        return 0x80000000
+                    end
                 }
             end
         end
@@ -433,8 +448,23 @@ ir.functions.dstRanking = function ()
             }
         }
         dst[#dst+1] = {
-            id = "ranking" .. i .. "Percentage", draw = isDraw, filter = 1, dst = {
-                {x = RANKING.LINE.PERCENTAGE.X(), y = RANKING.LINE.PERCENTAGE.Y(RANKING, i), w = RANKING.LINE.PERCENTAGE.W, h = RANKING.LINE.PERCENTAGE.SIZE, r = 0, g = 0, b = 0}
+            id = "ranking" .. i .. "Percentage", draw = isDraw, dst = {
+                {x = RANKING.LINE.PERCENTAGE.X(), y = RANKING.LINE.PERCENTAGE.Y(RANKING, i), w = IR.P_NUM.W, h = IR.P_NUM.H}
+            }
+        }
+        dst[#dst+1] = {
+            id = "irDot", draw = isDraw, dst = {
+                {x = RANKING.LINE.PERCENTAGE.X_DOT(RANKING), y = RANKING.LINE.PERCENTAGE.Y_SYMBOL(RANKING, i), w = IR.P_NUM.W, h = IR.P_NUM.H}
+            }
+        }
+        dst[#dst+1] = {
+            id = "ranking" .. i .. "PercentageAfterDot", draw = isDraw, dst = {
+                {x = RANKING.LINE.PERCENTAGE.X_AF_DOT(RANKING), y = RANKING.LINE.PERCENTAGE.Y(RANKING, i), w = IR.P_NUM.W, h = IR.P_NUM.H}
+            }
+        }
+        dst[#dst+1] = {
+            id = "irPercent", draw = isDraw, dst = {
+                {x = RANKING.LINE.PERCENTAGE.X_PERCENT(RANKING), y = RANKING.LINE.PERCENTAGE.Y_SYMBOL(RANKING, i), w = IR.P_NUM.W, h = IR.P_NUM.H}
             }
         }
     end

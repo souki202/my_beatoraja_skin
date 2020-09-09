@@ -5,6 +5,11 @@ NUMBERS_24PX = {
     W = 14,
     H = 18,
     ID = "24pxNumbers",
+    DOT_SIZE = 4,
+    PERCENT = {
+        W = 17,
+        H = 14,
+    }
 }
 
 NUMBERS_18PX = {
@@ -12,6 +17,7 @@ NUMBERS_18PX = {
     SRC_Y = 183,
     W = 10,
     H = 13,
+    DOT_SIZE = 3,
 }
 
 NUMBERS_14PX = {

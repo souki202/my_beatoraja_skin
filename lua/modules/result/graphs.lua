@@ -80,6 +80,7 @@ local GRAPH = {
     TAB = {
         X = function (self) return self.WND_GAUGE.X + self.WND_GAUGE.W end,
         START_Y = function (self) return self.WND_GAUGE.Y + self.WND_GAUGE.H - self.TAB.H - 1 end,
+        Y = function (self, idx) return self.TAB.START_Y(self) - self.TAB.INTERVAL_Y * (idx - 1) end,
         INTERVAL_Y = 106,
         W = 45,
         H = 126,
@@ -87,6 +88,12 @@ local GRAPH = {
             GROOVE = 1,
             SCORE = 2,
             RANKING = 3,
+        },
+        BUTTON = {
+            X = function (self) return self.TAB.X(self) end,
+            Y = function (self, idx) return self.TAB.Y(self, idx) + 15 end,
+            W = 45,
+            H = 96,
         },
         PREFIX = {"grooveGauge", "scoreGauge", "ranking"}
     },
@@ -372,11 +379,11 @@ notesGraph.functions.dstScoreGraph = function ()
         if 0 < type and type < 5 then
             local prefix = GRAPH.PREFIX[type]
             local p = getGrooveNotesGraphSizePercentage()
-            table.insert(skin.destination, {
+            dst[#dst+1] = {
                 id = prefix .. "Graph", blend = type == 4 and 2 or 1, dst = {
                     {x = GRAPH.GAUGE.X(GRAPH), y = GRAPH.GAUGE.Y(GRAPH), w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.GAUGE.H * p, a = notesGraph.functions.getGrooveNotesGraphTransparency()}
                 }
-            })
+            }
         end
     end
 
@@ -565,6 +572,7 @@ end
 
 notesGraph.functions.dstGrooveGaugeArea = function ()
     local skin = {destination = {}}
+    local dst = skin.destination
     -- groove gauge出力
     local grooveX = GRAPH.GAUGE.X(GRAPH)
     local grooveY = GRAPH.GAUGE.Y(GRAPH)
@@ -581,45 +589,45 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
     end
 
     -- スコアグラフを隠すためのマスク
-    table.insert(skin.destination, {
+    dst[#dst+1] = {
         id = "scoreGraphMaskBg", draw = getIsDrawGrooveGauge, dst = {
             {x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.SHADOW, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW*2}
         }
-    })
+    }
 
-    table.insert(skin.destination, {
+    dst[#dst+1] = {
         id = "grooveGaugeGraphBg", draw = getIsDrawGrooveGauge, dst = {
             {x = grooveX, y = grooveY, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H}
         }
-    })
+    }
 
     -- ノーツグラフ本体
     local type = notesGraph.functions.getGraphType(4)
     if 0 < type and type < 5 then
         local prefix = GRAPH.PREFIX[type]
         local p = getGrooveNotesGraphSizePercentage()
-        table.insert(skin.destination, {
+        dst[#dst+1] = {
             id = prefix .. "Graph", blend = type == 4 and 2 or 1, draw = getIsDrawGrooveGauge, dst = {
                 {x = grooveX, y = grooveY, w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.GAUGE.H * p, a = notesGraph.functions.getGrooveNotesGraphTransparency()}
             }
-        })
+        }
     end
 
-    table.insert(skin.destination, {
+    dst[#dst+1] = {
         id = "grooveGaugeGraphFront", draw = getIsDrawGrooveGauge, dst = {
             {x = grooveX, y = grooveY, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H}
         }
-    })
+    }
 
     do
         -- GROOVE GAUGEラベルの出力
         local labelY = getDrawLabelAtTop() and GRAPH.GROOVE_TEXT.TOP_Y(GRAPH) or GRAPH.GROOVE_TEXT.BOTTOM_Y(GRAPH)
         if isDrawGrooveGaugeLabel() then
-            table.insert(skin.destination, {
+            dst[#dst+1] = {
                 id = "grooveGaugeText", draw = getIsDrawGrooveGauge, dst = {
                     {x = GRAPH.GROOVE_TEXT.X(GRAPH), y = labelY, w = GRAPH.GROOVE_TEXT.W, h = GRAPH.GROOVE_TEXT.H}
                 },
-            })
+            }
         end
         -- ランダムオプションの出力
         if isDrawPlayOption() then
@@ -627,25 +635,25 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
             if isDrawGrooveGaugeLabel() then
                 opY = labelY + OPTIONS.IMG.DY_WHEN_DRAW_LABEL * (getDrawLabelAtTop() and -1 or 1)
             end
-            table.insert(skin.destination, {
+            dst[#dst+1] = {
                 id = "randomOptionImageSet", dst = {
                     {x = OPTIONS.IMG.X(), y = opY, w = OPTIONS.IMG.W, h = OPTIONS.IMG.H}
                 }
-            })
+            }
         end
     end
     dstNumberRightJustifyWithDrawFunc(skin, "grooveGaugeValue", grooveX + GRAPH.GROOVE_NUM.X, grooveY + GRAPH.GROOVE_NUM.Y, NUM_24PX.W, NUM_24PX.H, 3, getIsDrawGrooveGauge)
-    table.insert(skin.destination, {
+    dst[#dst+1] = {
         id = "dotFor24PxWhite", draw = getIsDrawGrooveGauge, dst = {
             {x = grooveX + GRAPH.GROOVE_NUM.DOT, y = grooveY + GRAPH.GROOVE_NUM.Y, w = NUM_24PX.DOT_SIZE, h = NUM_24PX.DOT_SIZE}
         }
-    })
+    }
     dstNumberRightJustifyWithDrawFunc(skin, "grooveGaugeValueAfterDot", grooveX + GRAPH.GROOVE_NUM.AF_X, grooveY + GRAPH.GROOVE_NUM.Y, NUM_24PX.W, NUM_24PX.H, 1, getIsDrawGrooveGauge)
-    table.insert(skin.destination, {
+    dst[#dst+1] = {
         id = "percentageFor24PxWhite", draw = getIsDrawGrooveGauge, dst = {
             {x = grooveX + GRAPH.GROOVE_NUM.SYMBOL_X, y = grooveY + GRAPH.GROOVE_NUM.Y, w = NUM_24PX.PERCENT.W, h = NUM_24PX.PERCENT.H}
         }
-    })
+    }
 
     mergeSkin(skin, ranking.dstMaskBg())
 
@@ -653,32 +661,34 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
     for i = 1, #GRAPH.TAB.PREFIX do
         local idPrefix = GRAPH.TAB.PREFIX[i]
         if idPrefix == "scoreGauge" and not notesGraph.didLoadPlayData then
-            table.insert(skin.destination,{
-                id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx ~= i end, dst = {
-                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.START_Y(GRAPH) - GRAPH.TAB.INTERVAL_Y * (i - 1), w = GRAPH.TAB.W, h = GRAPH.TAB.H, r = 128, g = 128, b = 128}
+            dst[#dst+1] = {
+                id = idPrefix .. "Tab", draw = function () return notesGraph.activeTabIdx ~= i end, dst = {
+                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.Y(GRAPH, i), w = GRAPH.TAB.W, h = GRAPH.TAB.H, r = 128, g = 128, b = 128}
                 }
-            })
+            }
         else
-            table.insert(skin.destination,{
-                id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx ~= i end, dst = {
-                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.START_Y(GRAPH) - GRAPH.TAB.INTERVAL_Y * (i - 1), w = GRAPH.TAB.W, h = GRAPH.TAB.H}
+            dst[#dst+1] = {
+                id = idPrefix .. "Tab", draw = function () return notesGraph.activeTabIdx ~= i end, dst = {
+                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.Y(GRAPH, i), w = GRAPH.TAB.W, h = GRAPH.TAB.H}
                 }
-            })
+            }
         end
+        
     end
-    table.insert(skin.destination, {
+    dst[#dst+1] = {
         id = "grooveGaugeFrame", draw = function () return notesGraph.activeTabIdx == 1 or notesGraph.activeTabIdx == 2 end, dst = {
             {
                 x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.SHADOW,
                 w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW * 2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW * 2
             }
         }
-    })
+    }
     return skin
 end
 
 notesGraph.functions.dstJudgeGaugeArea = function ()
     local skin = {destination = {}}
+    local dst = skin.destination
     -- グラフ出力
     for i = 1, 3 do
         local type = notesGraph.functions.getGraphType(i)
@@ -687,61 +697,68 @@ notesGraph.functions.dstJudgeGaugeArea = function ()
             local y = GRAPH.WND_JUDGE.Y + GRAPH.JUDGE_GRAPH.Y + GRAPH.JUDGE_GRAPH.INTERVAL_Y * (i - 1)
             local prefix = GRAPH.PREFIX[type]
             -- 黒背景
-            table.insert(skin.destination, {
+            dst[#dst+1] = {
                 id = "black", dst = {
                     {x = x, y = y, w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.JUDGE_GRAPH.H, a = 128}
                 }
-            })
+            }
             -- グラフ本体
-            table.insert(skin.destination, {
+            dst[#dst+1] = {
                 id = prefix .. "Graph", blend = type == 4 and 2 or 1, dst = {
                     {x = x, y = y, w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.JUDGE_GRAPH.H}
                 }
-            })
+            }
             -- グラフ種別文字
-            table.insert(skin.destination, {
+            dst[#dst+1] = {
                 id = prefix .. "GraphText", dst = {
                     {x = x + GRAPH.JUDGE_TEXT.X, y = y + GRAPH.JUDGE_TEXT.Y, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H}
                 }
-            })
+            }
             -- グラフ項目
-            table.insert(skin.destination, {
+            dst[#dst+1] = {
                 id = prefix .. "Description", dst = {
                     {x = x + GRAPH.DESCRIPTION.X, y = y + GRAPH.DESCRIPTION.Y, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H}
                 }
-            })
+            }
         end
     end
     -- グラフフレーム
-    table.insert(skin.destination, {
+    dst[#dst+1] = {
         id = "judgeFrame", dst = {
             {
                 x = GRAPH.WND_JUDGE.X - GRAPH.WND_JUDGE.SHADOW, y = GRAPH.WND_JUDGE.Y - GRAPH.WND_JUDGE.SHADOW,
                 w = GRAPH.WND_JUDGE.W + GRAPH.WND_JUDGE.SHADOW * 2, h = GRAPH.WND_JUDGE.H + GRAPH.WND_JUDGE.SHADOW * 2
             }
         }
-    })
+    }
     return skin
 end
 
-notesGraph.functions.dstActiveTab = function ()
+notesGraph.functions.dstActiveTabAndButton = function ()
     local skin = {destination = {}}
+    local dst = skin.destination
     -- アクティブタブを上に
     for i = 1, #GRAPH.TAB.PREFIX do
         local idPrefix = GRAPH.TAB.PREFIX[i]
         if idPrefix == "scoreGauge" and not notesGraph.didLoadPlayData then
-            table.insert(skin.destination,{
+            dst[#dst+1] = {
                 id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx == i end, dst = {
-                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.START_Y(GRAPH) - GRAPH.TAB.INTERVAL_Y * (i - 1), w = GRAPH.TAB.W, h = GRAPH.TAB.H, r = 128, g = 128, b = 128}
+                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.Y(GRAPH, i), w = GRAPH.TAB.W, h = GRAPH.TAB.H, r = 128, g = 128, b = 128}
                 }
-            })
+            }
         else
-            table.insert(skin.destination,{
+            dst[#dst+1] = {
                 id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx == i end, dst = {
-                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.START_Y(GRAPH) - GRAPH.TAB.INTERVAL_Y * (i - 1), w = GRAPH.TAB.W, h = GRAPH.TAB.H}
+                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.Y(GRAPH, i), w = GRAPH.TAB.W, h = GRAPH.TAB.H}
                 }
-            })
+            }
         end
+        -- タブのボタン
+        dst[#dst+1] = {
+            id = GRAPH.TAB.PREFIX[i] .. "TabButton", draw = function () return notesGraph.activeTabIdx ~= i end, dst = {
+                {x = GRAPH.TAB.BUTTON.X(GRAPH), y = GRAPH.TAB.BUTTON.Y(GRAPH, i), w = GRAPH.TAB.BUTTON.W, h = GRAPH.TAB.BUTTON.H}
+            }
+        }
     end
     return skin
 end
@@ -751,7 +768,7 @@ notesGraph.functions.dst= function ()
     mergeSkin(skin, notesGraph.functions.dstJudgeGaugeArea())
     mergeSkin(skin, notesGraph.functions.dstGrooveGaugeArea())
     mergeSkin(skin, ranking.dst())
-    mergeSkin(skin, notesGraph.functions.dstActiveTab())
+    mergeSkin(skin, notesGraph.functions.dstActiveTabAndButton())
     return skin
 end
 
