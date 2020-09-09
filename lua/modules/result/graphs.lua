@@ -508,7 +508,7 @@ notesGraph.functions.load = function ()
             {id = "scoreGaugeTabButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = function () notesGraph.functions.switchTab(2) end},
             {id = "rankingTabButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = function () notesGraph.functions.switchTab(3) end},
             -- スコアグラフを隠すための背景
-            {id = "scoreGraphMaskBg", src = getBgSrc(), x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = HEIGHT - GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.H - GRAPH.WND_GAUGE.SHADOW, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW*2},
+            {id = "scoreGraphMaskBg", src = getBgSrc(), x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = HEIGHT - GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.H - GRAPH.WND_GAUGE.SHADOW, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW},
         },
         imageset = {},
         value = {
@@ -591,7 +591,7 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
     -- スコアグラフを隠すためのマスク
     dst[#dst+1] = {
         id = "scoreGraphMaskBg", draw = getIsDrawGrooveGauge, dst = {
-            {x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.SHADOW, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW*2}
+            {x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = GRAPH.WND_GAUGE.Y, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW}
         }
     }
 

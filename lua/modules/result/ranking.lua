@@ -152,7 +152,7 @@ ranking.functions.load = function (isShowRankingFunc)
     end
     local getNum = main_state.number
     ranking.maxScoreCache = getNum(74) * 2
-    ranking.myScoreCache = getNum(150)
+    ranking.myScoreCache = math.max(getNum(150), getNum(71))
 
     local skin = {
         image = {
@@ -254,7 +254,7 @@ ranking.functions.load = function (isShowRankingFunc)
         vals[#vals+1] = {
             id = RANKING.ID_PREFIX .. (i + 3) .. "Diff", src = 4, x = 0, y = 333 + 26, w = NUMBERS_18PX.W * 12, h = NUMBERS_18PX.H * 2, divx = 12, divy = 2, digit = 5,
             value = function ()
-                local s = ranking.irScoreCache[i + 2]
+                local s = ranking.irScoreCache[i + 3]
                 if s > 0 then
                     return ranking.myScoreCache - s
                 end
@@ -263,15 +263,16 @@ ranking.functions.load = function (isShowRankingFunc)
         }
         vals[#vals+1] = {
             id = RANKING.ID_PREFIX .. (i + 3) .. "Percentage", src = 0, x = 1928, y = 392, w = NUMBERS_18PX.W * 10, h = NUMBERS_18PX.H, divx = 10, digit = 3, value = function ()
-                local s = ranking.irScoreCache[i + 2]
+                local s = ranking.irScoreCache[i + 3]
                 if s > 0 and ranking.maxScoreCache > 0 then
                     return math.floor(100 * s / ranking.maxScoreCache)
                 end
+                return 0x80000000
             end
         }
         vals[#vals+1] = {
             id = RANKING.ID_PREFIX .. (i + 3) .. "PercentageAfterDot", src = 0, x = 1928, y = 392, w = NUMBERS_18PX.W * 10, h = NUMBERS_18PX.H, divx = 10, digit = 2, padding = 1, value = function ()
-                local s = ranking.irScoreCache[i + 2]
+                local s = ranking.irScoreCache[i + 3]
                 if s > 0 and ranking.maxScoreCache > 0 then
                     return math.floor(100 * s / ranking.maxScoreCache * 100) % 100
                 end
