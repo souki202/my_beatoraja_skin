@@ -2,14 +2,15 @@ require("modules.commons.numbers")
 require("modules.commons.my_window")
 require("modules.result.commons")
 local main_state = require("main_state")
+local background = require("modules.result.background")
 local resultObtained = require("modules.result.result_obtained")
 local graphs = require("modules.result.graphs")
 local ir = require("modules.result.ir")
+local fade = require("modules.result.fade")
 local userInfo = require("modules.result.user_info")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
 local TEXTURE_SIZE = 2048
-local BG_ID = "background"
 
 local STAGE_FILE = {
     X = 79,
@@ -429,9 +430,6 @@ local NEW_RECORD = {
     }
 }
 
-local FADEOUT_ANIM_TIME = 300
-local FADEIN_ANIM_TIME = 150
-
 local isCourseResult = false
 local function setIsCourseResult(b)
     isCourseResult = b
@@ -471,7 +469,7 @@ function makeHeader()
         name = "Social Skin" .. (DEBUG and " dev result" or ""),
         w = WIDTH,
         h = HEIGHT,
-        fadeout = 500,
+        fadeout = fade.getFadeOutTime(),
         scene = 3600000,
         input = INPUT_WAIT,
         -- 980まで使用
@@ -557,13 +555,6 @@ local function easeOut(t, s, e, d)
     local t2 = t / d
     t2 = t2 - 1
     return c * (t2 * t2 * t2 + 1) + s
-end
-
--- ランプやクリアかどうかに応じて適切な背景を1枚だけ読み込む
-local function loadBackground(skin)
-    table.insert(skin.image, {
-        id = BG_ID, src = getBgSrc(), x = 0, y = 0, w = -1, h = -1
-    })
 end
 
 local function initialize(skin)
@@ -752,8 +743,6 @@ local function main()
         {id = "white", src = 999, x = 2, y = 0, w = 1, h = 1},
     }
 
-    -- 背景読み込み
-    loadBackground(skin)
     -- ウィンドウ読み込み
     loadBaseWindowResult(skin)
 
@@ -868,40 +857,30 @@ local function main()
     }
 
     resultObtained.load(skin)
+    mergeSkin(skin, background.load())
     mergeSkin(skin, graphs.load())
     mergeSkin(skin, ir.load())
     mergeSkin(skin, userInfo.load())
 
-    skin.destination = {
-        -- 背景
-        {
-            id = BG_ID, dst = {
-                {x = 0, y = 0, w = WIDTH, h = HEIGHT}
-            }
-        },
-        -- ステージファイル背景
-        -- {
-        --     id = "black", op = {191}, dst = {
-        --         {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H, a = 255}
-        --     }
-        -- },
-        -- noimage
-        {
-            id = "noImage", op = {190}, stretch = 1, dst = {
-                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
-            }
-        },
-        -- ジャケット画像
-        {
-            id = -100, op = {191}, filter = 1, stretch = 1, dst = {
-                {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
-            }
-        },
-    }
+    skin.destination = {}
 
+    mergeSkin(skin, background.dst())
     mergeSkin(skin, graphs.dst())
     mergeSkin(skin, ir.dst())
     mergeSkin(skin, userInfo.dst())
+
+    -- noimage
+    table.insert(skin.destination, {
+        id = "noImage", op = {190}, stretch = 1, dst = {
+            {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
+        }
+    })
+    -- stagefile
+    table.insert(skin.destination, {
+        id = -100, op = {191}, filter = 1, stretch = 1, dst = {
+            {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
+        }
+    })
 
     -- タイトル部分
     destinationStaticBaseWindowResult(skin, TITLE_BAR.WND.X, TITLE_BAR.WND.Y, TITLE_BAR.WND.W, TITLE_BAR.WND.H)
@@ -1649,22 +1628,7 @@ local function main()
         })
     end
 
-    -- フェードイン
-    table.insert(skin.destination, {
-        id = "black", loop = -1, dst = {
-            {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 255},
-            {time = FADEIN_ANIM_TIME, a = 0}
-        }
-    })
-
-    -- フェードアウト
-    table.insert(skin.destination, {
-        id = "black", timer = 2, loop = skin.fadeout, dst = {
-            {time = 0, x = 0, y = 0, w = WIDTH, h = HEIGHT, a = 0},
-            {time = skin.fadeout - FADEOUT_ANIM_TIME},
-            {time = skin.fadeout, a = 255}
-        }
-    })
+    mergeSkin(skin, fade.dst())
 
     return skin
 end
