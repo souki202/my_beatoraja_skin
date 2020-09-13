@@ -1,11 +1,16 @@
 require("modules.result.commons")
 require("modules.result2.commons")
+local main_state = require("main_state")
+local largeLamp = require("modules.result2.large_lamp")
 
 local rank = {
     functions = {}
 }
 
+
 local RANK = {
+    LIST = {"Aaa", "Aa", "A", "B", "C", "D", "E", "F"},
+
     AREA = {
         X = 224,
         Y = 72,
@@ -18,8 +23,15 @@ local RANK = {
     TEXT = {
         X = function (self) return self.AREA.X + (self.AREA.W - self.TEXT.W) / 2 end,
         Y = function (self) return self.AREA.Y + (self.AREA.H - self.TEXT.H) / 2 end,
-        W = 300, -- placeholder
-        H = 200,
+        W = 512, -- placeholder
+        H = 256,
+        DIV_Y = 128,
+        PER_H = function (self) return self.TEXT.H / self.TEXT.DIV_Y end,
+    },
+    ANIMATION = {
+        TEXT_APPEAR_START = largeLamp.getAnimationEndTime(),
+        TEXT_PARTS_APPEAR_TIME = largeLamp.getAnimationEndTime() + 100,
+        TEXT_ANIM_END_TIME = largeLamp.getAnimationEndTime() + 800,
     }
 }
 
@@ -34,8 +46,24 @@ rank.functions.load = function ()
             {id = "bokehBgRankFrameArea", src = getBokehBgSrc(), x = RANK.AREA.X, y = HEIGHT - RANK.AREA.Y - RANK.AREA.H, w = RANK.AREA.W, h = RANK.AREA.H}
         },
     }
-    -- ランクの文字読み込み
+    local imgs = skin.image
 
+    -- ランクの文字読み込み
+    for i = 1, #RANK.LIST do
+        -- 大量にimgに突っ込むわけには行かないので, 今回のランクの分だけ読む
+        if main_state.option(300 + (i - 1)) then
+            local perH = RANK.TEXT.PER_H(RANK)
+            for j = 1, RANK.TEXT.DIV_Y do
+                local y = RANK.TEXT.H * (i - 1) + perH * (j - 1)
+                imgs[#imgs+1] = {
+                    id = "rankTextPart" .. j, src = 8, x = 0, y = y, w = RANK.TEXT.W, h = perH
+                }
+                imgs[#imgs+1] = {
+                    id = "rankTextBrightPart" .. j, src = 8, x = RANK.TEXT.W, y = y, w = RANK.TEXT.W, h = perH
+                }
+            end
+        end
+    end
     return skin
 end
 
@@ -52,6 +80,42 @@ rank.functions.dst = function ()
                     {x = RANK.AREA.X, y = RANK.AREA.Y, w = RANK.AREA.W, h = RANK.AREA.H, a = RANK.BG.ALPHA}
                 }
             },
+        }
+    }
+    local dst = skin.destination
+
+    -- 文字の出力
+    do
+        local dt = (RANK.ANIMATION.TEXT_ANIM_END_TIME - RANK.ANIMATION.TEXT_PARTS_APPEAR_TIME) / RANK.TEXT.DIV_Y
+        local perH = RANK.TEXT.PER_H(RANK)
+        local eachTextAnimTime = RANK.ANIMATION.TEXT_PARTS_APPEAR_TIME - RANK.ANIMATION.TEXT_APPEAR_START
+        for i = 1, RANK.TEXT.DIV_Y do
+            local imgIdx = RANK.TEXT.DIV_Y - (i - 1)
+            dst[#dst+1] = {
+                id = "rankTextPart" .. imgIdx, loop = dt * (i - 1) + RANK.ANIMATION.TEXT_APPEAR_START + eachTextAnimTime, dst = {
+                    {time = 0, x = RANK.TEXT.X(RANK), y = RANK.TEXT.Y(RANK) + perH * (i - 1), w = RANK.TEXT.W, h = perH, a = 0, acc = 1},
+                    {time = dt * (i - 1) + RANK.ANIMATION.TEXT_APPEAR_START + eachTextAnimTime / 2},
+                    {time = dt * (i - 1) + RANK.ANIMATION.TEXT_APPEAR_START + eachTextAnimTime, a = 255}
+                }
+            }
+        end
+        -- 光る方を上に
+        for i = 1, RANK.TEXT.DIV_Y do
+            local imgIdx = RANK.TEXT.DIV_Y - (i - 1)
+            dst[#dst+1] = {
+                id = "rankTextBrightPart" .. imgIdx, loop = -1, dst = {
+                    {time = 0, x = RANK.TEXT.X(RANK), y = RANK.TEXT.Y(RANK) + perH * (i - 1), w = RANK.TEXT.W, h = perH, a = 0, acc = 1},
+                    {time = dt * (i - 1) + RANK.ANIMATION.TEXT_APPEAR_START},
+                    {time = dt * (i - 1) + RANK.ANIMATION.TEXT_APPEAR_START + eachTextAnimTime / 2, a = 255},
+                    {time = dt * (i - 1) + RANK.ANIMATION.TEXT_APPEAR_START + eachTextAnimTime, a = 0}
+                }
+            }
+        end
+    end
+
+    -- フレームの出力
+    mergeSkin(skin, {
+        destination = {
             {
                 id = "rankFrameDecoration", dst = {
                     {x = RANK.AREA.X, y = RANK.AREA.Y, w = RANK.AREA.W, h = RANK.AREA.H}
@@ -63,9 +127,7 @@ rank.functions.dst = function ()
                 }
             }
         }
-    }
-
-    -- 文字の出力
+    })
 
     return skin
 end

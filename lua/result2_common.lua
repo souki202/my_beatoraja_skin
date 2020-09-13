@@ -238,6 +238,7 @@ local function main()
         {id = 5, path = "../result2/parts/rank/frame/edge/*.png"},
         {id = 6, path = "../result2/parts/rank/frame/decoration/*.png"},
         {id = 7, path = "../result2/parts/rank/frame/background/*.png"},
+        {id = 8, path = "../result2/parts/rank/text/default.png"},
 
         {id = 20, path = "../result2/noimage/*.png"},
         {id = 100, path = "../result2/background/isclear/clear/*.png"},

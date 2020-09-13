@@ -45,6 +45,10 @@ local LARGE_LAMP = {
     }
 }
 
+largeLamp.functions.getAnimationEndTime = function ()
+    return LARGE_LAMP.ANIMATION.ALL_TEXT_DEL_TIME
+end
+
 largeLamp.functions.getLampId = function (clearType)
     return LARGE_LAMP.PREFIX[clearType]
 end
