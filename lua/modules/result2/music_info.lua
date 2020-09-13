@@ -28,13 +28,22 @@ local MUSIC_INFO = {
 }
 
 musicInfo.functions.load = function ()
+    local titleText = main_state.text(12)
+    if main_state.text(1003) ~= "" then
+        titleText = titleText .. "/" .. main_state.text(1003)
+    end
+
+    local artistText = main_state.text(14)
+    if main_state.text(15) ~= "" then
+        artistText = artistText .. "/" .. main_state.text(15)
+    end
     return {
         image = {
             {id = "musicInfoBg", src = 1, x = 0, y = 0, w = -1, h = -1}
         },
         text = {
-            {id = "musicTitleAndFolder", font = 0, size = MUSIC_INFO.TITLE.SIZE, overflow = 1, align = 1, constantText = main_state.text(12) .. "/" .. main_state.text(1003)},
-            {id = "musicArtist", font = 0, size = MUSIC_INFO.ARTIST.SIZE, overflow = 1, align = 1, constantText = main_state.text(14) .. "/" .. main_state.text(15)},
+            {id = "musicTitleAndFolder", font = 0, size = MUSIC_INFO.TITLE.SIZE, overflow = 1, align = 1, constantText = titleText},
+            {id = "musicArtist", font = 0, size = MUSIC_INFO.ARTIST.SIZE, overflow = 1, align = 1, constantText = artistText},
         }
     }
 end
