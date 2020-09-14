@@ -50,6 +50,10 @@ largeLamp.functions.getAnimationEndTime = function ()
 end
 
 largeLamp.functions.getLampId = function (clearType)
+    if clearType == 0 then
+        print("今回のランプがNO PLAYです")
+        clearType = 5
+    end
     return LARGE_LAMP.PREFIX[clearType]
 end
 

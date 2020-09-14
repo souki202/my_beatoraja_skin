@@ -32,22 +32,13 @@ end
 
 userInfo.functions.load = function ()
     local getNum = main_state.number
+    local playerLabel = "Player: " .. main_state.text(2)
+    local dateLabel = string.format("%04d", getNum(21)) .. "-" .. string.format("%02d", getNum(22)) .. "-" .. string.format("%02d", getNum(23)) .. " " .. string.format("%02d", getNum(24)) .. ":" .. string.format("%02d", getNum(25)) .. ":" .. string.format("%02d", getNum(26))
+
     return {
         text = {
-            {
-                id = "resultDate", font = 0, size = USER_INFO.SIZE * 2, constantText = (
-                function ()
-                    return string.format("%04d", getNum(21)) .. "-" .. string.format("%02d", getNum(22)) .. "-" .. string.format("%02d", getNum(23)) .. " " .. string.format("%02d", getNum(24)) .. ":" .. string.format("%02d", getNum(25)) .. ":" .. string.format("%02d", getNum(26))
-                end
-                )()
-            },
-            {
-                id = "playerName", font = 0, size = USER_INFO.SIZE * 2, align = 2, constantText = (
-                    function ()
-                        return "Player: " .. main_state.text(2)
-                    end
-                )()
-            }
+            {id = "resultDate", font = 0, size = USER_INFO.SIZE * 2, constantText = playerLabel},
+            {id = "playerName", font = 0, size = USER_INFO.SIZE * 2, align = 2, constantText = dateLabel}
         }
     }
 end

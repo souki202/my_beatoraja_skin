@@ -11,7 +11,9 @@ local judges = require("modules.result2.judges")
 local exscores = require("modules.result2.exscores")
 local musicInfo = require("modules.result2.music_info")
 local largeLamp = require("modules.result2.large_lamp")
+local lamp = require("modules.result2.lamps")
 local rank = require("modules.result2.rank")
+local groove = require("modules.result2.groove")
 local resultObtained = require("modules.result.result_obtained")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
@@ -27,10 +29,13 @@ end
 
 local function setProperties(skin)
     table.insert(skin.property, {
-        name = "各種グラフ グルーヴゲージ部分", item = {{name = "ノーツ数分布", op = 945}, {name = "判定分布", op = 946}, {name = "EARLY/LATE分布(棒グラフ)", op = 947}, {name = "無し", op = 949}}, def = "無し"
+        name = "各種グラフ グルーヴゲージ部分", item = {{name = "ノーツ数分布", op = 945}, {name = "判定分布", op = 946}, {name = "EARLY/LATE分布(棒グラフ)", op = 947}, {name = "無し", op = 949}}, def = "ノーツ数分布"
     })
 
     if isCourseResult then
+        table.insert(skin.property, {
+            name = "ステージファイル部分の判定グラフ", item = {{name = "ノーツ数分布", op = 950}, {name = "判定分布", op = 951}, {name = "EARLY/LATE分布(棒グラフ)", op = 952}}, def = "判定分布"
+        })
         table.insert(skin.property, {
             name = "各種グラフ1個目", item = {{name = "ノーツ数分布", op = 930}, {name = "判定分布", op = 931}, {name = "EARLY/LATE分布(棒グラフ)", op = 932}}, def = "ノーツ数分布"
         })
@@ -41,6 +46,9 @@ local function setProperties(skin)
             name = "各種グラフ3個目", item = {{name = "ノーツ数分布", op = 940}, {name = "判定分布", op = 941}, {name = "EARLY/LATE分布(棒グラフ)", op = 942}}, def = "EARLY/LATE分布(棒グラフ)"
         })
     else
+        table.insert(skin.property, {
+            name = "ステージファイル部分の判定グラフ", item = {{name = "ノーツ数分布", op = 950}, {name = "判定分布", op = 951}, {name = "EARLY/LATE分布(棒グラフ)", op = 952}, {name = "タイミング可視化グラフ", op = 953}}, def = "判定分布"
+        })
         table.insert(skin.property, {
             name = "各種グラフ1個目", item = {{name = "ノーツ数分布", op = 930}, {name = "判定分布", op = 931}, {name = "EARLY/LATE分布(棒グラフ)", op = 932}, {name = "タイミング可視化グラフ", op = 933}}, def = "ノーツ数分布"
         })
@@ -62,7 +70,7 @@ local function makeHeader()
         fadeout = fade.getFadeOutTime(),
         scene = 3600000,
         input = INPUT_WAIT,
-        -- 910, 920, 930, 935, 940, 945, 965, 975
+        -- 910, 920, 930, 935, 940, 945, 950, 965, 975
         property = {
             {
                 name = "背景の分類", item = {{name = "クリアかどうか", op = 910}, {name = "ランク毎", op = 911}, {name = "クリアランプ毎", op = 912}}, def = "クリアかどうか"
@@ -240,6 +248,11 @@ local function main()
         {id = 7, path = "../result2/parts/rank/frame/background/*.png"},
         {id = 8, path = "../result2/parts/rank/text/default.png"},
 
+        {id = 9, path = "../result2/parts/gauge/shadow.png"},
+        {id = 10, path = "../result2/parts/gauge/details.png"},
+        {id = 11, path = "../result2/parts/gauge/labels.png"},
+        {id = 12, path = "../result2/parts/lamps/normal.png"},
+
         {id = 20, path = "../result2/noimage/*.png"},
         {id = 100, path = "../result2/background/isclear/clear/*.png"},
         {id = 101, path = "../result2/background/isclear/failed/*.png"},
@@ -275,6 +288,8 @@ local function main()
         {id = 200, path = "../result2/backgroundbokeh/isclear/clear/*.png"},
         {id = 201, path = "../result2/backgroundbokeh/isclear/failed/*.png"},
 
+        -- 数字は300番台
+        {id = 330, path = "../result2/parts/simplenumbers/30px.png"},
         {id = 999, path = "../common/colors/colors.png"},
     }
     do
@@ -313,7 +328,10 @@ local function main()
     }
 
 
+    mergeSkin(skin, loadNumberSymbols())
     mergeSkin(skin, background.load())
+    mergeSkin(skin, groove.load())
+    mergeSkin(skin, lamp.load())
     mergeSkin(skin, stagefile.load())
     mergeSkin(skin, rank.load())
     mergeSkin(skin, judges.load())
@@ -325,6 +343,8 @@ local function main()
     skin.destination = {}
 
     mergeSkin(skin, background.dst())
+    mergeSkin(skin, groove.dst())
+    mergeSkin(skin, lamp.dst())
     mergeSkin(skin, stagefile.dst())
     mergeSkin(skin, rank.dst())
     mergeSkin(skin, judges.dst())

@@ -114,6 +114,28 @@ function isSimpleRankingInformation()
 	return getTableValue(skin_config.option, "ランキングの情報量", 980) == 981
 end
 
+function getGrooveNotesGraphTransparency()
+	return 255 - getOffsetValueWithDefault("グルーヴゲージ部分のノーツグラフの透明度 (255で透明)", {a = 0}).a
+end
+--[[
+    グルーヴゲージ下の各種グラフの種類を取得
+
+    @param  int pos 上から何番目か 1,2,3は下部分の枠目, 4はグルーヴゲージ部分
+    @return int 1:ノーツ数分布, 2:判定分布, 3:EARLY/LATE分布(棒グラフ), 4:タイミング可視化グラフ, 5:無し
+]]
+function getGraphType(pos)
+    if pos == 4 then
+        return (getTableValue(skin_config.option, "各種グラフ グルーヴゲージ部分", 949) % 5) + 1
+    end
+
+    if pos < 1 or 3 < pos then return 5 end
+    local def = 930
+    if pos == 2 then def = 936
+    elseif pos == 3 then def = 942
+    end
+    return (getTableValue(skin_config.option, "各種グラフ" .. pos .. "個目", def) % 5) + 1
+end
+
 function getBgSrc()
     if getTableValue(skin_config.option, "背景の分類", 910) == 910 then
         -- クリアかどうかの背景時
