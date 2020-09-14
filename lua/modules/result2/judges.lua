@@ -99,6 +99,18 @@ local JUDGES = {
     },
 }
 
+judges.functions.getLargeNumSize = function ()
+    return JUDGES.NUM.LARGE
+end
+
+judges.functions.getSmallNumSize = function ()
+    return JUDGES.NUM.SMALL
+end
+
+judges.functions.getLabelSize = function ()
+    return {W = JUDGES.LABEL.W, H = JUDGES.LABEL.H}
+end
+
 judges.functions.load = function ()
     local skin = {image = {}, value = {}}
     local imgs = skin.image

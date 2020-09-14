@@ -14,6 +14,7 @@ local largeLamp = require("modules.result2.large_lamp")
 local lamp = require("modules.result2.lamps")
 local rank = require("modules.result2.rank")
 local groove = require("modules.result2.groove")
+local scoreDetail = require("modules.result2.score_detail")
 local resultObtained = require("modules.result.result_obtained")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
@@ -106,6 +107,19 @@ local function makeHeader()
             {name = "GOOD数字"   , path = "../result2/parts/judge/num/good/*.png", def = "orange"},
             {name = "BAD数字"    , path = "../result2/parts/judge/num/bad/*.png", def = "dark red"},
             {name = "POOR数字"   , path = "../result2/parts/judge/num/poor/*.png", def = "dark purple"},
+            {name = "詳細画面判定--------------------------------------", path="../dummy/*"},
+            {name = "PERFECT文字", path = "../result2/parts/detail/judge/text/perfect/*.png", def = "light purple"},
+            {name = "GREAT文字"  , path = "../result2/parts/detail/judge/text/great/*.png", def = "orange"},
+            {name = "GOOD文字"   , path = "../result2/parts/detail/judge/text/good/*.png", def = "orange"},
+            {name = "BAD文字"    , path = "../result2/parts/detail/judge/text/bad/*.png", def = "light red"},
+            {name = "POOR文字"   , path = "../result2/parts/detail/judge/text/poor/*.png", def = "purple"},
+            {name = "E.POOR文字" , path = "../result2/parts/detail/judge/text/epoor/*.png", def = "purple"},
+            {name = "PERFECT数字", path = "../result2/parts/detail/judge/num/perfect/*.png", def = "light purple"},
+            {name = "GREAT数字"  , path = "../result2/parts/detail/judge/num/great/*.png", def = "orange"},
+            {name = "GOOD数字"   , path = "../result2/parts/detail/judge/num/good/*.png", def = "orange"},
+            {name = "BAD数字"    , path = "../result2/parts/detail/judge/num/bad/*.png", def = "dark red"},
+            {name = "POOR数字"   , path = "../result2/parts/detail/judge/num/poor/*.png", def = "dark purple"},
+            {name = "E.POOR数字" , path = "../result2/parts/detail/judge/num/epoor/*.png", def = "dark purple"},
             {name = "ランク-------------------------------------------", path="../dummy/*"},
             {name = "ランクの額縁の縁"  , path = "../result2/parts/rank/frame/edge/*.png", def = "luxury"},
             {name = "ランクの額縁の装飾", path = "../result2/parts/rank/frame/decoration/*.png", def = "ivy"},
@@ -252,6 +266,11 @@ local function main()
         {id = 10, path = "../result2/parts/gauge/details.png"},
         {id = 11, path = "../result2/parts/gauge/labels.png"},
         {id = 12, path = "../result2/parts/lamps/normal.png"},
+        {id = 13, path = "../result2/parts/detail/labels.png"},
+        {id = 14, path = "../result2/parts/detail/headers.png"},
+        {id = 15, path = "../result2/parts/detail/num36.png"},
+        {id = 16, path = "../result2/parts/detail/gray_num48.png"},
+        {id = 17, path = "../result2/parts/detail/exscore_num.png"},
 
         {id = 20, path = "../result2/noimage/*.png"},
         {id = 100, path = "../result2/background/isclear/clear/*.png"},
@@ -283,12 +302,25 @@ local function main()
         {id = 166, path = "../result2/parts/ir/background/default.png"},
         {id = 167, path = "../result2/parts/ir/text/default.png"},
         {id = 168, path = "../result2/parts/ir/num/default.png"},
+        -- 詳細画面用
+        {id = 170, path = "../result2/parts/detail/judge/text/perfect/*.png"},
+        {id = 171, path = "../result2/parts/detail/judge/text/great/*.png"},
+        {id = 172, path = "../result2/parts/detail/judge/text/good/*.png"},
+        {id = 173, path = "../result2/parts/detail/judge/text/bad/*.png"},
+        {id = 174, path = "../result2/parts/detail/judge/text/poor/*.png"},
+        {id = 175, path = "../result2/parts/detail/judge/text/epoor/*.png"},
+        {id = 180, path = "../result2/parts/detail/judge/num/perfect/*.png"},
+        {id = 181, path = "../result2/parts/detail/judge/num/great/*.png"},
+        {id = 182, path = "../result2/parts/detail/judge/num/good/*.png"},
+        {id = 183, path = "../result2/parts/detail/judge/num/bad/*.png"},
+        {id = 184, path = "../result2/parts/detail/judge/num/poor/*.png"},
+        {id = 185, path = "../result2/parts/detail/judge/num/epoor/*.png"},
 
         -- ぼかし背景は210~220
         {id = 200, path = "../result2/backgroundbokeh/isclear/clear/*.png"},
         {id = 201, path = "../result2/backgroundbokeh/isclear/failed/*.png"},
 
-        -- 数字は300番台
+        -- シンプル数字は300番台
         {id = 330, path = "../result2/parts/simplenumbers/30px.png"},
         {id = 999, path = "../common/colors/colors.png"},
     }
@@ -337,6 +369,7 @@ local function main()
     mergeSkin(skin, judges.load())
     mergeSkin(skin, exscores.load())
     mergeSkin(skin, musicInfo.load())
+    mergeSkin(skin, scoreDetail.load())
     mergeSkin(skin, largeLamp.load())
     mergeSkin(skin, fade.load())
 
@@ -349,6 +382,7 @@ local function main()
     mergeSkin(skin, rank.dst())
     mergeSkin(skin, judges.dst())
     mergeSkin(skin, exscores.dst())
+    mergeSkin(skin, scoreDetail.dst())
 
     mergeSkin(skin, musicInfo.dst())
     mergeSkin(skin, largeLamp.dst())

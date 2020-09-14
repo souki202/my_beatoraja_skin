@@ -36,6 +36,37 @@ function loadNumber(id, size, digit, align, ref, value)
     return {id = id, src = 300 + size, x = 0, y = 0, w = param.W * 10, h = param.H, divx = 10, align = align, digit = digit, ref = ref, value = value}
 end
 
+function dstPercentage(valId, dotId, afterDotId, percentId, afterDotDigit, x, y, numW, numH, numSpace, dotW, dotH, dotAreaW, dotSpace, percentW, percentH, percentAreaW, percentSpace)
+    local percentX = x - percentAreaW - (percentW - percentAreaW) / 2
+    local afterDotX = percentX - percentSpace - afterDotDigit * (numW + numSpace)
+    local dotX = afterDotId - dotAreaW - (dotW - dotAreaW) / 2
+    local valX = dotX - dotSpace - 3 * (numW + numSpace)
+    return {
+        destination = {
+            {
+                id = percentId, dst = {
+                    {x = x, y = y, w = percentW, h = percentH}
+                }
+            },
+            {
+                id = afterDotId, dst = {
+                    {x = afterDotX, y = y, w = numW, h = numH}
+                }
+            },
+            {
+                id = dotId, dst = {
+                    {x = dotX, y = y, w = dotW, h = dotH}
+                }
+            },
+            {
+                id = valId, dst = {
+                    {x = valX, y = y, w = numW, h = numH}
+                }
+            }
+        }
+    }
+end
+
 function getRankFrameBgAlpha()
 	return 255 - getOffsetValueWithDefault("ランクの額縁の背景の透明度(既定値165 255で透明)", {a = 165}).a
 end
