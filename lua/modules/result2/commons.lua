@@ -36,16 +36,23 @@ function loadNumber(id, size, digit, align, ref, value)
     return {id = id, src = 300 + size, x = 0, y = 0, w = param.W * 10, h = param.H, divx = 10, align = align, digit = digit, ref = ref, value = value}
 end
 
-function dstPercentage(valId, dotId, afterDotId, percentId, afterDotDigit, x, y, numW, numH, numSpace, dotW, dotH, dotAreaW, dotSpace, percentW, percentH, percentAreaW, percentSpace)
-    local percentX = x - percentAreaW - (percentW - percentAreaW) / 2
-    local afterDotX = percentX - percentSpace - afterDotDigit * (numW + numSpace)
-    local dotX = afterDotId - dotAreaW - (dotW - dotAreaW) / 2
-    local valX = dotX - dotSpace - 3 * (numW + numSpace)
+--[[
+    パーセンテージ全体を出力する
+
+    @param dotInfo {W, H, AREA_W, SPACE}を持つ配列
+    @param percentInfo {W, H, AREA_W, SPACE}を持つ配列
+    @return スキンの配列 mergeSkinしてください
+]]
+function dstPercentage(valId, dotId, afterDotId, percentId, afterDotDigit, x, y, numW, numH, numSpace, dotInfo, percentInfo)
+    local percentX = x - percentInfo.W + (percentInfo.W - percentInfo.AREA_W) / 2
+    local afterDotX = percentX - percentInfo.SPACE - afterDotDigit * (numW + numSpace)
+    local dotX = afterDotX - numSpace / 2 - dotInfo.W + (dotInfo.W - dotInfo.AREA_W) / 2
+    local valX = dotX - dotInfo.SPACE - 3 * (numW + numSpace)
     return {
         destination = {
             {
                 id = percentId, dst = {
-                    {x = x, y = y, w = percentW, h = percentH}
+                    {x = percentX, y = y, w = percentInfo.W, h = percentInfo.H}
                 }
             },
             {
@@ -55,7 +62,7 @@ function dstPercentage(valId, dotId, afterDotId, percentId, afterDotDigit, x, y,
             },
             {
                 id = dotId, dst = {
-                    {x = dotX, y = y, w = dotW, h = dotH}
+                    {x = dotX, y = y, w = dotInfo.W, h = dotInfo.H}
                 }
             },
             {

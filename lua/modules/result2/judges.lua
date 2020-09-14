@@ -96,6 +96,11 @@ local JUDGES = {
             H = 46,
             SPACE = -4
         },
+        VERY_SMALL = {
+            W = 26,
+            H = 36,
+            SPACE = -3
+        },
     },
 }
 
@@ -105,6 +110,10 @@ end
 
 judges.functions.getSmallNumSize = function ()
     return JUDGES.NUM.SMALL
+end
+
+judges.functions.getVerySmallNumSize = function ()
+    return JUDGES.NUM.VERY_SMALL
 end
 
 judges.functions.getLabelSize = function ()

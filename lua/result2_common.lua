@@ -268,7 +268,7 @@ local function main()
         {id = 12, path = "../result2/parts/lamps/normal.png"},
         {id = 13, path = "../result2/parts/detail/labels.png"},
         {id = 14, path = "../result2/parts/detail/headers.png"},
-        {id = 15, path = "../result2/parts/detail/num36.png"},
+        {id = 15, path = "../result2/parts/detail/small_num.png"},
         {id = 16, path = "../result2/parts/detail/gray_num48.png"},
         {id = 17, path = "../result2/parts/detail/exscore_num.png"},
 
