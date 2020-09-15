@@ -89,17 +89,17 @@ local JUDGES = {
         LARGE = {
             W = 46,
             H = 63,
-            SPACE = -5
+            SPACE = -7
         },
         SMALL = {
             W = 34,
             H = 46,
-            SPACE = -4
+            SPACE = -7
         },
         VERY_SMALL = {
             W = 26,
             H = 36,
-            SPACE = -3
+            SPACE = -7
         },
     },
 }

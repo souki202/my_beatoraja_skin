@@ -3,6 +3,7 @@ require("modules.result.commons")
 
 CUSTOM_TIMERS = {
     SWITCH_STAGEFILE_TAB = 10100,
+    SWITCH_DETAIL = 10101,
 }
 
 RESULT2NUM = {

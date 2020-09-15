@@ -10,9 +10,11 @@ local BACKGROUND = {
 }
 
 background.functions.load = function ()
+    print("bgsrc: " .. getBgSrc())
     return {
         image = {
             {id = BACKGROUND.ID, src = getBgSrc(), x = 0, y = 0, w = -1, h = -1},
+            -- {id = BACKGROUND.ID, src = 102, x = 0, y = 0, w = -1, h = -1},
         }
     }
 end

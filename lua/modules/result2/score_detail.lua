@@ -4,6 +4,7 @@ local main_state = require("main_state")
 local judges = require("modules.result2.judges")
 
 local scoreDetail = {
+    isOpening = false,
     functions = {}
 }
 
@@ -20,10 +21,13 @@ local DETAIL = {
         W = 120,
         H = 32,
         RATE = {
-            Y = 1027,
+            Y = function (self) return self.AREA.Y + 1020 end,
         },
         JUDGE = {
-            Y = 988
+            Y = function (self) return self.AREA.Y + 988 end,
+        },
+        BEST = {
+            Y = function (self) return self.AREA.Y + 534 - 6 end,
         }
     },
     JUDGES = {
@@ -41,11 +45,24 @@ local DETAIL = {
     HEADER = {
         X = function (self) return self.AREA.X + 38 end,
         W = 256,
-        H = 36
+        H = 36,
     },
     EXSCORE = {
+        Y = function (self) return self.AREA.Y + 346 end,
         W = 256,
         H = 44,
+    },
+    TN = {
+        Y = function (self) return self.AREA.Y + 565 end,
+    },
+    COMBO = {
+        Y = function (self) return self.AREA.Y + 481 end,
+    },
+    BP = {
+        Y = function (self) return self.AREA.Y + 426 end,
+    },
+    TARGET = {
+        Y = function (self) return self.AREA.Y + 291 end,
     },
     COL = {
         X = function (self, idx) return self.AREA.X + 462 + self.COL.W * (idx - 1) end,
@@ -75,7 +92,7 @@ local DETAIL = {
     GRAY_30NUM = {
         W = 24,
         H = 31,
-        SPACE = -9,
+        SPACE = -8,
         DOT = {
             W = 12,
             H = 12,
@@ -128,6 +145,11 @@ scoreDetail.functions.loadGray48Number = function (id, digit, align, ref, value)
     return {id = id, src = 16, x = 0, y = 0, w = param.W * 10, h = param.H, divx = 10, align = align, digit = digit, space = param.SPACE, ref = ref, value = value}
 end
 
+scoreDetail.functions.switchOpenState = function ()
+    scoreDetail.isOpening = not scoreDetail.isOpening
+    return 1
+end
+
 
 scoreDetail.functions.load = function ()
     local totalNotes = main_state.number(74)
@@ -142,12 +164,15 @@ scoreDetail.functions.load = function ()
             {id = "gray30Percent", src = 15, x = 336, y = 216, w = DETAIL.GRAY_30NUM.PERCENT.W, h = DETAIL.GRAY_30NUM.PERCENT.H},
             -- ヘッダ読み込み 数が少ないので普通に.
             {id = "totalNotesDetailHeader" , src = 14, x = 0, y = DETAIL.HEADER.H * 0, w = DETAIL.HEADER.W, h = DETAIL.HEADER.H},
-            {id = "maxComboDetailHeader"   , src = 14, x = 0, y = DETAIL.HEADER.H * 1, w = DETAIL.HEADER.W, h = DETAIL.HEADER.H},
-            {id = "missCountDetailHeader"  , src = 14, x = 0, y = DETAIL.HEADER.H * 2, w = DETAIL.HEADER.W, h = DETAIL.HEADER.H},
+            {id = "comboDetailHeader"   , src = 14, x = 0, y = DETAIL.HEADER.H * 1, w = DETAIL.HEADER.W, h = DETAIL.HEADER.H},
+            {id = "bpDetailHeader"  , src = 14, x = 0, y = DETAIL.HEADER.H * 2, w = DETAIL.HEADER.W, h = DETAIL.HEADER.H},
             {id = "targetScoreDetailHeader", src = 14, x = 0, y = DETAIL.HEADER.H * 3, w = DETAIL.HEADER.W, h = DETAIL.HEADER.H},
             {id = "exScoreDetailHeader"    , src = 14, x = 0, y = DETAIL.HEADER.H * 4, w = DETAIL.EXSCORE.W, h = DETAIL.EXSCORE.H},
         },
-        value = {}
+        value = {},
+        customTimers = {
+            {id = CUSTOM_TIMERS.SWITCH_DETAIL, timer = scoreDetail.functions.switchOpenState}
+        }
     }
     local imgs = skin.image
     local vals = skin.value
@@ -221,24 +246,38 @@ scoreDetail.functions.load = function ()
     -- combo
     vals[#vals+1] = scoreDetail.functions.loadGray48Number("comboDetailValue", 5, 0, 75, nil)
     vals[#vals+1] = scoreDetail.functions.loadGray36Number("comboOldDetailValue", 5, 0, 173, nil)
-    vals[#vals+1] = {id = "comboDiffDetailValue", src = 15, x = 0, y = 72, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, ref = 175}
+    vals[#vals+1] = {id = "comboDiffDetailValue", src = 15, x = 0, y = 72, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, space = DETAIL.GRAY_36NUM.SPACE, ref = 175}
+    do
+        local rate = main_state.number(75) / totalNotes * 100
+        local rateAf = math.floor(rate * 100) % 100
+        vals[#vals+1] = scoreDetail.functions.loadGray30Number("comboRateDetailValue", 3, 0, 0, nil, function () return rate end)
+        vals[#vals+1] = scoreDetail.functions.loadGray30Number("comboRateDetailValueAfterDot", 2, 0, 1, nil, function () return rateAf end)
+    end
+
     -- bp
-    vals[#vals+1] = scoreDetail.functions.loadGray48Number("comboDetailValue", 5, 0, 76, nil)
-    vals[#vals+1] = scoreDetail.functions.loadGray36Number("comboOldDetailValue", 5, 0, 176, nil)
-    vals[#vals+1] = {id = "comboDiffDetailValue", src = 15, x = 0, y = 144, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, ref = 176}
+    vals[#vals+1] = scoreDetail.functions.loadGray48Number("bpDetailValue", 5, 0, 76, nil)
+    vals[#vals+1] = scoreDetail.functions.loadGray36Number("bpOldDetailValue", 5, 0, 176, nil)
+    vals[#vals+1] = {id = "bpDiffDetailValue", src = 15, x = 0, y = 144, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, space = DETAIL.GRAY_36NUM.SPACE, ref = 176}
+    do
+        local rate = main_state.number(76) / totalNotes * 100
+        local rateAf = math.floor(rate * 100) % 100
+        vals[#vals+1] = scoreDetail.functions.loadGray30Number("bpRateDetailValue", 3, 0, 0, nil, function () return rate end)
+        vals[#vals+1] = scoreDetail.functions.loadGray30Number("bpRateDetailValueAfterDot", 2, 0, 1, nil, function () return rateAf end)
+    end
+
     -- EXSCORE
     vals[#vals+1] = {id = "exScoreDetailValue", src = 17, x = 0, y = 0, w = judges.getLargeNumSize().W * 10, h = judges.getLargeNumSize().H, divx = 10, digit = 5, space = judges.getLargeNumSize().SPACE, ref = 71}
     vals[#vals+1] = scoreDetail.functions.loadGray48Number("bestScoreDetailValue", 5, 0, 170, nil)
-    vals[#vals+1] = scoreDetail.functions.loadGray30Number("exScoreRateDetailValue", 5, 0, 0, 102, nil)
-    vals[#vals+1] = scoreDetail.functions.loadGray30Number("exScoreRateAfterDotDetailValue", 5, 0, 1, 103, nil)
+    vals[#vals+1] = scoreDetail.functions.loadGray30Number("exScoreRateDetailValue", 3, 0, 0, 102, nil)
+    vals[#vals+1] = scoreDetail.functions.loadGray30Number("exScoreRateAfterDotDetailValue", 2, 0, 1, 103, nil)
 
     -- ベストスコア
-    vals[#vals+1] = {id = "bestDiffDetailValue", src = 15, x = 0, y = 72, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, ref = 172}
+    vals[#vals+1] = {id = "bestDiffDetailValue", src = 15, x = 0, y = 72, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, space = DETAIL.GRAY_36NUM.SPACE, ref = 172}
     -- ターゲットスコア
     vals[#vals+1] = scoreDetail.functions.loadGray48Number("targetScoreDetailValue", 5, 0, 151, nil)
-    vals[#vals+1] = {id = "targetDiffDetailValue", src = 15, x = 0, y = 72, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, ref = 153}
-    vals[#vals+1] = scoreDetail.functions.loadGray30Number("targetScoreRateDetailValue", 5, 0, 0, 122, nil)
-    vals[#vals+1] = scoreDetail.functions.loadGray30Number("targetScoreRateAfterDotDetailValue", 5, 1, 0, 123, nil)
+    vals[#vals+1] = {id = "targetDiffDetailValue", src = 15, x = 0, y = 72, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, space = DETAIL.GRAY_36NUM.SPACE, ref = 153}
+    vals[#vals+1] = scoreDetail.functions.loadGray30Number("targetScoreRateDetailValue", 3, 0, 0, 122, nil)
+    vals[#vals+1] = scoreDetail.functions.loadGray30Number("targetScoreRateAfterDotDetailValue", 2, 1, 0, 123, nil)
 
     return skin
 end
@@ -259,27 +298,27 @@ scoreDetail.functions.dst = function ()
             -- 上部のラベルから
             {
                 id = "rateDetailLabel", dst = {
-                    {x = DETAIL.COL.X(DETAIL, 3.5), y = DETAIL.LABEL.RATE.Y, w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
+                    {x = DETAIL.COL.X(DETAIL, 3.5), y = DETAIL.LABEL.RATE.Y(DETAIL), w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
                 }
             },
             {
                 id = "earlyDetailLabel", dst = {
-                    {x = DETAIL.COL.X(DETAIL, 1), y = DETAIL.LABEL.JUDGE.Y, w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
+                    {x = DETAIL.COL.X(DETAIL, 1), y = DETAIL.LABEL.JUDGE.Y(DETAIL), w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
                 }
             },
             {
                 id = "lateDetailLabel", dst = {
-                    {x = DETAIL.COL.X(DETAIL, 2), y = DETAIL.LABEL.JUDGE.Y, w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
+                    {x = DETAIL.COL.X(DETAIL, 2), y = DETAIL.LABEL.JUDGE.Y(DETAIL), w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
                 }
             },
             {
                 id = "numDetailLabel", dst = {
-                    {x = DETAIL.COL.X(DETAIL, 3), y = DETAIL.LABEL.JUDGE.Y, w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
+                    {x = DETAIL.COL.X(DETAIL, 3), y = DETAIL.LABEL.JUDGE.Y(DETAIL), w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
                 }
             },
             {
                 id = "scoreDetailLabel", dst = {
-                    {x = DETAIL.COL.X(DETAIL, 4), y = DETAIL.LABEL.JUDGE.Y, w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
+                    {x = DETAIL.COL.X(DETAIL, 4), y = DETAIL.LABEL.JUDGE.Y(DETAIL), w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
                 }
             },
         }
@@ -342,8 +381,129 @@ scoreDetail.functions.dst = function ()
         end
     end
 
+    -- total notes
+    dst[#dst+1] = {
+        id = "totalNotesDetailHeader", dst = {
+            {x = DETAIL.HEADER.X(DETAIL), y = DETAIL.TN.Y(DETAIL), w = DETAIL.HEADER.W, h = DETAIL.HEADER.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "totalNotesDetailValue", dst = {
+            {x = DETAIL.MAIN_NUM.X_GRAY48PX(DETAIL), y = DETAIL.TN.Y(DETAIL), w = DETAIL.GRAY_48NUM.W, h = DETAIL.GRAY_48NUM.H}
+        }
+    }
+    -- best diff rate
+    dst[#dst+1] = {
+        id = "bestDetailLabel", dst = {
+            {x = DETAIL.COL.X(DETAIL, 1), y = DETAIL.LABEL.BEST.Y(DETAIL), w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "diffDetailLabel", dst = {
+            {x = DETAIL.COL.X(DETAIL, 2), y = DETAIL.LABEL.BEST.Y(DETAIL), w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "rateDetailLabel", dst = {
+            {x = DETAIL.COL.X(DETAIL, 3), y = DETAIL.LABEL.BEST.Y(DETAIL), w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
+        }
+    }
+
+    -- max combo
+    dst[#dst+1] = {
+        id = "comboDetailHeader", dst = {
+            {x = DETAIL.HEADER.X(DETAIL), y = DETAIL.COMBO.Y(DETAIL), w = DETAIL.HEADER.W, h = DETAIL.HEADER.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "comboDetailValue", dst = {
+            {x = DETAIL.MAIN_NUM.X_GRAY48PX(DETAIL), y = DETAIL.COMBO.Y(DETAIL), w = DETAIL.GRAY_48NUM.W, h = DETAIL.GRAY_48NUM.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "comboOldDetailValue", dst = {
+            {x = DETAIL.COL.NUM36_X(DETAIL, 1), y = DETAIL.COMBO.Y(DETAIL), w = DETAIL.GRAY_36NUM.W, h = DETAIL.GRAY_36NUM.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "comboDiffDetailValue", dst = {
+            {x = DETAIL.COL.NUM36_X(DETAIL, 2), y = DETAIL.COMBO.Y(DETAIL), w = DETAIL.GRAY_36NUM.W, h = DETAIL.GRAY_36NUM.H}
+        }
+    }
+    mergeSkin(skin, dstPercentage("comboRateDetailValue", "gray30Dot", "comboRateDetailValueAfterDot", "gray30Percent", 2, DETAIL.COL.RATE_X(DETAIL, 3), DETAIL.COMBO.Y(DETAIL), num30.W, num30.H, num30.SPACE, num30.DOT, num30.PERCENT))
+
+    -- bp
+    dst[#dst+1] = {
+        id = "bpDetailHeader", dst = {
+            {x = DETAIL.HEADER.X(DETAIL), y = DETAIL.BP.Y(DETAIL), w = DETAIL.HEADER.W, h = DETAIL.HEADER.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "bpDetailValue", dst = {
+            {x = DETAIL.MAIN_NUM.X_GRAY48PX(DETAIL), y = DETAIL.BP.Y(DETAIL), w = DETAIL.GRAY_48NUM.W, h = DETAIL.GRAY_48NUM.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "bpOldDetailValue", dst = {
+            {x = DETAIL.COL.NUM36_X(DETAIL, 1), y = DETAIL.BP.Y(DETAIL), w = DETAIL.GRAY_36NUM.W, h = DETAIL.GRAY_36NUM.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "bpDiffDetailValue", dst = {
+            {x = DETAIL.COL.NUM36_X(DETAIL, 2), y = DETAIL.BP.Y(DETAIL), w = DETAIL.GRAY_36NUM.W, h = DETAIL.GRAY_36NUM.H}
+        }
+    }
+    mergeSkin(skin, dstPercentage("bpRateDetailValue", "gray30Dot", "bpRateDetailValueAfterDot", "gray30Percent", 2, DETAIL.COL.RATE_X(DETAIL, 3), DETAIL.BP.Y(DETAIL), num30.W, num30.H, num30.SPACE, num30.DOT, num30.PERCENT))
+
+    -- exscore
+    dst[#dst+1] = {
+        id = "exScoreDetailHeader", dst = {
+            {x = DETAIL.HEADER.X(DETAIL), y = DETAIL.EXSCORE.Y(DETAIL), w = DETAIL.EXSCORE.W, h = DETAIL.EXSCORE.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "exScoreDetailValue", dst = {
+            {x = DETAIL.MAIN_NUM.X_72PX(DETAIL), y = DETAIL.EXSCORE.Y(DETAIL), w = judges.getLargeNumSize().W, h = judges.getLargeNumSize().H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "bestScoreDetailValue", dst = {
+            {x = DETAIL.COL.NUM48_X(DETAIL, 1), y = DETAIL.EXSCORE.Y(DETAIL), w = DETAIL.GRAY_48NUM.W, h = DETAIL.GRAY_48NUM.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "bestDiffDetailValue", dst = {
+            {x = DETAIL.COL.NUM36_X(DETAIL, 2), y = DETAIL.EXSCORE.Y(DETAIL), w = DETAIL.GRAY_36NUM.W, h = DETAIL.GRAY_36NUM.H}
+        }
+    }
+    mergeSkin(skin, dstPercentage("exScoreRateDetailValue", "gray30Dot", "exScoreRateAfterDotDetailValue", "gray30Percent", 2, DETAIL.COL.RATE_X(DETAIL, 3), DETAIL.EXSCORE.Y(DETAIL), num30.W, num30.H, num30.SPACE, num30.DOT, num30.PERCENT))
+
+    -- target score
+    dst[#dst+1] = {
+        id = "targetScoreDetailHeader", dst = {
+            {x = DETAIL.HEADER.X(DETAIL), y = DETAIL.TARGET.Y(DETAIL), w = DETAIL.HEADER.W, h = DETAIL.HEADER.H}
+        }
+    }
+    -- メイン数字はなし
+    -- dst[#dst+1] = {
+    --     id = "targetScoreDetailValue", dst = {
+    --         {x = DETAIL.MAIN_NUM.X_GRAY48PX(DETAIL), y = DETAIL.BP.Y(DETAIL), w = DETAIL.GRAY_48NUM.W, h = DETAIL.GRAY_48NUM.H}
+    --     }
+    -- }
+    dst[#dst+1] = {
+        id = "targetScoreDetailValue", dst = {
+            {x = DETAIL.COL.NUM48_X(DETAIL, 1), y = DETAIL.TARGET.Y(DETAIL), w = DETAIL.GRAY_48NUM.W, h = DETAIL.GRAY_48NUM.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "targetDiffDetailValue", dst = {
+            {x = DETAIL.COL.NUM36_X(DETAIL, 2), y = DETAIL.TARGET.Y(DETAIL), w = DETAIL.GRAY_36NUM.W, h = DETAIL.GRAY_36NUM.H}
+        }
+    }
+    mergeSkin(skin, dstPercentage("targetScoreRateDetailValue", "gray30Dot", "targetScoreRateAfterDotDetailValue", "gray30Percent", 2, DETAIL.COL.RATE_X(DETAIL, 3), DETAIL.TARGET.Y(DETAIL), num30.W, num30.H, num30.SPACE, num30.DOT, num30.PERCENT))
+
     -- 全てにアニメーション用のタイマとxを設定
-    for i, v in ipairs(skin.destination) do
+    for i = 1, #skin.destination do
         
     end
     return skin
