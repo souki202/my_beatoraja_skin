@@ -14,7 +14,6 @@ background.functions.load = function ()
     return {
         image = {
             {id = BACKGROUND.ID, src = getBgSrc(), x = 0, y = 0, w = -1, h = -1},
-            -- {id = BACKGROUND.ID, src = 102, x = 0, y = 0, w = -1, h = -1},
         }
     }
 end

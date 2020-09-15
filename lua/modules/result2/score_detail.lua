@@ -1,10 +1,13 @@
 require("modules.result.commons")
 require("modules.result2.commons")
+require("modules.commons.deepcopy")
 local main_state = require("main_state")
+local timer_util = require("timer_util")
 local judges = require("modules.result2.judges")
 
 local scoreDetail = {
-    isOpening = false,
+    isOpened = false,
+    timeForAnimation = 99999999,
     functions = {}
 }
 
@@ -13,6 +16,7 @@ local DETAIL = {
         X = 0,
         Y = 0,
         W = 960,
+        SHADOW_W = 1005,
         H = HEIGHT,
         DIMMER_ALPHA = 90,
     },
@@ -64,6 +68,21 @@ local DETAIL = {
     TARGET = {
         Y = function (self) return self.AREA.Y + 291 end,
     },
+    TIMING = {
+        LABEL = {
+            X = function (self) return self.AREA.X + 727 end,
+            Y = function (self) return self.AREA.Y + 229 end,
+            W = 162,
+            H = 32,
+        },
+        VAL = {
+            X_LABEL = function (self) return self.TIMING.LABEL.X(self) - 29 end,
+            X_NUM = function (self) return self.TIMING.LABEL.X(self) + 150 end,
+            Y1 = function (self) return self.TIMING.LABEL.Y(self) - 40 end,
+            Y2 = function (self) return self.TIMING.VAL.Y1(self) - 40 end,
+        }
+    },
+
     COL = {
         X = function (self, idx) return self.AREA.X + 462 + self.COL.W * (idx - 1) end,
         -- 5桁前提
@@ -82,13 +101,6 @@ local DETAIL = {
         X_JUDGE48PX = function (self) return self.MAIN_NUM.X(self) - 5 * (judges.getSmallNumSize().W + judges.getSmallNumSize().SPACE) + 5 end,
         X_GRAY48PX = function (self) return self.MAIN_NUM.X(self) - 5 * (self.GRAY_48NUM.W + self.GRAY_48NUM.SPACE) + 5 end,
     },
-
-    TIMING = {
-        LABEL = {
-            W = 162,
-            H = 32,
-        }
-    },
     GRAY_30NUM = {
         W = 24,
         H = 31,
@@ -104,7 +116,13 @@ local DETAIL = {
             H = 31,
             SPACE = -1,
             AREA_W = 19,
-        }
+        },
+        EMPTY = {
+            W = 0,
+            H = 0,
+            SPACE = 0,
+            AREA_W = 0,
+        },
     },
     GRAY_36NUM = {
         W = 26,
@@ -127,7 +145,34 @@ local DETAIL = {
         W = 32,
         H = 45,
         SPACE = -5
-    }
+    },
+    GRAPH = {
+        PREFIX = {"notes", "judges", "el", "timing", "blank"},
+        DIMMER_ALPHA = 90,
+        X = function (self) return self.AREA.X + 43 end,
+        Y = function (self, idx) 
+            if idx == 1 then return self.AREA.Y + 154
+            else return self.AREA.Y + 22
+            end
+        end,
+        W = 630,
+        H = 102,
+        DETAIL = {
+            X = function (self) return self.GRAPH.X(self) + self.GRAPH.W - 7 - self.GRAPH.DETAIL.W end,
+            Y = function (self, idx) return self.GRAPH.Y(self, idx) + self.GRAPH.H - 7 - self.GRAPH.DETAIL.H end,
+            W = 174,
+            H = 12,
+        },
+        LABEL = {
+            X = function (self) return self.GRAPH.X(self) + 1 end,
+            Y = function (self, idx) return self.GRAPH.Y(self, idx) + self.GRAPH.H - 1 - self.GRAPH.LABEL.H end,
+            W = 128,
+            H = 29,
+        }
+    },
+    ANIMATION = {
+        MOVE_TIME = 100,
+    },
 }
 
 scoreDetail.functions.loadGray30Number = function (id, digit, align, padding, ref, value)
@@ -145,11 +190,60 @@ scoreDetail.functions.loadGray48Number = function (id, digit, align, ref, value)
     return {id = id, src = 16, x = 0, y = 0, w = param.W * 10, h = param.H, divx = 10, align = align, digit = digit, space = param.SPACE, ref = ref, value = value}
 end
 
-scoreDetail.functions.switchOpenState = function ()
-    scoreDetail.isOpening = not scoreDetail.isOpening
+--[[
+    @param {string} id 整数部分はこのID, 小数部分はid.."AfterDot", ドットはid.."Dot", %はid.."Percent"
+    @param {int} afterDotDigit 小数部分の桁数
+    @param {float} rate パーセンテージ
+    @return {array} skin mergeSkinする
+]]
+scoreDetail.functions.loadDiffRate30Number = function (id, afterDotDigit, rate)
+    local skin = {image = {}, value = {}}
+    local vals = skin.value
+    local imgs = skin.image
+    local rateAf = math.floor(math.abs(rate) * 100) % 100
+    vals[#vals+1] = {id = id, src = 15, x = 0, y = 247, w = DETAIL.GRAY_30NUM.W * 12, h = DETAIL.GRAY_30NUM.H * 2, divx = 12, divy = 2, digit = 3, space = DETAIL.GRAY_30NUM.SPACE, value = function () return rate end}
+    if rate >= 0 then
+        vals[#vals+1] = {id = id .. "AfterDot", src = 15, x = 0, y = 247, w = DETAIL.GRAY_30NUM.W * 10, h = DETAIL.GRAY_30NUM.H, divx = 10, padding = 1, digit = afterDotDigit, space = DETAIL.GRAY_30NUM.SPACE, value = function () return rateAf end}
+        imgs[#imgs+1] = {id = id .. "Dot", src = 15, x = 288, y = 266, w = DETAIL.GRAY_30NUM.DOT.W, h = DETAIL.GRAY_30NUM.DOT.H}
+        imgs[#imgs+1] = {id = id .. "Percent", src = 15, x = 336, y = 247, w = DETAIL.GRAY_30NUM.PERCENT.W, h = DETAIL.GRAY_30NUM.PERCENT.H}
+    else
+        vals[#vals+1] = {id = id .. "AfterDot", src = 15, x = 0, y = 278, w = DETAIL.GRAY_30NUM.W * 10, h = DETAIL.GRAY_30NUM.H, divx = 10, padding = 1, digit = afterDotDigit, space = DETAIL.GRAY_30NUM.SPACE, value = function () return rateAf end}
+        imgs[#imgs+1] = {id = id .. "Dot", src = 15, x = 288, y = 297, w = DETAIL.GRAY_30NUM.DOT.W, h = DETAIL.GRAY_30NUM.DOT.H}
+        imgs[#imgs+1] = {id = id .. "Percent", src = 15, x = 336, y = 278, w = DETAIL.GRAY_30NUM.PERCENT.W, h = DETAIL.GRAY_30NUM.PERCENT.H}
+    end
+    return skin
+end
+
+scoreDetail.functions.switchOpenStateTimer = function ()
+    if isPressedLeft() then
+        scoreDetail.functions.switchOpenState()
+    end
     return 1
 end
 
+scoreDetail.functions.switchOpenState = function ()
+    scoreDetail.isOpened = not scoreDetail.isOpened
+    myPrint("詳細画面切り替え: " .. (scoreDetail.isOpened and "opened" or "closed"))
+    if scoreDetail.isOpened then
+        scoreDetail.timeForAnimation = main_state.time()
+    else
+        scoreDetail.timeForAnimation = main_state.time() - DETAIL.ANIMATION.MOVE_TIME * 1000
+    end
+end
+
+scoreDetail.functions.isOpenedWindow = function ()
+    return scoreDetail.isOpened
+end
+
+-- 閉じるアニメーションのためにこれ
+scoreDetail.functions.windowAnimationTimer = function ()
+    if scoreDetail.isOpened then
+        return scoreDetail.timeForAnimation
+    else
+        scoreDetail.timeForAnimation = scoreDetail.timeForAnimation + getDeltaTime() * 2
+        return scoreDetail.timeForAnimation
+    end
+end
 
 scoreDetail.functions.load = function ()
     local totalNotes = main_state.number(74)
@@ -160,6 +254,7 @@ scoreDetail.functions.load = function ()
     local skin = {
         image = {
             {id = "detailBokehBg", src = getBokehBgSrc(), x = 0, y = HEIGHT - DETAIL.AREA.Y - DETAIL.AREA.H, w = DETAIL.AREA.W, h = DETAIL.AREA.H},
+            {id = "detailWindowShadow", src = 18, x = 0, y = 0, w = -1, h = -1},
             {id = "gray30Dot", src = 15, x = 288, y = 235, w = DETAIL.GRAY_30NUM.DOT.W, h = DETAIL.GRAY_30NUM.DOT.H},
             {id = "gray30Percent", src = 15, x = 336, y = 216, w = DETAIL.GRAY_30NUM.PERCENT.W, h = DETAIL.GRAY_30NUM.PERCENT.H},
             -- ヘッダ読み込み 数が少ないので普通に.
@@ -168,10 +263,12 @@ scoreDetail.functions.load = function ()
             {id = "bpDetailHeader"  , src = 14, x = 0, y = DETAIL.HEADER.H * 2, w = DETAIL.HEADER.W, h = DETAIL.HEADER.H},
             {id = "targetScoreDetailHeader", src = 14, x = 0, y = DETAIL.HEADER.H * 3, w = DETAIL.HEADER.W, h = DETAIL.HEADER.H},
             {id = "exScoreDetailHeader"    , src = 14, x = 0, y = DETAIL.HEADER.H * 4, w = DETAIL.EXSCORE.W, h = DETAIL.EXSCORE.H},
+            {id = "switchDetailWindowButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = scoreDetail.functions.switchOpenState},
         },
         value = {},
         customTimers = {
-            {id = CUSTOM_TIMERS.SWITCH_DETAIL, timer = scoreDetail.functions.switchOpenState}
+            {id = CUSTOM_TIMERS_RESULT2.SWITCH_DETAIL, timer = scoreDetail.functions.switchOpenStateTimer},
+            {id = CUSTOM_TIMERS_RESULT2.DETAIL_WND_TIMER, timer = scoreDetail.functions.windowAnimationTimer}
         }
     }
     local imgs = skin.image
@@ -179,7 +276,7 @@ scoreDetail.functions.load = function ()
 
     -- ラベル群の読み込み
     do
-        local prefix = {"early", "late", "rate", "score", "num", "best", "diff", "rate"}
+        local prefix = {"early", "late", "rate", "score", "num", "best", "diff", "avg", "std"}
         for i, v in ipairs(prefix) do
             imgs[#imgs+1] = {
                 id = v .. "DetailLabel", src = 13, x = 0, y = DETAIL.LABEL.H * (i - 1), w = DETAIL.LABEL.W, h = DETAIL.LABEL.H
@@ -273,11 +370,26 @@ scoreDetail.functions.load = function ()
 
     -- ベストスコア
     vals[#vals+1] = {id = "bestDiffDetailValue", src = 15, x = 0, y = 72, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, space = DETAIL.GRAY_36NUM.SPACE, ref = 172}
+    -- ベストスコアとのレート差計算
+    do
+        local rate = (main_state.rate() - main_state.rate_best()) * 100
+        mergeSkin(skin, scoreDetail.functions.loadDiffRate30Number("scoreRateBestDiffDetailValue", 2, rate))
+    end
     -- ターゲットスコア
     vals[#vals+1] = scoreDetail.functions.loadGray48Number("targetScoreDetailValue", 5, 0, 151, nil)
     vals[#vals+1] = {id = "targetDiffDetailValue", src = 15, x = 0, y = 72, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, space = DETAIL.GRAY_36NUM.SPACE, ref = 153}
     vals[#vals+1] = scoreDetail.functions.loadGray30Number("targetScoreRateDetailValue", 3, 0, 0, 122, nil)
     vals[#vals+1] = scoreDetail.functions.loadGray30Number("targetScoreRateAfterDotDetailValue", 2, 1, 0, 123, nil)
+    -- ターゲットスコアとのレート差計算
+    do
+        local rate = (main_state.rate() - main_state.rate_rival()) * 100
+        mergeSkin(skin, scoreDetail.functions.loadDiffRate30Number("scoreRateTargetDiffDetailValue", 2, rate))
+    end
+    -- タイミング
+    vals[#vals+1] = scoreDetail.functions.loadGray30Number("timingAvgDetailValue", 3, 0, 0, 374, nil)
+    vals[#vals+1] = scoreDetail.functions.loadGray30Number("timingAvgDetailValueAfterDot", 2, 0, 1, 375, nil)
+    vals[#vals+1] = scoreDetail.functions.loadGray30Number("timingStdDetailValue", 3, 0, 0, 376, nil)
+    vals[#vals+1] = scoreDetail.functions.loadGray30Number("timingStdDetailValueAfterDot", 2, 0, 1, 377, nil)
 
     return skin
 end
@@ -288,6 +400,11 @@ scoreDetail.functions.dst = function ()
             {
                 id = "detailBokehBg", dst = {
                     {x = DETAIL.AREA.X, y = DETAIL.AREA.Y, w = DETAIL.AREA.W, h = DETAIL.AREA.H}
+                }
+            },
+            {
+                id = "detailWindowShadow", dst = {
+                    {x = DETAIL.AREA.X, y = DETAIL.AREA.Y, w = DETAIL.AREA.SHADOW_W, h = DETAIL.AREA.H}
                 }
             },
             {
@@ -476,7 +593,10 @@ scoreDetail.functions.dst = function ()
             {x = DETAIL.COL.NUM36_X(DETAIL, 2), y = DETAIL.EXSCORE.Y(DETAIL), w = DETAIL.GRAY_36NUM.W, h = DETAIL.GRAY_36NUM.H}
         }
     }
+    -- 対bestとのdiff
     mergeSkin(skin, dstPercentage("exScoreRateDetailValue", "gray30Dot", "exScoreRateAfterDotDetailValue", "gray30Percent", 2, DETAIL.COL.RATE_X(DETAIL, 3), DETAIL.EXSCORE.Y(DETAIL), num30.W, num30.H, num30.SPACE, num30.DOT, num30.PERCENT))
+    -- 対bestとのrateのdiff
+    mergeSkin(skin, dstPercentage("scoreRateBestDiffDetailValue", "scoreRateBestDiffDetailValueDot", "scoreRateBestDiffDetailValueAfterDot", "scoreRateBestDiffDetailValuePercent", 2, DETAIL.COL.RATE_X(DETAIL, 4), DETAIL.EXSCORE.Y(DETAIL), num30.W, num30.H, num30.SPACE, num30.DOT, num30.PERCENT))
 
     -- target score
     dst[#dst+1] = {
@@ -500,12 +620,112 @@ scoreDetail.functions.dst = function ()
             {x = DETAIL.COL.NUM36_X(DETAIL, 2), y = DETAIL.TARGET.Y(DETAIL), w = DETAIL.GRAY_36NUM.W, h = DETAIL.GRAY_36NUM.H}
         }
     }
+    -- 対targetとのdiff
     mergeSkin(skin, dstPercentage("targetScoreRateDetailValue", "gray30Dot", "targetScoreRateAfterDotDetailValue", "gray30Percent", 2, DETAIL.COL.RATE_X(DETAIL, 3), DETAIL.TARGET.Y(DETAIL), num30.W, num30.H, num30.SPACE, num30.DOT, num30.PERCENT))
+    -- 対targetとのrateのdiff
+    mergeSkin(skin, dstPercentage("scoreRateTargetDiffDetailValue", "scoreRateTargetDiffDetailValueDot", "scoreRateTargetDiffDetailValueAfterDot", "scoreRateTargetDiffDetailValuePercent", 2, DETAIL.COL.RATE_X(DETAIL, 4), DETAIL.TARGET.Y(DETAIL), num30.W, num30.H, num30.SPACE, num30.DOT, num30.PERCENT))
+
+    -- 判定グラフ等描画
+    -- グラフ本体やラベルはgroove.luaで読み込み済み
+    mergeSkin(skin, {
+        destination = {
+            { -- 判定グラフbg
+                id = "black", dst = {
+                    {x = DETAIL.GRAPH.X(DETAIL), y = DETAIL.GRAPH.Y(DETAIL, 1), w = DETAIL.GRAPH.W, h = DETAIL.GRAPH.H, a = DETAIL.GRAPH.DIMMER_ALPHA}
+                }
+            },
+            { -- 判定ゲージ本体
+                id = DETAIL.GRAPH.PREFIX[getGaugeTypeAtDetailWindow1()] .. "Graph", dst = {
+                    {x = DETAIL.GRAPH.X(DETAIL), y = DETAIL.GRAPH.Y(DETAIL, 1), w = DETAIL.GRAPH.W, h = DETAIL.GRAPH.H}
+                }
+            },
+            { -- 色の説明部分
+                id = DETAIL.GRAPH.PREFIX[getGaugeTypeAtDetailWindow1()] .. "Detail", dst = {
+                    {x = DETAIL.GRAPH.DETAIL.X(DETAIL), y = DETAIL.GRAPH.DETAIL.Y(DETAIL, 1), w = DETAIL.GRAPH.DETAIL.W, h = DETAIL.GRAPH.DETAIL.H}
+                }
+            },
+            { -- 色の説明部分
+                id = DETAIL.GRAPH.PREFIX[getGaugeTypeAtDetailWindow1()] .. "Label", dst = {
+                    {x = DETAIL.GRAPH.LABEL.X(DETAIL), y = DETAIL.GRAPH.LABEL.Y(DETAIL, 1), w = DETAIL.GRAPH.LABEL.W, h = DETAIL.GRAPH.LABEL.H}
+                }
+            },
+            { -- 判定グラフshadow
+                id = "judgeGaugeShadow", dst = {
+                    {x = DETAIL.GRAPH.X(DETAIL), y = DETAIL.GRAPH.Y(DETAIL, 1), w = DETAIL.GRAPH.W, h = DETAIL.GRAPH.H, a = DETAIL.GRAPH.DIMMER_ALPHA}
+                }
+            },
+            -- 2個目
+            { -- 判定グラフbg
+                id = "black", dst = {
+                    {x = DETAIL.GRAPH.X(DETAIL), y = DETAIL.GRAPH.Y(DETAIL, 2), w = DETAIL.GRAPH.W, h = DETAIL.GRAPH.H, a = DETAIL.GRAPH.DIMMER_ALPHA}
+                }
+            },
+            { -- 判定ゲージ本体
+                id = DETAIL.GRAPH.PREFIX[getGaugeTypeAtDetailWindow2()] .. "Graph", dst = {
+                    {x = DETAIL.GRAPH.X(DETAIL), y = DETAIL.GRAPH.Y(DETAIL, 2), w = DETAIL.GRAPH.W, h = DETAIL.GRAPH.H}
+                }
+            },
+            { -- 色の説明部分
+                id = DETAIL.GRAPH.PREFIX[getGaugeTypeAtDetailWindow2()] .. "Detail", dst = {
+                    {x = DETAIL.GRAPH.DETAIL.X(DETAIL), y = DETAIL.GRAPH.DETAIL.Y(DETAIL, 2), w = DETAIL.GRAPH.DETAIL.W, h = DETAIL.GRAPH.DETAIL.H}
+                }
+            },
+            { -- 色の説明部分
+                id = DETAIL.GRAPH.PREFIX[getGaugeTypeAtDetailWindow2()] .. "Label", dst = {
+                    {x = DETAIL.GRAPH.LABEL.X(DETAIL), y = DETAIL.GRAPH.LABEL.Y(DETAIL, 2), w = DETAIL.GRAPH.LABEL.W, h = DETAIL.GRAPH.LABEL.H}
+                }
+            },
+            { -- 判定グラフshadow
+                id = "judgeGaugeShadow", dst = {
+                    {x = DETAIL.GRAPH.X(DETAIL), y = DETAIL.GRAPH.Y(DETAIL, 2), w = DETAIL.GRAPH.W, h = DETAIL.GRAPH.H, a = DETAIL.GRAPH.DIMMER_ALPHA}
+                }
+            },
+        }
+    })
+
+    -- タイミング
+    dst[#dst+1] = {
+        id = "timingShiftDetailLabel", dst = {
+            {x = DETAIL.TIMING.LABEL.X(DETAIL), y = DETAIL.TIMING.LABEL.Y(DETAIL), w = DETAIL.TIMING.LABEL.W, h = DETAIL.TIMING.LABEL.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "avgDetailLabel", dst = {
+            {x = DETAIL.TIMING.VAL.X_LABEL(DETAIL), y = DETAIL.TIMING.VAL.Y1(DETAIL), w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
+        }
+    }
+    mergeSkin(skin, dstPercentage("timingAvgDetailValue", "gray30Dot", "timingAvgDetailValueAfterDot", "gray30Percent", 2, DETAIL.TIMING.VAL.X_NUM(DETAIL), DETAIL.TIMING.VAL.Y1(DETAIL), num30.W, num30.H, num30.SPACE, num30.DOT, num30.EMPTY))
+    dst[#dst+1] = {
+        id = "stdDetailLabel", dst = {
+            {x = DETAIL.TIMING.VAL.X_LABEL(DETAIL), y = DETAIL.TIMING.VAL.Y2(DETAIL), w = DETAIL.LABEL.W, h = DETAIL.LABEL.H}
+        }
+    }
+    mergeSkin(skin, dstPercentage("timingStdDetailValue", "gray30Dot", "timingStdDetailValueAfterDot", "gray30Percent", 2, DETAIL.TIMING.VAL.X_NUM(DETAIL), DETAIL.TIMING.VAL.Y2(DETAIL), num30.W, num30.H, num30.SPACE, num30.DOT, num30.EMPTY))
 
     -- 全てにアニメーション用のタイマとxを設定
-    for i = 1, #skin.destination do
-        
+    do
+        local moveTime = DETAIL.ANIMATION.MOVE_TIME
+        local moveW = DETAIL.AREA.SHADOW_W
+        for i = 1, #dst do
+            local d = dst[i]
+            local toX = d.dst[1].x
+            d.timer = CUSTOM_TIMERS_RESULT2.DETAIL_WND_TIMER
+            d.loop = moveTime
+            d.dst[1].time = 0
+            d.dst[1].x = toX - moveW
+            d.dst[2] = {time = moveTime, x = toX}
+            if d.id == "detailBokehBg" then
+                d.dst[1].a = 0
+                d.dst[2].a = 255
+            end
+        end
     end
+    -- マウスdeスイッチ用の出力
+    dst[#dst+1] = {
+        id = "switchDetailWindowButton", dst = {
+            {x = DETAIL.AREA.X, y = DETAIL.AREA.Y, w = DETAIL.AREA.W, h = DETAIL.AREA.H}
+        }
+    }
     return skin
 end
 

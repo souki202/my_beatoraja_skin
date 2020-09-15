@@ -31,6 +31,14 @@ function isPressedDown()
     return Gdx.input:isKeyJustPressed(Input.Keys.DOWN)
 end
 
+function isPressedLeft()
+    return Gdx.input:isKeyJustPressed(Input.Keys.LEFT)
+end
+
+function isPressedRight()
+    return Gdx.input:isKeyJustPressed(Input.Keys.RIGHT)
+end
+
 function getDeltaY()
     return Gdx.input:getDeltaY()
 end

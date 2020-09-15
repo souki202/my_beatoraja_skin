@@ -8,3 +8,26 @@
 [0909/225840.205:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
 [0910/003958.993:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
 [0910/004003.996:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0914/172217.482:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0914/172217.482:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0914/172217.501:WARNING:angle_platform_impl.cc(52)] compileToBinary(230): 
+C:\fakepath(69,8-58): warning X3571: pow(f, e) will not work for negative f, use abs(f) or conditionally handle negative values if you expect them
+C:\fakepath(77,9-43): warning X3571: pow(f, e) will not work for negative f, use abs(f) or conditionally handle negative values if you expect them
+
+[0914/172218.001:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0914/172218.001:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0915/002655.626:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/104438.026:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/104438.786:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/104438.829:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/104443.030:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/104443.791:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/104443.842:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/104543.386:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/131352.749:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/131357.757:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/142629.847:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/185438.676:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/185438.721:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/185443.680:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/185443.726:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.

@@ -54,9 +54,9 @@ local JUDGES = {
         X = function (self, arrayLabel, isSmall)
             local cx = self.AREA[arrayLabel].X(self) + self.AREA.W / 2
             if isSmall then
-                return cx - self.NUM.DIGIT * (self.NUM.SMALL.W + self.NUM.SMALL.SPACE) / 2 - 4
+                return cx - self.NUM.DIGIT * (self.NUM.SMALL.W + self.NUM.SMALL.SPACE) / 2 - 6
             else
-                return cx - self.NUM.DIGIT * (self.NUM.LARGE.W + self.NUM.LARGE.SPACE) / 2 - 7
+                return cx - self.NUM.DIGIT * (self.NUM.LARGE.W + self.NUM.LARGE.SPACE) / 2 - 8
             end
         end,
         Y = function (self, arrayLabel, isSmall)

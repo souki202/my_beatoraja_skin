@@ -35,29 +35,23 @@ local function setProperties(skin)
 
     if isCourseResult then
         table.insert(skin.property, {
-            name = "ステージファイル部分の判定グラフ", item = {{name = "ノーツ数分布", op = 950}, {name = "判定分布", op = 951}, {name = "EARLY/LATE分布(棒グラフ)", op = 952}}, def = "判定分布"
+            name = "各種グラフ ステージファイル部分", item = {{name = "ノーツ数分布", op = 930}, {name = "判定分布", op = 931}, {name = "EARLY/LATE分布(棒グラフ)", op = 932}}, def = "ノーツ数分布"
         })
         table.insert(skin.property, {
-            name = "各種グラフ1個目", item = {{name = "ノーツ数分布", op = 930}, {name = "判定分布", op = 931}, {name = "EARLY/LATE分布(棒グラフ)", op = 932}}, def = "ノーツ数分布"
+            name = "各種グラフ 詳細画面1個目", item = {{name = "ノーツ数分布", op = 935}, {name = "判定分布", op = 936}, {name = "EARLY/LATE分布(棒グラフ)", op = 937}}, def = "判定分布"
         })
         table.insert(skin.property, {
-            name = "各種グラフ2個目", item = {{name = "ノーツ数分布", op = 935}, {name = "判定分布", op = 936}, {name = "EARLY/LATE分布(棒グラフ)", op = 937}}, def = "判定分布"
-        })
-        table.insert(skin.property, {
-            name = "各種グラフ3個目", item = {{name = "ノーツ数分布", op = 940}, {name = "判定分布", op = 941}, {name = "EARLY/LATE分布(棒グラフ)", op = 942}}, def = "EARLY/LATE分布(棒グラフ)"
+            name = "各種グラフ 詳細画面2個目", item = {{name = "ノーツ数分布", op = 940}, {name = "判定分布", op = 941}, {name = "EARLY/LATE分布(棒グラフ)", op = 942}}, def = "EARLY/LATE分布(棒グラフ)"
         })
     else
         table.insert(skin.property, {
-            name = "ステージファイル部分の判定グラフ", item = {{name = "ノーツ数分布", op = 950}, {name = "判定分布", op = 951}, {name = "EARLY/LATE分布(棒グラフ)", op = 952}, {name = "タイミング可視化グラフ", op = 953}}, def = "判定分布"
+            name = "各種グラフ ステージファイル部分", item = {{name = "ノーツ数分布", op = 930}, {name = "判定分布", op = 931}, {name = "EARLY/LATE分布(棒グラフ)", op = 932}, {name = "タイミング可視化グラフ", op = 933}}, def = "ノーツ数分布"
         })
         table.insert(skin.property, {
-            name = "各種グラフ1個目", item = {{name = "ノーツ数分布", op = 930}, {name = "判定分布", op = 931}, {name = "EARLY/LATE分布(棒グラフ)", op = 932}, {name = "タイミング可視化グラフ", op = 933}}, def = "ノーツ数分布"
+            name = "各種グラフ 詳細画面1個目", item = {{name = "ノーツ数分布", op = 935}, {name = "判定分布", op = 936}, {name = "EARLY/LATE分布(棒グラフ)", op = 937}, {name = "タイミング可視化グラフ", op = 938}}, def = "判定分布"
         })
         table.insert(skin.property, {
-            name = "各種グラフ2個目", item = {{name = "ノーツ数分布", op = 935}, {name = "判定分布", op = 936}, {name = "EARLY/LATE分布(棒グラフ)", op = 937}, {name = "タイミング可視化グラフ", op = 938}}, def = "判定分布"
-        })
-        table.insert(skin.property, {
-            name = "各種グラフ3個目", item = {{name = "ノーツ数分布", op = 940}, {name = "判定分布", op = 941}, {name = "EARLY/LATE分布(棒グラフ)", op = 942}, {name = "タイミング可視化グラフ", op = 943}}, def = "EARLY/LATE分布(棒グラフ)"
+            name = "各種グラフ 詳細画面2個目", item = {{name = "ノーツ数分布", op = 940}, {name = "判定分布", op = 941}, {name = "EARLY/LATE分布(棒グラフ)", op = 942}, {name = "タイミング可視化グラフ", op = 943}}, def = "EARLY/LATE分布(棒グラフ)"
         })
     end
 end
@@ -71,7 +65,7 @@ local function makeHeader()
         fadeout = fade.getFadeOutTime(),
         scene = 3600000,
         input = INPUT_WAIT,
-        -- 910, 920, 930, 935, 940, 945, 950, 965, 975
+        -- 910, 920, 930, 935, 940, 945, 965, 975
         property = {
             {
                 name = "背景の分類", item = {{name = "クリアかどうか", op = 910}, {name = "ランク毎", op = 911}, {name = "クリアランプ毎", op = 912}}, def = "クリアかどうか"
@@ -271,6 +265,7 @@ local function main()
         {id = 15, path = "../result2/parts/detail/small_num.png"},
         {id = 16, path = "../result2/parts/detail/gray_num48.png"},
         {id = 17, path = "../result2/parts/detail/exscore_num.png"},
+        {id = 18, path = "../result2/parts/detail/shadow.png"},
 
         {id = 20, path = "../result2/noimage/*.png"},
         {id = 100, path = "../result2/background/isclear/clear/*.png"},
@@ -382,12 +377,11 @@ local function main()
     mergeSkin(skin, rank.dst())
     mergeSkin(skin, judges.dst())
     mergeSkin(skin, exscores.dst())
-    mergeSkin(skin, scoreDetail.dst())
 
     mergeSkin(skin, musicInfo.dst())
+    mergeSkin(skin, scoreDetail.dst())
     mergeSkin(skin, largeLamp.dst())
     mergeSkin(skin, fade.dst())
-
     return skin
 end
 

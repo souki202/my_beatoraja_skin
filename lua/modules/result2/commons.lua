@@ -1,9 +1,10 @@
 local main_state = require("main_state")
 require("modules.result.commons")
 
-CUSTOM_TIMERS = {
+CUSTOM_TIMERS_RESULT2 = {
     SWITCH_STAGEFILE_TAB = 10100,
     SWITCH_DETAIL = 10101,
+    DETAIL_WND_TIMER = 10102,
 }
 
 RESULT2NUM = {
@@ -88,5 +89,13 @@ function getGrooveGaugeAreaGraph()
 end
 
 function getGaugeTypeAtStageFileArea()
-    return (getTableValue(skin_config.option, "ステージファイル部分の判定グラフ", 951) % 5) + 1
+    return (getTableValue(skin_config.option, "各種グラフ ステージファイル部分", 930) % 5) + 1
+end
+
+function getGaugeTypeAtDetailWindow1()
+    return (getTableValue(skin_config.option, "各種グラフ 詳細画面1個目", 936) % 5) + 1
+end
+
+function getGaugeTypeAtDetailWindow2()
+    return (getTableValue(skin_config.option, "各種グラフ 詳細画面2個目", 942) % 5) + 1
 end

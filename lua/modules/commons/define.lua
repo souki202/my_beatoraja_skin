@@ -197,12 +197,6 @@ function globalInitialize(skin)
         {id = 10000, timer = "updateTime"},
         {id = 10001, timer = "updateDrawNumbers"},
     }
-
-    -- IntMapバグ回避のため. 本当に回避できているかは不明
-    -- 先にTimerを連番で登録しておく
-    for i = getTimerStart(), getTimerStart() + getMaxDigit() * 10 do
-        table.insert(skin.customTimers, {id = i})
-    end
 end
 
 function getTableValue(tbl, key, defaultValue)

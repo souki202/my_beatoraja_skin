@@ -117,7 +117,7 @@ groove.functions.load = function ()
             {id = "elGraph", noGap = 1, orderReverse = 1, type = 2, backTexOff = 1},
         },
         timingdistributiongraph = {
-            {id = "timingGraph", graphColor = "88FF88FF"},
+            {id = "timingGraph", graphColor = "88FF88FF", PRColor = "00000000", BDColor = "88000088", GDColor = "88880088", GRColor = "00880088", PGColor = "00008888", devColor = "ffffff44", averageColor = "ffffff44"},
         },
     }
     mergeSkin(skin, scoreGraph.load())

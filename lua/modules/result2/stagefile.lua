@@ -1,4 +1,5 @@
 require("modules.result.commons")
+require("modules.result2.commons")
 local main_state = require("main_state")
 
 local stagefile = {
@@ -40,6 +41,14 @@ stagefile.functions.changeTab = function ()
     return 1
 end
 
+stagefile.functions.changeTabByButton = function ()
+    tab.nowTab = tab.nowTab + 1
+    if tab.nowTab > tab.numOfTabs then
+        tab.nowTab = 1
+    end
+    myPrint("nowTab: " .. tab.nowTab)
+end
+
 stagefile.functions.getTabList = function ()
     return TAB_LIST
 end
@@ -60,9 +69,10 @@ stagefile.functions.load = function ()
     return {
         image = {
             {id = "noImage", src = 20, x = 0, y = 0, w = -1, h = -1},
+            {id = "switcStagefileWindowButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = stagefile.functions.changeTabByButton},
         },
         customTimers = {
-            {id = CUSTOM_TIMERS.SWITCH_STAGEFILE_TAB, timer = stagefile.functions.changeTab}
+            {id = CUSTOM_TIMERS.CUSTOM_TIMERS_RESULT2, timer = stagefile.functions.changeTab}
         }
     }
 end
@@ -82,6 +92,11 @@ stagefile.functions.dst = function ()
             },
             {
                 id = -100, draw = function () return stagefile.functions.getIsDrawStagefile() and main_state.option(191) end, stretch = 1, filter = 1, dst = {
+                    {x = STAGEFILE.X, y = STAGEFILE.Y, w = STAGEFILE.W, h = STAGEFILE.H}
+                }
+            },
+            {
+                id = "switcStagefileWindowButton", dst = {
                     {x = STAGEFILE.X, y = STAGEFILE.Y, w = STAGEFILE.W, h = STAGEFILE.H}
                 }
             }
