@@ -74,6 +74,9 @@ local function makeHeader()
             --     name = "スコア位置", item = {{name = "左", op = 920}, {name = "右", op = 921}}, def = "左"
             -- },
             {
+                name = "ステージファイル部分の初期表示", item = {{name = "ステージファイル", op = 915}, {name = "グルーブゲージ", op = 916}, {name = "スコアグラフ", op = 917}}, def = "ステージファイル"
+            },
+            {
                 name = "スコアグラフ(プレイスキン併用時のみ)", item = {{name = "累積スコア", op = 965}, {name = "一定区間のレート", op = 966}}, def = "一定区間のレート"
             },
             {
@@ -268,6 +271,10 @@ local function main()
         {id = 18, path = "../result2/parts/detail/shadow.png"},
 
         {id = 20, path = "../result2/noimage/*.png"},
+        {id = 21, path = "../result2/parts/grooveside/labels.png"},
+        {id = 22, path = "../result2/parts/grooveside/num.png"},
+
+        -- 背景群
         {id = 100, path = "../result2/background/isclear/clear/*.png"},
         {id = 101, path = "../result2/background/isclear/failed/*.png"},
         -- 110~120は下のfor

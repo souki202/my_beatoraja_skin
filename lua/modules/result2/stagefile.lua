@@ -7,7 +7,7 @@ local stagefile = {
 }
 
 local STAGEFILE = {
-    X = 1085,
+    X = 1137,
     Y = 492,
     W = 640,
     H = 480,
@@ -66,6 +66,7 @@ stagefile.functions.getIsDrawStagefile = function ()
 end
 
 stagefile.functions.load = function ()
+    tab.nowTab = getStageFileAreaDefaultView()
     return {
         image = {
             {id = "noImage", src = 20, x = 0, y = 0, w = -1, h = -1},
@@ -95,11 +96,6 @@ stagefile.functions.dst = function ()
                     {x = STAGEFILE.X, y = STAGEFILE.Y, w = STAGEFILE.W, h = STAGEFILE.H}
                 }
             },
-            {
-                id = "switcStagefileWindowButton", dst = {
-                    {x = STAGEFILE.X, y = STAGEFILE.Y, w = STAGEFILE.W, h = STAGEFILE.H}
-                }
-            }
         }
     }
 end

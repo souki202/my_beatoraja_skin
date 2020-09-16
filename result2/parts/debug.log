@@ -31,3 +31,8 @@ C:\fakepath(77,9-43): warning X3571: pow(f, e) will not work for negative f, use
 [0915/185438.721:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
 [0915/185443.680:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
 [0915/185443.726:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/235156.052:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0915/235201.054:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0916/001859.950:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0916/001903.961:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0916/001904.957:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.

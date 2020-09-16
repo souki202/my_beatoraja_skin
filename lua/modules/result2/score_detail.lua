@@ -171,7 +171,8 @@ local DETAIL = {
         }
     },
     ANIMATION = {
-        MOVE_TIME = 100,
+        MOVE_TIME = 200,
+        CLOSE_TIME = 1000,
     },
 }
 
@@ -227,7 +228,7 @@ scoreDetail.functions.switchOpenState = function ()
     if scoreDetail.isOpened then
         scoreDetail.timeForAnimation = main_state.time()
     else
-        scoreDetail.timeForAnimation = main_state.time() - DETAIL.ANIMATION.MOVE_TIME * 1000
+        scoreDetail.timeForAnimation = main_state.time() - DETAIL.ANIMATION.CLOSE_TIME * 1000
     end
 end
 
@@ -238,9 +239,13 @@ end
 -- 閉じるアニメーションのためにこれ
 scoreDetail.functions.windowAnimationTimer = function ()
     if scoreDetail.isOpened then
+        local t = main_state.time()
+        local moveTime = DETAIL.ANIMATION.MOVE_TIME
+        if t - scoreDetail.timeForAnimation > moveTime * 1000 then
+            scoreDetail.timeForAnimation = t - moveTime * 1000
+        end
         return scoreDetail.timeForAnimation
     else
-        scoreDetail.timeForAnimation = scoreDetail.timeForAnimation + getDeltaTime() * 2
         return scoreDetail.timeForAnimation
     end
 end
@@ -709,11 +714,15 @@ scoreDetail.functions.dst = function ()
         for i = 1, #dst do
             local d = dst[i]
             local toX = d.dst[1].x
+            local fromX = toX - moveW
             d.timer = CUSTOM_TIMERS_RESULT2.DETAIL_WND_TIMER
-            d.loop = moveTime
+            d.loop = -1
             d.dst[1].time = 0
-            d.dst[1].x = toX - moveW
+            d.dst[1].x = fromX
+            d.dst[1].acc = 2
             d.dst[2] = {time = moveTime, x = toX}
+            d.dst[3] = {time = DETAIL.ANIMATION.CLOSE_TIME, x = toX}
+            d.dst[4] = {time = DETAIL.ANIMATION.CLOSE_TIME + moveTime, x = fromX}
             if d.id == "detailBokehBg" then
                 d.dst[1].a = 0
                 d.dst[2].a = 255

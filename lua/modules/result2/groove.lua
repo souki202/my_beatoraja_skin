@@ -10,7 +10,12 @@ local groove = {
 }
 
 local GROOVE = {
-    AREA = stagefile.getStageFileArea(),
+    AREA = {
+        X = 1007,
+        Y = 490,
+        W = 900,
+        H = 480,
+    },
     DIMMER_ALPHA = 90,
     PLAYER = {
         X = function (self) return self.AREA.X + 7 end,
@@ -19,7 +24,7 @@ local GROOVE = {
         SIZE = 24,
     },
     DATE = {
-        X = function (self) return self.AREA.X + self.AREA.W - 7 end,
+        X = function (self) return self.AREA.X + 633 end,
         Y = function (self) return self.AREA.Y + 4 end,
         W = 220,
         SIZE = 24,
@@ -68,7 +73,27 @@ local GROOVE = {
                 H = 29,
             }
         }
-    }
+    },
+    INFO = {
+        KEYS = {"7", "5", "14", "10", "9", "24", "48"},
+        HEADERS = {"difficulty", "keys", "judge", "option", "lnMode", "bestLamp"},
+        JUDGES = {"veryEasy", "easy", "normal", "hard", "veryHard"},
+        LABEL = {
+            X_HEADER = function (self) return self.AREA.X + 643 end,
+            X_VALUE = function (self) return self.AREA.X + 893 - self.INFO.LABEL.W end,
+            Y = function (self, idx) return self.AREA.Y + 437 - self.INFO.LABEL.INTERVAL_Y * (idx - 1) end,
+            W = 192,
+            H = 36,
+            INTERVAL_Y = 36,
+        },
+        NUM = {
+            X = function (self) return self.AREA.X + 893 - 5 - 5 * (self.INFO.NUM.W + self.INFO.NUM.SPACE) end,
+            Y = function (self, idx) return self.AREA.Y + 437 - self.INFO.INTERVAL_Y * (idx - 1) end,
+            W = 26,
+            H = 36,
+            SPACE = -7,
+        }
+    },
 }
 
 groove.functions.getIsDrawGroove = function ()
@@ -85,7 +110,8 @@ groove.functions.load = function ()
     local dateLabel = string.format("%04d", getNum(21)) .. "-" .. string.format("%02d", getNum(22)) .. "-" .. string.format("%02d", getNum(23)) .. " " .. string.format("%02d", getNum(24)) .. ":" .. string.format("%02d", getNum(25)) .. ":" .. string.format("%02d", getNum(26))
     local skin = {
         image = {
-            {id = "grooveBokehBg", src = getBokehBgSrc(), x = GROOVE.AREA.X, y = GROOVE.AREA.Y - GROOVE.AREA.H, w = GROOVE.AREA.W, h = GROOVE.AREA.H},
+            {id = "grooveBokehBg", src = getBokehBgSrc(), x = GROOVE.AREA.X, y = HEIGHT - GROOVE.AREA.Y - GROOVE.AREA.H, w = GROOVE.AREA.W, h = GROOVE.AREA.H},
+            {id = "grooveMaskBg", src = getBgSrc(), x = GROOVE.AREA.X, y = HEIGHT - GROOVE.AREA.Y - GROOVE.AREA.H, w = GROOVE.AREA.W, h = GROOVE.AREA.H},
             {id = "grooveShadow", src = 9, x = 0, y = 0, w = -1, h = GROOVE.GAUGE.GROOVE.H},
             {id = "judgeGaugeShadow", src = 9, x = 0, y = GROOVE.GAUGE.GROOVE.H, w = -1, h = GROOVE.GAUGE.JUDGE.H},
             {id = GROOVE.GAUGE.JUDGE_IDS[1] .. "Detail", src = 10, x = 0, y = GROOVE.GAUGE.JUDGE.DETAIL.H * 0, w = -1, h = GROOVE.GAUGE.JUDGE.DETAIL.H},
@@ -98,10 +124,17 @@ groove.functions.load = function ()
             {id = GROOVE.GAUGE.JUDGE_IDS[4] .. "Label", src = 11, x = 0, y = GROOVE.GAUGE.JUDGE.LABEL.H * 3, w = -1, h = GROOVE.GAUGE.JUDGE.LABEL.H},
             {id = "GrooveLabel", src = 11, x = 0, y = GROOVE.GAUGE.JUDGE.LABEL.H * 5, w = -1, h = GROOVE.GAUGE.JUDGE.LABEL.H},
             {id = "ScoreGraphLabel", src = 11, x = 0, y = GROOVE.GAUGE.JUDGE.LABEL.H * 6, w = -1, h = GROOVE.GAUGE.JUDGE.LABEL.H},
+            -- ln mode
+            {id = "lnModeLabel", src = 21, x = GROOVE.INFO.LABEL.W * 2, y = 0, w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H * 3, divy = 3, len = 3, ref = 308},
+            -- random mode
+            {id = "randomModeLabel", src = 21, x = GROOVE.INFO.LABEL.W * 3, y = 0, w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H * 10, divy = 10, len = 10, ref = 42},
+            -- lamp
+            {id = "oldLampLabel", src = 21, x = GROOVE.INFO.LABEL.W * 5, y = 0, w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H * 11, divy = 11, len = 11, ref = 371},
         },
         value = {
             loadNumber("grooveValue", 30, 3, 0, 107, nil),
-            loadNumber("grooveValueAfterDot", 30, 1, 0, 407, nil)
+            loadNumber("grooveValueAfterDot", 30, 1, 0, 407, nil),
+            {id = "difficultyValue", src = 22, x = 0, y = 0, w = GROOVE.INFO.NUM.W * 10, h = GROOVE.INFO.NUM.H, divx = 10, digit = 5, space = GROOVE.INFO.NUM.SPACE, ref = 96},
         },
         text = {
             {id = "playerLabel", font = 0, size = 24, constantText = playerLabel},
@@ -120,6 +153,26 @@ groove.functions.load = function ()
             {id = "timingGraph", graphColor = "88FF88FF", PRColor = "00000000", BDColor = "88000088", GDColor = "88880088", GRColor = "00880088", PGColor = "00008888", devColor = "ffffff44", averageColor = "ffffff44"},
         },
     }
+    local imgs = skin.image
+    -- header
+    for i, id in ipairs(GROOVE.INFO.HEADERS) do
+        imgs[#imgs+1] = {id = id .. "Header", src = 21, x = GROOVE.INFO.LABEL.W * 0, y = GROOVE.INFO.LABEL.H * (i - 1), w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H}
+    end
+    -- keys
+    do
+        local op = {160, 161, 162, 163, 164, 1160, 1161}
+        for i = 1, #GROOVE.INFO.KEYS do
+            if main_state.option(op[i]) then
+                imgs[#imgs+1] = {id = "grooveSideKeysLabel", src = 21, x = GROOVE.INFO.LABEL.W * 1, y = 0, w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H}
+            end
+        end
+    end
+    -- judges
+    for i = 1, #GROOVE.INFO.JUDGES do
+        if main_state.option(184 - (i - 1)) then
+            imgs[#imgs+1] = {id = "grooveSideJudgeLabel", src = 21, x = GROOVE.INFO.LABEL.W * 4, y = GROOVE.INFO.LABEL.H * (i - 1), w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H}
+        end
+    end
     mergeSkin(skin, scoreGraph.load())
     return skin
 end
@@ -131,12 +184,12 @@ groove.functions.dst = function ()
         destination = {
             -- スコアグラフの背景をここで
             { -- ぼかし背景
-                id = "grooveBokehBg", dst = {
+                id = "grooveBokehBg", draw = isDrawGraph, dst = {
                     {x = GROOVE.AREA.X, y = GROOVE.AREA.Y, w = GROOVE.AREA.W, h = GROOVE.AREA.H}
                 }
             },
             { -- dimmer
-                id = "black", dst = {
+                id = "black", draw = isDrawGraph, dst = {
                     {x = GROOVE.AREA.X, y = GROOVE.AREA.Y, w = GROOVE.AREA.W, h = GROOVE.AREA.H, a = GROOVE.DIMMER_ALPHA}
                 }
             },
@@ -146,12 +199,12 @@ groove.functions.dst = function ()
     mergeSkin(skin, {
         destination = {
             { -- スコアグラフ用のshadow
-                id = "grooveShadow", dst = {
+                id = "grooveShadow", draw = isDrawGraph, dst = {
                     {x = GROOVE.GAUGE.GROOVE.X(GROOVE), y = GROOVE.GAUGE.GROOVE.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.H}
                 }
             },
             {
-                id = "ScoreGraphLabel", dst = {
+                id = "ScoreGraphLabel", draw = isDrawGraph, dst = {
                     {x = GROOVE.GAUGE.GROOVE.LABEL.X(GROOVE), y = GROOVE.GAUGE.GROOVE.LABEL.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.LABEL.W, h = GROOVE.GAUGE.GROOVE.LABEL.H}
                 }
             },
@@ -247,6 +300,48 @@ groove.functions.dst = function ()
             },
         }
     })
+
+    local dst = skin.destination
+    -- ここから楽曲詳細等
+    -- headerだけ先に出す
+    for i, id in ipairs(GROOVE.INFO.HEADERS) do
+        local pos = i
+        if i == 6 then pos = 7 end
+        dst[#dst+1] = {
+            id = id .. "Header", draw = isDrawGraph, dst = {
+                {x = GROOVE.INFO.LABEL.X_HEADER(GROOVE), y = GROOVE.INFO.LABEL.Y(GROOVE, pos), w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H}
+            }
+        }
+    end
+    -- 難易度数値
+    dst[#dst+1] = {
+        id = "difficultyValue", draw = isDrawGraph, dst = {
+            {x = GROOVE.INFO.NUM.X(GROOVE), y = GROOVE.INFO.LABEL.Y(GROOVE, 1), w = GROOVE.INFO.NUM.W, h = GROOVE.INFO.NUM.H}
+        }
+    }
+    do
+        local idPrefix = {"grooveSideKeys", "grooveSideJudge", "randomMode", "lnMode", "oldLamp"}
+        for i = 1, #idPrefix do
+            local pos = i + 1
+            if i == 5 then pos = 8 end
+            dst[#dst+1] = {
+                id = idPrefix[i] .. "Label", draw = isDrawGraph, dst = {
+                    {x = GROOVE.INFO.LABEL.X_VALUE(GROOVE), y = GROOVE.INFO.LABEL.Y(GROOVE, pos), w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H}
+                }
+            }
+        end
+    end
+
+    dst[#dst+1] = { -- これらを隠すための背景
+        id = "grooveMaskBg", draw = function () return not isDrawGraph() end, dst = {
+            {x = GROOVE.AREA.X, y = GROOVE.AREA.Y, w = GROOVE.AREA.W, h = GROOVE.AREA.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "switcStagefileWindowButton", dst = {
+            {x = GROOVE.AREA.X, y = GROOVE.AREA.Y, w = GROOVE.AREA.W, h = GROOVE.AREA.H}
+        }
+    }
     return skin
 end
 
