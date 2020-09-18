@@ -46,13 +46,13 @@ local function setProperties(skin)
         })
     else
         table.insert(skin.property, {
-            name = "各種グラフ ステージファイル部分", item = {{name = "ノーツ数分布", op = 930}, {name = "判定分布", op = 931}, {name = "EARLY/LATE分布(棒グラフ)", op = 932}, {name = "タイミング可視化グラフ", op = 933}}, def = "ノーツ数分布"
+            name = "各種グラフ ステージファイル部分", item = {{name = "ノーツ数分布", op = 930}, {name = "判定分布", op = 931}, {name = "EARLY/LATE分布(棒グラフ)", op = 932}, {name = "タイミング可視化グラフ", op = 933}}, def = "判定分布"
         })
         table.insert(skin.property, {
-            name = "各種グラフ 詳細画面1個目", item = {{name = "ノーツ数分布", op = 935}, {name = "判定分布", op = 936}, {name = "EARLY/LATE分布(棒グラフ)", op = 937}, {name = "タイミング可視化グラフ", op = 938}}, def = "判定分布"
+            name = "各種グラフ 詳細画面1個目", item = {{name = "ノーツ数分布", op = 935}, {name = "判定分布", op = 936}, {name = "EARLY/LATE分布(棒グラフ)", op = 937}, {name = "タイミング可視化グラフ", op = 938}}, def = "EARLY/LATE分布(棒グラフ)"
         })
         table.insert(skin.property, {
-            name = "各種グラフ 詳細画面2個目", item = {{name = "ノーツ数分布", op = 940}, {name = "判定分布", op = 941}, {name = "EARLY/LATE分布(棒グラフ)", op = 942}, {name = "タイミング可視化グラフ", op = 943}}, def = "EARLY/LATE分布(棒グラフ)"
+            name = "各種グラフ 詳細画面2個目", item = {{name = "ノーツ数分布", op = 940}, {name = "判定分布", op = 941}, {name = "EARLY/LATE分布(棒グラフ)", op = 942}, {name = "タイミング可視化グラフ", op = 943}}, def = "タイミング可視化グラフ"
         })
     end
 end

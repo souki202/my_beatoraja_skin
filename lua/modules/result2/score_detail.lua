@@ -87,7 +87,7 @@ local DETAIL = {
         X = function (self, idx) return self.AREA.X + 462 + self.COL.W * (idx - 1) end,
         -- 5桁前提
         NUM36_X = function (self, idx) return self.COL.X(self, idx + 1) - 15 - 5 * (self.GRAY_36NUM.W + self.GRAY_36NUM.SPACE) end,
-        NUM48_X = function (self, idx) return self.COL.X(self, idx + 1) - 15 - 5 * (self.GRAY_48NUM.W + self.GRAY_48NUM.SPACE) end,
+        NUM48_X = function (self, idx) return self.COL.X(self, idx + 1) - 12 - 5 * (self.GRAY_48NUM.W + self.GRAY_48NUM.SPACE) end,
         NUM36_JUDGE_X = function (self, idx) return self.COL.X(self, idx + 1) - 15 - 5 * (judges.getVerySmallNumSize().W + judges.getVerySmallNumSize().SPACE) end,
         NUM48_JUDGE_X = function (self, idx) return self.COL.X(self, idx + 1) - 15 - 5 * (judges.getSmallNumSize().W + judges.getSmallNumSize().SPACE) end,
 
@@ -206,13 +206,17 @@ scoreDetail.functions.loadDiffRate30Number = function (id, afterDotDigit, rate)
     local skin = {image = {}, value = {}}
     local vals = skin.value
     local imgs = skin.image
+    local absRate = math.abs(rate)
     local rateAf = math.floor(math.abs(rate) * 100) % 100
-    vals[#vals+1] = {id = id, src = 15, x = 0, y = 247, w = DETAIL.GRAY_30NUM.W * 12, h = DETAIL.GRAY_30NUM.H * 2, divx = 12, divy = 2, digit = 3, space = DETAIL.GRAY_30NUM.SPACE, value = function () return rate end}
     if rate >= 0 then
+        -- プラス記号を出すために24分割. マイナスの方は使用されない版
+        vals[#vals+1] = {id = id, src = 15, x = 0, y = 247, w = DETAIL.GRAY_30NUM.W * 12, h = DETAIL.GRAY_30NUM.H * 2, divx = 12, divy = 2, digit = 3, space = DETAIL.GRAY_30NUM.SPACE, value = function () return absRate end}
         vals[#vals+1] = {id = id .. "AfterDot", src = 15, x = 0, y = 247, w = DETAIL.GRAY_30NUM.W * 10, h = DETAIL.GRAY_30NUM.H, divx = 10, padding = 1, digit = afterDotDigit, space = DETAIL.GRAY_30NUM.SPACE, value = function () return rateAf end}
         imgs[#imgs+1] = {id = id .. "Dot", src = 15, x = 288, y = 266, w = DETAIL.GRAY_30NUM.DOT.W, h = DETAIL.GRAY_30NUM.DOT.H}
         imgs[#imgs+1] = {id = id .. "Percent", src = 15, x = 336, y = 247, w = DETAIL.GRAY_30NUM.PERCENT.W, h = DETAIL.GRAY_30NUM.PERCENT.H}
     else
+        -- 0%台のマイナスの場合, 整数部分が0になってプラス扱いされる対策で整数部分も分離 マイナス描画のため24分割版
+        vals[#vals+1] = {id = id, src = 15, x = 0, y = 278, w = DETAIL.GRAY_30NUM.W * 12, h = DETAIL.GRAY_30NUM.H * 2, divx = 12, divy = 2, digit = 3, space = DETAIL.GRAY_30NUM.SPACE, value = function () return absRate end}
         vals[#vals+1] = {id = id .. "AfterDot", src = 15, x = 0, y = 278, w = DETAIL.GRAY_30NUM.W * 10, h = DETAIL.GRAY_30NUM.H, divx = 10, padding = 1, digit = afterDotDigit, space = DETAIL.GRAY_30NUM.SPACE, value = function () return rateAf end}
         imgs[#imgs+1] = {id = id .. "Dot", src = 15, x = 288, y = 297, w = DETAIL.GRAY_30NUM.DOT.W, h = DETAIL.GRAY_30NUM.DOT.H}
         imgs[#imgs+1] = {id = id .. "Percent", src = 15, x = 336, y = 278, w = DETAIL.GRAY_30NUM.PERCENT.W, h = DETAIL.GRAY_30NUM.PERCENT.H}
@@ -368,7 +372,7 @@ scoreDetail.functions.load = function ()
     -- bp
     vals[#vals+1] = scoreDetail.functions.loadGray48Number("bpDetailValue", 5, 0, 76, nil)
     vals[#vals+1] = scoreDetail.functions.loadGray36Number("bpOldDetailValue", 5, 0, 176, nil)
-    vals[#vals+1] = {id = "bpDiffDetailValue", src = 15, x = 0, y = 144, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, space = DETAIL.GRAY_36NUM.SPACE, ref = 176}
+    vals[#vals+1] = {id = "bpDiffDetailValue", src = 15, x = 0, y = 144, w = DETAIL.GRAY_36NUM.W * 12, h = DETAIL.GRAY_36NUM.H * 2, divx = 12, divy = 2, digit = 5, space = DETAIL.GRAY_36NUM.SPACE, ref = 178}
     do
         local rate = main_state.number(76) / totalNotes * 100
         local rateAf = math.floor(rate * 100) % 100

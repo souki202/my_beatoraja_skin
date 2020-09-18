@@ -9,7 +9,7 @@ local rank = {
 
 
 local RANK = {
-    LIST = {"Aaa", "Aa", "A", "B", "C", "D", "E", "F"},
+    LIST = {"Aaa", "Aa", "A", "B", "C", "D", "E", "F", "F"},
 
     AREA = {
         X = 224,
@@ -49,9 +49,9 @@ rank.functions.load = function ()
     local imgs = skin.image
 
     -- ランクの文字読み込み
-    for i = 1, #RANK.LIST do
+    for i = 2, #RANK.LIST do
         -- 大量にimgに突っ込むわけには行かないので, 今回のランクの分だけ読む
-        if main_state.option(300 + (i - 1)) then
+        if main_state.option(300 + (i - 2)) then
             local perH = RANK.TEXT.PER_H(RANK)
             for j = 1, RANK.TEXT.DIV_Y do
                 local y = RANK.TEXT.H * (i - 1) + perH * (j - 1)

@@ -115,6 +115,8 @@ groove.functions.load = function ()
     local getNum = main_state.number
     local playerLabel = "Player: " .. main_state.text(2)
     local dateLabel = string.format("%04d", getNum(21)) .. "-" .. string.format("%02d", getNum(22)) .. "-" .. string.format("%02d", getNum(23)) .. " " .. string.format("%02d", getNum(24)) .. ":" .. string.format("%02d", getNum(25)) .. ":" .. string.format("%02d", getNum(26))
+    GROOVE.GAUGE.GROOVE.JUDGE.H = GROOVE.GAUGE.GROOVE.H * getGrooveNotesGraphSizePercentage()
+
     local skin = {
         image = {
             {id = "grooveBokehBg", src = getBokehBgSrc(), x = GROOVE.AREA.X, y = HEIGHT - GROOVE.AREA.Y - GROOVE.AREA.H, w = GROOVE.AREA.W, h = GROOVE.AREA.H},
@@ -241,8 +243,8 @@ groove.functions.dst = function ()
                 }
             },
             { -- groovegauge部分の判定グラフ
-                id = GROOVE.GAUGE.JUDGE_IDS[getGrooveGaugeAreaGraph()], draw = isDrawGroove, dst = {
-                    {x = GROOVE.GAUGE.GROOVE.X(GROOVE), y = GROOVE.GAUGE.GROOVE.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.JUDGE.H, a = GROOVE.GAUGE.GROOVE.JUDGE.ALPHA}
+                id = GROOVE.GAUGE.JUDGE_IDS[getGrooveGaugeAreaGraph()] .. "Graph", draw = isDrawGroove, dst = {
+                    {x = GROOVE.GAUGE.GROOVE.X(GROOVE), y = GROOVE.GAUGE.GROOVE.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.JUDGE.H, a = getGrooveNotesGraphTransparency()}
                 }
             },
             { -- groovegauge border
