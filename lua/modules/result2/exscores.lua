@@ -20,17 +20,17 @@ local EXSCORES = {
     },
     EX_NUM = {
         X = function (self, idx) return self.AREA.X(self, idx) + 666 - (self.EX_NUM.W + self.EX_NUM.SPACE) * 5 end,
-        Y = function (self, idx) return self.AREA.Y(self, idx) + 16 end,
-        W = 61,
-        H = 92,
-        SPACE = 3,
+        Y = function (self, idx) return self.AREA.Y(self, idx) + 10 end,
+        W = 72,
+        H = 103,
+        SPACE = -7,
     },
     OTHER_NUM = {
         X = function (self, idx) return self.AREA.X(self, idx) + 666 - (self.OTHER_NUM.W + self.OTHER_NUM.SPACE) * 5 end,
-        Y = function (self, idx) return self.AREA.Y(self, idx) + 16 end,
-        W = 35,
-        H = 50,
-        SPACE = 2,
+        Y = function (self, idx) return self.AREA.Y(self, idx) + 10 end,
+        W = 46,
+        H = 63,
+        SPACE = -7,
 
         IR = {
             SLUSH = {
@@ -78,7 +78,7 @@ exscores.functions.load = function ()
 
     -- IRのプレイヤーと順位区切り用スラッシュ
     imgs[#imgs+1] = {
-        id = "largeValueIrSlash", src = 168, x = EXSCORES.OTHER_NUM.W * 11, y = 0, w = EXSCORES.OTHER_NUM.W, h = EXSCORES.OTHER_NUM.H
+        id = "largeValueIrSlash", src = 168, x = 598, y = 0, w = EXSCORES.OTHER_NUM.W, h = EXSCORES.OTHER_NUM.H
     }
 
     return skin

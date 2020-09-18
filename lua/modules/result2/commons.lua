@@ -5,6 +5,11 @@ CUSTOM_TIMERS_RESULT2 = {
     SWITCH_STAGEFILE_TAB = 10100,
     SWITCH_DETAIL = 10101,
     DETAIL_WND_TIMER = 10102,
+    SWITCH_RANKING = 10201,
+    RANKING_WND_TIMER = 10202,
+    UPDATE_SCORE_GRAPH = 10203,
+    RANKING_SCORE_GRAPH1_TIMER = 10250,
+    RANKING_SCORE_GRAPH11_TIMER = 10260,
 }
 
 RESULT2NUM = {
@@ -102,4 +107,8 @@ end
 
 function getStageFileAreaDefaultView()
     return (getTableValue(skin_config.option, "ステージファイル部分の初期表示", 915) % 5) + 1
+end
+
+function getRankingGaugeAlpha()
+	return 255 - getOffsetValueWithDefault("ランキングのゲージの透明度(既定値75 255で透明)", {a = 75}).a
 end

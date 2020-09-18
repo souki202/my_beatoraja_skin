@@ -1,4 +1,5 @@
 
+require("modules.commons.easing")
 require("modules.commons.numbers")
 require("modules.commons.my_window")
 require("modules.result.commons")
@@ -496,13 +497,6 @@ local header = {
 
 local function is2P()
     return getTableValue(skin_config.option, "スコア位置", 920) == 921
-end
-
-local function easeOut(t, s, e, d)
-    local c = e - s
-    local t2 = t / d
-    t2 = t2 - 1
-    return c * (t2 * t2 * t2 + 1) + s
 end
 
 -- ランプやクリアかどうかに応じて適切な背景を1枚だけ読み込む

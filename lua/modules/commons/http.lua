@@ -31,26 +31,19 @@ local function httpConnection(url)
 end
 
 -- 各スキンのバージョンを確認する
--- @param  number selectVersion 現在のバージョンの文字列
--- @param  number resultVersion
--- @return boolean, boolean 新しいバージョンがあればtrue, ないか, 接続失敗すればfalse 1個目はセレクト, 2個目はresult
-function skinVersionCheck(selectVersion, resultVersion, decideVersion, playVersion)
+-- @param  {array} versions 現在のバージョンの文字列の配列 手前から, セレクト, リザルト, decide, プレイ, リザルト2
+-- @return {boolean} 新しいバージョンがあるかの配列. それぞれのindexは上に対応しているか, nil 取得に失敗すれば空の配列
+function skinVersionCheck(nowVersions)
     local err, v = pcall(httpConnection, "https://tori-blog.net/wp-content/uploads/skin/version")
-
+    local isNews = {}
     if v then
-        if  #v < 2 then
-            print("バージョンチェックに失敗しました")
-            return false, false, false, false
-        elseif #v == 2 then
-            return tonumber(selectVersion) < tonumber(v[1]), tonumber(resultVersion) < tonumber(v[2]), false, false
-        elseif #v == 3 then
-            return tonumber(selectVersion) < tonumber(v[1]), tonumber(resultVersion) < tonumber(v[2]), tonumber(decideVersion) < tonumber(v[3]), false
-        elseif #v >= 4 then
-            return tonumber(selectVersion) < tonumber(v[1]), tonumber(resultVersion) < tonumber(v[2]), tonumber(decideVersion) < tonumber(v[3]), tonumber(playVersion) < tonumber(v[4])
+        local n = math.min(#v, #nowVersions)
+        for i = 1, n do
+            isNews[i] = tonumber(nowVersions[i]) < tonumber(v[i])
         end
     else
-        return false, false, false, false
+        print("スキンのバージョンチェックに失敗しました")
     end
 
-    return false, false, false, false
+    return isNews
 end

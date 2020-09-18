@@ -15,6 +15,7 @@ local lamp = require("modules.result2.lamps")
 local rank = require("modules.result2.rank")
 local groove = require("modules.result2.groove")
 local scoreDetail = require("modules.result2.score_detail")
+local ranking = require("modules.result2.ranking")
 local resultObtained = require("modules.result.result_obtained")
 
 local INPUT_WAIT = 500 -- シーン開始から入力受付までの時間
@@ -87,7 +88,8 @@ local function makeHeader()
             },
         },
         filepath = {
-            {name = "NoImage画像(png)", path = "../result2/noimage/*.png", def = "default"},
+            {name = "NoImage画像", path = "../result2/noimage/*.png", def = "default"},
+            {name = "ランキングのヘッダー", path = "../result2/parts/ranking/header/*.png", def = "ranking"},
             {name = "判定---------------------------------------------", path="../dummy/*"},
             {name = "PERFECT背景", path = "../result2/parts/judge/background/perfect/*.png", def = "light blue purple"},
             {name = "GREAT背景"  , path = "../result2/parts/judge/background/great/*.png", def = "purple orange"},
@@ -122,14 +124,15 @@ local function makeHeader()
             {name = "ランクの額縁の装飾", path = "../result2/parts/rank/frame/decoration/*.png", def = "ivy"},
             {name = "ランクの額縁の背景", path = "../result2/parts/rank/frame/background/*.png", def = "oldpaper"},
             {name = "背景選択-----------------------------------------", path="../dummy/*"},
-            {name = "CLEAR背景(png)", path = "../result2/background/isclear/clear/*.png", def = "bg"},
-            {name = "FAILED背景(png)", path = "../result2/background/isclear/failed/*.png", def = "bg"},
+            {name = "CLEAR背景", path = "../result2/background/isclear/clear/*.png", def = "bg"},
+            {name = "FAILED背景", path = "../result2/background/isclear/failed/*.png", def = "bg"},
         },
         offset = {
             {name = "経験値等画面表示秒数 (決定キーの場合, 最小1秒)", x = 0},
             {name = "スコアグラフの1マスの高さ (既定値2)", h = 0},
             {name = "スコアグラフの細かさ (既定値2 1~5 小さいほど細かい)", w = 0},
             {name = "ランクの額縁の背景の透明度(既定値165 255で透明)", a = 0},
+            {name = "ランキングのゲージの透明度(既定値75 255で透明)", a = 0},
             {name = "平滑化周り--------------------------", x = 0},
             {name = "単純移動平均の期間 (既定値7)", x = 0},
             {name = "指数移動平均の最新データの重視率 (既定値40 0<x<100)", x = 0},
@@ -141,33 +144,33 @@ local function makeHeader()
     do
         local filepathes = header.filepath
         -- ボケていない方
-        filepathes[#filepathes+1] = {name = "背景選択2-----------------------------------------", path="../dummy/*"}
+        filepathes[#filepathes+1] = {name = "背景選択2(クリアランク毎)-------------------------", path="../dummy/*"}
         for i, rankDir in ipairs(RANK_DIR_LIST) do
             filepathes[#filepathes+1] = {
-                name = string.upper(rankDir) .. "背景(png)", path = "../result2/background/ranks/" .. rankDir .. "/*.png"
+                name = string.upper(rankDir) .. "背景(ランク毎)", path = "../result2/background/ranks/" .. rankDir .. "/*.png"
             }
         end
-        filepathes[#filepathes+1] = {name = "背景選択3-----------------------------------------", path="../dummy/*"}
+        filepathes[#filepathes+1] = {name = "背景選択3(クリアランプ毎)-------------------------", path="../dummy/*"}
         for i, lampDir in ipairs(LAMP_DIR_LIST) do
             filepathes[#filepathes+1] = {
-                name = LAMP_DIR_NAME_LIST[i] .. "背景(png)", path = "../result2/background/lamps/" .. lampDir .. "/*.png"
+                name = LAMP_DIR_NAME_LIST[i] .. "背景(ランプ毎)", path = "../result2/background/lamps/" .. lampDir .. "/*.png"
             }
         end
         -- ボケている方
-        filepathes[#filepathes+1] = {name = "背景選択(ぼかし)----------------------------------", path="../dummy/*"}
-        filepathes[#filepathes+1] = {name = "CLEARぼかし背景(png)", path = "../result2/backgroundbokeh/isclear/clear/*.png", def = "bg"}
-        filepathes[#filepathes+1] = {name = "FAILEDぼかし背景(png)", path = "../result2/backgroundbokeh/isclear/failed/*.png", def = "bg"}
+        filepathes[#filepathes+1] = {name = "背景選択(ぼかし クリアランク毎)-------------------", path="../dummy/*"}
+        filepathes[#filepathes+1] = {name = "CLEARぼかし背景", path = "../result2/backgroundbokeh/isclear/clear/*.png", def = "bg"}
+        filepathes[#filepathes+1] = {name = "FAILEDぼかし背景", path = "../result2/backgroundbokeh/isclear/failed/*.png", def = "bg"}
 
-        filepathes[#filepathes+1] = {name = "背景選択2(ぼかし)---------------------------------", path="../dummy/*"}
+        filepathes[#filepathes+1] = {name = "背景選択2(ぼかし クリアランプ毎)------------------", path="../dummy/*"}
         for i, rankDir in ipairs(RANK_DIR_LIST) do
             filepathes[#filepathes+1] = {
-                name = string.upper(rankDir) .. "ぼかし背景(png)", path = "../result2/backgroundbokeh/ranks/" .. rankDir .. "/*.png"
+                name = string.upper(rankDir) .. "ぼかし背景(ランク毎)", path = "../result2/backgroundbokeh/ranks/" .. rankDir .. "/*.png"
             }
         end
         filepathes[#filepathes+1] = {name = "背景選択3(ぼかし)---------------------------------", path="../dummy/*"}
         for i, lampDir in ipairs(LAMP_DIR_LIST) do
             filepathes[#filepathes+1] = {
-                name = LAMP_DIR_NAME_LIST[i] .. "ぼかし背景(png)", path = "../result2/backgroundbokeh/lamps/" .. lampDir .. "/*.png"
+                name = LAMP_DIR_NAME_LIST[i] .. "ぼかし背景(ランプ毎)", path = "../result2/backgroundbokeh/lamps/" .. lampDir .. "/*.png"
             }
         end
     end
@@ -231,7 +234,7 @@ local function main()
                 print("FULLCOMBOのため, 経験値1.4倍")
                 exp = exp * 1.4
             elseif CLEAR_TYPE == LAMPS.PERFECT then
-                print("FULLCOMBOのため, 経験値1.5倍")
+                print("PERFECTのため, 経験値1.5倍")
                 exp = exp * 1.5
             elseif CLEAR_TYPE == LAMPS.MAX then
                 print("MAXのため, 経験値5倍")
@@ -259,9 +262,9 @@ local function main()
         {id = 7, path = "../result2/parts/rank/frame/background/*.png"},
         {id = 8, path = "../result2/parts/rank/text/default.png"},
 
-        {id = 9, path = "../result2/parts/gauge/shadow.png"},
-        {id = 10, path = "../result2/parts/gauge/details.png"},
-        {id = 11, path = "../result2/parts/gauge/labels.png"},
+        {id = 9, path = "../result2/parts/graph/shadow.png"},
+        {id = 10, path = "../result2/parts/graph/details.png"},
+        {id = 11, path = "../result2/parts/graph/labels.png"},
         {id = 12, path = "../result2/parts/lamps/normal.png"},
         {id = 13, path = "../result2/parts/detail/labels.png"},
         {id = 14, path = "../result2/parts/detail/headers.png"},
@@ -273,6 +276,14 @@ local function main()
         {id = 20, path = "../result2/noimage/*.png"},
         {id = 21, path = "../result2/parts/grooveside/labels.png"},
         {id = 22, path = "../result2/parts/grooveside/num.png"},
+
+        {id = 25, path = "../result2/parts/ranking/header/*.png"},
+        {id = 26, path = "../result2/parts/ranking/shadow.png"},
+        {id = 27, path = "../result2/parts/ranking/num.png"},
+        {id = 28, path = "../result2/parts/ranking/arrow.png"},
+        {id = 29, path = "../result2/parts/ranking/graph_area_shadow.png"},
+        {id = 30, path = "../result2/parts/ranking/order.png"},
+        {id = 31, path = "../result2/parts/ranking/gauge.png"},
 
         -- 背景群
         {id = 100, path = "../result2/background/isclear/clear/*.png"},
@@ -372,7 +383,8 @@ local function main()
     mergeSkin(skin, exscores.load())
     mergeSkin(skin, musicInfo.load())
     mergeSkin(skin, scoreDetail.load())
-    mergeSkin(skin, largeLamp.load())
+    mergeSkin(skin, ranking.load())
+    mergeSkin(skin, largeLamp.load(CLEAR_TYPE))
     mergeSkin(skin, fade.load())
 
     skin.destination = {}
@@ -387,6 +399,7 @@ local function main()
 
     mergeSkin(skin, musicInfo.dst())
     mergeSkin(skin, scoreDetail.dst())
+    mergeSkin(skin, ranking.dst())
     mergeSkin(skin, largeLamp.dst())
     mergeSkin(skin, fade.dst())
     return skin

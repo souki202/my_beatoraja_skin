@@ -1,3 +1,4 @@
+require("modules.commons.easing")
 require("modules.commons.numbers")
 require("modules.commons.my_window")
 require("modules.result.commons")
@@ -548,13 +549,6 @@ function makeHeader()
     }
     setProperties(header)
     return header
-end
-
-local function easeOut(t, s, e, d)
-    local c = e - s
-    local t2 = t / d
-    t2 = t2 - 1
-    return c * (t2 * t2 * t2 + 1) + s
 end
 
 local function initialize(skin)

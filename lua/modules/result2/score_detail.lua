@@ -7,7 +7,7 @@ local judges = require("modules.result2.judges")
 
 local scoreDetail = {
     isOpened = false,
-    timeForAnimation = 99999999,
+    timeForAnimation = 9999999,
     functions = {}
 }
 
@@ -172,13 +172,18 @@ local DETAIL = {
     },
     ANIMATION = {
         MOVE_TIME = 200,
-        CLOSE_TIME = 1000,
+        CLOSE_TIME = 1000000,
     },
 }
 
 scoreDetail.functions.loadGray30Number = function (id, digit, align, padding, ref, value)
     local param = DETAIL.GRAY_30NUM
     return {id = id, src = 15, x = 0, y = 216, w = param.W * 10, h = param.H, divx = 10, align = align, digit = digit, space = param.SPACE, padding = padding, ref = ref, value = value}
+end
+
+scoreDetail.functions.loadGray30NumberWithSign = function (id, digit, align, padding, ref, value)
+    local param = DETAIL.GRAY_30NUM
+    return {id = id, src = 15, x = 0, y = 247, w = param.W * 12, h = param.H * 2, divx = 12, divy = 2, align = align, digit = digit, space = param.SPACE, padding = padding, ref = ref, value = value}
 end
 
 scoreDetail.functions.loadGray36Number = function (id, digit, align, ref, value)
@@ -238,14 +243,17 @@ end
 
 -- 閉じるアニメーションのためにこれ
 scoreDetail.functions.windowAnimationTimer = function ()
+    local t = main_state.time()
+    local moveTime = DETAIL.ANIMATION.MOVE_TIME
     if scoreDetail.isOpened then
-        local t = main_state.time()
-        local moveTime = DETAIL.ANIMATION.MOVE_TIME
         if t - scoreDetail.timeForAnimation > moveTime * 1000 then
             scoreDetail.timeForAnimation = t - moveTime * 1000
         end
         return scoreDetail.timeForAnimation
     else
+        if t - scoreDetail.timeForAnimation > (DETAIL.ANIMATION.CLOSE_TIME + moveTime) * 1000 then
+            scoreDetail.timeForAnimation = t - (DETAIL.ANIMATION.CLOSE_TIME + moveTime) * 1000
+        end
         return scoreDetail.timeForAnimation
     end
 end
@@ -253,6 +261,7 @@ end
 scoreDetail.functions.load = function ()
     local totalNotes = main_state.number(74)
     local theoretical = totalNotes * 2
+    scoreDetail.timeForAnimation = -(DETAIL.ANIMATION.CLOSE_TIME + DETAIL.ANIMATION.MOVE_TIME) * 1000
     -- 判定文字は読み込み済み
     -- 各判定合計数字も読み込み済み
 
@@ -716,7 +725,7 @@ scoreDetail.functions.dst = function ()
             local toX = d.dst[1].x
             local fromX = toX - moveW
             d.timer = CUSTOM_TIMERS_RESULT2.DETAIL_WND_TIMER
-            d.loop = -1
+            d.loop = 99999999
             d.dst[1].time = 0
             d.dst[1].x = fromX
             d.dst[1].acc = 2

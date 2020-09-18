@@ -489,8 +489,11 @@ local function main()
 
     -- バージョンチェック
     if isCheckNewVersion() then
-        local v1, v2, v3, v4 = skinVersionCheck(SKIN_INFO.SELECT_VRESION, SKIN_INFO.RESULT_VERSION, SKIN_INFO.DECIDE_VERSION, SKIN_INFO.PLAY_VERSION)
-        existNewVersion = v1 or v2 or v3 or v4
+        local isNews = skinVersionCheck({SKIN_INFO.SELECT_VRESION, SKIN_INFO.RESULT_VERSION, SKIN_INFO.DECIDE_VERSION, SKIN_INFO.PLAY_VERSION, SKIN_INFO.RESULT2_VERSION})
+        existNewVersion = false
+        for i = 1, #isNews do
+            existNewVersion = existNewVersion or isNews[i]
+        end
         userData.updateNextVersionCheckDate()
     end
 

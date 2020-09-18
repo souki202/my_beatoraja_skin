@@ -42,7 +42,7 @@ local LARGE_LAMP = {
         MOVE_X_DELTA = -64,
         NUM_OF_LINES = 5,
         ALPHA = 192,
-    }
+    },
 }
 
 largeLamp.functions.getAnimationEndTime = function ()
@@ -57,10 +57,9 @@ largeLamp.functions.getLampId = function (clearType)
     return LARGE_LAMP.PREFIX[clearType]
 end
 
-largeLamp.functions.load = function ()
+largeLamp.functions.load = function (lamp)
     local skin = {image = {}}
     local imgs = skin.image
-
     do
         local perW = LARGE_LAMP.AREA.PER_W(LARGE_LAMP)
         for i = 1, LARGE_LAMP.AREA.DIV_X do
@@ -103,7 +102,7 @@ largeLamp.functions.dst = function ()
 
     do
         -- 線の出力 シンプルに横から出てくる
-        do
+        if CLEAR_TYPE ~= LAMPS.FAILED then
             local perW = LARGE_LAMP.AREA.LINE_PER_W(LARGE_LAMP)
             for j = 1, LARGE_LAMP.LINES.NUM_OF_LINES do
                 local lineGapTime = LARGE_LAMP.ANIMATION.EACH_LINE_DT * (j - 1)

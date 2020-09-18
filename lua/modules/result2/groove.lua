@@ -84,7 +84,7 @@ local GROOVE = {
             Y = function (self, idx) return self.AREA.Y + 437 - self.INFO.LABEL.INTERVAL_Y * (idx - 1) end,
             W = 192,
             H = 36,
-            INTERVAL_Y = 36,
+            INTERVAL_Y = 40,
         },
         NUM = {
             X = function (self) return self.AREA.X + 893 - 5 - 5 * (self.INFO.NUM.W + self.INFO.NUM.SPACE) end,
@@ -92,6 +92,13 @@ local GROOVE = {
             W = 26,
             H = 36,
             SPACE = -7,
+        },
+        STAGEFILE = {
+            X = function (self) return self.AREA.X + 640 end,
+            Y = function (self, idx) return self.AREA.Y + 5 end,
+            W = 255,
+            H = 191,
+            BG_ALPHA = 90,
         }
     },
 }
@@ -298,6 +305,21 @@ groove.functions.dst = function ()
                     {x = GROOVE.GAUGE.JUDGE.X(GROOVE), y = GROOVE.GAUGE.JUDGE.Y(GROOVE), w = GROOVE.GAUGE.JUDGE.W, h = GROOVE.GAUGE.JUDGE.H, a = GROOVE.DIMMER_ALPHA}
                 }
             },
+            {
+                id = "noImage", draw = function () return isDrawGraph() and main_state.option(190) end, stretch = 1, filter = 1, dst = {
+                    {x = GROOVE.INFO.STAGEFILE.X(GROOVE), y = GROOVE.INFO.STAGEFILE.Y(GROOVE), w = GROOVE.INFO.STAGEFILE.W, h = GROOVE.INFO.STAGEFILE.H}
+                }
+            },
+            {
+                id = "black", draw = function () return isDrawGraph() and main_state.option(191) end, dst = {
+                    {x = GROOVE.INFO.STAGEFILE.X(GROOVE), y = GROOVE.INFO.STAGEFILE.Y(GROOVE), w = GROOVE.INFO.STAGEFILE.W, h = GROOVE.INFO.STAGEFILE.H, a = GROOVE.INFO.STAGEFILE.BG_ALPHA}
+                }
+            },
+            {
+                id = -100, draw = function () return isDrawGraph() and main_state.option(191) end, stretch = 1, filter = 1, dst = {
+                    {x = GROOVE.INFO.STAGEFILE.X(GROOVE), y = GROOVE.INFO.STAGEFILE.Y(GROOVE), w = GROOVE.INFO.STAGEFILE.W, h = GROOVE.INFO.STAGEFILE.H}
+                }
+            },
         }
     })
 
@@ -306,7 +328,7 @@ groove.functions.dst = function ()
     -- headerだけ先に出す
     for i, id in ipairs(GROOVE.INFO.HEADERS) do
         local pos = i
-        if i == 6 then pos = 7 end
+        -- if i == 6 then pos = 7 end
         dst[#dst+1] = {
             id = id .. "Header", draw = isDrawGraph, dst = {
                 {x = GROOVE.INFO.LABEL.X_HEADER(GROOVE), y = GROOVE.INFO.LABEL.Y(GROOVE, pos), w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H}
@@ -323,7 +345,7 @@ groove.functions.dst = function ()
         local idPrefix = {"grooveSideKeys", "grooveSideJudge", "randomMode", "lnMode", "oldLamp"}
         for i = 1, #idPrefix do
             local pos = i + 1
-            if i == 5 then pos = 8 end
+            if i == 5 then pos = 7 end
             dst[#dst+1] = {
                 id = idPrefix[i] .. "Label", draw = isDrawGraph, dst = {
                     {x = GROOVE.INFO.LABEL.X_VALUE(GROOVE), y = GROOVE.INFO.LABEL.Y(GROOVE, pos), w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H}
