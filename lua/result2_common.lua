@@ -60,7 +60,7 @@ end
 local function makeHeader()
     local header = {
         type = 7,
-        name = "Glass style" .. (DEBUG and " dev result" or ""),
+        name = "Glass Style" .. (DEBUG and " dev result" or ""),
         w = WIDTH,
         h = HEIGHT,
         fadeout = fade.getFadeOutTime(),

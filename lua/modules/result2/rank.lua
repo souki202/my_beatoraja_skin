@@ -35,6 +35,29 @@ local RANK = {
     }
 }
 
+rank.functions.getRankIdx = function ()
+    local m = main_state.number(74) * 2
+    if m == 0 then return 0 end
+    local s = main_state.number(71)
+    local p = s / m
+    local numOfRank = 27
+    local rankDetailedIdx = {0}
+    for i = 1, numOfRank do
+        rankDetailedIdx[i + 1] = p >= 1.0 * i / numOfRank
+    end
+
+    myPrint("TN: " .. (m / 2), "score: " .. s, "rate: " .. p)
+
+    local values = {0, 6, 9, 12, 15, 18, 21, 24, 28}
+    for i = 1, #values do
+        if rankDetailedIdx[values[i] + 1] and (i > 27 and true or (not rankDetailedIdx[values[i + 1] + 1])) then
+            myPrint("ランク: " .. (values[i] / numOfRank) .. " 以上 " .. (values[i + 1] / numOfRank) .. " 以下", (#values - i))
+            if i == #values then return 1 end
+            return #values - i
+        end
+    end
+end
+
 rank.functions.load = function ()
     RANK.BG.ALPHA = getRankFrameBgAlpha()
 
@@ -49,12 +72,15 @@ rank.functions.load = function ()
     local imgs = skin.image
 
     -- ランクの文字読み込み
-    for i = 2, #RANK.LIST do
+    -- for i = 1, #RANK.LIST do
+    do
+        local i = rank.functions.getRankIdx()
         -- 大量にimgに突っ込むわけには行かないので, 今回のランクの分だけ読む
-        if main_state.option(300 + (i - 2)) then
+        myPrint("rank読み込み: " .. RANK.LIST[i], i)
+        -- if main_state.option(300 + (i - 1)) then
             local perH = RANK.TEXT.PER_H(RANK)
             for j = 1, RANK.TEXT.DIV_Y do
-                local y = RANK.TEXT.H * (i - 1) + perH * (j - 1)
+                local y = RANK.TEXT.H * i + perH * (j - 1)
                 imgs[#imgs+1] = {
                     id = "rankTextPart" .. j, src = 8, x = 0, y = y, w = RANK.TEXT.W, h = perH
                 }
@@ -62,7 +88,7 @@ rank.functions.load = function ()
                     id = "rankTextBrightPart" .. j, src = 8, x = RANK.TEXT.W, y = y, w = RANK.TEXT.W, h = perH
                 }
             end
-        end
+        -- end
     end
     return skin
 end
