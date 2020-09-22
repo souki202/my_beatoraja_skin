@@ -25,21 +25,6 @@ local LOADING = {
         Y = function (self) return self.AREA.Y() + 352 end,
         SIZE = 24,
     },
-    TITLE = {
-        X = nil,
-        X_1 = function () return lanes.getAreaX() + lanes.getAreaW() + 65 end,
-        X_2 = function () return 65 end,
-        Y = nil,
-        Y_1 = function () return lanes.getAreaY() - 64 end,
-        Y_2 = function () return 12 end,
-        W = 1285,
-        H = 64,
-        TEXT = {
-            SIZE = 34,
-            X = function (self) return self.TITLE.X() + self.TITLE.W / 2 end,
-            DY = 8,
-        },
-    },
     READY = {
         X = function (self) return self.AREA.X() + (self.AREA.W() - self.READY.W) / 2 end,
         START_X = function (self) return self.AREA.X() + (self.AREA.W() - self.READY.W * self.READY.INIT_MUL) / 2 end,
@@ -72,17 +57,12 @@ local function getDifficultyColor()
 end
 
 loading.functions.load = function ()
-    LOADING.TITLE.X = is1P() and LOADING.TITLE.X_1 or LOADING.TITLE.X_2
-    LOADING.TITLE.Y = isBgaOnLeftUpper() and LOADING.TITLE.Y_1 or LOADING.TITLE.Y_2
-
     return {
         image = {
             {id = "loadingCircle", src = 0, x = 655, y = 0, w = LOADING.CIRCLE.SIZE, h = LOADING.CIRCLE.SIZE},
             {id = "readyText", src = 17, x = 0, y = 0, w = -1, h = -1},
-            {id = "titleBg", src = 0, x = 460, y = PARTS_TEXTURE_SIZE - 1, w = LOADING.TITLE.W, h = 1},
         },
         text = {
-            {id = "title", font = 0, size = LOADING.TITLE.TEXT.SIZE, ref = 12, align = 1},
             {id = "loadingText", font = 0, size = LOADING.TEXT.SIZE, constantText = "楽曲データ読込中", align = 1},
             {id = "loadCompleteText", font = 0, size = LOADING.TEXT.SIZE, constantText = "プレイ開始待機中", align = 1},
         },
@@ -93,7 +73,6 @@ loading.functions.load = function ()
 end
 
 loading.functions.dst = function ()
-    local r, g, b = getDifficultyColor()
     -- BACKBMPはbga.luaの方で
     return {
         destination = {
@@ -116,12 +95,6 @@ loading.functions.dst = function ()
             }},
             {id = "loadingGauge", op = {80}, dst = {
                 {x = LOADING.GAUGE.X(LOADING), y = LOADING.GAUGE.Y(LOADING), w = LOADING.GAUGE.W, h = LOADING.GAUGE.H, a = 192}
-            }},
-            {id = "titleBg", op = {80}, dst = {
-                {x = LOADING.TITLE.X(), y = LOADING.TITLE.Y(), w = LOADING.TITLE.W, h = LOADING.TITLE.H, r = r, g = g, b = b}
-            }},
-            {id = "title", op = {80}, dst = {
-                {x = LOADING.TITLE.TEXT.X(LOADING), y = LOADING.TITLE.Y() + LOADING.TITLE.TEXT.DY, w = 1200, h = LOADING.TITLE.TEXT.SIZE}
             }},
             {id = "readyText", op = {81}, timer = 40, loop = -1, dst = {
                 {time = 0, x = LOADING.READY.START_X(LOADING), y = LOADING.READY.START_Y(LOADING), w = LOADING.READY.W * LOADING.READY.INIT_MUL, h = LOADING.READY.H * LOADING.READY.INIT_MUL},

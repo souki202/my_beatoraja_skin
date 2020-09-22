@@ -8,6 +8,7 @@ local judges = require("modules.play.judges")
 local life = require("modules.play.life")
 local scoreGraph = require("modules.play.score_graph")
 local bga = require("modules.play.bga")
+local title = require("modules.play.title")
 local progress = require("modules.play.progress_bar")
 local judgeDetail = require("modules.play.judge_detail")
 local hispeed = require("modules.play.hispeed")
@@ -184,7 +185,11 @@ local header = {
         {name = "背景画像", path = "../play/parts/background/*.png", def = "default"},
         {name = "汎用画像(png)", path = "../play/parts/versatilitybga/*.png", def = "default"},
         {name = "汎用画像(mp4)", path = "../play/parts/versatilitybga/*.mp4", def = "default"},
-        {name = "黒帯部分BGAのマスク", path = "../play/parts/bgamask/*.png", def = "default"},
+        {name = "BGAフレーム(横上部)", path = "../play/parts/bga/frame/normal/*.png", def = "default"},
+        {name = "BGAフレーム(横全体)", path = "../play/parts/bga/frame/large/*.png", def = "blank"},
+        {name = "BGAフレーム(全画面)", path = "../play/parts/bga/frame/full/*.png", def = "blank"},
+        {name = "黒帯部分BGAのマスク", path = "../play/parts/bga/mask/*.png", def = "default"},
+        {name = "タイトル部分フレーム", path = "../play/parts/title/frame/*.png", def = "default"},
         {name = "ノート画像(通常形式)", path = "../play/parts/notes/normal/*.png", def = "default"},
         {name = "ノート画像(独自形式)", path = "../play/parts/notes/original/*.png", def = "default"},
         {name = "レーンのシンボル(白鍵)", path = "../play/parts/lanesymbols/white/*.png", def = "dia"},
@@ -196,7 +201,10 @@ local header = {
         {name = "判定画像(EARLY)", path = "../play/parts/judges/early/*.png", def = "text"},
         {name = "判定画像(LATE)", path = "../play/parts/judges/late/*.png", def = "text"},
         {name = "コンボ画像", path = "../play/parts/combo/*.png", def = "default"},
-        {name = "グルーヴゲージのインディケーター", path = "../play/parts/indicators/*.png", def = "default"},
+        {name = "グルーヴゲージのフレーム", path = "../play/parts/groove/frame/*.png", def = "default"},
+        {name = "グルーヴゲージの種類の文字", path = "../play/parts/groove/types/*.png", def = "default"},
+        {name = "グルーヴゲージのインディケーター", path = "../play/parts/groove/indicators/*.png", def = "default"},
+        {name = "EXSCOREの文字", path = "../play/parts/exscore/label/*.png", def = "default"},
         {name = "ボム関連画像---------", path = "../dummy/*"},
         {name = "wave1", path = "../play/parts/bombs/wave1/*.png", def = "default"},
         {name = "particle1", path = "../play/parts/bombs/particle1/*.png", def = "default"},
@@ -283,8 +291,6 @@ local function main()
         {id = 28, path = "../play/parts/judges/early/*.png"},
         {id = 29, path = "../play/parts/judges/late/*.png"},
         {id = 6, path = "../play/parts/combo/*.png"},
-        {id = 7, path = "../play/parts/indicators/*.png"},
-        {id = 8, path = "../play/parts/bgamask/*.png"},
         {id = 9, path = "../play/parts/lanecover/default.png"},
         {id = 10, path = "../play/parts/liftcover/default.png"},
         {id = 11, path = "../play/parts/bombs/wave1/*.png"},
@@ -302,7 +308,16 @@ local function main()
         {id = 23, path = "../play/parts/versatilitybga/*.mp4"},
         {id = 25, path = "../play/parts/visualizer/bar.png"},
         {id = 26, path = "../play/parts/visualizer/reflection.png"},
-        {id = 27, path = "../play/parts/gauge100/default.png"},
+        {id = 40, path = "../play/parts/groove/indicators/*.png"},
+        {id = 41, path = "../play/parts/groove/gauge100/default.png"},
+        {id = 42, path = "../play/parts/groove/types/*.png"},
+        {id = 43, path = "../play/parts/groove/frame/*.png"},
+        {id = 50, path = "../play/parts/exscore/label/*.png"},
+        {id = 60, path = "../play/parts/bga/mask/*.png"},
+        {id = 61, path = "../play/parts/bga/frame/normal/*.png"},
+        {id = 62, path = "../play/parts/bga/frame/large/*.png"},
+        {id = 63, path = "../play/parts/bga/frame/full/*.png"},
+        {id = 70, path = "../play/parts/title/frame/*.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 
@@ -329,6 +344,7 @@ local function main()
     mergeSkin(skin, scores.load())
     mergeSkin(skin, logger.load())
     mergeSkin(skin, bga.load())
+    mergeSkin(skin, title.load())
     mergeSkin(skin, lanes.load())
     mergeSkin(skin, progress.load())
     mergeSkin(skin, sideInfo.load())
@@ -354,6 +370,7 @@ local function main()
     if isDrawVisualizer1() then
         mergeSkin(skin, visualizer.dst())
     end
+    mergeSkin(skin, title.dst())
     mergeSkin(skin, progress.dst())
     mergeSkin(skin, sideInfo.dst())
     mergeSkin(skin, hispeed.dst())

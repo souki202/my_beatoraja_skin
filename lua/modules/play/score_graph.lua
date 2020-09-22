@@ -51,7 +51,7 @@ local SCORE = {
     TEXT = {
         X = function (self) return self.AREA.X() + 4 end,
         Y = function (self) return self.AREA.Y() + 73 end,
-        W = 89,
+        W = 256,
         H = 18,
     },
 
@@ -83,7 +83,7 @@ scoreGraph.functions.load = function ()
             {id = "graphRankA", src = 0, x = 0, y = 0, w = SCORE.RANK_TEXT.W, h = SCORE.RANK_TEXT.H},
             {id = "graphRankAa", src = 0, x = 0, y = SCORE.RANK_TEXT.H, w = SCORE.RANK_TEXT.W, h = SCORE.RANK_TEXT.H},
             {id = "graphRankAaa", src = 0, x = 0, y = SCORE.RANK_TEXT.H * 2, w = SCORE.RANK_TEXT.W, h = SCORE.RANK_TEXT.H},
-            {id = "exscoreText", src = 0, x = 124, y = 0, w = SCORE.TEXT.W, h = SCORE.TEXT.H},
+            {id = "exscoreText", src = 50, x = 0, y = 0, w = SCORE.TEXT.W, h = SCORE.TEXT.H},
             {id = "scorePercentageDot", src = 0, x = 2032, y = 94, w = NUMBERS_14PX.W, h = NUMBERS_14PX.H},
             {id = "scorePercent", src = 0, x = 1939, y = 94, w = SCORE.P_NUM.P_W, h = SCORE.P_NUM.P_H},
         },

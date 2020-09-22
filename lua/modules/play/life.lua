@@ -44,7 +44,7 @@ local LIFE = {
         ID_PREFIX = "grooveTypeText",
         X = function (self) return self.AREA.X() + 4 end,
         Y = function (self) return self.AREA.Y() + 58 end,
-        W = 147,
+        W = 256,
         H = 18,
     },
     HIDDEN = {
@@ -117,12 +117,12 @@ life.functions.load = function ()
     LIFE.GAUGE.LIGHT.MAX_H = LIFE.GAUGE.LIGHT.MAX_H * (100 + getLifeGaugeEffectSizeYOffset()) / 100
     local skin = {
         image = {
-            {id = "grooveFrame", src = 0, x = 0, y = PARTS_TEXTURE_SIZE - LIFE.AREA.H, w = LIFE.AREA.W, h = LIFE.AREA.H},
+            {id = "grooveFrame", src = 43, x = 0, y = 0, w = LIFE.AREA.W, h = LIFE.AREA.H},
             {id = "gaugeGlass", src = 0, x = 432, y = PARTS_TEXTURE_SIZE - LIFE.GAUGE.H, w = 1, h = LIFE.GAUGE.H},
             -- インディケーター
-            {id = "grooveIndicatorSafe", src = 7, x = 0, y = 0, w = LIFE.INDICATOR.W, h = LIFE.INDICATOR.H},
-            {id = "grooveIndicatorWarn", src = 7, x = LIFE.INDICATOR.W, y = 0, w = LIFE.INDICATOR.W, h = LIFE.INDICATOR.H},
-            {id = "grooveIndicatorDanger", src = 7, x = LIFE.INDICATOR.W*2, y = 0, w = LIFE.INDICATOR.W, h = LIFE.INDICATOR.H},
+            {id = "grooveIndicatorSafe", src = 40, x = 0, y = 0, w = LIFE.INDICATOR.W, h = LIFE.INDICATOR.H},
+            {id = "grooveIndicatorWarn", src = 40, x = LIFE.INDICATOR.W, y = 0, w = LIFE.INDICATOR.W, h = LIFE.INDICATOR.H},
+            {id = "grooveIndicatorDanger", src = 40, x = LIFE.INDICATOR.W*2, y = 0, w = LIFE.INDICATOR.W, h = LIFE.INDICATOR.H},
 
             {id = "grooveValueDot", src = 0, x = PARTS_TEXTURE_SIZE - LIFE.NUM.W, y = 76, w = LIFE.NUM.W, h = LIFE.NUM.H},
             {id = "percent24px", src = 0, x = 1851, y = 76, w = LIFE.NUM.P_W, h = LIFE.NUM.P_H},
@@ -136,7 +136,7 @@ life.functions.load = function ()
             {id = "lightIndicator", src = 0, x = 22, y = 0, w = LIFE.GAUGE.LIGHT.SIZE, h = LIFE.GAUGE.LIGHT.SIZE},
 
             -- 100%時のキラ
-            {id = "gauge100Particle", src = 27, x = 0, y = 0, w = -1, h = -1},
+            {id = "gauge100Particle", src = 41, x = 0, y = 0, w = -1, h = -1},
         },
         value = {
             {id = "grooveValue", src = 0, x = 1880, y = 76, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = LIFE.NUM.DIGIT, ref = 107},
@@ -163,8 +163,8 @@ life.functions.load = function ()
     -- ゲージ種類文字読み込み
     for i = 1, #LIFE.TYPES do
         imgs[#imgs+1] = {
-            id = LIFE.TEXT.ID_PREFIX .. LIFE.TYPES[i], src = 0,
-            x = 213, y = LIFE.TEXT.H * (i - 1), w = LIFE.TEXT.W, h = LIFE.TEXT.H
+            id = LIFE.TEXT.ID_PREFIX .. LIFE.TYPES[i], src = 42,
+            x = 0, y = LIFE.TEXT.H * (i - 1), w = LIFE.TEXT.W, h = LIFE.TEXT.H
         }
     end
 

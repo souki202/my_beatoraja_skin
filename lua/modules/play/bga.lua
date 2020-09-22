@@ -115,13 +115,19 @@ bga.functions.load = function ()
         end
     end
 
+    local frameSrc = 61
+    if isBgaOnLeft() then frameSrc = 62
+    elseif isFullScreenBga() then frameSrc = 63
+    end
+    
     return {
         image = {
-            {id = "bgaMask", src = 8, x = 0, y = 0, w = -1, h = -1},
+            {id = "bgaMask", src = 60, x = 0, y = 0, w = -1, h = -1},
             {id = "background", src = 18, x = 0, y = 0, w = WIDTH, h = HEIGHT},
             {id = "background2", src = 18, x = 0, y = HEIGHT - BGA.Y, w = WIDTH, h = BGA.Y},
             {id = "versatilityBgaPng", src = 22, x = 0, y = 0, w = -1, h = -1},
             {id = "versatilityBgaMp4", src = 23, x = 0, y = 0, w = -1, h = -1},
+            {id = "bgaFrame", src = frameSrc, x = 0, y = 0, w = -1, h = -1},
         },
         bga = {id = "bga"}
     }
@@ -281,6 +287,12 @@ bga.functions.dst = function ()
         id = -100, op = {81, 191, -195}, stretch = 1, filter = 1, timer = 40, loop = -1, dst = {
             {time = 0, x = bgaX, y = BGA.Y, w = BGA.W, h = BGA.H, a = 255},
             {time = 500, a = 0}
+        }
+    }
+
+    dst[#dst+1] = {
+        id = "bgaFrame", dst = {
+            {x = bgaX, y = BGA.Y, w = BGA.W, h = BGA.H}
         }
     }
 
