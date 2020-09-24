@@ -20,10 +20,10 @@ cover.functions.load = function ()
             {id = "hiddenCover", src = 999, x = 1, y = 0, w = 1, h = 1, disapearLine = lanes.getAreaNormalY()}
         },
         slider = {
-            {id = "laneCover", src = 9, x = 0, y = 0, w = COVER.W(), h = COVER.H(), angle = 2, range = lanes.getLaneNormalHeight(), type = 4}
+            {id = "laneCover", src = 86, x = 0, y = 0, w = COVER.W(), h = COVER.H(), angle = 2, range = lanes.getLaneNormalHeight(), type = 4}
         },
         liftCover = {
-            {id = "liftCover", src = 10, x = 0, y = 0, w = COVER.W(), h = COVER.H(), disapearLine = lanes.getAreaNormalY()}
+            {id = "liftCover", src = 87, x = 0, y = 0, w = COVER.W(), h = COVER.H(), disapearLine = lanes.getAreaNormalY()}
         }
     }
 end

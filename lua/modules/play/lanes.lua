@@ -1,8 +1,13 @@
 require("modules.commons.define")
 local commons = require("modules.play.commons")
+local main_state = require("main_state")
 
 local notes = {
     functions = {}
+}
+
+local rhythm = {
+    elapsedTimerTime = 0,
 }
 
 local NOTES = {
@@ -35,7 +40,7 @@ local LANES = {
         EXTEND_H = 723 + 84,
         SPACE = 75,
     },
-    EDGE = {
+    SIDE = {
         W = 18,
         H = HEIGHT,
     },
@@ -140,118 +145,132 @@ notes.functions.load = function ()
     local nx = NOTES.SIZES.X
     local skin = {
         image = {
-            {id = "laneEdge", src = 0, x = 0, y = 30, w = LANES.EDGE.W, h = 1},
+            {id = "laneSide", src = 80, x = 0, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
 
             -- シンボル
-            {id = "whiteSymbol", src = 2, x = 0, y = 0, w = -1, h = -1},
-            {id = "blueSymbol", src = 3, x = 0, y = 0, w = -1, h = -1},
-            {id = "turntableSymbol", src = 4, x = 0, y = 0, w = -1, h = -1},
+            {id = "whiteSymbol", src = 83, x = 0, y = 0, w = -1, h = -1},
+            {id = "blueSymbol", src = 84, x = 0, y = 0, w = -1, h = -1},
+            {id = "turntableSymbol", src = 85, x = 0, y = 0, w = -1, h = -1},
+        },
+        customTimers = {
+            {
+                id = CUSTOM_TIMERS.MY_BPM_TIMER, timer = function ()
+                    if main_state.timer(140) > 0 then
+                        -- ソフラン時に多少の誤差がでるが許容する
+                        -- 時間のたつ速さ倍率
+                        local timeMul = main_state.number(160) / 60
+                        rhythm.elapsedTimerTime = rhythm.elapsedTimerTime + getDeltaTime() * timeMul
+                        return main_state.time() - rhythm.elapsedTimerTime
+                    end
+                    return main_state.time()
+                end
+            }
         },
     }
     if getNoteType() == 1 then
         -- 独自形式
         local skin2 = {
             image = {
-                {id = "note-b", src = 24, x = nx[3], y = 0, w = NOTES.SIZES.W[3], h = NOTES.SIZES.H},
-                {id = "note-w", src = 24, x = nx[2], y = 0, w = NOTES.SIZES.W[2], h = NOTES.SIZES.H},
-                {id = "note-s", src = 24, x = nx[1], y = 0, w = NOTES.SIZES.W[1], h = NOTES.SIZES.H},
+                {id = "note-b", src = 81, x = nx[3], y = 0, w = NOTES.SIZES.W[3], h = NOTES.SIZES.H},
+                {id = "note-w", src = 81, x = nx[2], y = 0, w = NOTES.SIZES.W[2], h = NOTES.SIZES.H},
+                {id = "note-s", src = 81, x = nx[1], y = 0, w = NOTES.SIZES.W[1], h = NOTES.SIZES.H},
 
-                {id = "lns-b", src = 24, x = nx[3], y = 144, w = NOTES.SIZES.W[3], h = NOTES.SIZES.LN_START_H},
-                {id = "lns-w", src = 24, x = nx[2], y = 144, w = NOTES.SIZES.W[2], h = NOTES.SIZES.LN_START_H},
-                {id = "lns-s", src = 24, x = nx[1], y = 144, w = NOTES.SIZES.W[1], h = NOTES.SIZES.LN_START_H},
+                {id = "lns-b", src = 81, x = nx[3], y = 144, w = NOTES.SIZES.W[3], h = NOTES.SIZES.LN_START_H},
+                {id = "lns-w", src = 81, x = nx[2], y = 144, w = NOTES.SIZES.W[2], h = NOTES.SIZES.LN_START_H},
+                {id = "lns-s", src = 81, x = nx[1], y = 144, w = NOTES.SIZES.W[1], h = NOTES.SIZES.LN_START_H},
 
-                {id = "lne-b", src = 24, x = nx[3], y = 96, w = NOTES.SIZES.W[3], h = NOTES.SIZES.H},
-                {id = "lne-w", src = 24, x = nx[2], y = 96, w = NOTES.SIZES.W[2], h = NOTES.SIZES.H},
-                {id = "lne-s", src = 24, x = nx[1], y = 96, w = NOTES.SIZES.W[1], h = NOTES.SIZES.H},
+                {id = "lne-b", src = 81, x = nx[3], y = 96, w = NOTES.SIZES.W[3], h = NOTES.SIZES.H},
+                {id = "lne-w", src = 81, x = nx[2], y = 96, w = NOTES.SIZES.W[2], h = NOTES.SIZES.H},
+                {id = "lne-s", src = 81, x = nx[1], y = 96, w = NOTES.SIZES.W[1], h = NOTES.SIZES.H},
 
-                {id = "lnb-b", src = 24, x = nx[3], y = 260, w = NOTES.SIZES.W[3], h = 1},
-                {id = "lnb-w", src = 24, x = nx[2], y = 260, w = NOTES.SIZES.W[2], h = 1},
-                {id = "lnb-s", src = 24, x = nx[1], y = 260, w = NOTES.SIZES.W[1], h = 1},
+                {id = "lnb-b", src = 81, x = nx[3], y = 260, w = NOTES.SIZES.W[3], h = 1},
+                {id = "lnb-w", src = 81, x = nx[2], y = 260, w = NOTES.SIZES.W[2], h = 1},
+                {id = "lnb-s", src = 81, x = nx[1], y = 260, w = NOTES.SIZES.W[1], h = 1},
 
-                {id = "lna-b", src = 24, x = nx[3], y = 192, w = NOTES.SIZES.W[3], h = 1},
-                {id = "lna-w", src = 24, x = nx[2], y = 192, w = NOTES.SIZES.W[2], h = 1},
-                {id = "lna-s", src = 24, x = nx[1], y = 192, w = NOTES.SIZES.W[1], h = 1},
+                {id = "lna-b", src = 81, x = nx[3], y = 192, w = NOTES.SIZES.W[3], h = 1},
+                {id = "lna-w", src = 81, x = nx[2], y = 192, w = NOTES.SIZES.W[2], h = 1},
+                {id = "lna-s", src = 81, x = nx[1], y = 192, w = NOTES.SIZES.W[1], h = 1},
 
-                {id = "hcns-b", src = 24, x = nx[3], y = 336, w = NOTES.SIZES.W[3], h = NOTES.SIZES.LN_START_H},
-                {id = "hcns-w", src = 24, x = nx[2], y = 336, w = NOTES.SIZES.W[2], h = NOTES.SIZES.LN_START_H},
-                {id = "hcns-s", src = 24, x = nx[1], y = 336, w = NOTES.SIZES.W[1], h = NOTES.SIZES.LN_START_H},
+                {id = "hcns-b", src = 81, x = nx[3], y = 336, w = NOTES.SIZES.W[3], h = NOTES.SIZES.LN_START_H},
+                {id = "hcns-w", src = 81, x = nx[2], y = 336, w = NOTES.SIZES.W[2], h = NOTES.SIZES.LN_START_H},
+                {id = "hcns-s", src = 81, x = nx[1], y = 336, w = NOTES.SIZES.W[1], h = NOTES.SIZES.LN_START_H},
 
-                {id = "hcne-b", src = 24, x = nx[3], y = 288, w = NOTES.SIZES.W[3], h = NOTES.SIZES.H},
-                {id = "hcne-w", src = 24, x = nx[2], y = 288, w = NOTES.SIZES.W[2], h = NOTES.SIZES.H},
-                {id = "hcne-s", src = 24, x = nx[1], y = 288, w = NOTES.SIZES.W[1], h = NOTES.SIZES.H},
+                {id = "hcne-b", src = 81, x = nx[3], y = 288, w = NOTES.SIZES.W[3], h = NOTES.SIZES.H},
+                {id = "hcne-w", src = 81, x = nx[2], y = 288, w = NOTES.SIZES.W[2], h = NOTES.SIZES.H},
+                {id = "hcne-s", src = 81, x = nx[1], y = 288, w = NOTES.SIZES.W[1], h = NOTES.SIZES.H},
 
-                {id = "hcnb-b", src = 24, x = nx[3], y = 528, w = NOTES.SIZES.W[3], h = 1},
-                {id = "hcnb-w", src = 24, x = nx[2], y = 528, w = NOTES.SIZES.W[2], h = 1},
-                {id = "hcnb-s", src = 24, x = nx[1], y = 528, w = NOTES.SIZES.W[1], h = 1},
+                {id = "hcnb-b", src = 81, x = nx[3], y = 528, w = NOTES.SIZES.W[3], h = 1},
+                {id = "hcnb-w", src = 81, x = nx[2], y = 528, w = NOTES.SIZES.W[2], h = 1},
+                {id = "hcnb-s", src = 81, x = nx[1], y = 528, w = NOTES.SIZES.W[1], h = 1},
 
-                {id = "hcna-b", src = 24, x = nx[3], y = 384, w = NOTES.SIZES.W[3], h = 1},
-                {id = "hcna-w", src = 24, x = nx[2], y = 384, w = NOTES.SIZES.W[2], h = 1},
-                {id = "hcna-s", src = 24, x = nx[1], y = 384, w = NOTES.SIZES.W[1], h = 1},
+                {id = "hcna-b", src = 81, x = nx[3], y = 384, w = NOTES.SIZES.W[3], h = 1},
+                {id = "hcna-w", src = 81, x = nx[2], y = 384, w = NOTES.SIZES.W[2], h = 1},
+                {id = "hcna-s", src = 81, x = nx[1], y = 384, w = NOTES.SIZES.W[1], h = 1},
 
-                {id = "hcnd-b", src = 24, x = nx[3], y = 480, w = NOTES.SIZES.W[3], h = 1},
-                {id = "hcnd-w", src = 24, x = nx[2], y = 480, w = NOTES.SIZES.W[2], h = 1},
-                {id = "hcnd-s", src = 24, x = nx[1], y = 480, w = NOTES.SIZES.W[1], h = 1},
+                {id = "hcnd-b", src = 81, x = nx[3], y = 480, w = NOTES.SIZES.W[3], h = 1},
+                {id = "hcnd-w", src = 81, x = nx[2], y = 480, w = NOTES.SIZES.W[2], h = 1},
+                {id = "hcnd-s", src = 81, x = nx[1], y = 480, w = NOTES.SIZES.W[1], h = 1},
 
-                {id = "hcnr-b", src = 24, x = nx[3], y = 432, w = NOTES.SIZES.W[3], h = 1},
-                {id = "hcnr-w", src = 24, x = nx[2], y = 432, w = NOTES.SIZES.W[2], h = 1},
-                {id = "hcnr-s", src = 24, x = nx[1], y = 432, w = NOTES.SIZES.W[1], h = 1},
+                {id = "hcnr-b", src = 81, x = nx[3], y = 432, w = NOTES.SIZES.W[3], h = 1},
+                {id = "hcnr-w", src = 81, x = nx[2], y = 432, w = NOTES.SIZES.W[2], h = 1},
+                {id = "hcnr-s", src = 81, x = nx[1], y = 432, w = NOTES.SIZES.W[1], h = 1},
 
-                {id = "mine-b", src = 24, x = nx[3], y = 48, w = NOTES.SIZES.W[3], h = NOTES.SIZES.H},
-                {id = "mine-w", src = 24, x = nx[2], y = 48, w = NOTES.SIZES.W[2], h = NOTES.SIZES.H},
-                {id = "mine-s", src = 24, x = nx[1], y = 48, w = NOTES.SIZES.W[1], h = NOTES.SIZES.H},    
+                {id = "mine-b", src = 81, x = nx[3], y = 48, w = NOTES.SIZES.W[3], h = NOTES.SIZES.H},
+                {id = "mine-w", src = 81, x = nx[2], y = 48, w = NOTES.SIZES.W[2], h = NOTES.SIZES.H},
+                {id = "mine-s", src = 81, x = nx[1], y = 48, w = NOTES.SIZES.W[1], h = NOTES.SIZES.H},    
             }
         }
         mergeSkin(skin, skin2)
     elseif getNoteType() == 0 then
         local skin2 = {
             image = {
-                {id = "note-b", src = 1, x = 127, y = 5, w = 21, h = 12},
-                {id = "note-w", src = 1, x = 99, y = 5, w = 27, h = 12},
-                {id = "note-s", src = 1, x = 50, y = 5, w = 46, h = 12},
+                {id = "note-b", src = 82, x = 127, y = 5, w = 21, h = 12},
+                {id = "note-w", src = 82, x = 99, y = 5, w = 27, h = 12},
+                {id = "note-s", src = 82, x = 50, y = 5, w = 46, h = 12},
 
-                {id = "lns-b", src = 1, x = 127, y = 57, w = 21, h = 13},
-                {id = "lns-w", src = 1, x = 99, y = 57, w = 27, h = 13},
-                {id = "lns-s", src = 1, x = 50, y = 57, w = 46, h = 12},
+                {id = "lns-b", src = 82, x = 127, y = 57, w = 21, h = 13},
+                {id = "lns-w", src = 82, x = 99, y = 57, w = 27, h = 13},
+                {id = "lns-s", src = 82, x = 50, y = 57, w = 46, h = 12},
 
-                {id = "lne-b", src = 1, x = 127, y = 43, w = 21, h = 13},
-                {id = "lne-w", src = 1, x = 99, y = 43, w = 27, h = 13},
-                {id = "lne-s", src = 1, x = 50, y = 43, w = 46, h = 12},
+                {id = "lne-b", src = 82, x = 127, y = 43, w = 21, h = 13},
+                {id = "lne-w", src = 82, x = 99, y = 43, w = 27, h = 13},
+                {id = "lne-s", src = 82, x = 50, y = 43, w = 46, h = 12},
 
-                {id = "lnb-b", src = 1, x = 127, y = 80, w = 21, h = 1},
-                {id = "lnb-w", src = 1, x = 99, y = 80, w = 27, h = 1},
-                {id = "lnb-s", src = 1, x = 50, y = 80, w = 46, h = 1},
+                {id = "lnb-b", src = 82, x = 127, y = 80, w = 21, h = 1},
+                {id = "lnb-w", src = 82, x = 99, y = 80, w = 27, h = 1},
+                {id = "lnb-s", src = 82, x = 50, y = 80, w = 46, h = 1},
 
-                {id = "lna-b", src = 1, x = 127, y = 76, w = 21, h = 1},
-                {id = "lna-w", src = 1, x = 99, y = 76, w = 27, h = 1},
-                {id = "lna-s", src = 1, x = 50, y = 76, w = 46, h = 1},
+                {id = "lna-b", src = 82, x = 127, y = 76, w = 21, h = 1},
+                {id = "lna-w", src = 82, x = 99, y = 76, w = 27, h = 1},
+                {id = "lna-s", src = 82, x = 50, y = 76, w = 46, h = 1},
 
-                {id = "hcns-b", src = 1, x = 127, y = 108, w = 21, h = 13},
-                {id = "hcns-w", src = 1, x = 99, y = 108, w = 27, h = 13},
-                {id = "hcns-s", src = 1, x = 50, y = 108, w = 46, h = 12},
+                {id = "hcns-b", src = 82, x = 127, y = 108, w = 21, h = 13},
+                {id = "hcns-w", src = 82, x = 99, y = 108, w = 27, h = 13},
+                {id = "hcns-s", src = 82, x = 50, y = 108, w = 46, h = 12},
 
-                {id = "hcne-b", src = 1, x = 127, y = 94, w = 21, h = 13},
-                {id = "hcne-w", src = 1, x = 99, y = 94, w = 27, h = 13},
-                {id = "hcne-s", src = 1, x = 50, y = 94, w = 46, h = 12},
+                {id = "hcne-b", src = 82, x = 127, y = 94, w = 21, h = 13},
+                {id = "hcne-w", src = 82, x = 99, y = 94, w = 27, h = 13},
+                {id = "hcne-s", src = 82, x = 50, y = 94, w = 46, h = 12},
 
-                {id = "hcnb-b", src = 1, x = 127, y = 131, w = 21, h = 1},
-                {id = "hcnb-w", src = 1, x = 99, y = 131, w = 27, h = 1},
-                {id = "hcnb-s", src = 1, x = 50, y = 131, w = 46, h = 1},
+                {id = "hcnb-b", src = 82, x = 127, y = 131, w = 21, h = 1},
+                {id = "hcnb-w", src = 82, x = 99, y = 131, w = 27, h = 1},
+                {id = "hcnb-s", src = 82, x = 50, y = 131, w = 46, h = 1},
 
-                {id = "hcna-b", src = 1, x = 127, y = 127, w = 21, h = 1},
-                {id = "hcna-w", src = 1, x = 99, y = 127, w = 27, h = 1},
-                {id = "hcna-s", src = 1, x = 50, y = 127, w = 46, h = 1},
+                {id = "hcna-b", src = 82, x = 127, y = 127, w = 21, h = 1},
+                {id = "hcna-w", src = 82, x = 99, y = 127, w = 27, h = 1},
+                {id = "hcna-s", src = 82, x = 50, y = 127, w = 46, h = 1},
 
-                {id = "hcnd-b", src = 1, x = 127, y = 128, w = 21, h = 1},
-                {id = "hcnd-w", src = 1, x = 99, y = 128, w = 27, h = 1},
-                {id = "hcnd-s", src = 1, x = 50, y = 128, w = 46, h = 1},
+                {id = "hcnd-b", src = 82, x = 127, y = 128, w = 21, h = 1},
+                {id = "hcnd-w", src = 82, x = 99, y = 128, w = 27, h = 1},
+                {id = "hcnd-s", src = 82, x = 50, y = 128, w = 46, h = 1},
 
-                {id = "hcnr-b", src = 1, x = 127, y = 129, w = 21, h = 1},
-                {id = "hcnr-w", src = 1, x = 99, y = 129, w = 27, h = 1},
-                {id = "hcnr-s", src = 1, x = 50, y = 129, w = 46, h = 1},
+                {id = "hcnr-b", src = 82, x = 127, y = 129, w = 21, h = 1},
+                {id = "hcnr-w", src = 82, x = 99, y = 129, w = 27, h = 1},
+                {id = "hcnr-s", src = 82, x = 50, y = 129, w = 46, h = 1},
 
-                {id = "mine-b", src = 1, x = 127, y = 23, w = 21, h = 8},
-                {id = "mine-w", src = 1, x = 99, y = 23, w = 27, h = 8},
-                {id = "mine-s", src = 1, x = 50, y = 23, w = 46, h = 8},
+                {id = "mine-b", src = 82, x = 127, y = 23, w = 21, h = 8},
+                {id = "mine-w", src = 82, x = 99, y = 23, w = 27, h = 8},
+                {id = "mine-s", src = 82, x = 50, y = 23, w = 46, h = 8},
             }
         }
         mergeSkin(skin, skin2)
@@ -407,17 +426,77 @@ notes.functions.dst = function ()
 
     -- レーンの左右
     do
-        local r, g, b = getSimpleLineColor()
-        dst[#dst+1] = {
-            id = "laneEdge", dst = {
-                {x = laneX - LANES.EDGE.W, y = 0, w = LANES.EDGE.W, h = LANES.EDGE.H, r = r, g = g, b = b}
+        if false then
+            -- 通常時
+            -- 上
+            dst[#dst+1] = {
+                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                    {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                    {time = 8000, y = LANES.SIDE.H},
+                }
             }
-        }
-        dst[#dst+1] = {
-            id = "laneEdge", dst = {
-                {x = laneX + LANES.AREA.W + LANES.EDGE.W, y = 0, w = -LANES.EDGE.W, h = LANES.EDGE.H, r = r, g = g, b = b}
+            dst[#dst+1] = {
+                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                    {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                    {time = 8000, y = LANES.SIDE.H},
+                }
             }
-        }
+            -- 下
+            dst[#dst+1] = {
+                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                    {time = 0, x = laneX, y = -LANES.SIDE.H, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                    {time = 8000, y = 0},
+                }
+            }
+            dst[#dst+1] = {
+                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                    {time = 0, x = laneX + LANES.AREA.W, y = -LANES.SIDE.H, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                    {time = 8000, y = 0},
+                }
+            }
+        else
+            -- 反転時
+            -- 上
+            dst[#dst+1] = {
+                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                    {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                    {time = 8000 * 2, y = LANES.SIDE.H * 2},
+                }
+            }
+            dst[#dst+1] = {
+                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                    {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                    {time = 8000 * 2, y = LANES.SIDE.H * 2},
+                }
+            }
+            dst[#dst+1] = {
+                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                    {time = 0, x = laneX, y = -9999, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                    {time = 8000, y = -LANES.SIDE.H},
+                    {time = 8000 * 2, y = 0},
+                }
+            }
+            dst[#dst+1] = {
+                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                    {time = 0, x = laneX + LANES.AREA.W, y = -9999, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                    {time = 8000, y = -LANES.SIDE.H},
+                    {time = 8000 * 2, y = 0},
+                }
+            }
+            -- 下
+            dst[#dst+1] = {
+                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                    {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = -LANES.SIDE.H},
+                    {time = 8000 * 2, y = LANES.SIDE.H * 2},
+                }
+            }
+            dst[#dst+1] = {
+                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                    {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = -LANES.SIDE.H},
+                    {time = 8000 * 2, y = LANES.SIDE.H * 2},
+                }
+            }
+        end
     end
 
     -- 青レーンの背景

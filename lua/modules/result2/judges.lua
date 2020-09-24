@@ -71,9 +71,9 @@ local JUDGES = {
             X = function (self, arrayLabel, isSmall)
                 local cx = self.AREA[arrayLabel].X(self) + self.AREA.W / 2
                 if isSmall then
-                    return cx - self.NUM.DIGIT * (self.NUM.SMALL.W + self.NUM.SMALL.SPACE) / 2 / 2 + 2
+                    return cx - self.NUM.DIGIT * (self.NUM.SMALL.W + self.NUM.SMALL.SPACE) / 2 / 2 - 5
                 else
-                    return cx - self.NUM.DIGIT * (self.NUM.LARGE.W + self.NUM.LARGE.SPACE) / 2 / 2 + 2
+                    return cx - self.NUM.DIGIT * (self.NUM.LARGE.W + self.NUM.LARGE.SPACE) / 2 / 2 - 5
                 end
             end,
             Y = function (self, arrayLabel, isSmall)
@@ -143,7 +143,7 @@ judges.functions.load = function ()
             -- missの分の画像
             if i == #JUDGES.IDS then
                 vals[#vals+1] = {
-                    id = "judge" .. JUDGES.IDS[i] .. "Num", src = 150 + (i - 1), x = 0, y = 0, w = size.W * 10, h = size.H, divx = 10, align = 2, digit = 5, space = size.SPACE, ref = 420
+                    id = "judgeEPoorNum", src = 150 + (i - 1), x = 0, y = 0, w = size.W * 10, h = size.H, divx = 10, align = 2, digit = 5, space = size.SPACE / 2, ref = 420
                 }
             end
         end
@@ -184,7 +184,7 @@ judges.functions.dst = function ()
             -- poorのときだけmissの分を描画
             if i == #JUDGES.IDS then
                 dst[#dst+1] = {
-                    id = "judge" .. JUDGES.IDS[i] .. "Num", filter = 1, dst = {
+                    id = "judgeEPoorNum", filter = 1, dst = {
                         {x = JUDGES.NUM.MISS.X(JUDGES, aryLabel, isSmall), y = JUDGES.NUM.MISS.Y(JUDGES, aryLabel, isSmall), w = size.W / 2, h = size.H / 2}
                     }
                 }

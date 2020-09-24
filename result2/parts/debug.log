@@ -36,3 +36,52 @@ C:\fakepath(77,9-43): warning X3571: pow(f, e) will not work for negative f, use
 [0916/001859.950:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
 [0916/001903.961:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
 [0916/001904.957:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0920/233711.287:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0921/001958.747:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0921/001959.027:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0921/002002.920:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0921/002003.750:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0921/150732.470:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0921/150732.471:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0921/150732.495:WARNING:angle_platform_impl.cc(52)] compileToBinary(230): 
+C:\fakepath(69,8-58): warning X3571: pow(f, e) will not work for negative f, use abs(f) or conditionally handle negative values if you expect them
+C:\fakepath(77,9-43): warning X3571: pow(f, e) will not work for negative f, use abs(f) or conditionally handle negative values if you expect them
+
+[0921/150735.071:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0921/150735.071:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0921/150736.949:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0921/150736.949:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0922/001002.946:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0922/141139.090:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0922/141139.878:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0922/141144.094:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0922/141144.897:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0923/000235.293:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0923/002059.890:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0923/002104.901:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0923/002217.776:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0923/081351.855:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0923/081356.879:WARNING:dns_config_service_win.cc(668)] Failed to read DnsConfig.
+[0923/131632.600:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0923/131632.600:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0923/131725.942:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0923/131725.942:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0923/131729.375:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0923/131729.375:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0923/132122.118:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0923/132122.118:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0923/132122.742:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0923/132122.742:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0923/132123.048:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0923/132123.048:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0923/132123.679:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0923/132123.679:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0923/132123.993:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0923/132123.993:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0923/132125.000:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0923/132125.000:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0923/132201.335:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0923/132201.336:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0923/132201.956:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 1612
+[0923/132201.956:ERROR:mf_helpers.cc(14)] Error in dxva_video_decode_accelerator_win.cc on line 842
+[0923/133121.427:ERROR:media_internals.cc(112)] Cannot get RenderProcessHost
