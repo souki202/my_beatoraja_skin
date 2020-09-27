@@ -17,6 +17,7 @@ CUSTOM_TIMERS = {
 	LOGGER_SAVE = 11001,
 	LOGGER_UPDATE = 12001,
 	MY_BPM_TIMER = 12100,
+	UPDATE_GAUGE_STATE = 12101,
 }
 
 function setKeys(keys)
@@ -290,6 +291,14 @@ end
 
 function getTargetRateType()
 	return getTableValue(skin_config.option, "ターゲットスコアのレート変動(ログ出力有効時)", 10110) - 10110
+end
+
+function getLaneSideAnimationTime()
+	return getOffsetValueWithDefault("レーンサイドの1ループのアニメーション時間(単位拍子 既定値8 -1でアニメーションなし)", {x = 8}).x
+end
+
+function getIsChangeLaneSideByGaugeState()
+	return getTableValue(skin_config.option, "レーンサイドの画像変化", 10116) == 10116
 end
 
 function getDifficultyValueForColor()

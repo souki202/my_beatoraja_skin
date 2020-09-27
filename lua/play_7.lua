@@ -34,7 +34,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10110まで
+    property = { -- 使用済み 10115まで
         {
             name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
         },
@@ -126,6 +126,9 @@ local header = {
             name = "判定ライン", item = {{name = "ON", op = 920}, {name = "OFF", op = 921}}, def = "ON"
         },
         {
+            name = "レーンサイドの画像変化", item = {{name = "無し", op = 10115}, {name = "ゲージ状態毎", op = 10116}}, def = "ゲージ状態毎"
+        },
+        {
             name = "キービーム--------------------------", item = {{name = "-", op = 19999}}
         },
         {
@@ -190,12 +193,18 @@ local header = {
         {name = "BGAフレーム(全画面)", path = "../play/parts/bga/frame/full/*.png", def = "blank"},
         {name = "黒帯部分BGAのマスク", path = "../play/parts/bga/mask/*.png", def = "default"},
         {name = "タイトル部分フレーム", path = "../play/parts/title/frame/*.png", def = "default"},
-        {name = "ノート画像(通常形式)", path = "../play/parts/notes/normal/*.png", def = "default"},
-        {name = "ノート画像(独自形式)", path = "../play/parts/notes/original/*.png", def = "default"},
-        {name = "レーンのシンボル(白鍵)", path = "../play/parts/lanesymbols/white/*.png", def = "dia"},
-        {name = "レーンのシンボル(青鍵)", path = "../play/parts/lanesymbols/blue/*.png", def = "dia"},
-        {name = "レーンのシンボル(ターンテーブル)", path = "../play/parts/lanesymbols/turntable/*.png", def = "circle"},
+        {name = "レーン部分全般--------------", path = "../dummy/*"},
+        {name = "ノート画像(通常形式)", path = "../play/parts/lane/notes/normal/*.png", def = "default"},
+        {name = "ノート画像(独自形式)", path = "../play/parts/lane/notes/original/*.png", def = "default"},
+        {name = "レーンのシンボル(白鍵)", path = "../play/parts/lane/lanesymbols/white/*.png", def = "dia"},
+        {name = "レーンのシンボル(青鍵)", path = "../play/parts/lane/lanesymbols/blue/*.png", def = "dia"},
+        {name = "レーンのシンボル(ターンテーブル)", path = "../play/parts/lane/lanesymbols/turntable/*.png", def = "circle"},
         {name = "レーンサイド", path = "../play/parts/lane/laneside/*.png", def = "default"},
+        {name = "レーンサイド(ゲージ状態毎 nogood)"  , path = "../play/parts/lane/laneside/state/nogood/*.png", def = "default"},
+        {name = "レーンサイド(ゲージ状態毎 nomiss)"  , path = "../play/parts/lane/laneside/state/nomiss/*.png", def = "default"},
+        {name = "レーンサイド(ゲージ状態毎 survival)", path = "../play/parts/lane/laneside/state/survival/*.png", def = "default"},
+        {name = "レーンサイド(ゲージ状態毎 clear)"   , path = "../play/parts/lane/laneside/state/clear/*.png", def = "default"},
+        {name = "レーンサイド(ゲージ状態毎 fail)"    , path = "../play/parts/lane/laneside/state/fail/*.png", def = "default"},
         {name = "レーンカバー", path = "../play/parts/lane/lanecover/*.png", def = "default"},
         {name = "リフトカバー", path = "../play/parts/lane/liftcover/*.png", def = "default"},
         {name = "判定画像", path = "../play/parts/judges/*.png", def = "default"},
@@ -220,6 +229,7 @@ local header = {
         {name = "レーンの黒背景(255で透明)", a = 0},
         {name = "グルーブゲージの通知エフェクトの大きさ差分(%)", y = 0},
         {name = "ゲージ100%時のキラキラの数(既定値20)", x = 0},
+        {name = "レーンサイドの1ループのアニメーション時間(単位拍子 既定値8 -1でアニメーションなし)", x = 0},
 
         {name = "スコアログ周り------------------", x = 0},
         {name = "スコアレートのサンプルノーツ数(既定値50)", x = 0},
@@ -320,6 +330,11 @@ local function main()
         {id = 85, path = "../play/parts/lane/lanesymbols/turntable/*.png"},
         {id = 86, path = "../play/parts/lane/lanecover/default.png"},
         {id = 87, path = "../play/parts/lane/liftcover/default.png"},
+        {id = 88, path = "../play/parts/lane/laneside/state/nogood/*.png"},
+        {id = 89, path = "../play/parts/lane/laneside/state/nomiss/*.png"},
+        {id = 90, path = "../play/parts/lane/laneside/state/survival/*.png"},
+        {id = 91, path = "../play/parts/lane/laneside/state/clear/*.png"},
+        {id = 92, path = "../play/parts/lane/laneside/state/fail/*.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 

@@ -50,7 +50,32 @@ local LANES = {
     },
     JUDGE_LINE = {
         H = 4,
+    },
+    -- レーンサイドの画像判定. 手前のidxから優先して判定
+    STATES = {
+        FUNCS = {
+            function () return main_state.judge(2) + main_state.judge(3) + main_state.judge(4) == 0 end,
+            function () return main_state.judge(2) > 0 and main_state.judge(3) + main_state.judge(4) == 0 end,
+            function () return main_state.gauge() > 0 and main_state.gauge_type() >= 3 end,
+            function () return main_state.option(1240) and main_state.gauge_type() < 3 end,
+            function () return true end,
+        },
+        ENUM = {
+            NO_GOOD = 1,
+            NO_MISS = 2,
+            SURVIVAL = 3,
+            CLEAR = 4,
+            FAIL = 5,
+        },
+        SUFFIX = {"NoGood", "NoMiss", "Survival", "Clear", "Fail"}
+    },
+    ANIMATION = {
+        SIDE_MOVE = 8000,
     }
+}
+
+local lanes = {
+    nowGaugeState = LANES.STATES.ENUM.NO_GOOD,
 }
 
 local SYMBOL = {
@@ -138,6 +163,8 @@ notes.functions.load = function ()
     local cover = require("modules.play.cover")
     local laneX = notes.functions.getAreaX()
 
+    LANES.ANIMATION.SIDE_MOVE = 1000 * getLaneSideAnimationTime()
+
     -- offsetで初期化
     local h = getTableValue(skin_config.offset, "判定線の高さ(既定値 4px)", {h = 0}).h
     if h ~= 0 then LANES.JUDGE_LINE.H = h end
@@ -145,8 +172,6 @@ notes.functions.load = function ()
     local nx = NOTES.SIZES.X
     local skin = {
         image = {
-            {id = "laneSide", src = 80, x = 0, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
-
             -- シンボル
             {id = "whiteSymbol", src = 83, x = 0, y = 0, w = -1, h = -1},
             {id = "blueSymbol", src = 84, x = 0, y = 0, w = -1, h = -1},
@@ -154,6 +179,7 @@ notes.functions.load = function ()
         },
         customTimers = {
             {
+                -- 付属のtimerは小節ごとにリセットされるので, 足し続けるタイマーを作成
                 id = CUSTOM_TIMERS.MY_BPM_TIMER, timer = function ()
                     if main_state.timer(140) > 0 then
                         -- ソフラン時に多少の誤差がでるが許容する
@@ -164,9 +190,39 @@ notes.functions.load = function ()
                     end
                     return main_state.time()
                 end
+            },
+            {
+                id = CUSTOM_TIMERS.UPDATE_GAUGE_STATE, timer = function ()
+                    for i, f in ipairs(LANES.STATES.FUNCS) do
+                        if f() then
+                            -- ゲージの状態を満たしていたら書き込んで終わり
+                            lanes.nowGaugeState = i
+                            return 1
+                        end
+                    end
+                    return 1
+                end
             }
         },
     }
+
+    local imgs = skin.image
+
+    -- レーンのサイドの画像読み込み
+    do
+        for i, suffix in ipairs(LANES.STATES.SUFFIX) do
+            if getIsChangeLaneSideByGaugeState() then
+                imgs[#imgs+1] = {
+                    id = "laneSide" .. suffix, src = 88 + (i - 1), x = 0, y = 0, w = -1, h = -1
+                }
+            else
+                imgs[#imgs+1] = {
+                    id = "laneSide" .. suffix, src = 80, x = 0, y = 0, w = -1, h = -1
+                }
+            end
+        end
+    end
+
     if getNoteType() == 1 then
         -- 独自形式
         local skin2 = {
@@ -426,76 +482,94 @@ notes.functions.dst = function ()
 
     -- レーンの左右
     do
-        if false then
-            -- 通常時
-            -- 上
-            dst[#dst+1] = {
-                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                    {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H},
-                    {time = 8000, y = LANES.SIDE.H},
+        for i, suffix in ipairs(LANES.STATES.SUFFIX) do
+            local d = function () return i == lanes.nowGaugeState end
+
+            if LANES.ANIMATION.SIDE_MOVE <= 0 then
+                -- アニメーションなし時
+                dst[#dst+1] = {
+                    id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                        {x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                    }
                 }
-            }
-            dst[#dst+1] = {
-                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                    {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
-                    {time = 8000, y = LANES.SIDE.H},
+                dst[#dst+1] = {
+                    id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                        {x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                    }
                 }
-            }
-            -- 下
-            dst[#dst+1] = {
-                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                    {time = 0, x = laneX, y = -LANES.SIDE.H, w = -LANES.SIDE.W, h = LANES.SIDE.H},
-                    {time = 8000, y = 0},
-                }
-            }
-            dst[#dst+1] = {
-                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                    {time = 0, x = laneX + LANES.AREA.W, y = -LANES.SIDE.H, w = LANES.SIDE.W, h = LANES.SIDE.H},
-                    {time = 8000, y = 0},
-                }
-            }
-        else
-            -- 反転時
-            -- 上
-            dst[#dst+1] = {
-                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                    {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H},
-                    {time = 8000 * 2, y = LANES.SIDE.H * 2},
-                }
-            }
-            dst[#dst+1] = {
-                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                    {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
-                    {time = 8000 * 2, y = LANES.SIDE.H * 2},
-                }
-            }
-            dst[#dst+1] = {
-                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                    {time = 0, x = laneX, y = -9999, w = -LANES.SIDE.W, h = LANES.SIDE.H},
-                    {time = 8000, y = -LANES.SIDE.H},
-                    {time = 8000 * 2, y = 0},
-                }
-            }
-            dst[#dst+1] = {
-                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                    {time = 0, x = laneX + LANES.AREA.W, y = -9999, w = LANES.SIDE.W, h = LANES.SIDE.H},
-                    {time = 8000, y = -LANES.SIDE.H},
-                    {time = 8000 * 2, y = 0},
-                }
-            }
-            -- 下
-            dst[#dst+1] = {
-                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                    {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = -LANES.SIDE.H},
-                    {time = 8000 * 2, y = LANES.SIDE.H * 2},
-                }
-            }
-            dst[#dst+1] = {
-                id = "laneSide", timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                    {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = -LANES.SIDE.H},
-                    {time = 8000 * 2, y = LANES.SIDE.H * 2},
-                }
-            }
+            else
+                if false then
+                    -- 通常時
+                    -- 上
+                    dst[#dst+1] = {
+                        id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                            {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE, y = LANES.SIDE.H},
+                        }
+                    }
+                    dst[#dst+1] = {
+                        id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                            {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE, y = LANES.SIDE.H},
+                        }
+                    }
+                    -- 下
+                    dst[#dst+1] = {
+                        id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                            {time = 0, x = laneX, y = -LANES.SIDE.H, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE, y = 0},
+                        }
+                    }
+                    dst[#dst+1] = {
+                        id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                            {time = 0, x = laneX + LANES.AREA.W, y = -LANES.SIDE.H, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE, y = 0},
+                        }
+                    }
+                else
+                    -- 反転時
+                    -- 上
+                    dst[#dst+1] = {
+                        id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                            {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE * 2, y = LANES.SIDE.H * 2},
+                        }
+                    }
+                    dst[#dst+1] = {
+                        id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                            {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE * 2, y = LANES.SIDE.H * 2},
+                        }
+                    }
+                    dst[#dst+1] = {
+                        id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                            {time = 0, x = laneX, y = -9999, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE, y = -LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE * 2, y = 0},
+                        }
+                    }
+                    dst[#dst+1] = {
+                        id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                            {time = 0, x = laneX + LANES.AREA.W, y = -9999, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE, y = -LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE * 2, y = 0},
+                        }
+                    }
+                    -- 下
+                    dst[#dst+1] = {
+                        id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                            {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = -LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE * 2, y = LANES.SIDE.H * 2},
+                        }
+                    }
+                    dst[#dst+1] = {
+                        id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
+                            {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = -LANES.SIDE.H},
+                            {time = LANES.ANIMATION.SIDE_MOVE * 2, y = LANES.SIDE.H * 2},
+                        }
+                    }
+                end
+            end
         end
     end
 
