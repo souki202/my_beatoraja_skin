@@ -90,6 +90,12 @@ local function getJudgeLineColor()
 	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 
+local function getLaneSideColor()
+	local dif = getDifficultyValueForColor()
+	local colors = {{255, 255, 255}, {137, 204, 137}, {137, 204, 204}, {204, 164, 108}, {204, 104, 104}, {204, 102, 153}}
+	return colors[dif][1], colors[dif][2], colors[dif][3]
+end
+
 local function isLeftScratch()
     local b = true
     if isMirrorTable() then
@@ -482,6 +488,10 @@ notes.functions.dst = function ()
 
     -- レーンの左右
     do
+        local r, g, b = getLaneSideColor()
+        if not getIsLaneSideColorToMatchDifficulyColor() then
+            r, g, b = 255, 255, 255
+        end
         for i, suffix in ipairs(LANES.STATES.SUFFIX) do
             local d = function () return i == lanes.nowGaugeState end
 
@@ -489,12 +499,12 @@ notes.functions.dst = function ()
                 -- アニメーションなし時
                 dst[#dst+1] = {
                     id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                        {x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                        {x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H, r = r, g = g, b = b},
                     }
                 }
                 dst[#dst+1] = {
                     id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                        {x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                        {x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H, r = r, g = g, b = b},
                     }
                 }
             else
@@ -503,26 +513,26 @@ notes.functions.dst = function ()
                     -- 上
                     dst[#dst+1] = {
                         id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                            {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H, r = r, g = g, b = b},
                             {time = LANES.ANIMATION.SIDE_MOVE, y = LANES.SIDE.H},
                         }
                     }
                     dst[#dst+1] = {
                         id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                            {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H, r = r, g = g, b = b},
                             {time = LANES.ANIMATION.SIDE_MOVE, y = LANES.SIDE.H},
                         }
                     }
                     -- 下
                     dst[#dst+1] = {
                         id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                            {time = 0, x = laneX, y = -LANES.SIDE.H, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = 0, x = laneX, y = -LANES.SIDE.H, w = -LANES.SIDE.W, h = LANES.SIDE.H, r = r, g = g, b = b},
                             {time = LANES.ANIMATION.SIDE_MOVE, y = 0},
                         }
                     }
                     dst[#dst+1] = {
                         id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                            {time = 0, x = laneX + LANES.AREA.W, y = -LANES.SIDE.H, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = 0, x = laneX + LANES.AREA.W, y = -LANES.SIDE.H, w = LANES.SIDE.W, h = LANES.SIDE.H, r = r, g = g, b = b},
                             {time = LANES.ANIMATION.SIDE_MOVE, y = 0},
                         }
                     }
@@ -531,26 +541,26 @@ notes.functions.dst = function ()
                     -- 上
                     dst[#dst+1] = {
                         id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                            {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = LANES.SIDE.H, r = r, g = g, b = b},
                             {time = LANES.ANIMATION.SIDE_MOVE * 2, y = LANES.SIDE.H * 2},
                         }
                     }
                     dst[#dst+1] = {
                         id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                            {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = LANES.SIDE.H, r = r, g = g, b = b},
                             {time = LANES.ANIMATION.SIDE_MOVE * 2, y = LANES.SIDE.H * 2},
                         }
                     }
                     dst[#dst+1] = {
                         id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                            {time = 0, x = laneX, y = -9999, w = -LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = 0, x = laneX, y = -9999, w = -LANES.SIDE.W, h = LANES.SIDE.H, r = r, g = g, b = b},
                             {time = LANES.ANIMATION.SIDE_MOVE, y = -LANES.SIDE.H},
                             {time = LANES.ANIMATION.SIDE_MOVE * 2, y = 0},
                         }
                     }
                     dst[#dst+1] = {
                         id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                            {time = 0, x = laneX + LANES.AREA.W, y = -9999, w = LANES.SIDE.W, h = LANES.SIDE.H},
+                            {time = 0, x = laneX + LANES.AREA.W, y = -9999, w = LANES.SIDE.W, h = LANES.SIDE.H, r = r, g = g, b = b},
                             {time = LANES.ANIMATION.SIDE_MOVE, y = -LANES.SIDE.H},
                             {time = LANES.ANIMATION.SIDE_MOVE * 2, y = 0},
                         }
@@ -558,13 +568,13 @@ notes.functions.dst = function ()
                     -- 下
                     dst[#dst+1] = {
                         id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                            {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = -LANES.SIDE.H},
+                            {time = 0, x = laneX, y = 0, w = -LANES.SIDE.W, h = -LANES.SIDE.H, r = r, g = g, b = b},
                             {time = LANES.ANIMATION.SIDE_MOVE * 2, y = LANES.SIDE.H * 2},
                         }
                     }
                     dst[#dst+1] = {
                         id = "laneSide" .. suffix, draw = d, timer = CUSTOM_TIMERS.MY_BPM_TIMER, dst = {
-                            {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = -LANES.SIDE.H},
+                            {time = 0, x = laneX + LANES.AREA.W, y = 0, w = LANES.SIDE.W, h = -LANES.SIDE.H, r = r, g = g, b = b},
                             {time = LANES.ANIMATION.SIDE_MOVE * 2, y = LANES.SIDE.H * 2},
                         }
                     }

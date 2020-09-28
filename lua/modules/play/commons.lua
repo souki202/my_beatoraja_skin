@@ -301,6 +301,10 @@ function getIsChangeLaneSideByGaugeState()
 	return getTableValue(skin_config.option, "レーンサイドの画像変化", 10116) == 10116
 end
 
+function getIsLaneSideColorToMatchDifficulyColor()
+	return getTableValue(skin_config.option, "レーンサイドを難易度毎の色変化に合わせる", 10121) == 10120
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)

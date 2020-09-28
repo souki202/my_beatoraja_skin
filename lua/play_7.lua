@@ -34,7 +34,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10115まで
+    property = { -- 使用済み 10120まで
         {
             name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
         },
@@ -127,6 +127,9 @@ local header = {
         },
         {
             name = "レーンサイドの画像変化", item = {{name = "無し", op = 10115}, {name = "ゲージ状態毎", op = 10116}}, def = "ゲージ状態毎"
+        },
+        {
+            name = "レーンサイドを難易度毎の色変化に合わせる", item = {{name = "ON", op = 10120}, {name = "OFF", op = 10121}}, def = "OFF"
         },
         {
             name = "キービーム--------------------------", item = {{name = "-", op = 19999}}
