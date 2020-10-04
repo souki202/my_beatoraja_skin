@@ -49,7 +49,10 @@ local LANES = {
         A = 92,
     },
     JUDGE_LINE = {
-        H = 4,
+        W = 436,
+        H = 64,
+        X = function (self) return self.AREA.X(self) - 2 end,
+        Y = function (self) return self.AREA.Y - 32 end,
     },
     -- レーンサイドの画像判定. 手前のidxから優先して判定
     STATES = {
@@ -78,15 +81,15 @@ local lanes = {
     nowGaugeState = LANES.STATES.ENUM.NO_GOOD,
 }
 
-local SYMBOL = {
-    WHITE = 52,
-    BLUE = 42,
-    TURNTABLE = 91,
-}
+-- local SYMBOL = {
+--     WHITE = 52,
+--     BLUE = 42,
+--     TURNTABLE = 91,
+-- }
 
 local function getJudgeLineColor()
 	local dif = getDifficultyValueForColor()
-	local colors = {{128, 128, 128}, {0, 255, 0}, {0, 128, 255}, {255, 128, 0}, {255, 0, 0}, {255, 0, 128}}
+	local colors = {{255, 255, 255}, {137, 204, 137}, {137, 204, 204}, {204, 164, 108}, {204, 104, 104}, {204, 102, 153}}
 	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 
@@ -124,7 +127,7 @@ notes.functions.getAreaY = function ()
 end
 
 notes.functions.getInnerAreaY = function ()
-    return notes.functions.getAreaY() + LANES.JUDGE_LINE.H
+    return notes.functions.getAreaY()
 end
 
 notes.functions.getOurterAreaY = function ()
@@ -168,20 +171,20 @@ notes.functions.load = function ()
     local keyBeam = require("modules.play.key_beam")
     local cover = require("modules.play.cover")
     local laneX = notes.functions.getAreaX()
+    if is1P() then
+        LANES.AREA.X = LANES.AREA.X_1
+    else
+        LANES.AREA.X = LANES.AREA.X_2
+    end
 
     LANES.ANIMATION.SIDE_MOVE = 1000 * getLaneSideAnimationTime()
-
-    -- offsetで初期化
-    local h = getTableValue(skin_config.offset, "判定線の高さ(既定値 4px)", {h = 0}).h
-    if h ~= 0 then LANES.JUDGE_LINE.H = h end
 
     local nx = NOTES.SIZES.X
     local skin = {
         image = {
             -- シンボル
-            {id = "whiteSymbol", src = 83, x = 0, y = 0, w = -1, h = -1},
-            {id = "blueSymbol", src = 84, x = 0, y = 0, w = -1, h = -1},
-            {id = "turntableSymbol", src = 85, x = 0, y = 0, w = -1, h = -1},
+            {id = "judgeLineLayer1", src = 83, x = 0, y = 0, w = -1, h = -1},
+            {id = "judgeLineLayer2", src = 84, x = 0, y = 0, w = -1, h = -1},
         },
         customTimers = {
             {
@@ -475,6 +478,7 @@ end
 notes.functions.dst = function ()
     local keyBeam = require("modules.play.key_beam")
     local cover = require("modules.play.cover")
+    local grow = require("modules.play.grow")
     local laneX = notes.functions.getAreaX()
     local skin = {destination = {}}
     local dst = skin.destination
@@ -596,7 +600,6 @@ notes.functions.dst = function ()
 
     mergeSkin(skin, keyBeam.dst())
 
-
     -- レーンの区切り線
     if isDrawSeparator() then
         for i = 1, commons.keys+1 do
@@ -610,49 +613,38 @@ notes.functions.dst = function ()
         end
     end
 
-    -- アンダーライン
-    do
-        local r, g, b = getSimpleLineColor()
-        dst[#dst+1] = {
-            id = "white", dst = {
-                {x = laneX, y = notes.functions.getAreaY() - 2, w = LANES.AREA.W, h = 2, r = r, g = g, b = b}
-            }
-        }
-    end
-
     dst[#dst+1] = {id = "notes"}
     mergeSkin(skin, cover.dst())
+    mergeSkin(skin, grow.dst())
 
     -- 判定線
     if isDrawJudgeLine() then
         local r, g, b = getJudgeLineColor()
+        if not getIsJudgeLineLayer1ColorToMatchDifficulyColor() then
+            r, g, b = 255, 255, 255
+        end
+        local r2, g2, b2 = getJudgeLineColor()
+        if not getIsJudgeLineLayer2ColorToMatchDifficulyColor() then
+            r2, g2, b2 = 255, 255, 255
+        end
+        local x = LANES.JUDGE_LINE.X(LANES)
+        local y = LANES.JUDGE_LINE.Y(LANES)
+        local w = LANES.JUDGE_LINE.W
+        local h = LANES.JUDGE_LINE.H
+        if not isLeftScratch() then
+            x = x + w
+            w = -w
+        end
         dst[#dst+1] = {
-            id = "white", offsets = {3}, dst = {
-                {x = laneX, y = notes.functions.getAreaY(), w = LANES.AREA.W, h = LANES.JUDGE_LINE.H, r = r, g = g, b = b}
+            id = "judgeLineLayer1", offsets = {3}, dst = {
+                {x = x, y = y, w = w, h = h, r = r, g = g, b = b}
             }
         }
-    end
-
-    -- レーンのシンボル
-    if isDrawLaneSymbol() then
-        local r, g, b = getSimpleLineColor()
-        for i = 1, commons.keys+1 do
-            local id = "turntable"
-            local s = SYMBOL.TURNTABLE
-            if i ~= commons.keys + 1 and i % 2 == 0 then
-                id = "blue"
-                s = SYMBOL.BLUE
-            end
-            if i ~= commons.keys + 1 and i % 2 == 1 then
-                id = "white"
-                s = SYMBOL.WHITE
-            end
-            dst[#dst+1] = {
-                id = id .. "Symbol", dst = {
-                    {x = NOTES.X[i], y = notes.functions.getAreaY() - s / 2, w = s, h = s, r = r, g = g, b = b}
-                }
+        dst[#dst+1] = {
+            id = "judgeLineLayer2", offsets = {3}, dst = {
+                {x = x, y = y, w = w, h = h, r = r2, g = g2, b = b2}
             }
-        end
+        }
     end
 
     return skin

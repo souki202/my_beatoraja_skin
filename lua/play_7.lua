@@ -34,7 +34,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10120まで
+    property = { -- 使用済み 10155まで
         {
             name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
         },
@@ -104,9 +104,9 @@ local header = {
         {
             name = "グルーヴゲージの通知エフェクトの基準", item = {{name = "5%毎", op = 10065}, {name = "10%毎", op = 10066}, {name = "20%毎", op = 10067}, {name = "30%毎", op = 10068}, {name = "無し", op = 10069}}, def = "10%毎"
         },
-        {
-            name = "グルーヴゲージ位置", item = {{name = "レーン下", op = 10100}, {name = "レーン左右", op = 10101}}, def = "レーン下"
-        },
+        -- {
+        --     name = "グルーヴゲージ位置", item = {{name = "レーン下", op = 10100}, {name = "レーン左右", op = 10101}}, def = "レーン下"
+        -- },
         {
             name = "ゲージ100%時のキラキラ", item = {{name = "ON", op = 10070}, {name = "OFF", op = 10071}}, def = "ON"
         },
@@ -119,8 +119,11 @@ local header = {
         {
             name = "レーン区切り線", item = {{name = "ON", op = 915}, {name = "OFF", op = 916}}, def = "ON"
         },
+        -- {
+        --     name = "レーンのシンボル", item = {{name = "ON", op = 965}, {name = "OFF", op = 966}}, def = "ON"
+        -- },
         {
-            name = "レーンのシンボル", item = {{name = "ON", op = 965}, {name = "OFF", op = 966}}, def = "ON"
+            name = "グロー表示", item = {{name = "ON", op = 10135}, {name = "OFF", op = 10136}}, def = "OFF"
         },
         {
             name = "判定ライン", item = {{name = "ON", op = 920}, {name = "OFF", op = 921}}, def = "ON"
@@ -130,6 +133,12 @@ local header = {
         },
         {
             name = "レーンサイドを難易度毎の色変化に合わせる", item = {{name = "ON", op = 10120}, {name = "OFF", op = 10121}}, def = "OFF"
+        },
+        {
+            name = "判定ライン(Layer1)を難易度毎の色変化に合わせる", item = {{name = "ON", op = 10125}, {name = "OFF", op = 10126}}, def = "OFF"
+        },
+        {
+            name = "判定ライン(Layer2)を難易度毎の色変化に合わせる", item = {{name = "ON", op = 10130}, {name = "OFF", op = 10131}}, def = "OFF"
         },
         {
             name = "キービーム--------------------------", item = {{name = "-", op = 19999}}
@@ -163,6 +172,18 @@ local header = {
         },
         {
             name = "ボムのparticle2のアニメーション", item = {{name = "フロー", op = 10015}, {name = "拡散", op = 10016}, {name = "静止", op = 10017}}, def = "フロー"
+        },
+        {
+            name = "ボムのparticle1のアルファ変化", item = {{name = "ease in", op = 10140}, {name = "linear", op = 10141}, {name = "ease out", op = 10142}}, def = "ease in"
+        },
+        {
+            name = "ボムのparticle2のアルファ変化", item = {{name = "ease in", op = 10145}, {name = "linear", op = 10146}, {name = "ease out", op = 10147}}, def = "ease in"
+        },
+        {
+            name = "ボムのparticle1の座標変化", item = {{name = "ease in", op = 10150}, {name = "linear", op = 10151}, {name = "ease out", op = 10152}}, def = "ease out"
+        },
+        {
+            name = "ボムのparticle2の座標変化", item = {{name = "ease in", op = 10155}, {name = "linear", op = 10156}, {name = "ease out", op = 10157}}, def = "ease out"
         },
         {
             name = "ボムのanimation1と2の黒背景透過", item = {{name = "ON", op = 10020}, {name = "OFF", op = 10021}}, def = "ON"
@@ -199,15 +220,14 @@ local header = {
         {name = "レーン部分全般--------------", path = "../dummy/*"},
         {name = "ノート画像(通常形式)", path = "../play/parts/lane/notes/normal/*.png", def = "default"},
         {name = "ノート画像(独自形式)", path = "../play/parts/lane/notes/original/*.png", def = "default"},
-        {name = "レーンのシンボル(白鍵)", path = "../play/parts/lane/lanesymbols/white/*.png", def = "dia"},
-        {name = "レーンのシンボル(青鍵)", path = "../play/parts/lane/lanesymbols/blue/*.png", def = "dia"},
-        {name = "レーンのシンボル(ターンテーブル)", path = "../play/parts/lane/lanesymbols/turntable/*.png", def = "circle"},
         {name = "レーンサイド", path = "../play/parts/lane/laneside/*.png", def = "default"},
         {name = "レーンサイド(ゲージ状態毎 nogood)"  , path = "../play/parts/lane/laneside/state/nogood/*.png", def = "default"},
         {name = "レーンサイド(ゲージ状態毎 nomiss)"  , path = "../play/parts/lane/laneside/state/nomiss/*.png", def = "default"},
         {name = "レーンサイド(ゲージ状態毎 survival)", path = "../play/parts/lane/laneside/state/survival/*.png", def = "default"},
         {name = "レーンサイド(ゲージ状態毎 clear)"   , path = "../play/parts/lane/laneside/state/clear/*.png", def = "default"},
         {name = "レーンサイド(ゲージ状態毎 fail)"    , path = "../play/parts/lane/laneside/state/fail/*.png", def = "default"},
+        {name = "判定ライン(Layer1)", path = "../play/parts/lane/judgeline/layer1/*.png", def = "default"},
+        {name = "判定ライン(Layer2)", path = "../play/parts/lane/judgeline/layer2/*.png", def = "default"},
         {name = "レーンカバー", path = "../play/parts/lane/lanecover/*.png", def = "default"},
         {name = "リフトカバー", path = "../play/parts/lane/liftcover/*.png", def = "default"},
         {name = "判定画像", path = "../play/parts/judges/*.png", def = "default"},
@@ -228,7 +248,7 @@ local header = {
     },
     offset = {
         {name = "各種オフセット(0で既定値)---------", x = 0},
-        {name = "判定線の高さ(既定値 4px)", h = 0},
+        -- {name = "判定線の高さ(既定値 4px)", h = 0},
         {name = "レーンの黒背景(255で透明)", a = 0},
         {name = "グルーブゲージの通知エフェクトの大きさ差分(%)", y = 0},
         {name = "ゲージ100%時のキラキラの数(既定値20)", x = 0},
@@ -328,9 +348,8 @@ local function main()
         {id = 80, path = "../play/parts/lane/laneside/*.png"},
         {id = 81, path = "../play/parts/lane/notes/original/*.png"},
         {id = 82, path = "../play/parts/lane/notes/normal/*.png"},
-        {id = 83, path = "../play/parts/lane/lanesymbols/white/*.png"},
-        {id = 84, path = "../play/parts/lane/lanesymbols/blue/*.png"},
-        {id = 85, path = "../play/parts/lane/lanesymbols/turntable/*.png"},
+        {id = 83, path = "../play/parts/lane/judgeline/layer1/*.png"},
+        {id = 84, path = "../play/parts/lane/judgeline/layer2/*.png"},
         {id = 86, path = "../play/parts/lane/lanecover/default.png"},
         {id = 87, path = "../play/parts/lane/liftcover/default.png"},
         {id = 88, path = "../play/parts/lane/laneside/state/nogood/*.png"},
@@ -365,10 +384,10 @@ local function main()
     mergeSkin(skin, logger.load())
     mergeSkin(skin, bga.load())
     mergeSkin(skin, title.load())
+    mergeSkin(skin, grow.load())
     mergeSkin(skin, lanes.load())
     mergeSkin(skin, progress.load())
     mergeSkin(skin, sideInfo.load())
-    mergeSkin(skin, grow.load())
     mergeSkin(skin, judges.load())
     mergeSkin(skin, life.load())
     mergeSkin(skin, scoreGraph.load())
@@ -394,8 +413,7 @@ local function main()
     mergeSkin(skin, progress.dst())
     mergeSkin(skin, sideInfo.dst())
     mergeSkin(skin, hispeed.dst())
-    mergeSkin(skin, lanes.dst()) -- キービームとリフト, レーンカバーはここの中でmergeSkin
-    mergeSkin(skin, grow.dst())
+    mergeSkin(skin, lanes.dst()) -- キービーム, リフト, レーンカバー, グローはここの中でmergeSkin
     mergeSkin(skin, bomb.dst())
     mergeSkin(skin, judges.dst())
     mergeSkin(skin, life.dst())

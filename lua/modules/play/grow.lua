@@ -29,15 +29,18 @@ grow.functions.load = function ()
 end
 
 grow.functions.dst = function ()
-    local r, g, b = getGrowColor()
-    return {
-        destination = {
-            {id = "grow", offset = 3, timer = 140, dst = {
-                {time = 0, x = GROW.X(), y = GROW.Y(), w = GROW.W(), h = GROW.H, r = r, g = g, b = b, a = 255},
-                {time = 1000, a = 64}
-            }}
+    if getIsDrawGrow() then
+        local r, g, b = getGrowColor()
+        return {
+            destination = {
+                {id = "grow", offset = 3, timer = 140, dst = {
+                    {time = 0, x = GROW.X(), y = GROW.Y(), w = GROW.W(), h = GROW.H, r = r, g = g, b = b, a = 255},
+                    {time = 1000, a = 64}
+                }}
+            }
         }
-    }
+    end
+    return {}
 end
 
 return grow.functions

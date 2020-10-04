@@ -463,7 +463,7 @@ local function main()
 			-- x軸周りに飛ばす方向の基本値を計算
 			local baseAngle = ((i % particle.LOOP_TIME) / particle.LOOP_TIME) * 2
 			-- 時刻iでの光球の位置を計算
-			local shineX = easeOut(i, shineStartX, shineToX, d) + CURTAIN.SHINE.W / 2
+			local shineX = easing.easeOut(i, shineStartX, shineToX, d) + CURTAIN.SHINE.W / 2
 			if shineX > -10 then
 				-- yは今のところ直線なので固定値
 				local particleStartY = CURTAIN.LINE.START_Y - CURTAIN.LINE.INTERVAL_Y * 4
@@ -573,8 +573,8 @@ local function main()
 			local coloredDelTime = CURTAIN.TEXT.COLORED_DEL_TIME
 			for i = 0, w, div do
 				local textX = startX + i
-				local time = easeOutTime(textX - div, CURTAIN.FROM_X, CURTAIN.TO_X, CURTAIN.CLOSE_TIME)
-				local delColoredTime = CURTAIN.CLOSE_TIME + easeOutTime(textX, shineStartX + CURTAIN.SHINE.W / 2, shineToX + CURTAIN.SHINE.W / 2, d)
+				local time = easing.easeOutTime(textX - div, CURTAIN.FROM_X, CURTAIN.TO_X, CURTAIN.CLOSE_TIME)
+				local delColoredTime = CURTAIN.CLOSE_TIME + easing.easeOutTime(textX, shineStartX + CURTAIN.SHINE.W / 2, shineToX + CURTAIN.SHINE.W / 2, d)
 				dst[#dst+1] = {
 					id = "textWhite" .. i, timer = 2, loop = time + appearTime, dst = {
 						{time = 0, x = textX, y = y, w = div, h = h, a = 0, acc = 0},
@@ -603,7 +603,7 @@ local function main()
 			local sr, sg, sb = getTextColor2()
 			for i = 0, w, div do
 				local textX = startX + i
-				local time = CURTAIN.CLOSE_TIME + easeOutTime(textX, shineStartX + CURTAIN.SHINE.W / 2, shineToX + CURTAIN.SHINE.W / 2, d)
+				local time = CURTAIN.CLOSE_TIME + easing.easeOutTime(textX, shineStartX + CURTAIN.SHINE.W / 2, shineToX + CURTAIN.SHINE.W / 2, d)
 				dst[#dst+1] = {
 					id = "textRich" .. i, timer = 2, loop = time + richAppearTime, dst = {
 						{time = 0, x = textX, y = y, w = div, h = h, a = 0, r = r, g = g, b = b, acc = 0},

@@ -241,7 +241,7 @@ ranking.functions.updateScoreGraph = function (rank)
     end
     local maxW = score / RANKING.THEORETICAL * RANKING.GRAPH.LINE.GAUGE.W
     -- 現在のwを取得
-    local w = easeOut(nowTime, 0, maxW, endTime - startTime)
+    local w = easing.easeOut(nowTime, 0, maxW, endTime - startTime)
     return t - w * RANKING.ANIMATION.SCORE_GRAPH_PER_W * 1000
 end
 

@@ -305,6 +305,34 @@ function getIsLaneSideColorToMatchDifficulyColor()
 	return getTableValue(skin_config.option, "レーンサイドを難易度毎の色変化に合わせる", 10121) == 10120
 end
 
+function getIsJudgeLineLayer1ColorToMatchDifficulyColor()
+	return getTableValue(skin_config.option, "判定ライン(Layer1)を難易度毎の色変化に合わせる", 10126) == 10125
+end
+
+function getIsJudgeLineLayer2ColorToMatchDifficulyColor()
+	return getTableValue(skin_config.option, "判定ライン(Layer2)を難易度毎の色変化に合わせる", 10131) == 10130
+end
+
+function getIsDrawGrow()
+	return getTableValue(skin_config.option, "グロー表示", 10136) == 10135
+end
+
+function getBombParticle1AlphaEasingType()
+	return getTableValue(skin_config.option, "ボムのparticle1のアルファ変化", 10142) % 5 + 1
+end
+
+function getBombParticle2AlphaEasingType()
+	return getTableValue(skin_config.option, "ボムのparticle2のアルファ変化", 10147) % 5 + 1
+end
+
+function getBombParticle1MoveEasingType()
+	return getTableValue(skin_config.option, "ボムのparticle1の座標変化", 10150) % 5 + 1
+end
+
+function getBombParticle2MoveEasingType()
+	return getTableValue(skin_config.option, "ボムのparticle2の座標変化", 10155) % 5 + 1
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)

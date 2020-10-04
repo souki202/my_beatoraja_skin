@@ -1564,7 +1564,7 @@ local function main()
         local brightEndTime = LARGE_LAMP.ANIMATION.TO_TOP_TIME + LARGE_LAMP.ANIMATION.TO_TOP_DIV * (i - 1 + LARGE_LAMP.ANIMATION.BRIGHT_INTERVAL * 2) * LARGE_LAMP.ANIMATION.BRIGHT_INTERVAL
         local maxTime = math.max(LARGE_LAMP.ANIMATION.AT_TOP_TIME, brightEndTime)
         for t = LARGE_LAMP.ANIMATION.TO_TOP_TIME, maxTime, LARGE_LAMP.ANIMATION.TO_TOP_DIV do
-            local y = easeOut(
+            local y = easing.easeOut(
                 math.min(t - LARGE_LAMP.ANIMATION.TO_TOP_TIME, LARGE_LAMP.ANIMATION.AT_TOP_TIME - LARGE_LAMP.ANIMATION.TO_TOP_TIME),
                 LARGE_LAMP.POS.INIT_Y,
                 LARGE_LAMP.POS.AT_TOP_Y,

@@ -1,4 +1,5 @@
 require("modules.commons.define")
+require("modules.commons.easing")
 local commons = require("modules.play.commons")
 local lanes = require("modules.play.lanes")
 local main_state = require("main_state")
@@ -29,6 +30,7 @@ local BOMB = {
         SPREAD_Y = 100,
         APPEAR_RANGE_X = 30,
         APPEAR_RANGE_Y = 30,
+        TIMER_DIV = 50,
     },
     P2 = {
         W = 16,
@@ -41,6 +43,7 @@ local BOMB = {
         SPREAD_Y = 100,
         APPEAR_RANGE_X = 30,
         APPEAR_RANGE_Y = 30,
+        TIMER_DIV = 5,
     },
     ANIM1 = {
         W = 300,
@@ -154,6 +157,58 @@ bomb.functions.load = function ()
 end
 
 --[[
+    @param  array particle BOMB.P1 or BOMB.P2
+    @param  int   alphaEaseType アルファ変化のイージング種類 1:ease in 2:linear 3:ease out
+    @param  int   moveEaseType  アルファ変化のイージング種類 1:ease in 2:linear 3:ease out
+    @param  int   sx xの開始座標
+    @param  int   sy yの開始座標
+    @param  int   tx xの終了座標
+    @param  int   ty yの終了座標
+    @return array mergeSkinする
+]]
+bomb.functions.createParticleTimers = function (particle, n, alphaEaseType, moveEaseType, timer, loop, endTime, sx, sy, tx, ty)
+    local skin = {destination = {}}
+    local dst = skin.destination
+    local timerDiv = particle.TIMER_DIV
+
+    local alphaEaseFunc = nil
+    if alphaEaseType == 1 then
+        alphaEaseFunc = easing.easeIn
+    elseif alphaEaseType == 2 then
+        alphaEaseFunc = easing.linear
+    elseif alphaEaseType == 3 then
+        alphaEaseFunc = easing.easeOut
+    end
+    local moveEaseFunc = nil
+    if moveEaseType == 1 then
+        moveEaseFunc = easing.easeIn
+    elseif moveEaseType == 2 then
+        moveEaseFunc = easing.linear
+    elseif moveEaseType == 3 then
+        moveEaseFunc = easing.easeOut
+    end
+
+    local dt = endTime / timerDiv
+    local dstTime = {
+        {time = 0, x = sx, y = sy, w = particle.W, h = particle.H, a = 255},
+    }
+
+    for i = 1, timerDiv do
+        local nowTime = i * dt
+        local nowAlpha = alphaEaseFunc(nowTime, 255, 0, endTime)
+        local nowX = moveEaseFunc(nowTime, sx, tx, endTime)
+        local nowY = moveEaseFunc(nowTime, sy, ty, endTime)
+        dstTime[#dstTime+1] = {
+            time = nowTime, x = nowX, y = nowY, a = nowAlpha
+        }
+    end
+    dst[#dst+1] = {
+        id = "bombParticle" .. n, offset = 3, timer = timer, loop = loop, dst = dstTime
+    }
+    return skin
+end
+
+--[[
     @param  array skin
     @param  int   number particle1かparticle2か
     @param  int   cx 対象レーンの中心座標
@@ -164,6 +219,8 @@ bomb.functions.addParticle = function (skin, number, cx, y, timer, isLn)
     if not isDrawBombParticle() then return end
     local dst = skin.destination
     local particle = number == 1 and BOMB.P1 or BOMB.P2
+    local alphaEaseType = number == 1 and getBombParticle1AlphaEasingType() or getBombParticle2AlphaEasingType()
+    local moveEaseType = number == 1 and getBombParticle1MoveEasingType() or getBombParticle2MoveEasingType()
     local flowH = particle.FLOW_H
     local spreadX, spreadY = particle.SPREAD_X, particle.SPREAD_Y
     local appearRangeX, appearRangeY = particle.APPEAR_RANGE_X, particle.APPEAR_RANGE_Y
@@ -176,13 +233,14 @@ bomb.functions.addParticle = function (skin, number, cx, y, timer, isLn)
             local sy = y + math.random(-appearRangeY, appearRangeY)
             local vy = math.random(math.floor(flowH / (-10)), flowH)
             local t = particle.TIME + math.random(-50, 50)
+            mergeSkin(skin, bomb.functions.createParticleTimers(particle, number, alphaEaseType, moveEaseType, timer, loop, t, sx, sy, sx, sy + vy))
             -- flow
-            dst[#dst+1] = {
-                id = "bombParticle" .. number, offset = 3, timer = timer, loop = loop, dst = {
-                    {time = 0, x = sx, y = sy, w = particle.W, h = particle.H, a = 255, acc = 2},
-                    {time = t, y = sy + vy, a = 0}
-                }
-            }
+            -- dst[#dst+1] = {
+            --     id = "bombParticle" .. number, offset = 3, timer = timer, loop = loop, dst = {
+            --         {time = 0, x = sx, y = sy, w = particle.W, h = particle.H, a = 255, acc = 2},
+            --         {time = t, y = sy + vy, a = 0}
+            --     }
+            -- }
         elseif particle.TYPE == 1 then
             -- 拡散
             local r = math.random(0, 360) / 180 * math.pi
@@ -190,23 +248,25 @@ bomb.functions.addParticle = function (skin, number, cx, y, timer, isLn)
             local vy = math.random(spreadY / 10, spreadY)
             local t = particle.TIME + math.random(-50, 50)
             local tx, ty = cx + math.cos(r) * vx, y + math.sin(r) * vy
-            dst[#dst+1] = {
-                id = "bombParticle" .. number, offset = 3, timer = timer, loop = loop, dst = {
-                    {time = 0, x = cx, y = y, w = particle.W, h = particle.H, a = 255, acc = 2},
-                    {time = t, x = tx, y = ty, a = 0}
-                }
-            }
+            mergeSkin(skin, bomb.functions.createParticleTimers(particle, number, alphaEaseType, moveEaseType, timer, loop, t, cx, y, tx, ty))
+            -- dst[#dst+1] = {
+            --     id = "bombParticle" .. number, offset = 3, timer = timer, loop = loop, dst = {
+            --         {time = 0, x = cx, y = y, w = particle.W, h = particle.H, a = 255, acc = 2},
+            --         {time = t, x = tx, y = ty, a = 0}
+            --     }
+            -- }
         elseif particle.TYPE == 2 then
             -- static
             local sx = cx + math.random(-appearRangeX, appearRangeX)
             local sy = y + math.random(-appearRangeY, appearRangeY)
             local t = particle.TIME + math.random(-50, 50)
-            dst[#dst+1] = {
-                id = "bombParticle" .. number, offset = 3, timer = timer, loop = loop, dst = {
-                    {time = 0, x = sx, y = sy, w = particle.W, h = particle.H, a = 255, acc = 2},
-                    {time = t, a = 0}
-                }
-            }
+            mergeSkin(skin, bomb.functions.createParticleTimers(particle, number, alphaEaseType, moveEaseType, timer, loop, t, sx, sy, sx, sy))
+            -- dst[#dst+1] = {
+            --     id = "bombParticle" .. number, offset = 3, timer = timer, loop = loop, dst = {
+            --         {time = 0, x = sx, y = sy, w = particle.W, h = particle.H, a = 255, acc = 2},
+            --         {time = t, a = 0}
+            --     }
+            -- }
         end
     end
 end
