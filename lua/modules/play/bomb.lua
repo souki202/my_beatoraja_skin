@@ -51,6 +51,10 @@ local BOMB = {
         DIV_X = 1,
         DIV_Y = 1,
         TIME = 300,
+        OFFSET_X = 0,
+        OFFSET_Y = 0,
+        IMG_H = 0,
+        IS_SPECIAL_LN = false,
     },
     ANIM2 = {
         W = 300,
@@ -58,6 +62,37 @@ local BOMB = {
         DIV_X = 1,
         DIV_Y = 1,
         TIME = 300,
+        OFFSET_X = 0,
+        OFFSET_Y = 0,
+        IMG_H = 0,
+        IS_SPECIAL_LN = false,
+    },
+    SOCIAL_SKIN_PRESET = {
+        W = 250,
+        H = 250,
+        DIV_X = 19,
+        DIV_Y = 1,
+        TIME = 450,
+        OFFSET_X = 0,
+        OFFSET_Y = 0,
+        IMG_H = 0,
+        IS_SPECIAL_LN = false,
+    },
+    OADX_PRESET = {
+        W = 384,
+        H = 384,
+        DIV_X = 16,
+        DIV_Y = 1,
+        TIME = 350,
+        OFFSET_X = 25,
+        OFFSET_Y = -30,
+        IMG_H = 768,
+        IS_SPECIAL_LN = true,
+    },
+    PRESETS = {
+        NONE = 1,
+        SOCIAL_SKIN = 2,
+        OADX03 = 3,
     },
 }
 
@@ -88,6 +123,12 @@ bomb.functions.load = function ()
     m = getOffsetValueWithDefault("ボムのanimation2の画像分割数", {x = 1, y = 1})
     BOMB.ANIM2.DIV_X = m.x
     BOMB.ANIM2.DIV_Y = m.y
+    m = getOffsetValueWithDefault("ボムのanimation1の描画座標差分", {x = 0, y = 0})
+    BOMB.ANIM1.OFFSET_X = m.x
+    BOMB.ANIM1.OFFSET_Y = m.y
+    m = getOffsetValueWithDefault("ボムのanimation2の描画座標差分", {x = 0, y = 0})
+    BOMB.ANIM2.OFFSET_X = m.x
+    BOMB.ANIM2.OFFSET_Y = m.y
     m = getOffsetValueWithDefault("ボムのparticle1の描画数(既定値7)", {x = 7})
     BOMB.P1.N = m.x
     m = getOffsetValueWithDefault("ボムのparticle2の描画数(既定値7)", {x = 7})
@@ -124,6 +165,18 @@ bomb.functions.load = function ()
     BOMB.P1.TYPE = getParticle1AnimationType()
     BOMB.P2.TYPE = getParticle2AnimationType()
 
+    -- プリセット適用
+    if getBombAnimation1Preset() == BOMB.PRESETS.SOCIAL_SKIN then
+        BOMB.ANIM1 = BOMB.SOCIAL_SKIN_PRESET
+    elseif getBombAnimation1Preset() == BOMB.PRESETS.OADX03 then
+        BOMB.ANIM1 = BOMB.OADX_PRESET
+    end
+    if getBombAnimation2Preset() == BOMB.PRESETS.SOCIAL_SKIN then
+        BOMB.ANIM2 = BOMB.SOCIAL_SKIN_PRESET
+    elseif getBombAnimation2Preset() == BOMB.PRESETS.OADX03 then
+        BOMB.ANIM2 = BOMB.OADX_PRESET
+    end
+
     local skin = {
         image = {
             {id = "bombWave1", src = 11, x = 0, y = 0, w = -1, h = -1},
@@ -138,18 +191,43 @@ bomb.functions.load = function ()
     local bombTimer = {51, 52, 53, 54, 55, 56, 57, 50}
     local lnBombTimer = {71, 72, 73, 74, 75, 76, 77, 70}
     for i = 1, #bombTimer do
-        imgs[#imgs+1] = {
-            id = "bombAnimation1" .. bombTimer[i], src = 13, x = 0, y = 0, w = -1, h = -1, divx = BOMB.ANIM1.DIV_X, divy = BOMB.ANIM1.DIV_Y, cycle = BOMB.ANIM1.TIME, timer = bombTimer[i]
-        }
-        imgs[#imgs+1] = {
-            id = "bombAnimation1" .. lnBombTimer[i], src = 13, x = 0, y = 0, w = -1, h = -1, divx = BOMB.ANIM1.DIV_X, divy = BOMB.ANIM1.DIV_Y, cycle = BOMB.ANIM1.TIME * 2 / 3, timer = lnBombTimer[i]
-        }
-        imgs[#imgs+1] = {
-            id = "bombAnimation2" .. bombTimer[i], src = 16, x = 0, y = 0, w = -1, h = -1, divx = BOMB.ANIM2.DIV_X, divy = BOMB.ANIM2.DIV_Y, cycle = BOMB.ANIM2.TIME, timer = bombTimer[i]
-        }
-        imgs[#imgs+1] = {
-            id = "bombAnimation2" .. lnBombTimer[i], src = 16, x = 0, y = 0, w = -1, h = -1, divx = BOMB.ANIM2.DIV_X, divy = BOMB.ANIM2.DIV_Y, cycle = BOMB.ANIM2.TIME * 2 / 3, timer = lnBombTimer[i]
-        }
+        for j = 1, 2, 1 do -- ANIM1と2
+            local anim = BOMB["ANIM" .. j]
+            local src = j == 1 and 13 or 16
+
+            if anim.IS_SPECIAL_LN then
+                local h = anim.IMG_H / 4 * 1
+                -- 非LN
+                imgs[#imgs+1] = {
+                    id = "bombAnimation" .. j .. bombTimer[i], src = src, x = 0, y = 0, w = -1, h = h, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.TIME, timer = bombTimer[i]
+                }
+                -- LN
+                if lnBombTimer[i] % 2 == 1 then
+                    -- 白鍵
+                    imgs[#imgs+1] = {
+                        id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = h * 1, w = -1, h = h, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.TIME * 2 / 3, timer = lnBombTimer[i]
+                    }
+                elseif lnBombTimer[i] % 2 == 0 and lnBombTimer[i] ~= 70 then
+                    -- 青鍵
+                    imgs[#imgs+1] = {
+                        id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = h * 2, w = -1, h = h, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.TIME * 2 / 3, timer = lnBombTimer[i]
+                    }
+                else
+                    -- 皿
+                    imgs[#imgs+1] = {
+                        id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = h * 3, w = -1, h = h, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.TIME * 2 / 3, timer = lnBombTimer[i]
+                    }
+                end
+            else
+                -- 通常
+                imgs[#imgs+1] = {
+                    id = "bombAnimation" .. j .. bombTimer[i], src = src, x = 0, y = 0, w = -1, h = -1, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.TIME, timer = bombTimer[i]
+                }
+                imgs[#imgs+1] = {
+                    id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = 0, w = -1, h = -1, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.TIME * 2 / 3, timer = lnBombTimer[i]
+                }
+            end
+        end
     end
 
 
@@ -309,13 +387,13 @@ bomb.functions.dst = function ()
         local y = lanes.getAreaY()
         -- WAVE1
         dst[#dst+1] = {
-            id = "bombWave1", offset = 3, timer = timer[i], loop = -1, dst = {
+            id = "bombWave1", offset = 3, timer = timer[i], loop = -1, filter = 1, dst = {
                 {time = 0, x = cx, y = y, w = 0, h = 0, a = 255, acc = 2},
                 {time = BOMB.WAVE1.TIME, x = cx - BOMB.WAVE1.W / 2, y = y - BOMB.WAVE1.H / 2, w = BOMB.WAVE1.W, h = BOMB.WAVE1.H, a = 0}
             }
         }
         dst[#dst+1] = {
-            id = "bombWave1", offset = 3, timer = lnTimer[i], dst = {
+            id = "bombWave1", offset = 3, timer = lnTimer[i], filter = 1, dst = {
                 {time = 0, x = cx, y = y, w = 0, h = 0, a = 255, acc = 2},
                 {time = BOMB.WAVE1.TIME * 2 / 3, x = cx - BOMB.WAVE1.W / 2, y = y - BOMB.WAVE1.H / 2, w = BOMB.WAVE1.W, h = BOMB.WAVE1.H, a = 0}
             }
@@ -326,28 +404,28 @@ bomb.functions.dst = function ()
         bomb.functions.addParticle(skin, 1, cx, y, lnTimer[i], true)
         -- bomb
         dst[#dst+1] = {
-            id = "bombAnimation1" .. timer[i], offsets = {3, 40}, timer = timer[i], loop = -1, blend = animBlend, dst = {
-                {time = 0, x = cx - BOMB.ANIM1.W / 2, y = y - BOMB.ANIM1.H / 2, w = BOMB.ANIM1.W, h = BOMB.ANIM1.H},
+            id = "bombAnimation1" .. timer[i], offsets = {3}, timer = timer[i], loop = -1, blend = animBlend, filter = 1, dst = {
+                {time = 0, x = cx - BOMB.ANIM1.W / 2 + BOMB.ANIM1.OFFSET_X, y = y - BOMB.ANIM1.H / 2 + BOMB.ANIM1.OFFSET_Y, w = BOMB.ANIM1.W, h = BOMB.ANIM1.H},
                 {time = BOMB.ANIM1.TIME - 1}
             }
         }
         -- bomb
         dst[#dst+1] = {
-            id = "bombAnimation1" .. lnTimer[i], offsets = {3, 40}, timer = lnTimer[i], blend = animBlend, dst = {
-                {time = 0, x = cx - BOMB.ANIM1.W / 2, y = y - BOMB.ANIM1.H / 2, w = BOMB.ANIM1.W, h = BOMB.ANIM1.H},
+            id = "bombAnimation1" .. lnTimer[i], offsets = {3}, timer = lnTimer[i], blend = animBlend, filter = 1, dst = {
+                {time = 0, x = cx - BOMB.ANIM1.W / 2 + BOMB.ANIM1.OFFSET_X, y = y - BOMB.ANIM1.H / 2 + BOMB.ANIM1.OFFSET_Y, w = BOMB.ANIM1.W, h = BOMB.ANIM1.H},
                 {time = BOMB.ANIM1.TIME * 2 / 3- 1}
             }
         }
 
         -- WAVE2
         dst[#dst+1] = {
-            id = "bombWave2", offset = 3, timer = timer[i], loop = -1, dst = {
+            id = "bombWave2", offset = 3, timer = timer[i], loop = -1, filter = 1, dst = {
                 {time = 0, x = cx, y = y, w = 0, h = 0, a = 255, acc = 2},
                 {time = BOMB.WAVE2.TIME, x = cx - BOMB.WAVE2.W / 2, y = y - BOMB.WAVE2.H / 2, w = BOMB.WAVE2.W, h = BOMB.WAVE2.H, a = 0}
             }
         }
         dst[#dst+1] = {
-            id = "bombWave2", offset = 3, timer = lnTimer[i], dst = {
+            id = "bombWave2", offset = 3, timer = lnTimer[i], filter = 1, dst = {
                 {time = 0, x = cx, y = y, w = 0, h = 0, a = 255, acc = 2},
                 {time = BOMB.WAVE2.TIME * 2 / 3, x = cx - BOMB.WAVE2.W / 2, y = y - BOMB.WAVE2.H / 2, w = BOMB.WAVE2.W, h = BOMB.WAVE2.H, a = 0}
             }
@@ -357,14 +435,14 @@ bomb.functions.dst = function ()
         bomb.functions.addParticle(skin, 2, cx, y, lnTimer[i], true)
         -- bomb
         dst[#dst+1] = {
-            id = "bombAnimation2" .. timer[i], offsets = {3, 41}, timer = timer[i], loop = -1, blend = animBlend, dst = {
-                {time = 0, x = cx - BOMB.ANIM2.W / 2, y = y - BOMB.ANIM2.H / 2, w = BOMB.ANIM2.W, h = BOMB.ANIM2.H},
+            id = "bombAnimation2" .. timer[i], offsets = {3}, timer = timer[i], loop = -1, blend = animBlend, filter = 1, dst = {
+                {time = 0, x = cx - BOMB.ANIM2.W / 2 + BOMB.ANIM2.OFFSET_X, y = y - BOMB.ANIM2.H / 2 + BOMB.ANIM2.OFFSET_Y, w = BOMB.ANIM2.W, h = BOMB.ANIM2.H},
                 {time = BOMB.ANIM2.TIME - 1}
             }
         }
         dst[#dst+1] = {
-            id = "bombAnimation2" .. lnTimer[i], offsets = {3, 41}, timer = lnTimer[i], blend = animBlend, dst = {
-                {time = 0, x = cx - BOMB.ANIM2.W / 2, y = y - BOMB.ANIM2.H / 2, w = BOMB.ANIM2.W, h = BOMB.ANIM2.H},
+            id = "bombAnimation2" .. lnTimer[i], offsets = {3}, timer = lnTimer[i], blend = animBlend, filter = 1, dst = {
+                {time = 0, x = cx - BOMB.ANIM2.W / 2 + BOMB.ANIM2.OFFSET_X, y = y - BOMB.ANIM2.H / 2 + BOMB.ANIM2.OFFSET_Y, w = BOMB.ANIM2.W, h = BOMB.ANIM2.H},
                 {time = BOMB.ANIM2.TIME * 2 / 3 - 1}
             }
         }

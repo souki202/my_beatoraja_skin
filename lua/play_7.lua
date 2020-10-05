@@ -34,7 +34,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10155まで
+    property = { -- 使用済み 10165まで
         {
             name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
         },
@@ -168,6 +168,12 @@ local header = {
             name = "ボムのパーティクル", item = {{name = "ON", op = 10005}, {name = "OFF", op = 10006}}, def = "ON"
         },
         {
+            name = "ボムのanimation1のプリセット", item = {{name = "無し", op = 10160}, {name = "SocialSkinボム", op = 10161}, {name = "OADXボム", op = 10162}}, def = "SocialSkinボム"
+        },
+        {
+            name = "ボムのanimation2のプリセット", item = {{name = "無し", op = 10165}, {name = "SocialSkinボム", op = 10166}, {name = "OADXボム", op = 10167}}, def = "SocialSkinボム"
+        },
+        {
             name = "ボムのparticle1のアニメーション", item = {{name = "フロー", op = 10010}, {name = "拡散", op = 10011}, {name = "静止", op = 10012}}, def = "フロー"
         },
         {
@@ -288,6 +294,7 @@ local header = {
         {name = "ボムのparticle2の拡散の広さ倍率差分(単位%)", w = 0, h = 0},
         {name = "ボムのparticle2の出現範囲倍率差分(単位%)", w = 0, h = 0},
 
+        {name = "ボムアニメーション関連(プリセット設定時は無視)-------------", x = 0},
         {name = "ボムのanimation1の大きさ倍率(単位%)", w = 0, h = 0},
         {name = "ボムのanimation1の画像分割数", x = 0, y = 0},
         {name = "ボムのanimation1の描画時間(単位100ms 既定値3)", x = 0},

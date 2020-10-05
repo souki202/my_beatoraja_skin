@@ -333,6 +333,14 @@ function getBombParticle2MoveEasingType()
 	return getTableValue(skin_config.option, "ボムのparticle2の座標変化", 10155) % 5 + 1
 end
 
+function getBombAnimation1Preset()
+	return getTableValue(skin_config.option, "ボムのanimation1のプリセット", 10161) % 5 + 1
+end
+
+function getBombAnimation2Preset()
+	return getTableValue(skin_config.option, "ボムのanimation2のプリセット", 10166) % 5 + 1
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)
