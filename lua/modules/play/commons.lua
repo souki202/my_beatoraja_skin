@@ -314,7 +314,7 @@ function getIsJudgeLineLayer2ColorToMatchDifficulyColor()
 end
 
 function getIsDrawGrow()
-	return getTableValue(skin_config.option, "グロー表示", 10136) == 10135
+	return getTableValue(skin_config.option, "グロー表示", 10135) == 10135
 end
 
 function getBombParticle1AlphaEasingType()

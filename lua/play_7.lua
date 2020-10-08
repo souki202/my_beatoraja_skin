@@ -123,7 +123,7 @@ local header = {
         --     name = "レーンのシンボル", item = {{name = "ON", op = 965}, {name = "OFF", op = 966}}, def = "ON"
         -- },
         {
-            name = "グロー表示", item = {{name = "ON", op = 10135}, {name = "OFF", op = 10136}}, def = "OFF"
+            name = "グロー表示", item = {{name = "ON", op = 10135}, {name = "OFF", op = 10136}}, def = "ON"
         },
         {
             name = "判定ライン", item = {{name = "ON", op = 920}, {name = "OFF", op = 921}}, def = "ON"
@@ -245,9 +245,9 @@ local header = {
         {name = "グルーヴゲージのインディケーター", path = "../play/parts/groove/indicators/*.png", def = "default"},
         {name = "EXSCOREの文字", path = "../play/parts/exscore/label/*.png", def = "default"},
         {name = "ボム関連画像---------", path = "../dummy/*"},
-        {name = "wave1", path = "../play/parts/bombs/wave1/*.png", def = "default"},
-        {name = "particle1", path = "../play/parts/bombs/particle1/*.png", def = "default"},
-        {name = "animation1", path = "../play/parts/bombs/animation1/*.png", def = "blank"},
+        {name = "wave1", path = "../play/parts/bombs/wave1/*.png", def = "blank"},
+        {name = "particle1", path = "../play/parts/bombs/particle1/*.png", def = "blank"},
+        {name = "animation1", path = "../play/parts/bombs/animation1/*.png", def = "default"},
         {name = "wave2", path = "../play/parts/bombs/wave2/*.png", def = "blank"},
         {name = "particle2", path = "../play/parts/bombs/particle2/*.png", def = "blank"},
         {name = "animation2", path = "../play/parts/bombs/animation2/*.png", def = "blank"},

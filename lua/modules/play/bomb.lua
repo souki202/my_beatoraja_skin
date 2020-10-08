@@ -51,6 +51,7 @@ local BOMB = {
         DIV_X = 1,
         DIV_Y = 1,
         TIME = 300,
+        LN_TIME = 300,
         OFFSET_X = 0,
         OFFSET_Y = 0,
         IMG_H = 0,
@@ -62,6 +63,7 @@ local BOMB = {
         DIV_X = 1,
         DIV_Y = 1,
         TIME = 300,
+        LN_TIME = 300,
         OFFSET_X = 0,
         OFFSET_Y = 0,
         IMG_H = 0,
@@ -70,13 +72,14 @@ local BOMB = {
     SOCIAL_SKIN_PRESET = {
         W = 250,
         H = 250,
-        DIV_X = 19,
+        DIV_X = 30,
         DIV_Y = 1,
-        TIME = 450,
+        TIME = 500,
+        LN_TIME = 1000,
         OFFSET_X = 0,
         OFFSET_Y = 0,
-        IMG_H = 0,
-        IS_SPECIAL_LN = false,
+        IMG_H = 1200,
+        IS_SPECIAL_LN = true,
     },
     OADX_PRESET = {
         W = 384,
@@ -84,6 +87,7 @@ local BOMB = {
         DIV_X = 16,
         DIV_Y = 1,
         TIME = 350,
+        LN_TIME = 350,
         OFFSET_X = 25,
         OFFSET_Y = -30,
         IMG_H = 768,
@@ -139,8 +143,10 @@ bomb.functions.load = function ()
     BOMB.WAVE2.TIME = m.x * 100
     m = getOffsetValueWithDefault("ボムのparticle1の描画時間(単位100ms 既定値3)", {x = 3})
     BOMB.P1.TIME = m.x * 100
+    BOMB.P1.LN_TIME = m.x * 100
     m = getOffsetValueWithDefault("ボムのparticle2の描画時間(単位100ms 既定値3)", {x = 3})
     BOMB.P2.TIME = m.x * 100
+    BOMB.P2.LN_TIME = m.x * 100
     m = getOffsetValueWithDefault("ボムのanimation1の描画時間(単位100ms 既定値3)", {x = 3})
     BOMB.ANIM1.TIME = m.x * 100
     m = getOffsetValueWithDefault("ボムのanimation2の描画時間(単位100ms 既定値3)", {x = 3})
@@ -205,17 +211,17 @@ bomb.functions.load = function ()
                 if lnBombTimer[i] % 2 == 1 then
                     -- 白鍵
                     imgs[#imgs+1] = {
-                        id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = h * 1, w = -1, h = h, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.TIME * 2 / 3, timer = lnBombTimer[i]
+                        id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = h * 1, w = -1, h = h, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.LN_TIME, timer = lnBombTimer[i]
                     }
                 elseif lnBombTimer[i] % 2 == 0 and lnBombTimer[i] ~= 70 then
                     -- 青鍵
                     imgs[#imgs+1] = {
-                        id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = h * 2, w = -1, h = h, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.TIME * 2 / 3, timer = lnBombTimer[i]
+                        id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = h * 2, w = -1, h = h, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.LN_TIME, timer = lnBombTimer[i]
                     }
                 else
                     -- 皿
                     imgs[#imgs+1] = {
-                        id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = h * 3, w = -1, h = h, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.TIME * 2 / 3, timer = lnBombTimer[i]
+                        id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = h * 3, w = -1, h = h, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.LN_TIME, timer = lnBombTimer[i]
                     }
                 end
             else
@@ -224,7 +230,7 @@ bomb.functions.load = function ()
                     id = "bombAnimation" .. j .. bombTimer[i], src = src, x = 0, y = 0, w = -1, h = -1, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.TIME, timer = bombTimer[i]
                 }
                 imgs[#imgs+1] = {
-                    id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = 0, w = -1, h = -1, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.TIME * 2 / 3, timer = lnBombTimer[i]
+                    id = "bombAnimation" .. j .. lnBombTimer[i], src = src, x = 0, y = 0, w = -1, h = -1, divx = anim.DIV_X, divy = anim.DIV_Y, cycle = anim.LN_TIME, timer = lnBombTimer[i]
                 }
             end
         end
