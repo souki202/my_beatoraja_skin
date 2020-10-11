@@ -60,7 +60,7 @@ keyBeam.functions.dst = function ()
         local r, g, b = wr, wg, wb
         local h2 = h
         local bh = KEY_BEAM.BACK_H[1]
-        local by = lanes.getOurterAreaY()
+        local by = lanes.getInnerAreaY()
         local myTimer = timer[i]
 
         if h ~= 0 then -- キービームがあるときだけセット

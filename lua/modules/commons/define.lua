@@ -68,6 +68,25 @@ function table.sum (tbl)
     return sum
 end
 
+function table.merge(tbl, overrideTbl)
+    if type(overrideTbl) == "table" then
+        for k, v in pairs(overrideTbl) do
+            -- 要素がないかテーブルでなければ全部上書き
+            if type(tbl[k]) ~= "table" then
+                tbl[k] = overrideTbl[k]
+            else
+                -- 直下の項目がテーブルでなければ更新
+                if type(overrideTbl[k]) ~= "table" then
+                    tbl[k] = overrideTbl[k]
+                else
+                    -- テーブルが見つかれば
+                    table.merge(tbl[k], overrideTbl[k])
+                end
+            end
+        end
+    end
+end
+
 function mergeSkin(skin, addSkin)
     if addSkin then
         for k, v in pairs(addSkin) do -- image, text, value 等がkey
