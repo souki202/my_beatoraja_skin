@@ -222,7 +222,7 @@ local header = {
         {name = "BGAフレーム(横全体)", path = "../play/parts/bga/frame/large/*.png", def = "blank"},
         {name = "BGAフレーム(全画面)", path = "../play/parts/bga/frame/full/*.png", def = "blank"},
         {name = "黒帯部分BGAのマスク", path = "../play/parts/bga/mask/*.png", def = "default"},
-        {name = "タイトル部分フレーム", path = "../play/parts/title/frame/*.png", def = "default"},
+        {name = "タイトル部分フレーム", path = "../play/parts/title/frame/*.png", def = "simple"},
         {name = "レーン部分全般--------------", path = "../dummy/*"},
         {name = "ノート画像(通常形式)", path = "../play/parts/lane/notes/normal/*.png", def = "default"},
         {name = "ノート画像(独自形式)", path = "../play/parts/lane/notes/original/*.png", def = "default"},

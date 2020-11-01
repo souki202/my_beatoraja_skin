@@ -66,7 +66,7 @@ local function makeHeader()
         fadeout = fade.getFadeOutTime(),
         scene = 3600000,
         input = INPUT_WAIT,
-        -- 910, 920, 930, 935, 940, 945, 965, 975
+        -- 910, 920, 930, 935, 940, 945, 965, 975, 980
         property = {
             {
                 name = "背景の分類", item = {{name = "クリアかどうか", op = 910}, {name = "ランク毎", op = 911}, {name = "クリアランプ毎", op = 912}}, def = "クリアかどうか"
@@ -85,6 +85,9 @@ local function makeHeader()
             },
             {
                 name = "ランキングの自分の名前表記", item = {{name = "プレイヤー名", op = 975}, {name = "YOU", op = 976}}, def = "プレイヤー名"
+            },
+            {
+                name = "日時表示", item = {{name = "無し", op = 985}, {name = "日付のみ", op = 986}, {name = "日付+日時", op = 987}}, def = "日付+日時"
             },
         },
         filepath = {

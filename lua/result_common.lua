@@ -473,7 +473,7 @@ function makeHeader()
         fadeout = fade.getFadeOutTime(),
         scene = 3600000,
         input = INPUT_WAIT,
-        -- 980まで使用
+        -- 985まで使用
         property = {
             {
                 name = "背景の分類", item = {{name = "クリアかどうか", op = 910}, {name = "ランク毎", op = 911}, {name = "クリアランプ毎", op = 912}}, def = "クリアかどうか"
@@ -507,6 +507,9 @@ function makeHeader()
             },
             {
                 name = "ランキングの情報量", item = {{name = "多い", op = 980}, {name = "少ない", op = 981}}, def = "多い"
+            },
+            {
+                name = "日時表示", item = {{name = "無し", op = 985}, {name = "日付のみ", op = 986}, {name = "日付+日時", op = 987}}, def = "日付+日時"
             },
         },
         filepath = {

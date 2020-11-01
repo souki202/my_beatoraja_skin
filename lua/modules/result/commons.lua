@@ -155,3 +155,15 @@ function getBgSrc()
         return 120 + CLEAR_TYPE - 1
     end
 end
+
+function isViewResultDate()
+	return getTableValue(skin_config.option, "日時表示", 987) ~= 985
+end
+
+function isViewDateOnly()
+	return getTableValue(skin_config.option, "日時表示", 987) == 986
+end
+
+function isViewDateAndTime()
+	return getTableValue(skin_config.option, "日時表示", 987) == 987
+end

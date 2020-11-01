@@ -33,7 +33,14 @@ end
 userInfo.functions.load = function ()
     local getNum = main_state.number
     local playerLabel = "Player: " .. main_state.text(2)
-    local dateLabel = string.format("%04d", getNum(21)) .. "-" .. string.format("%02d", getNum(22)) .. "-" .. string.format("%02d", getNum(23)) .. " " .. string.format("%02d", getNum(24)) .. ":" .. string.format("%02d", getNum(25)) .. ":" .. string.format("%02d", getNum(26))
+    local dateLabel = ""
+    if isViewResultDate() then
+        if isViewDateOnly() then
+            dateLabel = string.format("%04d", getNum(21)) .. "-" .. string.format("%02d", getNum(22)) .. "-" .. string.format("%02d", getNum(23))
+        elseif isViewDateAndTime() then
+            dateLabel = string.format("%04d", getNum(21)) .. "-" .. string.format("%02d", getNum(22)) .. "-" .. string.format("%02d", getNum(23)) .. " " .. string.format("%02d", getNum(24)) .. ":" .. string.format("%02d", getNum(25)) .. ":" .. string.format("%02d", getNum(26))
+        end
+    end
 
     return {
         text = {
