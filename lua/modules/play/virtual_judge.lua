@@ -1,0 +1,5 @@
+require("modules.commons.define")
+local commons = require("modules.play.commons")
+local scores = require("modules.play.score")
+local lanes = require("modules.play.lanes")
+local main_state = require("main_state")
