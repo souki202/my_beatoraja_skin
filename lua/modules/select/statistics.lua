@@ -212,7 +212,7 @@ statistics.functions.destinationWindow = function(skin)
     local next = statistics.ITEM.NEXT_HEADER_Y
 
     -- プレイヤーデータ
-    dstSubHeaderSelect(skin, SIMPLE_WND_AREA.X + statistics.HEADER.X1, nowY, statistics.HEADER.W, {}, statistics.functions.getWindowTimerId(), atime, "ユーザ")
+    dstSubHeaderSelect(skin, SIMPLE_WND_AREA.X + statistics.HEADER.X1, nowY, statistics.HEADER.W, {}, statistics.functions.getWindowTimerId(), atime, "ユーザ", false)
     nowY = nowY - interval
     for i = 1, #statistics.USER.VALUES do
         -- 文字
@@ -234,7 +234,7 @@ statistics.functions.destinationWindow = function(skin)
     nowY = nowY - next
 
     -- 時間
-    dstSubHeaderSelect(skin, SIMPLE_WND_AREA.X + statistics.HEADER.X1, nowY, statistics.HEADER.W, {}, statistics.functions.getWindowTimerId(), atime, "時間")
+    dstSubHeaderSelect(skin, SIMPLE_WND_AREA.X + statistics.HEADER.X1, nowY, statistics.HEADER.W, {}, statistics.functions.getWindowTimerId(), atime, "時間", false)
     nowY = nowY - interval
     for i = 1, #statistics.PLAYTIME.TEXTS do
         local ni = i == 1 and 1 or 4
@@ -283,7 +283,7 @@ statistics.functions.destinationWindow = function(skin)
     nowY = nowY - next
 
     -- 判定等
-    dstSubHeaderSelect(skin, SIMPLE_WND_AREA.X + statistics.HEADER.X1, nowY, statistics.HEADER.W, {}, statistics.functions.getWindowTimerId(), atime, "プレイ情報")
+    dstSubHeaderSelect(skin, SIMPLE_WND_AREA.X + statistics.HEADER.X1, nowY, statistics.HEADER.W, {}, statistics.functions.getWindowTimerId(), atime, "プレイ情報", false)
     nowY = nowY - interval
     for i = 1, #statistics.PLAY.IDS do
         -- 文字

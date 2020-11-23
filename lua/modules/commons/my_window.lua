@@ -451,6 +451,16 @@ function destinationWindowWithTimer(skin, ids, edgeSize, shadow, op, timer, loop
     end
 end
 
+function dstCloseArea(skin, id, op, timer, animationTime)
+    table.insert(skin.destination, {
+        id = id, timer = timer, loop = animationTime, op = op, dst = {
+            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1, a = 0},
+            {time = 1},
+            {time = animationTime, x = SIMPLE_WND_AREA.X + 49, y = SIMPLE_WND_AREA.Y + 86, w = 1502, h = 724, a = 0}
+        }
+    })
+end
+
 -- フォントサイズは30
 function dstHeaderSelect(skin, op, timer, animationTime, textId)
     -- 左の斜線部分
@@ -479,7 +489,7 @@ end
 
 -- x, yは絶対座標
 -- フォントサイズは24
-function dstSubHeaderSelect(skin, x, y, w, op, timer, animationTime, textId)
+function dstSubHeaderSelect(skin, x, y, w, op, timer, animationTime, textId, isCenteringText)
     -- 左
     table.insert(skin.destination, {
         id = SUB_HEADER.EDGE.LEFT_ID, timer = timer, loop = animationTime, op = op, dst = {
@@ -503,12 +513,20 @@ function dstSubHeaderSelect(skin, x, y, w, op, timer, animationTime, textId)
     })
     -- 文字
     if textId ~= nil then
+        local textX = x + w / 2
+        if not isCenteringText then
+            textX = x + 20
+        end
         table.insert(skin.destination, {
             id = textId, timer = timer, loop = animationTime, op = op, dst = {
                 {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 1, h = 1, a = 0},
                 {time = 1, a = 255}, -- w, hを0にするとエラーが出る場合があることの対処
-                {time = animationTime, x = x + 20, y = y + 7, w = w, h = SUB_HEADER.FONT_SIZE, a = 255}
+                {time = animationTime, x = textX, y = y + 7, w = w, h = SUB_HEADER.FONT_SIZE, a = 255}
             }
         })
     end
+end
+
+function dstSwitchWindowItem(dst, timer, animationTime)
+
 end

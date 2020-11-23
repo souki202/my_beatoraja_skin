@@ -1014,7 +1014,7 @@ help.functions.setDestinationDescription = function(skin)
         })
 
         -- 詳細の暗い背景ヘッダー背景
-        dstSubHeaderSelect(skin, headerX, headerY, help.detail.HEADER.W, {}, timer, viewTime, nil)
+        dstSubHeaderSelect(skin, headerX, headerY, help.detail.HEADER.W, {}, timer, viewTime, nil, false)
         
         -- ボタン出力
         table.insert(skin.destination, {
