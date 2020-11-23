@@ -7,6 +7,7 @@ local commons = require("modules.select.commons")
 local background = require("modules.select.background")
 local help = require("modules.select.help")
 local statistics = require("modules.select.statistics")
+local volumes = require("modules.select.volumes")
 local opening = require("modules.select.opening")
 local user = require("modules.select.user")
 local stagefile = require("modules.select.stagefile")
@@ -67,7 +68,7 @@ local OPTION_INFO = {
     SWITCH_BUTTON_H = 56,
     HEADER2_EDGE_BG_W = 16,
     HEADER2_EDGE_BG_H = 42,
-    HEADER2_TEXT_SRC_X = 1709,
+    HEADER2_TEXT_SRC_X = 3827,
     HEADER2_TEXT_W = 300,
     HEADER2_TEXT_H = 42,
     BG_H = 44*5,
@@ -825,6 +826,7 @@ local function main()
     mergeSkin(skin, clock.load())
     mergeSkin(skin, ir.load())
     mergeSkin(skin, musicInfo.load())
+    mergeSkin(skin, volumes.load())
 
     skin.destination = {}
 
@@ -960,6 +962,8 @@ local function main()
 
     -- 統計ウィンドウ
     statistics.destinationWindow(skin)
+    -- ボリューム
+    mergeSkin(skin, volumes.dst())
 
     -- プレイオプション
     -- 背景部分

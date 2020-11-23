@@ -177,9 +177,6 @@ statistics.functions.load = function(skin)
             value = function() return statistics.USER.VALUES[i] end
         }
     end
-
-
-    
 end
 
 statistics.functions.destinationOpenButton = function(skin)

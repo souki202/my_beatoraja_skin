@@ -3,8 +3,9 @@ require("modules.commons.numbers")
 
 local commons = require("modules.select.commons")
 local main_state = require("main_state")
+require("modules.commons.my_window")
 
-local volumes = {
+local VOLUMES = {
     WND = {
         W = 1600,
         H = 900
@@ -14,13 +15,47 @@ local volumes = {
         Y = 12,
     },
 
-    ID_PREFIX = "volumes",
+    ITEM = {
+        Y = function (idx) return SIMPLE_WND_AREA.Y + 766 - (idx - 1) * 64 end,
+        VOLUME_ICON = {
+            W = 52,
+            H = 36,
+            X_MIN = function () return SIMPLE_WND_AREA.X + 223 end,
+            X_MAX = function () return SIMPLE_WND_AREA.X + 1334 end,
+        },
+        SLIDER = {
+            X = function () return SIMPLE_WND_AREA.X + 293 end,
+            W = 1024,
+            BG_NONACTIVE = {
+                H = 8,
+                EDGE_W = 8,
+                BODY_W = 1024 - 8 * 2,
+            },
+            BG_ACTIVE = {
+                H = 18,
+                EDGE_W = 8,
+                BODY = 1024 - 8,
+            },
+            HANDLE = {
+                W = 38,
+                H = 62,
+                -- RANGE = 1024,
+            },
+        },
+    },
 
+
+    ID_PREFIX = "volumes",
+}
+
+local volumes = {
     isOpen = false,
     isClosing = false,
     isClosed = true,
     closeTime = 0,
     openTime = 0,
+
+    functions = {}
 }
 
 function openVolumes()
@@ -67,21 +102,68 @@ function volumesTimer()
     return main_state.timer_off_value
 end
 
-volumes.functions.load = function(skin)
-    table.insert(skin.customEvents, {id = 1010, action = "openVolumes()"})
-    table.insert(skin.customEvents, {id = 1011, action = "closeVolumes()"})
-    table.insert(skin.customEvents, {id = 1012, action = "closeVolumesRightClickEvent()"})
+volumes.functions.load = function()
+    local iconW = VOLUMES.ITEM.SLIDER.VOLUME_ICON.W
+    local iconH = VOLUMES.ITEM.SLIDER.VOLUME_ICON.H
 
-    -- 背景は閉じるボタン
-    table.insert(skin.image, {
-        id = "blackVolumesClose", src = 999, x = 1, y = 0, w = 1, h = 1, act = 1011
-    })
+    local skin = {
+        customEvents = {
+            {id = 1020, action = "openVolumes()"},
+            {id = 1021, action = "closeVolumes()"},
+            {id = 1022, action = "closeVolumesRightClickEvent()"},
+        },
+        image = {
+            {id = "blackVolumesClose", src = 999, x = 1, y = 0, w = 1, h = 1, act = 1021},
+            {id = "whiteVolumesBg", src = 999, x = 2, y = 0, w = 1, h = 1, act = 1022},
+
+            -- 音量アイコン
+            {id = "volumeMinIcon", src = 2, x = 1704        , y = TEXTURE_SIZE - iconH, w = iconW, h = iconH},
+            {id = "volumeMaxIcon", src = 2, x = 1704 + iconW, y = TEXTURE_SIZE - iconH, w = iconW, h = iconH},
+
+            -- スライダーの端の部分とnonactiveの本体
+            {id = "volumeActiveEdge", src = 2, x = 1687, y = 2022, w = VOLUMES.ITEM.SLIDER.BG_ACTIVE.EDGE_W, h = VOLUMES.ITEM.SLIDER.BG_ACTIVE.H},
+            {id = "volumeNonActiveEdge", src = 2, x = 1687, y = 2040, w = VOLUMES.ITEM.SLIDER.BG_NONACTIVE.EDGE_W, h = VOLUMES.ITEM.SLIDER.BG_NONACTIVE.H},
+            {id = "volumeNonActiveBody", src = 2, x = 1687 + VOLUMES.ITEM.SLIDER.BG_NONACTIVE.EDGE_W, y = 2040, w = 1, h = VOLUMES.ITEM.SLIDER.BG_NONACTIVE.H},
+
+        },
+        text = {
+            {id = "volumesHeader", font = 0, size = HEADER.TEXT.FONT_SIZE, align = 0, constantText = "音量設定"},
+            -- 各設定名
+            {id = "masterHeaderText", font = 0, size = SUB_HEADER.FONT_SIZE, align = 1, constantText = "MASTER"},
+            {id = "keyHeaderText", font = 0, size = SUB_HEADER.FONT_SIZE, align = 1, constantText = "KEY"},
+            {id = "bgmHeaderText", font = 0, size = SUB_HEADER.FONT_SIZE, align = 1, constantText = "BGM"},
+        },
+        graph = {},
+    }
 
     -- 閉じるボタン
-    loadCloseButtonSelect(skin, "volumesCloseButton", 1011)
+    loadCloseButtonSelect(skin, "volumesCloseButton", 1021)
 
-    table.insert(skin.image, {
-        id = "whiteVolumesBg", src = 999, x = 2, y = 0, w = 1, h = 1, act = 1012
-    })
+    local texts = skin.text
+    local imgs = skin.image
+    local graphs = skin.graph
 
+    -- 各音量の読み込み等
+    -- スライダーはdstで
+    for i = 1, 3 do
+        -- 音量ゲージのアクティブ部分
+        graphs[#graphs+1] = {
+            id = "volumeActiveBody", src = 2, 
+        }
+    end
+
+    return skin
 end
+
+volumes.functions.dst = function ()
+    local skin = {
+        destination = {},
+        slider = {
+            {id = "musicSelectSlider", src = 0, x = 1541, y = commons.PARTS_OFFSET + 263, w = MUSIC_SLIDER_BUTTON_W, h = MUSIC_SLIDER_BUTTON_H, type = 1, range = 1024, angle = 1},
+        }
+    }
+
+    return skin
+end
+
+return volumes.functions

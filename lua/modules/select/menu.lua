@@ -36,7 +36,7 @@ local MENU = {
         INTERVAL_X = 137,
         START_X = function(self) return self.WND.X() + 27 end,
         OPENED_START_X = function(self) return self.WND.OPEN_X(self) + 27 end,
-        IDS = {"statisticsOpenButton", "helpOpenButton"}, -- 左から
+        IDS = {"statisticsOpenButton", "helpOpenButton", "volumesOpenButton"}, -- 左から
     },
 }
 
@@ -73,6 +73,9 @@ menu.functions.load = function ()
             },
             {
                 id = "statisticsOpenButton", src = 0, x = 1761, y = commons.PARTS_OFFSET + 771, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H, act = 1010
+            },
+            {
+                id = "volumesOpenButton", src = 0, x = 1903, y = commons.PARTS_OFFSET + 771, w = CLOSE_BUTTON.W, h = CLOSE_BUTTON.H, act = 1020
             },
             {
                 id = "switchButton", src = 0, x = 1389, y = PARTS_TEXTURE_SIZE - MENU.SWITCH.H, w = MENU.SWITCH.W, h = MENU.SWITCH.H
