@@ -21,7 +21,7 @@ require("modules.commons.timer")
 
 DEBUG = true
 
-function table.in_key (tbl, key)
+function table.in_key(tbl, key)
     for k, v in pairs (tbl) do
         if k==key then return true end
     end
@@ -60,7 +60,7 @@ function table.shuffle(tbl)
     end
 end
 
-function table.sum (tbl)
+function table.sum(tbl)
     local sum = 0
     for i = 1, #tbl do
         sum = sum + tbl[i]
@@ -86,6 +86,18 @@ function table.merge(tbl, overrideTbl)
         end
     end
 end
+
+function string.split(str, ts)
+    -- 引数がないときは空tableを返す
+    if ts == nil then return {} end
+    local t = {};
+    local i = 1
+    for s in string.gmatch(str, "([^"..ts.."]+)") do
+      t[i] = s
+      i = i + 1
+    end
+    return t
+  end
 
 function mergeSkin(skin, addSkin)
     if addSkin then

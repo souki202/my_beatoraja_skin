@@ -176,6 +176,10 @@ local DETAIL = {
     },
 }
 
+scoreDetail.functions.getGray30NumData = function ()
+    return DETAIL.GRAY_30NUM
+end
+
 scoreDetail.functions.loadGray30Number = function (id, digit, align, padding, ref, value)
     local param = DETAIL.GRAY_30NUM
     return {id = id, src = 15, x = 0, y = 216, w = param.W * 10, h = param.H, divx = 10, align = align, digit = digit, space = param.SPACE, padding = padding, ref = ref, value = value}
@@ -221,6 +225,25 @@ scoreDetail.functions.loadDiffRate30Number = function (id, afterDotDigit, rate)
         imgs[#imgs+1] = {id = id .. "Dot", src = 15, x = 288, y = 297, w = DETAIL.GRAY_30NUM.DOT.W, h = DETAIL.GRAY_30NUM.DOT.H}
         imgs[#imgs+1] = {id = id .. "Percent", src = 15, x = 336, y = 278, w = DETAIL.GRAY_30NUM.PERCENT.W, h = DETAIL.GRAY_30NUM.PERCENT.H}
     end
+    return skin
+end
+
+--[[
+    TODO: 別の場所に分離
+    @param {string} id 整数部分はこのID, 小数部分はid.."AfterDot", ドットはid.."Dot", %はid.."Percent"
+    @param {int} afterDotDigit 小数部分の桁数
+    @param {int} rateRef スキンで割り当てられた番号
+    @param {int} rateAfterDotRef スキンで割り当てられた番号
+    @return {array} skin mergeSkinする
+]]
+scoreDetail.functions.loadRate30Number = function (id, afterDotDigit, rateRef, rateAfterDotRef)
+    local skin = {image = {}, value = {}}
+    local vals = skin.value
+    local imgs = skin.image
+    vals[#vals+1] = {id = id, src = 15, x = 0, y = 216, w = DETAIL.GRAY_30NUM.W * 12, h = DETAIL.GRAY_30NUM.H * 2, divx = 12, divy = 2, digit = 3, space = DETAIL.GRAY_30NUM.SPACE, ref = rateRef,}
+    vals[#vals+1] = {id = id .. "AfterDot", src = 15, x = 0, y = 216, w = DETAIL.GRAY_30NUM.W * 10, h = DETAIL.GRAY_30NUM.H, divx = 10, padding = 1, digit = afterDotDigit, space = DETAIL.GRAY_30NUM.SPACE, ref = rateAfterDotRef,}
+    imgs[#imgs+1] = {id = id .. "Dot", src = 15, x = 288, y = 235, w = DETAIL.GRAY_30NUM.DOT.W, h = DETAIL.GRAY_30NUM.DOT.H}
+    imgs[#imgs+1] = {id = id .. "Percent", src = 15, x = 336, y = 216, w = DETAIL.GRAY_30NUM.PERCENT.W, h = DETAIL.GRAY_30NUM.PERCENT.H}
     return skin
 end
 

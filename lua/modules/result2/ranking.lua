@@ -1,3 +1,4 @@
+require("modules.commons.define")
 require("modules.commons.easing")
 require("modules.result.commons")
 require("modules.result2.commons")
@@ -5,10 +6,15 @@ local main_state = require("main_state")
 local judges = require("modules.result2.judges")
 local scoreDetail = require("modules.result2.score_detail")
 
+local VIEW_TYPES = {
+    RANKING = 1, LAMPS = 2
+}
+
 local ranking = {
     numOfPlayers = 0,
     isOpened = false,
-    timeForAnimation = 9999999,
+    viewType = VIEW_TYPES.RANKING,
+    timeForWindow = 9999999,
     openTime = 0,
     isDrawRankCache = {},
     functions = {}
@@ -131,6 +137,31 @@ local RANKING = {
     },
 }
 
+local LAMPS = {
+    AREA = RANKING.AREA,
+    LABEL = {
+        X = function () return RANKING.AREA.X + 70 end,
+        Y = function (idx) return RANKING.GRAPH.LINE.Y(RANKING, idx) + 26 end,
+        W = 221,
+        H = 39,
+    },
+    GRAPH = {
+        AREA = RANKING.GRAPH.AREA,
+        LINE = {
+            Y = RANKING.GRAPH.LINE.Y,
+            INTERVAL_Y = RANKING.GRAPH.LINE.INTERVAL_Y,
+            GAUGE = RANKING.GRAPH.LINE.GAUGE,
+            VALUE = RANKING.GRAPH.LINE.SCORE,
+            PERCENTAGE = RANKING.GRAPH.LINE.DIFF,
+        },
+    },
+    IDS = {"max", "perfect", "fullcombo", "exhard", "hard", "normal", "easy", "laeasy", "aeasy", "failed"},
+}
+
+LAMPS.GRAPH.LINE.VALUE.X = function (self) return self.GRAPH.AREA.X(self) end
+LAMPS.GRAPH.LINE.PERCENTAGE.X = function (self) return self.GRAPH.AREA.X(self) + 92 end
+
+
 ranking.functions.isSelfRank = function (targetRank)
     local selfRank = main_state.number(179)
     if selfRank == nil then return false end
@@ -142,7 +173,11 @@ ranking.functions.isSelfRank = function (targetRank)
 end
 
 ranking.functions.getIsDrawTheRank = function (rank)
-    return ranking.isDrawRankCache[rank]
+    return ranking.viewType == VIEW_TYPES.RANKING and ranking.isDrawRankCache[rank]
+end
+
+ranking.functions.getIsDrawLamps = function ()
+    return ranking.viewType == VIEW_TYPES.LAMPS
 end
 
 ranking.functions.getIsDrawTheRankForCache = function (rank)
@@ -188,14 +223,32 @@ ranking.functions.switchOpenStateTimer = function ()
     return 1
 end
 
+--[[
+    ランキング画面を切り替える
+    closed -> ranking -> lamps -> closed の順
+]]
 ranking.functions.switchOpenState = function ()
-    ranking.isOpened = not ranking.isOpened
-    myPrint("ランキング画面切り替え: " .. (ranking.isOpened and "opened" or "closed"))
-    if ranking.isOpened then
-        ranking.timeForAnimation = main_state.time()
-        ranking.openTime = main_state.time()
+    -- 表示の状態の操作
+    if not ranking.isOpened then
+        ranking.viewType = VIEW_TYPES.RANKING
+        ranking.isOpened = true
+    elseif ranking.isOpened and ranking.viewType == VIEW_TYPES.RANKING then
+        ranking.viewType = VIEW_TYPES.LAMPS
     else
-        ranking.timeForAnimation = main_state.time() - RANKING.ANIMATION.CLOSE_TIME * 1000
+        ranking.isOpened = false
+    end
+    myPrint("ランキング画面切り替え: " .. (ranking.isOpened and "opened" or "closed"))
+    myPrint("ランキング画面切り替え type: " .. (ranking.viewType == VIEW_TYPES.RANKING and "ranking" or "lamps"))
+
+    -- 各種タイマの操作
+    if ranking.isOpened and ranking.viewType == VIEW_TYPES.RANKING then
+        ranking.timeForWindow = main_state.time()
+        ranking.openTime = main_state.time()
+    elseif ranking.isOpened and ranking.viewType == VIEW_TYPES.LAMPS then
+        -- グラフのアニメーションをするためにウィンドウを開いた直後の時刻にする
+        ranking.openTime = main_state.time() - RANKING.ANIMATION.MOVE_TIME
+    else
+        ranking.timeForWindow = main_state.time() - RANKING.ANIMATION.CLOSE_TIME * 1000
     end
 end
 
@@ -213,24 +266,26 @@ ranking.functions.windowAnimationTimer = function ()
     local moveTime = RANKING.ANIMATION.MOVE_TIME
     ranking.numOfPlayers = main_state.number(180)
     if ranking.isOpened then
-        if t - ranking.timeForAnimation > moveTime * 1000 then
-            ranking.timeForAnimation = t - moveTime * 1000
+        if t - ranking.timeForWindow > moveTime * 1000 then
+            ranking.timeForWindow = t - moveTime * 1000
         end
-        return ranking.timeForAnimation
+        return ranking.timeForWindow
     else
-        if t - ranking.timeForAnimation > (RANKING.ANIMATION.CLOSE_TIME + moveTime) * 1000 then
-            ranking.timeForAnimation = t - (RANKING.ANIMATION.CLOSE_TIME + moveTime) * 1000
+        if t - ranking.timeForWindow > (RANKING.ANIMATION.CLOSE_TIME + moveTime) * 1000 then
+            ranking.timeForWindow = t - (RANKING.ANIMATION.CLOSE_TIME + moveTime) * 1000
         end
-        return ranking.timeForAnimation
+        return ranking.timeForWindow
     end
 end
 
 ranking.functions.updateScoreGraph = function (rank)
     local t = main_state.time()
     local timeSceneOpening = t - ranking.openTime
-    if not ranking.isOpened or not ranking.functions.getIsDrawTheRank(rank) or timeSceneOpening < RANKING.ANIMATION.GAUGE_APPEAR_WAIT * 1000 then
+    -- 非表示状態か, その順位は表示しない場合
+    if not ranking.isOpened or ranking.viewType ~= VIEW_TYPES.RANKING or not ranking.functions.getIsDrawTheRank(rank) or timeSceneOpening < RANKING.ANIMATION.GAUGE_APPEAR_WAIT * 1000 then
         return t
     end
+
     local startTime = RANKING.ANIMATION.GAUGE_APPEAR_WAIT * 1000
     local endTime = RANKING.ANIMATION.GAUGE_APPEAR_ANIMATION_END * 1000
     local nowTime = math.max(startTime, math.min(timeSceneOpening, endTime)) - startTime
@@ -245,8 +300,32 @@ ranking.functions.updateScoreGraph = function (rank)
     return t - w * RANKING.ANIMATION.SCORE_GRAPH_PER_W * 1000
 end
 
+ranking.functions.updateLampsGraph = function (lampValueId)
+    local t = main_state.time()
+    local timeSceneOpening = t - ranking.openTime
+    if not ranking.isOpened or ranking.viewType ~= VIEW_TYPES.LAMPS or timeSceneOpening < RANKING.ANIMATION.GAUGE_APPEAR_WAIT * 1000 then
+        return t
+    end
+
+    local startTime = RANKING.ANIMATION.GAUGE_APPEAR_WAIT * 1000
+    local endTime = RANKING.ANIMATION.GAUGE_APPEAR_ANIMATION_END * 1000
+    local nowTime = math.max(startTime, math.min(timeSceneOpening, endTime)) - startTime
+    -- ゲージアニメーション開始
+    local totalPlayer = main_state.number(180)
+    if totalPlayer == 0 then
+        return t
+    end
+    local thisLampPlayer = main_state.number(lampValueId)
+    if thisLampPlayer < 0 then
+        return t
+    end
+    local maxW = thisLampPlayer / totalPlayer * LAMPS.GRAPH.LINE.GAUGE.W
+    local w = easing.easeOut(nowTime, 0, maxW, endTime - startTime)
+    return t - w * RANKING.ANIMATION.SCORE_GRAPH_PER_W * 1000
+end
+
 ranking.functions.load = function ()
-    ranking.timeForAnimation = -(RANKING.ANIMATION.CLOSE_TIME + RANKING.ANIMATION.MOVE_TIME) * 1000
+    ranking.timeForWindow = -(RANKING.ANIMATION.CLOSE_TIME + RANKING.ANIMATION.MOVE_TIME) * 1000
     -- とりあえず全部非表示
     for i = 1, 11 do
         ranking.isDrawRankCache[i] = false
@@ -258,6 +337,7 @@ ranking.functions.load = function ()
     RANKING.MY_BEST_SCORE = math.max(main_state.number(150), main_state.number(71))
     RANKING.IS_SHOW_PLAYER_NAME = isShowOwnPlayerNameInRanking()
     RANKING.GRAPH.LINE.GAUGE.ALPHA = getRankingGaugeAlpha()
+    LAMPS.GRAPH.LINE.GAUGE.ALPHA = getRankingGaugeAlpha()
     local skin = {
         image = {
             {id = "rankingBokehBg", src = getBokehBgSrc(), x = RANKING.AREA.X, y = HEIGHT - RANKING.AREA.Y - RANKING.AREA.H, w = RANKING.AREA.W, h = RANKING.AREA.H},
@@ -314,6 +394,65 @@ ranking.functions.load = function ()
         vals[#vals+1] = scoreDetail.loadGray30NumberWithSign("rank" .. i .. "DiffScore", 5, 0, 0, nil, function () return ranking.functions.getDiffScore(i) end)
         timers[#timers+1] = {id = CUSTOM_TIMERS_RESULT2.RANKING_SCORE_GRAPH1_TIMER + (i - 1), timer = function () return ranking.functions.updateScoreGraph(i) end}
     end
+
+    -- ランプグラフ用の読み込み
+    local valueId = {224, 222, 218, 208, 216, 214, 212, 206, 204, 210}
+    local rateId = {225, 223, 219, 209, 217, 215, 213, 207, 205, 211} -- NO PLAY(202)は入れない
+    local afId = {240, 239, 238, 233, 237, 236, 235, 232, 231, 234}
+    for i, id in ipairs(LAMPS.IDS) do
+        -- グラフ用. ランキングと仕様を合わせるため普通のimageで
+        imgs[#imgs+1] = {
+            id = id .. "LampGraph", src = 31, x = i - 1, y = 0, w = 1, h = RANKING.GRAPH.LINE.GAUGE.H
+        }
+        -- ラベル
+        imgs[#imgs+1] = {
+            id = id .. "LampLabel", src = 32, x = 0, y = LAMPS.LABEL.H * (i - 1), w = LAMPS.LABEL.W, h = LAMPS.LABEL.H
+        }
+        -- パーセンテージ
+        mergeSkin(skin, scoreDetail.loadRate30Number(id .. "LampRateValue", 1, rateId[i], afId[i]))
+        -- 人数
+        vals[#vals+1] = scoreDetail.loadGray30Number(id .. "LampValue", 5, 0, 0, valueId[i], nil)
+        timers[#timers+1] = {id = CUSTOM_TIMERS_RESULT2.LAMPS_GRAPH_TIMER + (i - 1), timer = function () return ranking.functions.updateLampsGraph(valueId[i]) end}
+    end
+
+    return skin
+end
+
+ranking.functions.dstLamp = function ()
+    local skin = {destination = {}}
+    local isDrawLamp = ranking.functions.getIsDrawLamps
+    local dst = skin.destination
+    local num30 = scoreDetail.getGray30NumData()
+    for i = 1, #LAMPS.IDS do
+        local id = LAMPS.IDS[i]
+        -- ランプのラベル
+        dst[#dst+1] = {
+            id = id .. "LampLabel", draw = isDrawLamp, dst = {
+                {x = LAMPS.LABEL.X(), y = LAMPS.LABEL.Y(i), w = LAMPS.LABEL.W, h = LAMPS.LABEL.H}
+            }
+        }
+        -- gauge
+        dst[#dst+1] = {
+            id = id .. "LampGraph", draw = isDrawLamp, timer = CUSTOM_TIMERS_RESULT2.LAMPS_GRAPH_TIMER + (i - 1), loop = RANKING.ANIMATION.SCORE_GRAPH_PER_W * RANKING.GRAPH.LINE.GAUGE.W, dst = {
+                {time = 0, x = LAMPS.GRAPH.LINE.GAUGE.X(LAMPS), y = LAMPS.GRAPH.LINE.GAUGE.Y(LAMPS, i), w = 0, h = LAMPS.GRAPH.LINE.GAUGE.H, a = LAMPS.GRAPH.LINE.GAUGE.ALPHA},
+                {time = RANKING.ANIMATION.SCORE_GRAPH_PER_W * LAMPS.GRAPH.LINE.GAUGE.W, w = LAMPS.GRAPH.LINE.GAUGE.W},
+            }
+        }
+        -- 人数
+        dst[#dst+1] = {
+            id = id .. "LampValue", draw = isDrawLamp, dst = {
+                {x = LAMPS.GRAPH.LINE.VALUE.X(LAMPS), y = LAMPS.GRAPH.LINE.VALUE.Y(LAMPS, i), w = LAMPS.GRAPH.LINE.VALUE.W, h = LAMPS.GRAPH.LINE.VALUE.H}
+            }
+        }
+        -- パーセンテージ
+        local pid = id .. "LampRateValue"
+        local p = dstPercentage(pid, pid .. "Dot", pid .. "AfterDot", pid .. "Percent", 1, LAMPS.GRAPH.LINE.PERCENTAGE.X(LAMPS), LAMPS.GRAPH.LINE.PERCENTAGE.Y(LAMPS, i), LAMPS.GRAPH.LINE.VALUE.W, LAMPS.GRAPH.LINE.VALUE.H, 0, num30.DOT, num30.PERCENT)
+        for _, value in pairs(p.destination) do
+            value.draw = isDrawLamp
+        end
+        mergeSkin(skin, p)
+    end
+
     return skin
 end
 
@@ -453,7 +592,10 @@ ranking.functions.dst = function ()
         }
     }
 
-    -- グラフ以外の全てにアニメーション用のタイマとxを設定
+    -- ランプ側読み込み
+    mergeSkin(skin, ranking.functions.dstLamp())
+
+    -- ゲージ以外の全てにアニメーション用のタイマとxを設定
     do
         local moveTime = RANKING.ANIMATION.MOVE_TIME
         local moveW = RANKING.AREA.SHADOW_W
@@ -470,6 +612,7 @@ ranking.functions.dst = function ()
                 d.dst[2] = {time = moveTime, x = toX}
                 d.dst[3] = {time = RANKING.ANIMATION.CLOSE_TIME, x = toX}
                 d.dst[4] = {time = RANKING.ANIMATION.CLOSE_TIME + moveTime, x = fromX}
+                -- 背景だけアルファのアニメーションを加える
                 if d.id == "rankingBokehBg" then
                     d.dst[1].a = 0
                     d.dst[2].a = 255
@@ -477,6 +620,7 @@ ranking.functions.dst = function ()
             end
         end
     end
+
     -- マウスdeスイッチ用の出力
     dst[#dst+1] = {
         id = "switchRankingWindowButton", dst = {

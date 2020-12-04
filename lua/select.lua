@@ -3,6 +3,8 @@ require("modules.commons.http")
 require("modules.commons.my_window")
 require("modules.commons.numbers")
 require("modules.commons.position")
+local json = require("modules.commons.json")
+local ctest = require("modules.commons.async")
 local commons = require("modules.select.commons")
 local background = require("modules.select.background")
 local help = require("modules.select.help")
@@ -478,7 +480,23 @@ local function destinationSmallKeysInHelp(skin, baseX, baseY, activeKeys, appear
     end
 end
 
+local isconnected = false
+local getMusicObj = nil
+local function test()
+    if not isconnected then
+        -- getMusicObj = getMusicDataAsync("梅雨の黒い黄昏 [DP REAL+3]")
+        getMusicObj = getMusicDataAsync("瑠璃色小箱 (b-UMB More Dark Mix)")
+        getMusicObj:runHttpRequest()
+        isconnected = true
+    else
+        if not getMusicObj.isConnecting then
+            print(getMusicObj.data["title"])
+        end
+    end
+end
+
 local function main()
+    test()
 	local skin = {}
 	-- ヘッダ情報をスキン本体にコピー
 	for k, v in pairs(header) do
@@ -528,6 +546,7 @@ local function main()
     table.insert(skin.customTimers, {id = statistics.getWindowTimerId(), timer = "statisticsTimer"}) -- 統計画面全体のタイマー
     table.insert(skin.customTimers, {id = volumes.getWindowTimerId(), timer = "volumesTimer"}) -- 音量設定画面全体のタイマー
     table.insert(skin.customTimers, {id = 13000, timer = "update"})
+    table.insert(skin.customTimers, {id = 18000, timer = function () test() end})
     -- 13100はmenu
 
     skin.customEvents = {} -- 1000~未定はヘルプ

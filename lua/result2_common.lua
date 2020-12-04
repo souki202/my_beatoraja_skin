@@ -287,6 +287,7 @@ local function main()
         {id = 29, path = "../result2/parts/ranking/graph_area_shadow.png"},
         {id = 30, path = "../result2/parts/ranking/order.png"},
         {id = 31, path = "../result2/parts/ranking/gauge.png"},
+        {id = 32, path = "../result2/parts/ranking/lamps/default.png"},
 
         -- 背景群
         {id = 100, path = "../result2/background/isclear/clear/*.png"},
