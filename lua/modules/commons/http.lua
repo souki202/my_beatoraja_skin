@@ -1,5 +1,4 @@
 local luajava = require("luajava")
-local json = require("modules.commons.json")
 require("modules.commons.url_encoder")
 
 local function httpConnection(url)
@@ -51,6 +50,11 @@ function skinVersionCheck(nowVersions)
 end
 
 local function parseMusicData(musicDataLines)
+    if DEBUG == true then
+        for key, value in ipairs(musicDataLines) do
+            print(value)
+        end
+    end
     local result = {}
 
     local getInsertTargetTable = function (keyArray)
@@ -59,12 +63,16 @@ local function parseMusicData(musicDataLines)
             if i >= #keyArray then
                 return nowDict
             end
+            if isNumber(key) then
+                key = tonumber(key)
+            end
             -- 該当のキーがなければ作る
             if not table.in_key(nowDict, key) then
                 nowDict[key] = {}
             end
             nowDict = nowDict[key]
         end
+        return nowDict
     end
 
     for _, line in ipairs(musicDataLines) do
@@ -73,7 +81,10 @@ local function parseMusicData(musicDataLines)
         local value = string.sub(line, separatePos + 1)
         local keyArray = string.split(key, ".")
         local t = getInsertTargetTable(keyArray)
-        t[keyArray[#keyArray]] = value
+
+        local k = keyArray[#keyArray]
+        if isNumber(k) then k = tonumber(k) end
+        t[k] = string.gsub(value, "(\\n)", "\n")
     end
 
     -- デバッグ出力
@@ -82,17 +93,25 @@ local function parseMusicData(musicDataLines)
         for key, value in pairs(result) do
             print(key, value)
         end
+        -- print ("難易度表数: " .. #result.tables)
     end
     return result
 end
 
+--[[
+    楽曲情報をHTTPで取得する
+
+    @param {string} title 楽曲名
+    @param {function(bool, array)} callback 取得完了時のcallback関数 成功時は第一引数にtrueが入る. 第二引数は取得したデータ
+]]
 function getMusicDataAsync(title)
-    local url = "https://bmsapi.tori-blog.net/?title=" .. URLEncoder.encode(title) .. "&format=lua"
+    local url = "https://bmsapi.tori-blog.net/?title=" .. URLEncoder.encode(title) .. "&format=lua&v=2"
     return {
         isConnecting = false,
+        wasSuccess = false,
         data = {},
 
-        runHttpRequest = function (self)
+        runHttpRequest = function (self, callback)
             -- 前回の接続が終わっていなければ終了
             if self.isConnecting == true then
                 return
@@ -102,6 +121,7 @@ function getMusicDataAsync(title)
                 run = function ()
                     print("楽曲情報取得開始: " .. title)
                     print("url: " .. url)
+                    self.wasSuccess = false
                     local url2 = luajava.newInstance("java.net.URL", url);
                     local urlConn = url2:openConnection()
                     urlConn:setRequestMethod("GET")
@@ -122,11 +142,9 @@ function getMusicDataAsync(title)
                                     hasLine = false
                                 end
                             end
-                            self.data = parseMusicData(lines)
-
                             -- parseする
-
-                            print("楽曲情報取得完了: ")
+                            self.wasSuccess, self.data = pcall(parseMusicData, lines)
+                            print("楽曲情報取得完了")
                         else
                             print("HTTPステータスが正常ではありません: " .. status)
                         end
@@ -134,6 +152,7 @@ function getMusicDataAsync(title)
                         print("connectに失敗しました")
                     end
                     self.isConnecting = false
+                    callback(self.wasSuccess, self.data)
                 end
             }
             local runnableProxy = luajava.createProxy("java.lang.Runnable", runnable)

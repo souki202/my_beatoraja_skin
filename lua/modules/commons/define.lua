@@ -135,6 +135,22 @@ function split(str, delim)
     return t
 end
 
+function isNumber(str)
+    if type(str) == "string" then
+        for i = 1, string.len(str) do
+            local b = str:byte(i)
+            if not(48 <= b and b <= 57) then
+                return false
+            end
+        end
+        return true
+    elseif type(str) == "number" then
+        return true
+    end
+
+    return false
+end
+
 --[[
     hsvをrgbに変換する
     @param  int h Hue 0 <= h <= 360
