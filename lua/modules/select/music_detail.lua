@@ -20,6 +20,10 @@ local musicDetail = {
     tablesString = "",
     wasDrawed = false,
     lastGetDataTitle = "",
+    event = {
+        name = "",
+        url = "",
+    },
     functions = {}
 }
 
@@ -32,36 +36,71 @@ musicDetail.functions.clearViewData = function ()
     musicDetail.getMusicDataObj = nil
     musicDetail.tablesString = ""
     musicDetail.wasDrawed = false
+    musicDetail.lastGetDataTitle = ""
+    musicDetail.event = {
+        name = "",
+        url = "",
+    }
 end
 
+--[[
+    楽曲のイベント情報を取得する
+    @return array {name, url}
+]]
+musicDetail.functions.getEventData = function ()
+    return musicDetail.event
+end
+
+musicDetail.functions.updateMusicDetailData = function (data, title)
+    musicDetail.musicData = data
+    musicDetail.tablesString = ""
+    if musicDetail.musicData.tables ~= nil then
+        for _, value in pairs(musicDetail.musicData.tables) do
+            -- level orderとfolder orderは不要なので削除
+            value.detail.level_order = {}
+            value.detail.folder_order = {}
+            -- テーブル名を入れる
+            if value.detail.type == nil or value.detail.type == "table" then
+                if musicDetail.tablesString == "" then
+                    musicDetail.tablesString = value.detail.name
+                else
+                    musicDetail.tablesString = musicDetail.tablesString .. "\n" .. value.detail.name
+                end
+            elseif value.detail.type ~= nil and value.detail.type == "event" then
+                -- イベントの場合は, イベント名とurlを取得
+                musicDetail.event.name = value.detail.name
+                if value.detail.event_url ~= nil then
+                    musicDetail.event.url = value.detail.event_url
+                else musicDetail.event.url = ""
+                end
+                print("イベント情報: " .. musicDetail.event.name, musicDetail.event.url)
+            end
+        end
+    end
+    musicDetail.wasDrawed = true
+    musicDetail.lastGetDataTitle = title
+
+end
+
+--[[
+    タイマーから呼び出す関数
+]]
 musicDetail.functions.getMusicDetail = function ()
     if MUSIC_DATA_CACHE == nil then
         return
     end
 
-    if not main_state.option(2) then
+    if not main_state.option(2) or main_state.option(1030) then
         musicDetail.functions.clearViewData()
         return 0
     end
 
     -- cacheがヒットしたらそれをとって終了
-    local title = main_state.text(10)
+    local title = main_state.text(12)
     if MUSIC_DATA_CACHE[title] ~= nil then
         if musicDetail.lastGetDataTitle ~= title then
             print("キャッシュがヒット: " .. title)
-            musicDetail.musicData = MUSIC_DATA_CACHE[title]
-            musicDetail.tablesString = ""
-            for _, value in pairs(musicDetail.musicData.tables) do
-                if musicDetail.tablesString == "" then
-                    -- musicDetail.tablesString = value.detail.name
-                    musicDetail.tablesString = value.comment
-                else
-                    -- musicDetail.tablesString = musicDetail.tablesString .. "\n" .. value.detail.name
-                    musicDetail.tablesString = musicDetail.tablesString .. "\n" .. value.comment
-                end
-            end
-            musicDetail.wasDrawed = true
-            musicDetail.lastGetDataTitle = title
+            musicDetail.functions.updateMusicDetailData(MUSIC_DATA_CACHE[title], title)
         end
         return
     end
@@ -79,25 +118,15 @@ musicDetail.functions.getMusicDetail = function ()
         -- 取得用オブジェクトが無ければ取得する
         musicDetail.getMusicDataObj = getMusicDataAsync(title)
         musicDetail.getMusicDataObj:runHttpRequest(function (isSuccess, data)
+            -- callback関数
+
             if not isSuccess then
                 return
             end
 
             myPrint("テーブル情報更新")
-            musicDetail.musicData = data
-            musicDetail.tablesString = ""
-            for _, value in pairs(musicDetail.musicData.tables) do
-                if musicDetail.tablesString == "" then
-                    -- musicDetail.tablesString = value.detail.name
-                    musicDetail.tablesString = value.comment
-                else
-                    -- musicDetail.tablesString = musicDetail.tablesString .. "\n" .. value.detail.name
-                    musicDetail.tablesString = musicDetail.tablesString .. "\n" .. value.comment
-                end
-            end
-            musicDetail.wasDrawed = true
+            musicDetail.functions.updateMusicDetailData(data, title)
             musicDetail.functions.addCache(data, title)
-            musicDetail.lastGetDataTitle = title
         end)
     end
 end
@@ -175,12 +204,12 @@ end
 musicDetail.functions.dst = function ()
     return {
         destination = {
-            {id = "white", dst = {
-                {x = 0, y = 0, w = 800, h = 1400}
-            }},
-            {id = "tableString", dst = {
-                {x = 100, y = 900, w = 1000, h = 48, r = 0, g = 0, b = 0}
-            }}
+            -- {id = "white", dst = {
+            --     {x = 0, y = 0, w = 800, h = 1400}
+            -- }},
+            -- {id = "tableString", dst = {
+            --     {x = 100, y = 900, w = 1000, h = 48, r = 0, g = 0, b = 0}
+            -- }}
         }
     }
 end

@@ -188,6 +188,7 @@ local header = {
         {name = "他画像-----------------------------------------", path="../dummy/*"},
         {name = "NoImage画像", path = "../select/noimage/*.png", def = "default"},
         {name = "ステージファイルフレーム", path = "../select/parts/stagefileframe/*.png", def = "simple"},
+        {name = "ステージファイルマスク", path = "../select/parts/stagefilemask/*.png", def = "default"},
         {name = "曲リストバーの画像(太い)", path = "../select/parts/songlist/thick/*.png", def = "default"},
         {name = "曲リストバーの画像(細い)", path = "../select/parts/songlist/thin/*.png", def = "default"},
         {name = "曲リストバーの背景", path = "../select/parts/songlist/bg/*.png", def = "default"},
@@ -514,6 +515,7 @@ local function main()
         {id = 10, path = "../select/parts/songlist/thick/*.png"},
         {id = 11, path = "../select/parts/songlist/thin/*.png"},
         {id = 13, path = "../select/parts/songlist/bg/*.png"},
+        {id = 20, path = "../select/parts/stagefilemask/*.png"},
         {id = 999, path = "../common/colors/colors.png"}
     }
 
