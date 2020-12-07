@@ -35,7 +35,7 @@ local STAGE_FILE = {
         TEXT = {
             X = function (self) return self.X + 4 end,
             Y = function (self) return self.Y + 3 end,
-            W = 580,
+            W = 551,
             SIZE = 18,
         },
         OPEN_ICON = {
@@ -44,6 +44,12 @@ local STAGE_FILE = {
             W = 25,
             H = 25,
         }
+    },
+    MUSIC_ICON = {
+        X = function (self) return self.X + (self.W - 27 - 29) end,
+        Y = function (self) return self.Y + 1 end,
+        W = 25,
+        H = 25,
     }
 }
 
@@ -59,6 +65,10 @@ stagefile.functions.load = function ()
             {
                 id = "openEventIcon", src = 0, x = 1408, y = PARTS_TEXTURE_SIZE - STAGE_FILE.EVENT.OPEN_ICON.H, w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H,
                 act = function () desktop.openUrlByBrowser(musicDetail.getEventData().url) end
+            },
+            {
+                id = "openMusicLinkIcon", src = 0, x = 1433, y = PARTS_TEXTURE_SIZE - STAGE_FILE.MUSIC_ICON.H, w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H,
+                act = function () desktop.openUrlByBrowser(musicDetail.getMusicLink()) end
             }
         },
         text = {
@@ -110,6 +120,12 @@ stagefile.functions.dst = function ()
             {
                 id = "openEventIcon", draw = function () return musicDetail.getEventData().url ~= "" end, dst = {
                     {x = STAGE_FILE.EVENT.OPEN_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.OPEN_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H}
+                }
+            },
+            -- ブラウザで開くアイコン
+            {
+                id = "openMusicLinkIcon", draw = function () return musicDetail.getMusicLink() ~= "" end, dst = {
+                    {x = STAGE_FILE.MUSIC_ICON.X(STAGE_FILE), y = STAGE_FILE.MUSIC_ICON.Y(STAGE_FILE), w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H}
                 }
             },
             -- イベント名

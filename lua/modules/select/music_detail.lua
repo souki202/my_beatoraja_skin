@@ -4,7 +4,9 @@ local main_state = require("main_state")
 
 -- キャッシュファイル読み込みエラー対策でpcallできるようにする
 local function cacheRequire()
-    require("cache.music_data")
+    if isUseMusicDb() then
+        require("cache.music_data")
+    end
 end
 local wasSuccessLoadCache, _ = pcall(cacheRequire)
 
@@ -24,6 +26,7 @@ local musicDetail = {
         name = "",
         url = "",
     },
+    musicLink = "",
     functions = {}
 }
 
@@ -37,6 +40,7 @@ musicDetail.functions.clearViewData = function ()
     musicDetail.tablesString = ""
     musicDetail.wasDrawed = false
     musicDetail.lastGetDataTitle = ""
+    musicDetail.musicLink = ""
     musicDetail.event = {
         name = "",
         url = "",
@@ -51,39 +55,59 @@ musicDetail.functions.getEventData = function ()
     return musicDetail.event
 end
 
+musicDetail.functions.getMusicLink = function ()
+    return musicDetail.musicLink
+end
+
 musicDetail.functions.updateMusicDetailData = function (data, title)
     musicDetail.musicData = data
     musicDetail.tablesString = ""
     if musicDetail.musicData.tables ~= nil then
         for _, value in pairs(musicDetail.musicData.tables) do
-            -- level orderとfolder orderは不要なので削除
-            value.detail.level_order = {}
-            value.detail.folder_order = {}
-            -- テーブル名を入れる
-            if value.detail.type == nil or value.detail.type == "table" then
-                if musicDetail.tablesString == "" then
-                    musicDetail.tablesString = value.detail.name
-                else
-                    musicDetail.tablesString = musicDetail.tablesString .. "\n" .. value.detail.name
+            -- 楽曲リンクを入れる
+            if musicDetail.musicLink == "" then
+                musicDetail.musicLink = value.url
+            elseif
+                value.url:find("(manbow.nothing.sh)|(k-bms.com)|(venue.bmssearch.net)|(toymusical.net)") ~= nil
+                or (
+                    musicDetail.musicLink:find("(manbow.nothing.sh)|(k-bms.com)|(venue.bmssearch.net)|(toymusical.net)", 1, true) == nil
+                    and #musicDetail.musicLink < #value.url
+                )
+                then
+                musicDetail.musicLink = value.url
+                myPrint("イベントリンク優先: " .. musicDetail.musicLink)
+            end
+
+            if value.detail ~= nil and value.detail ~= "None" then
+                -- level orderとfolder orderは不要なので削除
+                value.detail.level_order = {}
+                value.detail.folder_order = {}
+                -- テーブル名を入れる
+                if value.detail.type == nil or value.detail.type == "table" then
+                    if musicDetail.tablesString == "" then
+                        musicDetail.tablesString = value.detail.name
+                    else
+                        musicDetail.tablesString = musicDetail.tablesString .. "\n" .. value.detail.name
+                    end
+                elseif value.detail.type ~= nil and value.detail.type == "event" then
+                    -- イベントの場合は, イベント名とurlを取得
+                    musicDetail.event.name = value.detail.name
+                    if value.detail.event_url ~= nil then
+                        musicDetail.event.url = value.detail.event_url
+                    else musicDetail.event.url = ""
+                    end
+                    print("イベント情報: " .. musicDetail.event.name, musicDetail.event.url)
                 end
-            elseif value.detail.type ~= nil and value.detail.type == "event" then
-                -- イベントの場合は, イベント名とurlを取得
-                musicDetail.event.name = value.detail.name
-                if value.detail.event_url ~= nil then
-                    musicDetail.event.url = value.detail.event_url
-                else musicDetail.event.url = ""
-                end
-                print("イベント情報: " .. musicDetail.event.name, musicDetail.event.url)
             end
         end
     end
     musicDetail.wasDrawed = true
     musicDetail.lastGetDataTitle = title
-
 end
 
 --[[
     タイマーから呼び出す関数
+    isUseMusicDbがfalseの場合はそもそも呼び出されない
 ]]
 musicDetail.functions.getMusicDetail = function ()
     if MUSIC_DATA_CACHE == nil then
@@ -182,7 +206,7 @@ musicDetail.functions.addCache = function (data, localTitle)
     end
     io.output(f)
     local cache = musicDetail.functions.createCacheString(data, "")
-    io.write(MUSIC_DETAIL.VAR_NAME .. '["' .. musicDetail.functions.escapeForLuaValue(data.title) .. '"]=' .. cache .. "\n")
+    io.write(MUSIC_DETAIL.VAR_NAME .. '["' .. musicDetail.functions.escapeForLuaValue(localTitle) .. '"]=' .. cache .. "\n")
     print("add cache: " .. cache)
     io.close(f)
     MUSIC_DATA_CACHE[localTitle] = data

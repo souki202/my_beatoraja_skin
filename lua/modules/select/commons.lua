@@ -71,4 +71,8 @@ function isShowScoreRate()
     return getTableValue(skin_config.option, "EXSCORE下の表示種類", 981) == 981
 end
 
+function isUseMusicDb()
+    return getTableValue(skin_config.option, "楽曲データベースの使用", 985) == 985
+end
+
 return SELECT

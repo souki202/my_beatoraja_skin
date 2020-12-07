@@ -121,7 +121,7 @@ local header = {
     fadeout = 500,
     scene = 3000,
     input = commons.INPUT_WAIT,
-    -- 使用済み 980まで
+    -- 使用済み 985まで
     property = {
         {
             name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}, def = "画像(png)"
@@ -173,6 +173,9 @@ local header = {
         },
         {
             name = "新バージョン確認", item = {{name = "する", op = 998}, {name = "しない", op = 999}}, def = "する",
+        },
+        {
+            name = "楽曲データベースの使用", item = {{name = "ON", op = 985}, {name = "OFF", op = 986}}, def = "ON"
         },
         {
             name = "タイルアニメーション設定------------------------", item = {{name = "-"}}
@@ -530,7 +533,9 @@ local function main()
     end
     table.insert(skin.customTimers, {id = statistics.getWindowTimerId(), timer = "statisticsTimer"}) -- 統計画面全体のタイマー
     table.insert(skin.customTimers, {id = volumes.getWindowTimerId(), timer = "volumesTimer"}) -- 音量設定画面全体のタイマー
-    table.insert(skin.customTimers, {id = musicDetail.getHttpTimer(), timer = function () musicDetail.getMusicDetail() end})
+    if isUseMusicDb() then
+        table.insert(skin.customTimers, {id = musicDetail.getHttpTimer(), timer = function () musicDetail.getMusicDetail() end})
+    end
     table.insert(skin.customTimers, {id = 13000, timer = "update"})
     -- 13100はmenu
 
