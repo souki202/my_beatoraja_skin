@@ -34,26 +34,32 @@ local STAGE_FILE = {
     },
     EVENT = {
         TEXT = {
-            X = function (self) return self.X + 4 end,
+            X = function (self) return self.X + (4 + 29 * 2 + 4) end,
             Y = function (self) return self.Y + 3 end,
             W = 551,
             SIZE = 18,
         },
         OPEN_ICON = {
-            X = function (self) return self.X + (self.W - 27) end,
+            X = function (self) return self.X + 4 end,
+            Y = function (self) return self.Y + 1 end,
+            W = 25,
+            H = 25,
+        },
+        LIST_ICON = {
+            X = function (self) return self.X + (4 + 29) end,
             Y = function (self) return self.Y + 1 end,
             W = 25,
             H = 25,
         }
     },
     MUSIC_ICON = {
-        X = function (self) return self.X + (self.W - 27 - 29) end,
+        X = function (self) return self.X + (self.W - 29) end,
         Y = function (self) return self.Y + 1 end,
         W = 25,
         H = 25,
     },
     README_ICON = {
-        X = function (self) return self.X + (self.W - 27 - 29 * 2) end,
+        X = function (self) return self.X + (self.W - 29 * 2) end,
         Y = function (self) return self.Y + 1 end,
         W = 25,
         H = 25,
@@ -71,11 +77,15 @@ stagefile.functions.load = function ()
             {id = "stageFileMask", src = 20, x = 0, y = 0, w = -1, h = -1},
             {
                 id = "openEventIcon", src = 0, x = 1408, y = PARTS_TEXTURE_SIZE - STAGE_FILE.EVENT.OPEN_ICON.H, w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H,
-                act = function () desktop.openUrlByBrowser(musicDetail.getEventData().url) end
+                act = function () desktop.openUrlByBrowser(musicDetail.getEventData().musicList) end
             },
             {
                 id = "openMusicLinkIcon", src = 0, x = 1433, y = PARTS_TEXTURE_SIZE - STAGE_FILE.MUSIC_ICON.H, w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H,
                 act = function () desktop.openUrlByBrowser(musicDetail.getMusicLink()) end
+            },
+            {
+                id = "openEventSpecialPageIcon", src = 0, x = 1483, y = PARTS_TEXTURE_SIZE - STAGE_FILE.EVENT.LIST_ICON.H, w = STAGE_FILE.EVENT.LIST_ICON.W, h = STAGE_FILE.EVENT.LIST_ICON.H,
+                act = function () desktop.openUrlByBrowser(musicDetail.getEventData().url) end
             },
             {id = "openReadmeIcon", src = 0, x = 1458, y = PARTS_TEXTURE_SIZE - STAGE_FILE.README_ICON.H, w = STAGE_FILE.README_ICON.W, h = STAGE_FILE.README_ICON.H, act = 17}
         },
@@ -126,13 +136,23 @@ stagefile.functions.dst = function ()
             },
             -- イベントブラウザで開くアイコン
             {
-                id = "openEventIcon", draw = function () return musicDetail.getEventData().url ~= "" and main_state.option(2) end, dst = {
+                id = "openEventIcon", draw = function () return musicDetail.getEventData().musicList ~= "" and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.EVENT.OPEN_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.OPEN_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H}
                 }
             },
             {
-                id = "openEventIcon", draw = function () return musicDetail.getEventData().url == "" and main_state.option(2) end, dst = {
+                id = "openEventIcon", draw = function () return musicDetail.getEventData().musicList == "" and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.EVENT.OPEN_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.OPEN_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H, a = 96}
+                }
+            },
+            {
+                id = "openEventSpecialPageIcon", draw = function () return musicDetail.getEventData().url ~= "" and main_state.option(2) end, dst = {
+                    {x = STAGE_FILE.EVENT.LIST_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.LIST_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.LIST_ICON.W, h = STAGE_FILE.EVENT.LIST_ICON.H}
+                }
+            },
+            {
+                id = "openEventSpecialPageIcon", draw = function () return musicDetail.getEventData().url == "" and main_state.option(2) end, dst = {
+                    {x = STAGE_FILE.EVENT.LIST_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.LIST_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.LIST_ICON.W, h = STAGE_FILE.EVENT.LIST_ICON.H, a = 96}
                 }
             },
             -- 楽曲ブラウザで開くアイコン

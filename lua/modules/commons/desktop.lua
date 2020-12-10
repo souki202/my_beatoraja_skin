@@ -7,7 +7,7 @@ local desktop = {
 }
 
 desktop.functions.openUrlByBrowser = function (url)
-    if url == "" then
+    if url == nil or url == "" then
         return
     end
 

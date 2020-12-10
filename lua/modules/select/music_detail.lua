@@ -25,6 +25,7 @@ local musicDetail = {
     event = {
         name = "",
         url = "",
+        musicList = "",
     },
     musicLink = "",
     functions = {}
@@ -52,6 +53,17 @@ local EVENT_LIST = {
     YARUKI0 = {
         A1_5th = {name = "A-1 ClimaX 5th -いちぬけた！-", url = "http://yaruki0.sakura.ne.jp/event/A1_5th/", musicList = ""},
         A1_6th = {name = "A-1 ClimaX 6th -To Air Graduation-", url = "http://a1climax6th.web.fc2.com", musicList = ""}
+    },
+    MUMEI0 = {name = "無名戦対抗戦", url = "https://event.yaruki0.net/mumeiVS/", musicList = "https://event.yaruki0.net/VSevent/"},
+    KBMS = {
+        {name = "PABAT! 2013 Seasons", url = "https://k-bms.com/party_pabat/party.jsp?board_num=1", musicList = "https://k-bms.com/party_pabat/party.jsp?board_num=1"},
+        {name = "PABAT! 2014 Seasons", url = "https://k-bms.com/party_pabat/party.jsp?board_num=11", musicList = "https://k-bms.com/party_pabat/party.jsp?board_num=11"},
+        {name = "PABAT! 2015 Seasons", url = "https://k-bms.com/party_pabat/party.jsp?board_num=15", musicList = "https://k-bms.com/party_pabat/party.jsp?board_num=15"},
+        {name = "PABAT! 2016 Seasons", url = "https://k-bms.com/party_pabat/party.jsp?board_num=16", musicList = "https://k-bms.com/party_pabat/party.jsp?board_num=16"},
+        {name = "PABAT! 2017 Seasons", url = "https://k-bms.com/party_pabat/party.jsp?board_num=17", musicList = "https://k-bms.com/party_pabat/party.jsp?board_num=17"},
+        {name = "PABAT! 2018 Seasons", url = "https://k-bms.com/party_pabat/party.jsp?board_num=18", musicList = "https://k-bms.com/party_pabat/party.jsp?board_num=18"},
+        {name = "PABAT! 2019 Seasons", url = "https://k-bms.com/party_pabat/party.jsp?board_num=19", musicList = "https://k-bms.com/party_pabat/party.jsp?board_num=19"},
+        {name = "PABAT! 2020 Seasons", url = "https://k-bms.com/party_pabat/party.jsp?board_num=20", musicList = "https://k-bms.com/party_pabat/party.jsp?board_num=20"},
     },
     MANBOW = {
         -- 適当に1~500まで配列埋めしてから初期化
@@ -218,13 +230,30 @@ musicDetail.functions.initManbowEvent = function ()
 end
 
 musicDetail.functions.guessEvent = function (url)
-    if url:find("yaruki0.sakura.ne.jp") then
+    if url:find("yaruki0.sakura.ne.jp", 1, true) then
         for key, value in pairs(EVENT_LIST.YARUKI0) do
             if url:find(key, 1, true) then
                 return value
             end
         end
-    elseif url:find("manbow.nothing.sh") then
+    elseif url:find("mumeiVS", 1, true) then
+        return EVENT_LIST.MUMEI0
+    elseif url:find("k-bms", 1, true) then
+        local _, _, str = url:find("board_num=(%d+)")
+        if str == nil then
+            return {name = "", url = ""}
+        elseif isNumber(str) and tonumber(str) > 0 then
+            str = tonumber(str)
+            if str == 1 then
+                return EVENT_LIST.KBMS[1]
+            elseif str == 11 then
+                return EVENT_LIST.KBMS[2]
+            elseif str >= 15 then
+                return EVENT_LIST.KBMS[str - 12]
+            end
+            return EVENT_LIST.MANBOW[tonumber(str)]
+        end
+    elseif url:find("manbow.nothing.sh", 1, true) then
         local _, _, str = url:find("event=(%d+)")
         if str == nil then
             return {name = "", url = ""}
@@ -232,6 +261,7 @@ musicDetail.functions.guessEvent = function (url)
             return EVENT_LIST.MANBOW[tonumber(str)]
         end
     end
+    return nil
 end
 
 musicDetail.functions.updateMusicDetailData = function (data, title)
@@ -278,10 +308,14 @@ musicDetail.functions.updateMusicDetailData = function (data, title)
     end
     -- 楽曲URLからイベント情報を取得
     local eventInfo = musicDetail.functions.guessEvent(musicDetail.musicLink)
-    if eventInfo then
+    if eventInfo ~= nil then
         if musicDetail.event.name == "" then
             myPrint("楽曲URLからイベント情報推測")
             musicDetail.event = eventInfo
+        else
+            if musicDetail.event.musicList == "" then
+                musicDetail.event.musicList = eventInfo.musicList
+            end
         end
     end
     musicDetail.wasDrawed = true
