@@ -1,9 +1,13 @@
-# 利用方法
+# Social Skin, Glass Style(リザルトのみ)
 
-beatoraja/skin/に適当なフォルダを作成し, そこに入れてください.
-hogehoge
-hogehoge
+## 利用方法
 
-## バージョンチェックディレクトリ
+beatoraja/skin/にに入れてください.
 
-`/opt/bitnami/apps/wordpress/htdocs/wp-content/uploads/skin`
+## 楽曲DBキャッシュ
+
+SocialSkin/lua/cache/music_data.lua を削除してください. (ディレクトリごと削除しないようにお願いします.)
+
+## その他
+
+[特設](https://tori-blog.net/bms/1392/)

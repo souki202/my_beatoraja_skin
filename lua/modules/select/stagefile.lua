@@ -1,4 +1,5 @@
 local commons = require("modules.select.commons")
+local main_state = require("main_state")
 local desktop = require("modules.commons.desktop")
 local musicDetail = require("modules.select.music_detail")
 
@@ -50,6 +51,12 @@ local STAGE_FILE = {
         Y = function (self) return self.Y + 1 end,
         W = 25,
         H = 25,
+    },
+    README_ICON = {
+        X = function (self) return self.X + (self.W - 27 - 29 * 2) end,
+        Y = function (self) return self.Y + 1 end,
+        W = 25,
+        H = 25,
     }
 }
 
@@ -69,7 +76,8 @@ stagefile.functions.load = function ()
             {
                 id = "openMusicLinkIcon", src = 0, x = 1433, y = PARTS_TEXTURE_SIZE - STAGE_FILE.MUSIC_ICON.H, w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H,
                 act = function () desktop.openUrlByBrowser(musicDetail.getMusicLink()) end
-            }
+            },
+            {id = "openReadmeIcon", src = 0, x = 1458, y = PARTS_TEXTURE_SIZE - STAGE_FILE.README_ICON.H, w = STAGE_FILE.README_ICON.W, h = STAGE_FILE.README_ICON.H, act = 17}
         },
         text = {
             {id = "eventName", font = 0, size = STAGE_FILE.EVENT.TEXT.SIZE*1.5, align = 0, overflow = 1, value = function () return musicDetail.getEventData().name end}
@@ -116,16 +124,37 @@ stagefile.functions.dst = function ()
                     {x = STAGE_FILE.X, y = STAGE_FILE.Y, w = STAGE_FILE.W, h = STAGE_FILE.H}
                 }
             },
-            -- ブラウザで開くアイコン
+            -- イベントブラウザで開くアイコン
             {
-                id = "openEventIcon", draw = function () return musicDetail.getEventData().url ~= "" end, dst = {
+                id = "openEventIcon", draw = function () return musicDetail.getEventData().url ~= "" and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.EVENT.OPEN_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.OPEN_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H}
                 }
             },
-            -- ブラウザで開くアイコン
             {
-                id = "openMusicLinkIcon", draw = function () return musicDetail.getMusicLink() ~= "" end, dst = {
+                id = "openEventIcon", draw = function () return musicDetail.getEventData().url == "" and main_state.option(2) end, dst = {
+                    {x = STAGE_FILE.EVENT.OPEN_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.OPEN_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H, a = 96}
+                }
+            },
+            -- 楽曲ブラウザで開くアイコン
+            {
+                id = "openMusicLinkIcon", draw = function () return musicDetail.getMusicLink() ~= "" and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.MUSIC_ICON.X(STAGE_FILE), y = STAGE_FILE.MUSIC_ICON.Y(STAGE_FILE), w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H}
+                }
+            },
+            {
+                id = "openMusicLinkIcon", draw = function () return musicDetail.getMusicLink() == "" and main_state.option(2) end, dst = {
+                    {x = STAGE_FILE.MUSIC_ICON.X(STAGE_FILE), y = STAGE_FILE.MUSIC_ICON.Y(STAGE_FILE), w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H, a = 96}
+                }
+            },
+            -- readtext
+            {
+                id = "openReadmeIcon", op = {175, 2}, dst = {
+                    {x = STAGE_FILE.README_ICON.X(STAGE_FILE), y = STAGE_FILE.README_ICON.Y(STAGE_FILE), w = STAGE_FILE.README_ICON.W, h = STAGE_FILE.README_ICON.H}
+                }
+            },
+            {
+                id = "openReadmeIcon", op = {176, 2}, dst = {
+                    {x = STAGE_FILE.README_ICON.X(STAGE_FILE), y = STAGE_FILE.README_ICON.Y(STAGE_FILE), w = STAGE_FILE.README_ICON.W, h = STAGE_FILE.README_ICON.H, a = 96}
                 }
             },
             -- イベント名
