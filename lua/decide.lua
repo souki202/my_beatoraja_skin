@@ -133,7 +133,7 @@ local function dithering(v)
 end
 
 local function getDifficultyValueForColor()
-	local dif = 0
+	local dif = 1
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 920)
 	if op == 920 then
 		for i = 150, 155 do
@@ -159,6 +159,7 @@ end
 local function getDifficultyColor()
 	local dif = getDifficultyValueForColor()
 	local colors = {{128, 128, 128}, {137, 204, 137}, {137, 204, 204}, {204, 164, 108}, {204, 104, 104}, {204, 102, 153}}
+	print(dif)
 	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 

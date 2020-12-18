@@ -158,7 +158,7 @@ local LAMPS = {
     IDS = {"max", "perfect", "fullcombo", "exhard", "hard", "normal", "easy", "laeasy", "aeasy", "failed"},
 }
 
-LAMPS.GRAPH.LINE.VALUE.X = function (self) return self.GRAPH.AREA.X(self) end
+LAMPS.GRAPH.LINE.VALUE.X = function (self) return self.GRAPH.AREA.X(self) + 9 end
 LAMPS.GRAPH.LINE.PERCENTAGE.X = function (self) return self.GRAPH.AREA.X(self) + 92 end
 
 
@@ -402,7 +402,7 @@ ranking.functions.load = function ()
     for i, id in ipairs(LAMPS.IDS) do
         -- グラフ用. ランキングと仕様を合わせるため普通のimageで
         imgs[#imgs+1] = {
-            id = id .. "LampGraph", src = 31, x = i - 1, y = 0, w = 1, h = RANKING.GRAPH.LINE.GAUGE.H
+            id = id .. "LampGraph", src = 31, x = #LAMPS.IDS - (i - 1), y = 0, w = 1, h = RANKING.GRAPH.LINE.GAUGE.H
         }
         -- ラベル
         imgs[#imgs+1] = {
@@ -446,7 +446,7 @@ ranking.functions.dstLamp = function ()
         }
         -- パーセンテージ
         local pid = id .. "LampRateValue"
-        local p = dstPercentage(pid, pid .. "Dot", pid .. "AfterDot", pid .. "Percent", 1, LAMPS.GRAPH.LINE.PERCENTAGE.X(LAMPS), LAMPS.GRAPH.LINE.PERCENTAGE.Y(LAMPS, i), LAMPS.GRAPH.LINE.VALUE.W, LAMPS.GRAPH.LINE.VALUE.H, 0, num30.DOT, num30.PERCENT)
+        local p = dstPercentageWithoutSign(pid, pid .. "Dot", pid .. "AfterDot", pid .. "Percent", 1, LAMPS.GRAPH.LINE.PERCENTAGE.X(LAMPS), LAMPS.GRAPH.LINE.PERCENTAGE.Y(LAMPS, i), LAMPS.GRAPH.LINE.VALUE.W, LAMPS.GRAPH.LINE.VALUE.H, 0, num30.DOT, num30.PERCENT)
         for _, value in pairs(p.destination) do
             value.draw = isDrawLamp
         end

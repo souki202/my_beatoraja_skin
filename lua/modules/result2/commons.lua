@@ -44,18 +44,11 @@ function loadNumber(id, size, digit, align, ref, value)
     return {id = id, src = 300 + size, x = 0, y = 0, w = param.W * 10, h = param.H, divx = 10, align = align, digit = digit, ref = ref, value = value}
 end
 
---[[
-    パーセンテージ全体を出力する
-
-    @param dotInfo {W, H, AREA_W, SPACE}を持つ配列
-    @param percentInfo {W, H, AREA_W, SPACE}を持つ配列
-    @return スキンの配列 mergeSkinしてください
-]]
-function dstPercentage(valId, dotId, afterDotId, percentId, afterDotDigit, x, y, numW, numH, numSpace, dotInfo, percentInfo)
+function dstPercentageWithIntDigit(valId, dotId, afterDotId, percentId, digit, afterDotDigit, x, y, numW, numH, numSpace, dotInfo, percentInfo)
     local percentX = x - percentInfo.W + (percentInfo.W - percentInfo.AREA_W) / 2
-    local afterDotX = percentX - percentInfo.SPACE - afterDotDigit * (numW + numSpace)
+    local afterDotX = percentX - percentInfo.SPACE - afterDotDigit * (numW + numSpace / 2)
     local dotX = afterDotX - numSpace / 2 - dotInfo.W + (dotInfo.W - dotInfo.AREA_W) / 2
-    local valX = dotX - dotInfo.SPACE - 3 * (numW + numSpace)
+    local valX = dotX - dotInfo.SPACE - (digit - 1) * (numW + numSpace)
     return {
         destination = {
             {
@@ -80,6 +73,21 @@ function dstPercentage(valId, dotId, afterDotId, percentId, afterDotDigit, x, y,
             }
         }
     }
+end
+
+--[[
+    パーセンテージ全体を出力する
+
+    @param dotInfo {W, H, AREA_W, SPACE}を持つ配列
+    @param percentInfo {W, H, AREA_W, SPACE}を持つ配列
+    @return スキンの配列 mergeSkinしてください
+]]
+function dstPercentage(valId, dotId, afterDotId, percentId, afterDotDigit, x, y, numW, numH, numSpace, dotInfo, percentInfo)
+    return dstPercentageWithIntDigit(valId, dotId, afterDotId, percentId, 4, afterDotDigit, x, y, numW, numH, numSpace, dotInfo, percentInfo)
+end
+
+function dstPercentageWithoutSign(valId, dotId, afterDotId, percentId, afterDotDigit, x, y, numW, numH, numSpace, dotInfo, percentInfo)
+    return dstPercentageWithIntDigit(valId, dotId, afterDotId, percentId, 3, afterDotDigit, x, y, numW, numH, numSpace, dotInfo, percentInfo)
 end
 
 function getRankFrameBgAlpha()

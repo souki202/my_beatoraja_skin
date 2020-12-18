@@ -275,7 +275,7 @@ musicDetail.functions.updateMusicDetailData = function (data, title)
             elseif
                 value.url:find("(manbow.nothing.sh)|(k-bms.com)|(venue.bmssearch.net)|(toymusical.net)") ~= nil
                 or (
-                    musicDetail.musicLink:find("(manbow.nothing.sh)|(k-bms.com)|(venue.bmssearch.net)|(toymusical.net)", 1, true) == nil
+                    musicDetail.musicLink:find("(manbow.nothing.sh)|(k-bms.com)|(venue.bmssearch.net)|(toymusical.net)") == nil
                     and #musicDetail.musicLink < #value.url
                 )
                 then

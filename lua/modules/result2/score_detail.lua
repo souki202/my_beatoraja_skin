@@ -114,8 +114,8 @@ local DETAIL = {
         PERCENT = {
             W = 29,
             H = 31,
-            SPACE = -1,
-            AREA_W = 19,
+            SPACE = -5,
+            AREA_W = 19, -- 影を省いた幅
         },
         EMPTY = {
             W = 0,
