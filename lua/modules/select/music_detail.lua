@@ -341,6 +341,7 @@ musicDetail.functions.getMusicDetail = function ()
     if MUSIC_DATA_CACHE[title] ~= nil then
         if musicDetail.lastGetDataTitle ~= title then
             print("キャッシュがヒット: " .. title)
+            musicDetail.functions.clearViewData()
             musicDetail.functions.updateMusicDetailData(MUSIC_DATA_CACHE[title], title)
         end
         return

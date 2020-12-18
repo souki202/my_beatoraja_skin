@@ -36,31 +36,31 @@ local STAGE_FILE = {
         TEXT = {
             X = function (self) return self.X + (4 + 29 * 2 + 4) end,
             Y = function (self) return self.Y + 3 end,
-            W = 551,
+            W = 510,
             SIZE = 18,
         },
         OPEN_ICON = {
             X = function (self) return self.X + 4 end,
-            Y = function (self) return self.Y + 1 end,
+            Y = function (self) return self.Y + 2 end,
             W = 25,
             H = 25,
         },
         LIST_ICON = {
             X = function (self) return self.X + (4 + 29) end,
-            Y = function (self) return self.Y + 1 end,
+            Y = function (self) return self.Y + 2 end,
             W = 25,
             H = 25,
         }
     },
     MUSIC_ICON = {
         X = function (self) return self.X + (self.W - 29) end,
-        Y = function (self) return self.Y + 1 end,
+        Y = function (self) return self.Y + 2 end,
         W = 25,
         H = 25,
     },
     README_ICON = {
         X = function (self) return self.X + (self.W - 29 * 2) end,
-        Y = function (self) return self.Y + 1 end,
+        Y = function (self) return self.Y + 2 end,
         W = 25,
         H = 25,
     }
