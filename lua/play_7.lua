@@ -34,7 +34,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10165まで
+    property = { -- 使用済み 10170まで
         {
             name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
         },
@@ -109,6 +109,9 @@ local header = {
         -- },
         {
             name = "ゲージ100%時のキラキラ", item = {{name = "ON", op = 10070}, {name = "OFF", op = 10071}}, def = "ON"
+        },
+        {
+            name = "LR2ゲージの表示", item = {{name = "ON", op = 10170}, {name = "OFF", op = 10171}}, def = "OFF"
         },
         {
             name = "レーン------------------------------", item = {{name = "-", op = 19999}}

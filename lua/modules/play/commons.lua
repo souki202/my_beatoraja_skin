@@ -9,6 +9,7 @@ local commons = {
 
 CUSTOM_TIMERS = {
 	LIFE = 10010,
+	LIFE_LR2 = 10011,
 	JUDGE = 10101,
 	VISUALIZER = 10200,
 	SCORE_VALUE = 11100,
@@ -339,6 +340,10 @@ end
 
 function getBombAnimation2Preset()
 	return getTableValue(skin_config.option, "ボムのanimation2のプリセット", 10166) % 5 + 1
+end
+
+function getIsEnableLR2Gauge()
+	return getTableValue(skin_config.option, "LR2ゲージの表示", 10171) == 10170
 end
 
 function getDifficultyValueForColor()
