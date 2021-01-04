@@ -6,7 +6,7 @@ beatoraja/skin/にに入れてください.
 
 ## 楽曲DBキャッシュ
 
-SocialSkin/lua/cache/music_data.lua を削除してください. (ディレクトリごと削除しないようにお願いします.)
+キャッシュの削除時はSocialSkin/lua/cache/music_data.lua を削除してください. (ディレクトリごと削除しないよう注意してください.)
 
 ## その他
 
