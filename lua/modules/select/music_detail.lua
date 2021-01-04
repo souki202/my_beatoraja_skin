@@ -301,6 +301,10 @@ musicDetail.functions.updateMusicDetailData = function (data, title)
                         musicDetail.event.url = value.detail.event_url
                     else musicDetail.event.url = ""
                     end
+                    if value.detail.list_url ~= nil then
+                        musicDetail.event.musicList = value.detail.list_url
+                    else musicDetail.event.musicList = ""
+                    end
                     print("イベント情報: " .. musicDetail.event.name, musicDetail.event.url)
                 end
             end

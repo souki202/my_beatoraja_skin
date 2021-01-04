@@ -56,7 +56,11 @@ detail.functions.load = function ()
         local sumRef = 110 + (i - 1)
         local eRef = 410 + (i - 1) * 2
         local lRef = eRef + 1
-        if i == #ids then sumRef = 420 end -- missだけ値が違う
+        if i == #ids then -- missだけ値が違う
+            sumRef = 420
+            eRef = 421
+            lRef = 422
+        end
         vals[#vals+1] = {
             id = ids[i] .. "DetailValue", src = 0, x = 1940, y = 105, w = DETAIL.NUM.W * 10, h = DETAIL.NUM.H, divx = 10, digit = DETAIL.NUM.DIGIT, ref = sumRef, align = 2
         }

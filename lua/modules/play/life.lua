@@ -11,9 +11,11 @@ local life = {
     gaugeType = 0,
     value = 0,
     lr2Gauge = {
+        gasType = 1,
         gaugeType = 1,
+        initGaugeType = 1,
         values = {20, 20, 20, 100, 100, 100, 100, 100, 100}, -- LIFE.TYPESと同じ順
-        processedNotes = 0,
+        processedJudges = 0,
         total = 100,
         notes = 1000,
         a = 1, -- 1ノーツあたりのNORMALゲージでの増加量
@@ -48,6 +50,7 @@ local LIFE = {
         P_H = 18,
         DIGIT = 3,
     },
+    TYPE_IDX = {AEASY = 1, EAST = 2, NORMAL = 3, HARD = 4, EXHARD = 5, HAZARD = 6, CLASS = 7, EXCLASS = 8, EXHARD_CLASS = 9},
     TYPES = {"Aeasy", "Easy", "Normal", "Hard", "Exhard", "Hazard", "Class", "ExClass", "ExhardClass"},
     TEXT = {
         ID_PREFIX = "grooveTypeText",
@@ -298,10 +301,10 @@ life.functions.lr2GaugeUpdate = function ()
         return
     end
     -- 処理ノーツ数に差がなければ終わり
-    if lastData.notes <= life.lr2Gauge.processedNotes then
+    if lastData.judges.sumJudges <= life.lr2Gauge.processedJudges then
         return
     end
-    life.lr2Gauge.processedNotes = lastData.notes
+    life.lr2Gauge.processedJudges = lastData.judges.sumJudges
 
     local twoBeforeData = playLog.twoBeforeData()
     local deltaJudges = {0, 0, 0, 0, 0, 0}
@@ -330,7 +333,76 @@ life.functions.lr2GaugeUpdate = function ()
             life.lr2Gauge.values[gaugeType] = math.min(life.lr2Gauge.values[gaugeType], 100)
         end
     end
+    life.functions.updateNowLR2GaugeType()
+end
 
+life.functions.updateNowLR2GaugeType = function ()
+    local t = life.lr2Gauge.gasType
+    if life.lr2Gauge.initGaugeType >= LIFE.TYPE_IDX.CLASS then
+        if t == 1 then
+            return
+        elseif t == 3 then -- best clear
+            -- 各ゲージでクリアしているか見る
+            for i = LIFE.TYPE_IDX.CLASS, LIFE.TYPE_IDX.EXHARD_CLASS do
+                local val = life.lr2Gauge.values[i]
+                if i <= LIFE.TYPE_IDX.NORMAL then
+                    -- ノーマル以下は一定以上
+                    if val >= LIFE.GAUGE.COLOR_BORDERS[i] then
+                        life.lr2Gauge.gaugeType = i
+                    end
+                else -- ハード以上は0%より多ければ
+                    if val > 0 then
+                        life.lr2Gauge.gaugeType = i
+                    end
+                end
+            end
+        elseif t == 4 or t == 2 then -- select to under
+            life.lr2Gauge.gaugeType = LIFE.TYPE_IDX.CLASS
+            for i = LIFE.TYPE_IDX.CLASS, life.lr2Gauge.initGaugeType do
+                local val = life.lr2Gauge.values[i]
+                if val > 0 then
+                    life.lr2Gauge.gaugeType = i
+                end
+            end
+        end
+    else
+        if t == 1 then
+            return
+        elseif t == 2 then -- hard to groove
+            if life.lr2Gauge.values[LIFE.TYPE_IDX.HARD] <= 0 or life.lr2Gauge.values[LIFE.TYPE_IDX.EXCLASS] <= 0 then
+                life.lr2Gauge.gaugeType = 3
+            end
+        elseif t == 3 then -- best clear
+            -- 各ゲージでクリアしているか見る
+            for i = 1, LIFE.TYPE_IDX.HAZARD do
+                local val = life.lr2Gauge.values[i]
+                if i <= LIFE.TYPE_IDX.NORMAL then
+                    -- ノーマル以下は一定以上
+                    if val >= LIFE.GAUGE.COLOR_BORDERS[i] then
+                        life.lr2Gauge.gaugeType = i
+                    end
+                else -- ハード以上は0%より多ければ
+                    if val > 0 then
+                        life.lr2Gauge.gaugeType = i
+                    end
+                end
+            end
+        elseif t == 4 then -- select to under
+            for i = 1, life.lr2Gauge.initGaugeType do
+                local val = life.lr2Gauge.values[i]
+                if i <= LIFE.TYPE_IDX.NORMAL then
+                    -- ノーマル以下は一定以上
+                    if val >= LIFE.GAUGE.COLOR_BORDERS[i] then
+                        life.lr2Gauge.gaugeType = i
+                    end
+                else -- ハード以上は0%より多ければ
+                    if val > 0 then
+                        life.lr2Gauge.gaugeType = i
+                    end
+                end
+            end
+        end
+    end
 end
 
 life.functions.load = function ()
@@ -453,8 +525,14 @@ life.functions.load = function ()
         })
         life.lr2Gauge.total = main_state.number(368)
         life.lr2Gauge.notes = main_state.number(74)
+        print("total: " .. life.lr2Gauge.total)
+        print("notes: " .. life.lr2Gauge.notes)
         life.lr2Gauge.a = life.lr2Gauge.total / life.lr2Gauge.notes
+        life.lr2Gauge.gasType = getLR2GaugeAutoShiftType()
     end
+    life.lr2Gauge.initGaugeType = main_state.gauge_type() + 1
+    life.lr2Gauge.gaugeType = life.lr2Gauge.initGaugeType
+    print("初期ゲージタイプ: " .. life.lr2Gauge.initGaugeType)
     return skin
 end
 
