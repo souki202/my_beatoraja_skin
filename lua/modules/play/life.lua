@@ -126,161 +126,39 @@ local LIFE = {
             else return 10
             end
         end,
-        ACQUISTITIONS = { -- 左から PG GR GD BD PR MS
-            {
-                function () return life.lr2Gauge.a * 1.3 end,
-                function () return life.lr2Gauge.a * 1.3 end,
-                function () return life.lr2Gauge.a * 1.3 / 2 end,
-                function () return -2.8 end,
-                function () return -4.8 end,
-                function () return -1.6 end
-            }, -- AEASY (想定)
-            {
-                function () return life.lr2Gauge.a * 1.2 end,
-                function () return life.lr2Gauge.a * 1.2 end,
-                function () return life.lr2Gauge.a * 1.2 / 2 end,
-                function () return -3.2 end,
-                function () return -4.8 end,
-                function () return -1.6 end
-            }, -- EASY
-            {
-                function () return life.lr2Gauge.a end,
-                function () return life.lr2Gauge.a end,
-                function () return life.lr2Gauge.a / 2 end,
-                function () return -4 end,
-                function () return -6 end,
-                function () return -2 end
-            }, -- NORAML
-            {
-                function () return 0.1 end,
-                function () return 0.1 end,
-                function () return 0.1 / 2 end,
-                function (self)
-                    local a = -6
-                    if life.lr2Gauge.values[4] <= 30 then
-                        a = a * 0.6
-                    end
-                    return a + self.LR2GAUGE.B()
-                end,
-                function (self)
-                    local a = -10
-                    if life.lr2Gauge.values[4] <= 30 then
-                        a = a * 0.6
-                    end
-                    return a + self.LR2GAUGE.B()
-                end,
-                function (self)
-                    local a = -2
-                    if life.lr2Gauge.values[4] <= 30 then
-                        a = a * 0.6
-                    end
-                    return a + self.LR2GAUGE.B()
-                end,
-            }, -- HARD
-            {
-                function () return 0.1 end,
-                function () return 0.1 end,
-                function () return 0.1 / 2 end,
-                function (self)
-                    local a = -12
-                    if life.lr2Gauge.values[5] <= 30 then
-                        a = a * 0.6
-                    end
-                    return a + self.LR2GAUGE.B()
-                end,
-                function (self)
-                    local a = -20
-                    if life.lr2Gauge.values[5] <= 30 then
-                        a = a * 0.6
-                    end
-                    return a + self.LR2GAUGE.B()
-                end,
-                function (self)
-                    local a = -12
-                    if life.lr2Gauge.values[5] <= 30 then
-                        a = a * 0.6
-                    end
-                    return a + self.LR2GAUGE.B()
-                end,
-            }, -- EXHARD
-            {
-                function () return 0.1 end,
-                function () return 0.1 end,
-                function () return 0.1 / 2 end,
-                function () return -100 end,
-                function () return -100 end,
-                function () return -20 end,
-            }, -- HAZARD
-            {
-                function () return 0.1 end,
-                function () return 0.1 end,
-                function () return 0.1 / 2 end,
-                function ()
-                    if life.lr2Gauge.values[7] > 30 then
-                        return -2
-                    else return -1.2
-                    end
-                end,
-                function ()
-                    if life.lr2Gauge.values[7] > 30 then
-                        return -3
-                    else return -1.8
-                    end
-                end,
-                function ()
-                    if life.lr2Gauge.values[7] > 30 then
-                        return -2
-                    else return -1.2
-                    end
-                end,
-            }, -- 段位
-            {
-                function () return 0.1 end,
-                function () return 0.1 end,
-                function () return 0.1 / 2 end,
-                function ()
-                    if life.lr2Gauge.values[8] > 30 then
-                        return -6
-                    else return -3.6
-                    end
-                end,
-                function ()
-                    if life.lr2Gauge.values[8] > 30 then
-                        return -10
-                    else return -6
-                    end
-                end,
-                function ()
-                    if life.lr2Gauge.values[8] > 30 then
-                        return -2
-                    else return -1.2
-                    end
-                end,
-            }, -- 段位HARD
-            {
-                function () return 0.1 end,
-                function () return 0.1 end,
-                function () return 0.1 / 2 end,
-                function ()
-                    if life.lr2Gauge.values[9] > 30 then
-                        return -12
-                    else return -7.2
-                    end
-                end,
-                function ()
-                    if life.lr2Gauge.values[9] > 30 then
-                        return -20
-                    else return -12
-                    end
-                end,
-                function ()
-                    if life.lr2Gauge.values[9] > 30 then
-                        return -12
-                    else return -6
-                    end
-                end,
-            }, -- 段位EXHARD
-        }
+        VALS = {
+            {140, 140, 70, -28, -40, -12}, -- AEASY
+            {120, 120, 60, -32, -48, -16}, -- EASY
+            {100, 100, 50, -40, -60, -20}, -- NORMAL
+            {10, 10, 5, -60, -100, -20}, -- HARD
+            {10, 10, 5, -120, -200, -120}, -- EXHARD
+            {10, 10, 5, -1000, -1000, -200}, -- HAZARD
+            {10, 10, 5, -20, -30, -20}, -- CLASS
+            {10, 10, 5, -60, -100, -20}, -- CLASS HARD
+            {10, 10, 5, -120, -200, -120}, -- CLASS HARD
+        },
+        CORRECTIONS = {
+            HARD = 0.6,
+            EXHARD = 0.6,
+        },
+        ACQUISTITIONS = function (self, gaugeType, judge)
+            local v = 0
+            if gaugeType <= self.TYPE_IDX.NORMAL and judge <= 3 then -- 通常ゲージの増加 (totalでの増加量に対する百分率)
+                v = life.lr2Gauge.a * self.LR2GAUGE.VALS[gaugeType][judge] / 100
+            elseif gaugeType >= self.TYPE_IDX.HARD and judge <= 3 then -- ハードゲージの増加 (0.01倍)
+                v = self.LR2GAUGE.VALS[gaugeType][judge] / 100
+            else -- 減少 (0.1倍)
+                v = self.LR2GAUGE.VALS[gaugeType][judge] / 10
+            end
+            if v < 0 then -- 減少時かつHARD, EXHARD時は30%以下のときに補正をかける
+                if gaugeType == self.TYPE_IDX.HARD and life.lr2Gauge.values[self.TYPE_IDX.HARD] <= 30 then
+                    return v * self.LR2GAUGE.CORRECTIONS.HARD
+                elseif gaugeType == self.TYPE_IDX.EXHARD and life.lr2Gauge.values[self.TYPE_IDX.EXHARD] <= 30 then
+                    return v * self.LR2GAUGE.CORRECTIONS.EXHARD
+                end
+            end
+            return v
+        end,
     },
     PARTICLE = {
         LEFT_X = function (self) return self.GAUGE.X(self) - 24 end,
@@ -294,7 +172,43 @@ local LIFE = {
     },
 }
 
-life.functions.lr2GaugeUpdate = function ()
+life.functions.initCustomGauge = function ()
+    local labels = {"AEASY", "EASY", "NORMAL", "HARD", "EXHARD"}
+    local judges = {"PG", "GR", "GD", "BD", "PR", "MS"}
+    -- 値をとってきて入れる
+    for i, value in ipairs(LIFE.LR2GAUGE.VALS) do
+        if i < 6 then -- hazardは無視
+            local namePrefix = "カスタムゲージ" .. labels[i] .. " "
+            for j = 1, 6, 1 do
+                local name = namePrefix .. judges[j]
+                if i <= 3 and j <= 3 then -- normalまでかつPG, GR, GDはtotalでの増加量に対する倍率
+                    name = name .. "増加率 (%"
+                elseif i > 3 and j <= 3 then -- hardとexhardの増加量は0.01
+                    name = name .. "増加量 (0.01%"
+                else
+                    name = name .. "増加量 (0.1%"
+                end
+                name = name .. " 既定値" .. value[j] .. ")"
+                print(name)
+                value[j] = getOffsetValueWithDefault(name, {x = value[j]}).x
+            end
+        end
+    end
+
+    -- 30%補正
+    LIFE.LR2GAUGE.CORRECTIONS.HARD = getOffsetValueWithDefault("カスタムゲージHARD 30%補正時の減少量倍率 (% 既定値60)", {x = 60}).x / 100
+    LIFE.LR2GAUGE.CORRECTIONS.EXHARD = getOffsetValueWithDefault("カスタムゲージEXHARD 30%補正時の減少量倍率 (% 既定値60)", {x = 60}).x / 100
+    print("30%補正 hard: " .. (LIFE.LR2GAUGE.CORRECTIONS.HARD * 100) .. "%")
+    print("30%補正 exhard: " .. (LIFE.LR2GAUGE.CORRECTIONS.EXHARD * 100) .. "%")
+    life.lr2Gauge.total = main_state.number(368)
+    life.lr2Gauge.notes = main_state.number(74)
+    print("total: " .. life.lr2Gauge.total)
+    print("notes: " .. life.lr2Gauge.notes)
+    life.lr2Gauge.a = life.lr2Gauge.total / life.lr2Gauge.notes
+    life.lr2Gauge.gasType = getLR2GaugeAutoShiftType()
+end
+
+life.functions.customGaugeUpdate = function ()
     -- 判定数の差分を取得
     local lastData = playLog.getLastTimeData()
     if lastData == nil then
@@ -319,7 +233,7 @@ life.functions.lr2GaugeUpdate = function ()
 
     for gaugeType = 1, #LIFE.TYPES do
         for judgeType = 1, 6 do
-            local a = LIFE.LR2GAUGE.ACQUISTITIONS[gaugeType][judgeType](LIFE) * deltaJudges[judgeType]
+            local a = LIFE.LR2GAUGE.ACQUISTITIONS(LIFE, gaugeType, judgeType) * deltaJudges[judgeType]
             -- ゲージ減少時か, 0%より高いとき
             if a < 0 or (a > 0 and life.lr2Gauge.values[gaugeType] > 0) then
                 life.lr2Gauge.values[gaugeType] = life.lr2Gauge.values[gaugeType] + a
@@ -366,40 +280,52 @@ life.functions.updateNowLR2GaugeType = function ()
             end
         end
     else
-        if t == 1 then
+        if t == 1 then -- GAS無し
             return
         elseif t == 2 then -- hard to groove
-            if life.lr2Gauge.values[LIFE.TYPE_IDX.HARD] <= 0 or life.lr2Gauge.values[LIFE.TYPE_IDX.EXCLASS] <= 0 then
+            -- 段位ゲージ時はGASは無し
+            if life.lr2Gauge.gaugeType >= LIFE.TYPE_IDX.CLASS then
+                return
+            end
+            if life.lr2Gauge.values[LIFE.TYPE_IDX.HARD] <= 0 then
                 life.lr2Gauge.gaugeType = 3
             end
         elseif t == 3 then -- best clear
             -- 各ゲージでクリアしているか見る
-            for i = 1, LIFE.TYPE_IDX.HAZARD do
-                local val = life.lr2Gauge.values[i]
-                if i <= LIFE.TYPE_IDX.NORMAL then
-                    -- ノーマル以下は一定以上
-                    if val >= LIFE.GAUGE.COLOR_BORDERS[i] then
-                        life.lr2Gauge.gaugeType = i
-                    end
-                else -- ハード以上は0%より多ければ
-                    if val > 0 then
-                        life.lr2Gauge.gaugeType = i
+            if life.lr2Gauge.gaugeType < LIFE.TYPE_IDX.CLASS then
+                for i = 1, LIFE.TYPE_IDX.HAZARD do
+                    local val = life.lr2Gauge.values[i]
+                    if i <= LIFE.TYPE_IDX.NORMAL then
+                        -- ノーマル以下は一定以上
+                        if val >= LIFE.GAUGE.COLOR_BORDERS[i] then
+                            life.lr2Gauge.gaugeType = i
+                        end
+                    else -- ハード以上は0%より多ければ
+                        if val > 0 then
+                            life.lr2Gauge.gaugeType = i
+                        end
                     end
                 end
+            else
+                -- 段位ゲージ 未実装
             end
         elseif t == 4 then -- select to under
-            for i = 1, life.lr2Gauge.initGaugeType do
-                local val = life.lr2Gauge.values[i]
-                if i <= LIFE.TYPE_IDX.NORMAL then
-                    -- ノーマル以下は一定以上
-                    if val >= LIFE.GAUGE.COLOR_BORDERS[i] then
-                        life.lr2Gauge.gaugeType = i
-                    end
-                else -- ハード以上は0%より多ければ
-                    if val > 0 then
-                        life.lr2Gauge.gaugeType = i
+            if life.lr2Gauge.gaugeType < LIFE.TYPE_IDX.CLASS then
+                for i = 1, life.lr2Gauge.initGaugeType do
+                    local val = life.lr2Gauge.values[i]
+                    if i <= LIFE.TYPE_IDX.NORMAL then
+                        -- ノーマル以下は一定以上
+                        if val >= LIFE.GAUGE.COLOR_BORDERS[i] then
+                            life.lr2Gauge.gaugeType = i
+                        end
+                    else -- ハード以上は0%より多ければ
+                        if val > 0 then
+                            life.lr2Gauge.gaugeType = i
+                        end
                     end
                 end
+            else
+                -- 段位ゲージ 未実装
             end
         end
     end
@@ -515,20 +441,18 @@ life.functions.load = function ()
             end,
         }
     end
-    if getIsEnableLR2Gauge() then
+
+    -- カスタムゲージ. 段位ゲージ時は使用しない
+    if getIsEnableLR2Gauge() and main_state.gauge_type() + 1 < LIFE.TYPE_IDX.CLASS then
+        life.functions.initCustomGauge()
+
         table.insert(skin.customTimers, {
             id = CUSTOM_TIMERS.LIFE_LR2,
             timer = function ()
-                life.functions.lr2GaugeUpdate()
+                life.functions.customGaugeUpdate()
                 return 1
             end
         })
-        life.lr2Gauge.total = main_state.number(368)
-        life.lr2Gauge.notes = main_state.number(74)
-        print("total: " .. life.lr2Gauge.total)
-        print("notes: " .. life.lr2Gauge.notes)
-        life.lr2Gauge.a = life.lr2Gauge.total / life.lr2Gauge.notes
-        life.lr2Gauge.gasType = getLR2GaugeAutoShiftType()
     end
     life.lr2Gauge.initGaugeType = main_state.gauge_type() + 1
     life.lr2Gauge.gaugeType = life.lr2Gauge.initGaugeType
@@ -561,8 +485,10 @@ life.functions.dstNormal = function ()
     local h = LIFE.GAUGE.H
     local y = LIFE.GAUGE.Y(LIFE)
     local bodyH = h
+    local orajaGaugeY = y
     if getIsEnableLR2Gauge() then
         bodyH = h / 2
+        orajaGaugeY = y + bodyH
     end
     for i = 1, #LIFE.TYPES do
         local border = LIFE.GAUGE.COLOR_BORDERS[i]
@@ -577,7 +503,7 @@ life.functions.dstNormal = function ()
             id = "white",
             draw = function () return getIsShowNow() and life.gaugeType+1 == i end,
             dst = {
-                {x = LIFE.GAUGE.X(LIFE), y = y + bodyH, w = LIFE.GAUGE.W, h = bodyH, r = bgHighColor[1], g = bgHighColor[2], b = bgHighColor[3]}
+                {x = LIFE.GAUGE.X(LIFE), y = orajaGaugeY, w = LIFE.GAUGE.W, h = bodyH, r = bgHighColor[1], g = bgHighColor[2], b = bgHighColor[3]}
             }
         }
         -- 少ない部分
@@ -585,7 +511,7 @@ life.functions.dstNormal = function ()
             id = "white",
             draw = function () return getIsShowNow() and life.gaugeType+1 == i end,
             dst = {
-                {x = LIFE.GAUGE.X(LIFE), y = y + bodyH, w = LIFE.GAUGE.W * border / 100, h = bodyH, r = bgLowColor[1], g = bgLowColor[2], b = bgLowColor[3]}
+                {x = LIFE.GAUGE.X(LIFE), y = orajaGaugeY, w = LIFE.GAUGE.W * border / 100, h = bodyH, r = bgLowColor[1], g = bgLowColor[2], b = bgLowColor[3]}
             }
         }
 
@@ -595,7 +521,7 @@ life.functions.dstNormal = function ()
             id = LIFE.GAUGE.ID_PREFIX .. LIFE.TYPES[i] .. "High",
             draw = function () return getIsShowNow() and life.value > border and life.gaugeType+1 == i end,
             dst = {
-                {x = LIFE.GAUGE.X(LIFE), y = y + bodyH, w = LIFE.GAUGE.W, h = bodyH, r = highColor[1], g = highColor[2], b = highColor[3]}
+                {x = LIFE.GAUGE.X(LIFE), y = orajaGaugeY, w = LIFE.GAUGE.W, h = bodyH, r = highColor[1], g = highColor[2], b = highColor[3]}
             }
         }
         -- 少ない部分の色
@@ -603,7 +529,7 @@ life.functions.dstNormal = function ()
             id = LIFE.GAUGE.ID_PREFIX .. LIFE.TYPES[i] .. "Low",
             draw = function () return getIsShowNow() and life.gaugeType+1 == i end,
             dst = {
-                {x = LIFE.GAUGE.X(LIFE), y = y + bodyH, w = LIFE.GAUGE.W * border / 100, h = bodyH, r = lowColor[1], g = lowColor[2], b = lowColor[3]}
+                {x = LIFE.GAUGE.X(LIFE), y = orajaGaugeY, w = LIFE.GAUGE.W * border / 100, h = bodyH, r = lowColor[1], g = lowColor[2], b = lowColor[3]}
             }
         }
 
