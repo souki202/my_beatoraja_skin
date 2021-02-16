@@ -169,5 +169,9 @@ function isViewDateAndTime()
 end
 
 function getIsViewCostomGrooveGauge()
-    return getTableValue(skin_config.option, "カスタムゲージの結果出力", 991) == 990
+    return getTableValue(skin_config.option, "カスタムゲージの結果出力", 991) == 990 and not getIsCourse()
+end
+
+function getIsCourse()
+	return main_state.text(150) ~= ""
 end
