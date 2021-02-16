@@ -14,11 +14,11 @@ local STAGEFILE = {
     BG_ALPHA = 255,
 }
 
-local TAB_LIST = {STAGEFILE = 1, GROOVE = 2, SCORE = 3}
+local TAB_LIST = {STAGEFILE = 1, GROOVE = 2, CUSTOM_GROOVE = 3, SCORE = 4}
 
 local tab = {
     nowTab = TAB_LIST.STAGEFILE,
-    numOfTabs = 3,
+    numOfTabs = 4,
 }
 
 stagefile.functions.changeTab = function ()
@@ -29,12 +29,19 @@ stagefile.functions.changeTab = function ()
         if tab.nowTab < 1 then
             tab.nowTab = tab.numOfTabs
         end
+        if not getIsViewCostomGrooveGauge() and tab.nowTab == TAB_LIST.CUSTOM_GROOVE then
+            tab.nowTab = TAB_LIST.GROOVE
+        end
         myPrint("nowTab: " .. tab.nowTab)
     elseif isPressedDown() then
         myPrint("move tab down")
         tab.nowTab = tab.nowTab + 1
         if tab.nowTab > tab.numOfTabs then
             tab.nowTab = 1
+        end
+
+        if not getIsViewCostomGrooveGauge() and tab.nowTab == TAB_LIST.CUSTOM_GROOVE then
+            tab.nowTab = TAB_LIST.SCORE
         end
         myPrint("nowTab: " .. tab.nowTab)
     end
@@ -45,6 +52,9 @@ stagefile.functions.changeTabByButton = function ()
     tab.nowTab = tab.nowTab + 1
     if tab.nowTab > tab.numOfTabs then
         tab.nowTab = 1
+    end
+    if not getIsViewCostomGrooveGauge() and tab.nowTab == TAB_LIST.CUSTOM_GROOVE then
+        tab.nowTab = TAB_LIST.SCORE
     end
     myPrint("nowTab: " .. tab.nowTab)
 end

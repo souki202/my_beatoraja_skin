@@ -4,6 +4,7 @@ local lanes = require("modules.play.lanes")
 local main_state = require("main_state")
 local timer_util = require("timer_util")
 local playLog = require("modules.commons.playlog")
+local life_image = require("modules.play.life_image")
 require("modules.commons.numbers")
 
 local life = {
@@ -189,8 +190,12 @@ life.functions.initCustomGauge = function ()
                     name = name .. "増加量 (0.1%"
                 end
                 name = name .. " 既定値" .. value[j] .. ")"
-                print(name)
-                value[j] = getOffsetValueWithDefault(name, {x = value[j]}).x
+                local v = getOffsetValueWithDefault(name, {x = value[j]}).x
+                if v == 9999 or v == -9999 then
+                    value[j] = 0
+                else
+                    value[j] = v
+                end
             end
         end
     end
@@ -202,10 +207,11 @@ life.functions.initCustomGauge = function ()
     print("30%補正 exhard: " .. (LIFE.LR2GAUGE.CORRECTIONS.EXHARD * 100) .. "%")
     life.lr2Gauge.total = main_state.number(368)
     life.lr2Gauge.notes = main_state.number(74)
-    print("total: " .. life.lr2Gauge.total)
-    print("notes: " .. life.lr2Gauge.notes)
     life.lr2Gauge.a = life.lr2Gauge.total / life.lr2Gauge.notes
+    print("1ノーツあたりの増加量: " .. life.lr2Gauge.a)
     life.lr2Gauge.gasType = getLR2GaugeAutoShiftType()
+
+    life_image.load()
 end
 
 life.functions.customGaugeUpdate = function ()
@@ -443,7 +449,7 @@ life.functions.load = function ()
     end
 
     -- カスタムゲージ. 段位ゲージ時は使用しない
-    if getIsEnableLR2Gauge() and main_state.gauge_type() + 1 < LIFE.TYPE_IDX.CLASS then
+    if isOutputLog() and getIsEnableLR2Gauge() and main_state.gauge_type() + 1 < LIFE.TYPE_IDX.CLASS then
         life.functions.initCustomGauge()
 
         table.insert(skin.customTimers, {
@@ -453,11 +459,24 @@ life.functions.load = function ()
                 return 1
             end
         })
+        local tn = main_state.number(74)
+        table.insert(skin.customTimers, {
+            id = CUSTOM_TIMERS.LIFE_OUTPUT,
+            timer = function ()
+                if main_state.timer(48) > 0 or main_state.timer(3) > 0 or playLog.getLastTimeData().notes == tn then
+                    life_image.output()
+                end
+            end
+        })
     end
     life.lr2Gauge.initGaugeType = main_state.gauge_type() + 1
     life.lr2Gauge.gaugeType = life.lr2Gauge.initGaugeType
     print("初期ゲージタイプ: " .. life.lr2Gauge.initGaugeType)
     return skin
+end
+
+life.functions.getCustomGauges = function ()
+    return life.lr2Gauge.values
 end
 
 life.functions.dstNormal = function ()

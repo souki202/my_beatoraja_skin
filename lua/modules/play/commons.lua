@@ -16,9 +16,10 @@ CUSTOM_TIMERS = {
 	SCORE_VALUE_INITIAL = 11101,
 	LOGGER = 11000,
 	LOGGER_SAVE = 11001,
-	LOGGER_UPDATE = 12001,
+	LOGGER_UPDATE = 11002,
 	MY_BPM_TIMER = 12100,
 	UPDATE_GAUGE_STATE = 12101,
+	LIFE_OUTPUT = 12102,
 }
 
 function setKeys(keys)
@@ -343,11 +344,11 @@ function getBombAnimation2Preset()
 end
 
 function getIsEnableLR2Gauge()
-	return getTableValue(skin_config.option, "LR2ゲージの表示", 10171) == 10170
+	return getTableValue(skin_config.option, "カスタムゲージの表示", 10171) == 10170
 end
 
 function getLR2GaugeAutoShiftType()
-	return getTableValue(skin_config.option, "LR2ゲージのゲージオートシフト", 10175) % 5 + 1
+	return getTableValue(skin_config.option, "カスタムゲージのゲージオートシフト", 10175) % 5 + 1
 end
 
 function getDifficultyValueForColor()

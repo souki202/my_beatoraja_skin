@@ -2,6 +2,7 @@ require("modules.commons.define")
 local playLog = require("modules.commons.playlog")
 local commons = require("modules.play.commons")
 local scores = require("modules.play.score")
+local life = require("modules.play.life")
 local main_state = require("main_state")
 
 local logger = {
@@ -65,11 +66,13 @@ logger.functions.load = function ()
                     if playTimerTime < 0 then
                         playTimerTime = main_state.timer(41)
                     end
-                    if playTimerTime >= 0 then
+                    if playTimerTime >= 0 and main_state.timer(3) <= 0 then
                         -- 現在の時刻を取得
-                        local data = {time = getElapsedTime() - playTimerTime}
+                        local t = getElapsedTime() - playTimerTime
+                        local data = {time = t}
                         local lastData = getLastTime()
                         local numOfProcessedExistNotes = 0
+                        playLog.addGrooveGaugeData(life.getCustomGauges(), t)
                         -- 判定数全部取る
                         do
                             local sumJudges = 0

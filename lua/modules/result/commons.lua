@@ -167,3 +167,7 @@ end
 function isViewDateAndTime()
 	return getTableValue(skin_config.option, "日時表示", 987) == 987
 end
+
+function getIsViewCostomGrooveGauge()
+    return getTableValue(skin_config.option, "カスタムゲージの結果出力", 991) == 990
+end

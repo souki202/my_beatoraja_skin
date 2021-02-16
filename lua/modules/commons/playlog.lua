@@ -3,32 +3,36 @@ require("modules.commons.deepcopy")
 local commons = require("modules.play.commons")
 local main_state = require("main_state")
 
+local empty_data = {
+    time = 0, -- micro sec
+    judges = {
+        sumJudges = 0,
+        early = {0, 0, 0, 0, 0, 0}, -- pg, gr, gd, bd, pr, ms
+        late  = {0, 0, 0, 0, 0, 0}
+    },
+    combo = 0,
+    notes = 0,
+    exscore = {
+        you = 0,
+        best = 0,
+        target = 0,
+    },
+    rangeExScore = {
+        theoretical = 0,
+        you = 0,
+        best = 0,
+        target = 0,
+    },
+}
+
 local logger = {
     didSave = false,
     data = { -- 必ず最初はすべて0のデータが入る
-        {
-            time = 0, -- micro sec
-            judges = {
-                sumJudges = 0,
-                early = {0, 0, 0, 0, 0, 0}, -- pg, gr, gd, bd, pr, ms
-                late  = {0, 0, 0, 0, 0, 0}
-            },
-            combo = 0,
-            notes = 0,
-            exscore = {
-                you = 0,
-                best = 0,
-                target = 0,
-            },
-            rangeExScore = {
-                theoretical = 0,
-                you = 0,
-                best = 0,
-                target = 0,
-            },
-        }
+        empty_data
     },
-    outputData = {},
+    outputData = {empty_data},
+    outputGaugesData = {{20, 20, 20, 100, 100, 100, 100, 100, 100}},
+
     songLengthSec = 1,
     songLengthMicroSec = 1,
     microSecPerIdx = 1,
@@ -38,6 +42,10 @@ local logger = {
 local LOGGER = {
     NUM_OF_SAVE_LOGS = 631,
 }
+
+logger.functions.numOfOutputLogs = function ()
+    return LOGGER.NUM_OF_SAVE_LOGS
+end
 
 --[[
     プレイログを保存
@@ -138,6 +146,38 @@ logger.functions.addData = function (data)
     local d = logger.data
     d[#d+1] = data
     logger.outputData[math.floor(data.time / logger.microSecPerIdx) + 1] = data
+end
+
+logger.functions.fillGrooveGaugeData = function (from, to)
+    if logger.outputGaugesData[from] == nil then
+        if from > 1 then
+            logger.functions.fillGrooveGaugeData(from - 1, to)
+        end
+    else
+        for i = from + 1, to do
+            logger.outputGaugesData[i] = logger.outputGaugesData[from]
+        end
+    end
+end
+
+logger.functions.addGrooveGaugeData = function (gauges, time)
+    local i = math.floor(time / logger.microSecPerIdx) + 1
+    if i >= 3 and logger.outputGaugesData[i - 1] == nil then
+        logger.functions.fillGrooveGaugeData(i - 2, i - 1)
+    end
+    local g = {}
+    for j, v in ipairs(gauges) do
+        g[j] = v
+    end
+    logger.outputGaugesData[i] = g
+end
+
+logger.functions.getGrooveGaugeData = function ()
+    return logger.outputGaugesData
+end
+
+logger.functions.getOutputData = function ()
+    return logger.outputData
 end
 
 --[[

@@ -43,7 +43,7 @@ local GROOVE = {
             LABEL = {
                 X = function (self) return self.GAUGE.GROOVE.X(self) + 1 end,
                 Y = function (self) return self.GAUGE.GROOVE.Y(self) + 1 end,
-                W = 128,
+                W = 196,
                 H = 29,
             },
             VALUE = {
@@ -69,7 +69,7 @@ local GROOVE = {
             LABEL = {
                 X = function (self) return self.GAUGE.JUDGE.X(self) + 1 end,
                 Y = function (self) return self.GAUGE.JUDGE.Y(self) + self.GAUGE.JUDGE.H - 1 - self.GAUGE.JUDGE.LABEL.H end,
-                W = 128,
+                W = 196,
                 H = 29,
             }
         }
@@ -107,8 +107,16 @@ groove.functions.getIsDrawGroove = function ()
     return stagefile.getNowTab() == stagefile.getTabList().GROOVE
 end
 
-groove.functions.getIsDrawGraph = function ()
-    return stagefile.getNowTab() == stagefile.getTabList().GROOVE or stagefile.getNowTab() == stagefile.getTabList().SCORE
+groove.functions.getIsDrawScoreGraph = function ()
+    return stagefile.getNowTab() == stagefile.getTabList().SCORE
+end
+
+groove.functions.getIsDrawCustomGroove = function ()
+    return stagefile.getNowTab() == stagefile.getTabList().CUSTOM_GROOVE
+end
+
+groove.functions.getIsDrawAnyGraph = function ()
+    return stagefile.getNowTab() ~= stagefile.getTabList().STAGEFILE
 end
 
 groove.functions.load = function ()
@@ -121,7 +129,8 @@ groove.functions.load = function ()
         elseif isViewDateAndTime() then
             dateLabel = string.format("%04d", getNum(21)) .. "-" .. string.format("%02d", getNum(22)) .. "-" .. string.format("%02d", getNum(23)) .. " " .. string.format("%02d", getNum(24)) .. ":" .. string.format("%02d", getNum(25)) .. ":" .. string.format("%02d", getNum(26))
         end
-    end    GROOVE.GAUGE.GROOVE.JUDGE.H = GROOVE.GAUGE.GROOVE.H * getGrooveNotesGraphSizePercentage()
+    end
+    GROOVE.GAUGE.GROOVE.JUDGE.H = GROOVE.GAUGE.GROOVE.H * getGrooveNotesGraphSizePercentage()
 
     local skin = {
         image = {
@@ -145,6 +154,9 @@ groove.functions.load = function ()
             {id = "randomModeLabel", src = 21, x = GROOVE.INFO.LABEL.W * 3, y = 0, w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H * 10, divy = 10, len = 10, ref = 42},
             -- lamp
             {id = "oldLampLabel", src = 21, x = GROOVE.INFO.LABEL.W * 5, y = 0, w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H * 11, divy = 11, len = 11, ref = 371},
+            {id = "customGrooveBg", src = 23, x = 0, y = 0, w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.H},
+            {id = "customGrooveGraph", src = 24, x = 0, y = 0, w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.H},
+            {id = "customGrooveLabel", src = 11, x = 0, y = GROOVE.GAUGE.JUDGE.LABEL.H * 7, w = -1, h = GROOVE.GAUGE.JUDGE.LABEL.H},
         },
         value = {
             loadNumber("grooveValue", 30, 3, 0, 107, nil),
@@ -168,6 +180,7 @@ groove.functions.load = function ()
             {id = "timingGraph", graphColor = "88FF88FF", PRColor = "00000000", BDColor = "88000088", GDColor = "88880088", GRColor = "00880088", PGColor = "00008888", devColor = "ffffff44", averageColor = "ffffff44"},
         },
     }
+
     local imgs = skin.image
     -- header
     for i, id in ipairs(GROOVE.INFO.HEADERS) do
@@ -188,23 +201,57 @@ groove.functions.load = function ()
             imgs[#imgs+1] = {id = "grooveSideJudgeLabel", src = 21, x = GROOVE.INFO.LABEL.W * 4, y = GROOVE.INFO.LABEL.H * (i - 1), w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H}
         end
     end
+
+    -- カスタムグルーヴゲージの読み込み
+    if getIsViewCostomGrooveGauge() then
+        local f = io.open(skin_config.get_path("../generated/custom_groove/id.txt"), "r")
+        local id = ""
+        if f then
+            for line in f:lines() do
+                id = line
+            end
+            print("カスタムグルーヴゲージ 画像ID: " .. id)
+            skin.source = {
+                {id = 24, path = "../generated/custom_groove/groove_" .. id .. ".png"}
+            }
+
+            -- そのままだと画像が増殖していくのでカスタムグルーヴゲージの結果を削除
+            local isDeleted = false
+            skin.customTimers = {
+                {
+                    id = CUSTOM_TIMERS_RESULT2.DELETE_CUSTOM_GROOVE_GRAPH,
+                    timer = function ()
+                        if main_state.timer(2) > 0 and not isDeleted then
+                            isDeleted = true
+                            os.remove(skin_config.get_path("../generated/custom_groove/groove_" .. id .. ".png"))
+                        end
+                    end
+                }
+            }
+        end
+    end
+
     mergeSkin(skin, scoreGraph.load())
+
     return skin
 end
 
 groove.functions.dst = function ()
     local isDrawGroove = groove.functions.getIsDrawGroove
-    local isDrawGraph = groove.functions.getIsDrawGraph
+    local isDrawScoreGraph = groove.functions.getIsDrawScoreGraph
+    local isDrawCustomGroove = groove.functions.getIsDrawCustomGroove
+    local isDrawAnyGraph = groove.functions.getIsDrawAnyGraph
+    local isDrawAnyGroove = function () return isDrawAnyGraph() and not isDrawScoreGraph() end
     local skin = {
         destination = {
             -- スコアグラフの背景をここで
             { -- ぼかし背景
-                id = "grooveBokehBg", draw = isDrawGraph, dst = {
+                id = "grooveBokehBg", draw = isDrawScoreGraph, dst = {
                     {x = GROOVE.AREA.X, y = GROOVE.AREA.Y, w = GROOVE.AREA.W, h = GROOVE.AREA.H}
                 }
             },
             { -- dimmer
-                id = "black", draw = isDrawGraph, dst = {
+                id = "black", draw = isDrawScoreGraph, dst = {
                     {x = GROOVE.AREA.X, y = GROOVE.AREA.Y, w = GROOVE.AREA.W, h = GROOVE.AREA.H, a = GROOVE.DIMMER_ALPHA}
                 }
             },
@@ -214,35 +261,37 @@ groove.functions.dst = function ()
     mergeSkin(skin, {
         destination = {
             { -- スコアグラフ用のshadow
-                id = "grooveShadow", draw = isDrawGraph, dst = {
+                id = "grooveShadow", draw = isDrawScoreGraph, dst = {
                     {x = GROOVE.GAUGE.GROOVE.X(GROOVE), y = GROOVE.GAUGE.GROOVE.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.H}
                 }
             },
             {
-                id = "ScoreGraphLabel", draw = isDrawGraph, dst = {
+                id = "ScoreGraphLabel", draw = isDrawScoreGraph, dst = {
                     {x = GROOVE.GAUGE.GROOVE.LABEL.X(GROOVE), y = GROOVE.GAUGE.GROOVE.LABEL.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.LABEL.W, h = GROOVE.GAUGE.GROOVE.LABEL.H}
                 }
             },
             { -- ぼかし背景
-                id = "grooveBokehBg", draw = isDrawGroove, dst = {
+                id = "grooveBokehBg", draw = isDrawAnyGroove, dst = {
                     {x = GROOVE.AREA.X, y = GROOVE.AREA.Y, w = GROOVE.AREA.W, h = GROOVE.AREA.H}
                 }
             },
             { -- dimmer
-                id = "black", draw = isDrawGroove, dst = {
+                id = "black", draw = isDrawAnyGroove, dst = {
                     {x = GROOVE.AREA.X, y = GROOVE.AREA.Y, w = GROOVE.AREA.W, h = GROOVE.AREA.H, a = GROOVE.DIMMER_ALPHA}
                 }
             },
             { -- プレイヤー名
-                id = "playerLabel", draw = isDrawGraph, dst = {
+                id = "playerLabel", draw = isDrawAnyGraph, dst = {
                     {x = GROOVE.PLAYER.X(GROOVE), y = GROOVE.PLAYER.Y(GROOVE), w = GROOVE.PLAYER.W, h = GROOVE.PLAYER.SIZE}
                 }
             },
             { -- プレイ日時
-                id = "dateLabel", draw = isDrawGraph, dst = {
+                id = "dateLabel", draw = isDrawAnyGraph, dst = {
                     {x = GROOVE.DATE.X(GROOVE), y = GROOVE.DATE.Y(GROOVE), w = GROOVE.DATE.W, h = GROOVE.DATE.SIZE}
                 }
             },
+
+            -- 通常のグルーヴゲージ
             { -- groovegauge bg
                 id = "grooveGaugeGraphBg", draw = isDrawGroove, dst = {
                     {x = GROOVE.GAUGE.GROOVE.X(GROOVE), y = GROOVE.GAUGE.GROOVE.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.H}
@@ -288,43 +337,71 @@ groove.functions.dst = function ()
                     {x = GROOVE.GAUGE.GROOVE.X(GROOVE), y = GROOVE.GAUGE.GROOVE.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.H}
                 }
             },
+
+            -- カスタムグルーヴゲージ
+            { -- groovegauge bg
+                id = "customGrooveBg", draw = isDrawCustomGroove, dst = {
+                    {x = GROOVE.GAUGE.GROOVE.X(GROOVE), y = GROOVE.GAUGE.GROOVE.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.H}
+                }
+            },
+            { -- groovegauge部分の判定グラフ
+                id = GROOVE.GAUGE.JUDGE_IDS[getGrooveGaugeAreaGraph()] .. "Graph", draw = isDrawCustomGroove, dst = {
+                    {x = GROOVE.GAUGE.GROOVE.X(GROOVE), y = GROOVE.GAUGE.GROOVE.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.JUDGE.H, a = getGrooveNotesGraphTransparency()}
+                }
+            },
+            { -- groovegauge border
+                id = "customGrooveGraph", draw = isDrawCustomGroove, dst = {
+                    {x = GROOVE.GAUGE.GROOVE.X(GROOVE), y = GROOVE.GAUGE.GROOVE.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.H}
+                }
+            },
+            {
+                id = "customGrooveLabel", draw = isDrawCustomGroove, dst = {
+                    {x = GROOVE.GAUGE.GROOVE.LABEL.X(GROOVE), y = GROOVE.GAUGE.GROOVE.LABEL.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.LABEL.W, h = GROOVE.GAUGE.GROOVE.LABEL.H}
+                }
+            },
+            { -- groovegauge shadow
+                id = "grooveShadow", draw = isDrawCustomGroove, dst = {
+                    {x = GROOVE.GAUGE.GROOVE.X(GROOVE), y = GROOVE.GAUGE.GROOVE.Y(GROOVE), w = GROOVE.GAUGE.GROOVE.W, h = GROOVE.GAUGE.GROOVE.H}
+                }
+            },
+
             { -- 判定グラフbg
-                id = "black", draw = isDrawGraph, dst = {
+                id = "black", draw = isDrawAnyGraph, dst = {
                     {x = GROOVE.GAUGE.JUDGE.X(GROOVE), y = GROOVE.GAUGE.JUDGE.Y(GROOVE), w = GROOVE.GAUGE.JUDGE.W, h = GROOVE.GAUGE.JUDGE.H, a = GROOVE.DIMMER_ALPHA}
                 }
             },
             { -- 判定ゲージ本体
-                id = GROOVE.GAUGE.JUDGE_IDS[getGaugeTypeAtStageFileArea()] .. "Graph", draw = isDrawGraph, dst = {
+                id = GROOVE.GAUGE.JUDGE_IDS[getGaugeTypeAtStageFileArea()] .. "Graph", draw = isDrawAnyGraph, dst = {
                     {x = GROOVE.GAUGE.JUDGE.X(GROOVE), y = GROOVE.GAUGE.JUDGE.Y(GROOVE), w = GROOVE.GAUGE.JUDGE.W, h = GROOVE.GAUGE.JUDGE.H}
                 }
             },
             { -- 色の説明部分
-                id = GROOVE.GAUGE.JUDGE_IDS[getGaugeTypeAtStageFileArea()] .. "Detail", draw = isDrawGraph, dst = {
+                id = GROOVE.GAUGE.JUDGE_IDS[getGaugeTypeAtStageFileArea()] .. "Detail", draw = isDrawAnyGraph, dst = {
                     {x = GROOVE.GAUGE.JUDGE.DETAIL.X(GROOVE), y = GROOVE.GAUGE.JUDGE.DETAIL.Y(GROOVE), w = GROOVE.GAUGE.JUDGE.DETAIL.W, h = GROOVE.GAUGE.JUDGE.DETAIL.H}
                 }
             },
             { -- 色の説明部分
-                id = GROOVE.GAUGE.JUDGE_IDS[getGaugeTypeAtStageFileArea()] .. "Label", draw = isDrawGraph, dst = {
+                id = GROOVE.GAUGE.JUDGE_IDS[getGaugeTypeAtStageFileArea()] .. "Label", draw = isDrawAnyGraph, dst = {
                     {x = GROOVE.GAUGE.JUDGE.LABEL.X(GROOVE), y = GROOVE.GAUGE.JUDGE.LABEL.Y(GROOVE), w = GROOVE.GAUGE.JUDGE.LABEL.W, h = GROOVE.GAUGE.JUDGE.LABEL.H}
                 }
             },
             { -- 判定グラフshadow
-                id = "judgeGaugeShadow", draw = isDrawGraph, dst = {
+                id = "judgeGaugeShadow", draw = isDrawAnyGraph, dst = {
                     {x = GROOVE.GAUGE.JUDGE.X(GROOVE), y = GROOVE.GAUGE.JUDGE.Y(GROOVE), w = GROOVE.GAUGE.JUDGE.W, h = GROOVE.GAUGE.JUDGE.H, a = GROOVE.DIMMER_ALPHA}
                 }
             },
             {
-                id = "noImage", draw = function () return isDrawGraph() and main_state.option(190) end, stretch = 1, filter = 1, dst = {
+                id = "noImage", draw = function () return isDrawAnyGraph() and main_state.option(190) end, stretch = 1, filter = 1, dst = {
                     {x = GROOVE.INFO.STAGEFILE.X(GROOVE), y = GROOVE.INFO.STAGEFILE.Y(GROOVE), w = GROOVE.INFO.STAGEFILE.W, h = GROOVE.INFO.STAGEFILE.H}
                 }
             },
             {
-                id = "black", draw = function () return isDrawGraph() and main_state.option(191) end, dst = {
+                id = "black", draw = function () return isDrawAnyGraph() and main_state.option(191) end, dst = {
                     {x = GROOVE.INFO.STAGEFILE.X(GROOVE), y = GROOVE.INFO.STAGEFILE.Y(GROOVE), w = GROOVE.INFO.STAGEFILE.W, h = GROOVE.INFO.STAGEFILE.H, a = GROOVE.INFO.STAGEFILE.BG_ALPHA}
                 }
             },
             {
-                id = -100, draw = function () return isDrawGraph() and main_state.option(191) end, stretch = 1, filter = 1, dst = {
+                id = -100, draw = function () return isDrawAnyGraph() and main_state.option(191) end, stretch = 1, filter = 1, dst = {
                     {x = GROOVE.INFO.STAGEFILE.X(GROOVE), y = GROOVE.INFO.STAGEFILE.Y(GROOVE), w = GROOVE.INFO.STAGEFILE.W, h = GROOVE.INFO.STAGEFILE.H}
                 }
             },
@@ -338,14 +415,14 @@ groove.functions.dst = function ()
         local pos = i
         -- if i == 6 then pos = 7 end
         dst[#dst+1] = {
-            id = id .. "Header", draw = isDrawGraph, dst = {
+            id = id .. "Header", draw = isDrawAnyGraph, dst = {
                 {x = GROOVE.INFO.LABEL.X_HEADER(GROOVE), y = GROOVE.INFO.LABEL.Y(GROOVE, pos), w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H}
             }
         }
     end
     -- 難易度数値
     dst[#dst+1] = {
-        id = "difficultyValue", draw = isDrawGraph, dst = {
+        id = "difficultyValue", draw = isDrawAnyGraph, dst = {
             {x = GROOVE.INFO.NUM.X(GROOVE), y = GROOVE.INFO.LABEL.Y(GROOVE, 1), w = GROOVE.INFO.NUM.W, h = GROOVE.INFO.NUM.H}
         }
     }
@@ -355,7 +432,7 @@ groove.functions.dst = function ()
             local pos = i + 1
             if i == 5 then pos = 7 end
             dst[#dst+1] = {
-                id = idPrefix[i] .. "Label", draw = isDrawGraph, dst = {
+                id = idPrefix[i] .. "Label", draw = isDrawAnyGraph, dst = {
                     {x = GROOVE.INFO.LABEL.X_VALUE(GROOVE), y = GROOVE.INFO.LABEL.Y(GROOVE, pos), w = GROOVE.INFO.LABEL.W, h = GROOVE.INFO.LABEL.H}
                 }
             }
@@ -363,7 +440,7 @@ groove.functions.dst = function ()
     end
 
     dst[#dst+1] = { -- これらを隠すための背景
-        id = "grooveMaskBg", draw = function () return not isDrawGraph() end, dst = {
+        id = "grooveMaskBg", draw = function () return not isDrawAnyGraph() end, dst = {
             {x = GROOVE.AREA.X, y = GROOVE.AREA.Y, w = GROOVE.AREA.W, h = GROOVE.AREA.H}
         }
     }
