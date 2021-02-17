@@ -50,7 +50,7 @@ local GRAPH = {
         TOP_Y = function (self) return self.GAUGE.Y(self) + self.GAUGE.H - 5 - self.GROOVE_TEXT.H end,
         BOTTOM_Y = function (self) return self.GAUGE.Y(self) + 5 end,
         Y = 5,
-        W = 189,
+        W = 210,
         H = 22,
     },
 
@@ -78,24 +78,26 @@ local GRAPH = {
     },
 
     TAB = {
-        X = function (self) return self.WND_GAUGE.X + self.WND_GAUGE.W end,
+        X = function (self) return WIDTH - self.TAB.W end,
         START_Y = function (self) return self.WND_GAUGE.Y + self.WND_GAUGE.H - self.TAB.H - 1 end,
         Y = function (self, idx) return self.TAB.START_Y(self) - self.TAB.INTERVAL_Y * (idx - 1) end,
-        INTERVAL_Y = 106,
-        W = 45,
-        H = 126,
+        INTERVAL_Y = 64,
+        W = 58,
+        H = 74,
         TYPES = {
             GROOVE = 1,
-            SCORE = 2,
-            RANKING = 3,
+            CUSTOM_GROOVE = 2,
+            SCORE = 3,
+            RANKING = 4,
+            LAMPS = 5,
         },
         BUTTON = {
-            X = function (self) return self.TAB.X(self) end,
-            Y = function (self, idx) return self.TAB.Y(self, idx) + 15 end,
-            W = 45,
-            H = 96,
+            X = function (self) return self.TAB.X(self) + 18 end,
+            Y = function (self, idx) return self.TAB.Y(self, idx) + 17 end,
+            W = 40,
+            H = 40,
         },
-        PREFIX = {"grooveGauge", "scoreGauge", "ranking"}
+        PREFIX = {"grooveGauge", "customGrooveGauge", "scoreGauge", "ranking", "lampsGraph"}
     },
 
     PREFIX = {"notes", "judges", "el", "timing"}
@@ -141,22 +143,18 @@ notesGraph.functions.load = function ()
             {id = "judgesDescription" , src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*1, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
             {id = "elDescription"     , src = 0, x = 626, y = 168 + GRAPH.DESCRIPTION.H*2, w = GRAPH.DESCRIPTION.W, h = GRAPH.DESCRIPTION.H},
             {id = "timingDescription" , src = 999, x = 0, y = 0, w = 1, h = 1},
-            {id = "notesGraphText"  , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*0, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
-            {id = "judgesGraphText" , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*1, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
-            {id = "elGraphText"     , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*2, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
-            {id = "timingGraphText" , src = 0, x = 199, y = 432 + GRAPH.JUDGE_TEXT.H*3, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
-            {id = "grooveGaugeText", src = 0, x = 199, y = 432 + GRAPH.GROOVE_TEXT.H*4, w = GRAPH.GROOVE_TEXT.W, h = GRAPH.GROOVE_TEXT.H},
+            {id = "notesGraphText"       , src = 9, x = 0, y = GRAPH.JUDGE_TEXT.H*0, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
+            {id = "judgesGraphText"      , src = 9, x = 0, y = GRAPH.JUDGE_TEXT.H*1, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
+            {id = "elGraphText"          , src = 9, x = 0, y = GRAPH.JUDGE_TEXT.H*2, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
+            {id = "timingGraphText"      , src = 9, x = 0, y = GRAPH.JUDGE_TEXT.H*3, w = GRAPH.JUDGE_TEXT.W, h = GRAPH.JUDGE_TEXT.H},
+            {id = "grooveGaugeText"      , src = 9, x = 0, y = GRAPH.GROOVE_TEXT.H*4, w = GRAPH.GROOVE_TEXT.W, h = GRAPH.GROOVE_TEXT.H},
+            {id = "customGrooveGaugeText", src = 9, x = 0, y = GRAPH.GROOVE_TEXT.H*5, w = GRAPH.GROOVE_TEXT.W, h = GRAPH.GROOVE_TEXT.H},
             -- ランダムオプションはグラフ上に表示
             {id = "randomOptionImgs", src = 0, x = 199, y = 566, w = OPTIONS.IMG.W, h = OPTIONS.IMG.H * 10, divy = 10, ref = 42},
-            -- tab
-            {id = "grooveGaugeTab", src = 0, x = 0, y = 93, w = GRAPH.TAB.W, h = GRAPH.TAB.H},
-            {id = "scoreGaugeTab", src = 0, x = 0, y = 93 + GRAPH.TAB.H, w = GRAPH.TAB.W, h = GRAPH.TAB.H},
-            {id = "rankingTab", src = 0, x = 0, y = 93 + GRAPH.TAB.H * 2, w = GRAPH.TAB.W, h = GRAPH.TAB.H},
-            {id = "grooveGaugeTabButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = function () notesGraph.functions.switchTab(1) end},
-            {id = "scoreGaugeTabButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = function () notesGraph.functions.switchTab(2) end},
-            {id = "rankingTabButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = function () notesGraph.functions.switchTab(3) end},
             -- スコアグラフを隠すための背景
             {id = "scoreGraphMaskBg", src = getBgSrc(), x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = HEIGHT - GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.H - GRAPH.WND_GAUGE.SHADOW, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW},
+            {id = "customGrooveBg", src = 7, x = 0, y = 0, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H},
+            {id = "customGrooveGraph", src = 8, x = 0, y = 0, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H},
         },
         imageset = {},
         value = {
@@ -186,12 +184,18 @@ notesGraph.functions.load = function ()
                         if notesGraph.activeTabIdx < 1 then
                             notesGraph.activeTabIdx = #GRAPH.TAB.PREFIX
                         end
+                        if not getIsViewCostomGrooveGauge() and notesGraph.activeTabIdx == GRAPH.TAB.TYPES.CUSTOM_GROOVE then
+                            notesGraph.activeTabIdx = GRAPH.TAB.TYPES.GROOVE
+                        end
                         myPrint("nowTab: " .. notesGraph.activeTabIdx)
                     elseif isPressedDown() then
                         myPrint("move tab down")
                         notesGraph.activeTabIdx = notesGraph.activeTabIdx + 1
                         if notesGraph.activeTabIdx > #GRAPH.TAB.PREFIX then
                             notesGraph.activeTabIdx = 1
+                        end
+                        if not getIsViewCostomGrooveGauge() and notesGraph.activeTabIdx == GRAPH.TAB.TYPES.CUSTOM_GROOVE then
+                            notesGraph.activeTabIdx = GRAPH.TAB.TYPES.SCORE
                         end
                         myPrint("nowTab: " .. notesGraph.activeTabIdx)
                     end
@@ -211,7 +215,40 @@ notesGraph.functions.load = function ()
     end
     skin.imageset[#skin.imageset+1] = {id = "randomOptionImageSet", ref = 42, images = opImgs}
 
-    mergeSkin(skin, ranking.load(function () return notesGraph.activeTabIdx == 3 end))
+    -- タブ読み込み
+    for i, v in ipairs(GRAPH.TAB.PREFIX) do
+        imgs[#imgs+1] = {id = v .. "TabIcon", src = 6, x = 0, y = GRAPH.TAB.H * (i - 1), w = GRAPH.TAB.W, h = GRAPH.TAB.H}
+        imgs[#imgs+1] = {id = v .. "TabButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = function () notesGraph.functions.switchTab(i) end}
+    end
+
+    -- カスタムグルーヴゲージ読み込み+画像削除
+    if getIsViewCostomGrooveGauge() then
+        local f = io.open(skin_config.get_path("../generated/custom_groove/id.txt"), "r")
+        local id = ""
+        if f then
+            for line in f:lines() do
+                id = line
+            end
+            print("カスタムグルーヴゲージ 画像ID: " .. id)
+            skin.source = {
+                {id = 8, path = "../generated/custom_groove/groove_" .. id .. ".png"}
+            }
+
+            -- そのままだと画像が増殖していくのでカスタムグルーヴゲージの結果を削除
+            local isDeleted = false
+            table.insert(skin.customTimers, {
+                id = 10103,
+                timer = function ()
+                    if main_state.timer(2) > 0 and not isDeleted then
+                        isDeleted = true
+                        os.remove(skin_config.get_path("../generated/custom_groove/groove_" .. id .. ".png"))
+                    end
+                end
+            })
+        end
+    end
+
+    mergeSkin(skin, ranking.load(function () return notesGraph.activeTabIdx == GRAPH.TAB.TYPES.RANKING end))
     mergeSkin(skin, scoreGraph.load())
     return skin
 end
@@ -223,6 +260,9 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
     local grooveX = GRAPH.GAUGE.X(GRAPH)
     local grooveY = GRAPH.GAUGE.Y(GRAPH)
     local getIsDrawGrooveGauge = function () return notesGraph.activeTabIdx == GRAPH.TAB.TYPES.GROOVE end
+    local getIsDrawCustomGrooveGauge = function () return notesGraph.activeTabIdx == GRAPH.TAB.TYPES.CUSTOM_GROOVE end
+    local getIsDrawAnyGrooveGauge = function () return getIsDrawGrooveGauge() or getIsDrawCustomGrooveGauge() end
+    local getIsDrawAnyGraph = function () return getIsDrawAnyGrooveGauge() or notesGraph.activeTabIdx == GRAPH.TAB.TYPES.SCORE end
 
     -- スコアグラフを描画
     do
@@ -236,13 +276,20 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
 
     -- スコアグラフを隠すためのマスク
     dst[#dst+1] = {
-        id = "scoreGraphMaskBg", draw = getIsDrawGrooveGauge, dst = {
+        id = "scoreGraphMaskBg", draw = getIsDrawAnyGrooveGauge, dst = {
             {x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = GRAPH.WND_GAUGE.Y, w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW*2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW}
         }
     }
 
+    -- 通常グルーヴゲージの背景
     dst[#dst+1] = {
         id = "grooveGaugeGraphBg", draw = getIsDrawGrooveGauge, dst = {
+            {x = grooveX, y = grooveY, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H}
+        }
+    }
+    -- カスタムグルーヴゲージの背景
+    dst[#dst+1] = {
+        id = "customGrooveBg", draw = getIsDrawCustomGrooveGauge, dst = {
             {x = grooveX, y = grooveY, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H}
         }
     }
@@ -259,8 +306,14 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
         }
     end
 
+    -- グルーヴゲージ本体
     dst[#dst+1] = {
         id = "grooveGaugeGraphFront", draw = getIsDrawGrooveGauge, dst = {
+            {x = grooveX, y = grooveY, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H}
+        }
+    }
+    dst[#dst+1] = {
+        id = "customGrooveGraph", draw = getIsDrawCustomGrooveGauge, dst = {
             {x = grooveX, y = grooveY, w = GRAPH.GAUGE.W, h = GRAPH.GAUGE.H}
         }
     }
@@ -271,6 +324,10 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
         if isDrawGrooveGaugeLabel() then
             dst[#dst+1] = {
                 id = "grooveGaugeText", draw = getIsDrawGrooveGauge, dst = {
+                    {x = GRAPH.GROOVE_TEXT.X(GRAPH), y = labelY, w = GRAPH.GROOVE_TEXT.W, h = GRAPH.GROOVE_TEXT.H}
+                },
+            }dst[#dst+1] = {
+                id = "customGrooveGaugeText", draw = getIsDrawCustomGrooveGauge, dst = {
                     {x = GRAPH.GROOVE_TEXT.X(GRAPH), y = labelY, w = GRAPH.GROOVE_TEXT.W, h = GRAPH.GROOVE_TEXT.H}
                 },
             }
@@ -303,25 +360,34 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
 
     mergeSkin(skin, ranking.dstMaskBg())
 
-    -- 非アクティブタブをフレームの下に
-    for i = 1, #GRAPH.TAB.PREFIX do
-        local idPrefix = GRAPH.TAB.PREFIX[i]
-        if idPrefix == "scoreGauge" and not notesGraph.didLoadPlayData then
-            dst[#dst+1] = {
-                id = idPrefix .. "Tab", draw = function () return notesGraph.activeTabIdx ~= i end, dst = {
-                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.Y(GRAPH, i), w = GRAPH.TAB.W, h = GRAPH.TAB.H, r = 128, g = 128, b = 128}
+    -- タブの描画
+    for i, v in ipairs(GRAPH.TAB.PREFIX) do
+        local usable = true
+        if i == GRAPH.TAB.TYPES.SCORE and not notesGraph.didLoadPlayData then
+            usable = false
+        elseif i == GRAPH.TAB.TYPES.CUSTOM_GROOVE and not getIsViewCostomGrooveGauge() then
+            usable = false
+        end
+
+        dst[#dst+1] = {
+            id = v .. "TabIcon", dst = {
+                {
+                    x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.Y(GRAPH, i), w = GRAPH.TAB.W, h = GRAPH.TAB.H,
+                    a = usable and 255 or 128
                 }
             }
-        else
+        }
+        if usable then
             dst[#dst+1] = {
-                id = idPrefix .. "Tab", draw = function () return notesGraph.activeTabIdx ~= i end, dst = {
-                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.Y(GRAPH, i), w = GRAPH.TAB.W, h = GRAPH.TAB.H}
+                id = v .. "TabButton", dst = {
+                    {x = GRAPH.TAB.BUTTON.X(GRAPH), y = GRAPH.TAB.BUTTON.Y(GRAPH, i), w = GRAPH.TAB.BUTTON.W, h = GRAPH.TAB.BUTTON.H,}
                 }
             }
         end
     end
+
     dst[#dst+1] = {
-        id = "grooveGaugeFrame", draw = function () return notesGraph.activeTabIdx == 1 or notesGraph.activeTabIdx == 2 end, dst = {
+        id = "grooveGaugeFrame", draw = getIsDrawAnyGraph, dst = {
             {
                 x = GRAPH.WND_GAUGE.X - GRAPH.WND_GAUGE.SHADOW, y = GRAPH.WND_GAUGE.Y - GRAPH.WND_GAUGE.SHADOW,
                 w = GRAPH.WND_GAUGE.W + GRAPH.WND_GAUGE.SHADOW * 2, h = GRAPH.WND_GAUGE.H + GRAPH.WND_GAUGE.SHADOW * 2
@@ -379,41 +445,11 @@ notesGraph.functions.dstJudgeGaugeArea = function ()
     return skin
 end
 
-notesGraph.functions.dstActiveTabAndButton = function ()
-    local skin = {destination = {}}
-    local dst = skin.destination
-    -- アクティブタブを上に
-    for i = 1, #GRAPH.TAB.PREFIX do
-        local idPrefix = GRAPH.TAB.PREFIX[i]
-        if idPrefix == "scoreGauge" and not notesGraph.didLoadPlayData then
-            dst[#dst+1] = {
-                id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx == i end, dst = {
-                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.Y(GRAPH, i), w = GRAPH.TAB.W, h = GRAPH.TAB.H, r = 128, g = 128, b = 128}
-                }
-            }
-        else
-            dst[#dst+1] = {
-                id = GRAPH.TAB.PREFIX[i] .. "Tab", draw = function () return notesGraph.activeTabIdx == i end, dst = {
-                    {x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.Y(GRAPH, i), w = GRAPH.TAB.W, h = GRAPH.TAB.H}
-                }
-            }
-        end
-        -- タブのボタン
-        dst[#dst+1] = {
-            id = GRAPH.TAB.PREFIX[i] .. "TabButton", draw = function () return notesGraph.activeTabIdx ~= i end, dst = {
-                {x = GRAPH.TAB.BUTTON.X(GRAPH), y = GRAPH.TAB.BUTTON.Y(GRAPH, i), w = GRAPH.TAB.BUTTON.W, h = GRAPH.TAB.BUTTON.H}
-            }
-        }
-    end
-    return skin
-end
-
 notesGraph.functions.dst= function ()
     local skin = {destination = {}}
     mergeSkin(skin, notesGraph.functions.dstJudgeGaugeArea())
     mergeSkin(skin, notesGraph.functions.dstGrooveGaugeArea())
     mergeSkin(skin, ranking.dst())
-    mergeSkin(skin, notesGraph.functions.dstActiveTabAndButton())
     return skin
 end
 
