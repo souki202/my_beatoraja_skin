@@ -3,6 +3,7 @@ require("modules.result.commons")
 require("modules.commons.input")
 local main_state = require("main_state")
 local ranking = require("modules.result.ranking")
+local lamps = require("modules.result.lamps")
 local scoreGraph = require("modules.result.score_graph")
 
 
@@ -249,6 +250,7 @@ notesGraph.functions.load = function ()
     end
 
     mergeSkin(skin, ranking.load(function () return notesGraph.activeTabIdx == GRAPH.TAB.TYPES.RANKING end))
+    mergeSkin(skin, lamps.load(function () return notesGraph.activeTabIdx == GRAPH.TAB.TYPES.LAMPS end))
     mergeSkin(skin, scoreGraph.load())
     return skin
 end
@@ -359,6 +361,7 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
     }
 
     mergeSkin(skin, ranking.dstMaskBg())
+    mergeSkin(skin, lamps.dstMaskBg())
 
     -- タブの描画
     for i, v in ipairs(GRAPH.TAB.PREFIX) do
@@ -450,6 +453,7 @@ notesGraph.functions.dst= function ()
     mergeSkin(skin, notesGraph.functions.dstJudgeGaugeArea())
     mergeSkin(skin, notesGraph.functions.dstGrooveGaugeArea())
     mergeSkin(skin, ranking.dst())
+    mergeSkin(skin, lamps.dst())
     return skin
 end
 

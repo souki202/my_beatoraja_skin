@@ -669,6 +669,8 @@ local function main()
         {id = 7, path = "../result/parts/groove/custom_gauge_bg.png"},
         -- {id = 8, path = "../generated/custom_groove/groove_xxx.png"},
         {id = 9, path = "../result/parts/graph_labels.png"},
+        {id = 10, path = "../result/parts/lamps/lamp_bg.png"},
+        {id = 11, path = "../result/parts/lamps/header.png"},
         {id = 20, path = "../result/noimage/*.png"},
         {id = 100, path = "../result/background/isclear/clear/*.png"},
         {id = 101, path = "../result/background/isclear/failed/*.png"},
