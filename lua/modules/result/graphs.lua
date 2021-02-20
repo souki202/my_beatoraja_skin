@@ -302,7 +302,7 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
         local prefix = GRAPH.PREFIX[type]
         local p = getGrooveNotesGraphSizePercentage()
         dst[#dst+1] = {
-            id = prefix .. "Graph", blend = type == 4 and 2 or 1, draw = getIsDrawGrooveGauge, dst = {
+            id = prefix .. "Graph", blend = type == 4 and 2 or 1, draw = getIsDrawAnyGrooveGauge, dst = {
                 {x = grooveX, y = grooveY, w = GRAPH.JUDGE_GRAPH.W, h = GRAPH.GAUGE.H * p, a = getGrooveNotesGraphTransparency()}
             }
         }

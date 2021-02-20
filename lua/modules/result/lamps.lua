@@ -134,6 +134,7 @@ lamps.functions.load = function (isDrawFunction)
                             lamps.rates[i] = r
                             lamps.rateAfterDots[i] = a
                             lamps.barValues[i] = sum / 100
+                            lamps.num[i] = main_state.number(valueIds[i])
                         end
                     end
                 end
@@ -212,7 +213,7 @@ lamps.functions.dst = function ()
 
     dst[#dst+1] = {
         id = "lampDistributionHeader", draw = isDraw, dst = {
-            {x = LAMPS.HEADER.X(LAMPS), y = LAMPS.HEADER.Y, w = LAMPS.HEADER.W, h = LAMPS.HEADER.H}
+            {x = LAMPS.HEADER.X(LAMPS), y = LAMPS.HEADER.Y(LAMPS), w = LAMPS.HEADER.W, h = LAMPS.HEADER.H}
         }
     }
 
@@ -275,7 +276,7 @@ lamps.functions.dst = function ()
             }
         }
         dst[#dst+1] = {
-            id = id .. "RateBarSeparator", draw = isDraw, center = 4, dst = {
+            id = id .. "RateBarSeparator", draw = function () return isDraw() and lamps.num[i] > 0 end, center = 4, dst = {
                 {
                     time = 0,
                     x = LAMPS.GRAPH.BEAM.X2(LAMPS), y = LAMPS.GRAPH.BEAM.Y(LAMPS, i), w = 1000, h = 2,
