@@ -48,7 +48,9 @@ local LAMPS = {
                 {148, 0, 99},
                 {0, 0, 247},
                 {148, 0, 0},
-            }
+            },
+
+            SHADOW = 10,
         },
         LABEL = {
             X = function (self) return self.WND.X + 48 end,
@@ -106,6 +108,8 @@ lamps.functions.load = function (isDrawFunction)
     local skin = {
         image = {
             {id = "graphWhite", src = 999, x = 2, y = 0, w = 1, h = 1},
+            {id = "lampGraphShadow", src = 12, x = 0, y = 0, w = LAMPS.GRAPH.BAR.W + LAMPS.GRAPH.BAR.SHADOW * 2, h = LAMPS.GRAPH.BAR.H + LAMPS.GRAPH.BAR.SHADOW * 2},
+            {id = "lampGraphOverlay", src = 12, x = 10, y = 620, w = LAMPS.GRAPH.BAR.W, h = 1},
             -- ヘッダー
             {id = "lampDistributionHeader", src = 11, x = 0, y = 0, w = LAMPS.HEADER.W, h = LAMPS.HEADER.H},
         },
@@ -131,6 +135,9 @@ lamps.functions.load = function (isDrawFunction)
                             if r < 0 or a < 0 then return end
 
                             sum = sum + r + a / 10
+                            if math.abs(100 - sum) < 0.1 then
+                                sum = 100
+                            end
                             lamps.rates[i] = r
                             lamps.rateAfterDots[i] = a
                             lamps.barValues[i] = sum / 100
@@ -214,6 +221,13 @@ lamps.functions.dst = function ()
     dst[#dst+1] = {
         id = "lampDistributionHeader", draw = isDraw, dst = {
             {x = LAMPS.HEADER.X(LAMPS), y = LAMPS.HEADER.Y(LAMPS), w = LAMPS.HEADER.W, h = LAMPS.HEADER.H}
+        }
+    }
+
+    -- 棒グラフの影
+    dst[#dst+1] = {
+        id = "lampGraphShadow", draw = function () return isDraw() and lamps.barValues[1] > 0 end, dst = {
+            {x = LAMPS.GRAPH.BAR.X(LAMPS) - LAMPS.GRAPH.BAR.SHADOW, y = LAMPS.GRAPH.BAR.Y(LAMPS) - LAMPS.GRAPH.BAR.SHADOW, w = LAMPS.GRAPH.BAR.W + LAMPS.GRAPH.BAR.SHADOW * 2, h = LAMPS.GRAPH.BAR.H + LAMPS.GRAPH.BAR.SHADOW * 2}
         }
     }
 
@@ -306,6 +320,14 @@ lamps.functions.dst = function ()
             }
         }
     end
+
+    -- 棒グラフの光沢
+    dst[#dst+1] = {
+        id = "lampGraphOverlay", draw = function () return isDraw() and lamps.barValues[1] > 0 end, dst = {
+            {x = LAMPS.GRAPH.BAR.X(LAMPS), y = LAMPS.GRAPH.BAR.Y(LAMPS), w = LAMPS.GRAPH.BAR.W, h = LAMPS.GRAPH.BAR.H}
+        }
+    }
+
     return skin
 end
 

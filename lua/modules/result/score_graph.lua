@@ -87,10 +87,6 @@ local exScores = { -- レートも今はこれを使う
     }
 }
 
-scoreGraph.functions.change2p = function ()
-    GRAPH.WND_GAUGE.X = LEFT_X
-end
-
 scoreGraph.functions.getScoreGraphType = function ()
     return getTableValue(skin_config.option, "スコアグラフ(プレイスキン併用時のみ)", 966) - 965 + 1
 end

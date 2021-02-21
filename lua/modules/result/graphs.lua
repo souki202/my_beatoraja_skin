@@ -120,8 +120,8 @@ local OPTIONS = {
 notesGraph.functions.change2p = function ()
     GRAPH.WND_GAUGE.X = LEFT_X
     GRAPH.WND_JUDGE.X = LEFT_X
-    scoreGraph.change2p()
     ranking.change2p()
+    lamps.change2p()
 end
 
 notesGraph.functions.switchTab = function (tabIdx)
