@@ -21,6 +21,7 @@ local fade = require("modules.play.fade")
 local visualizer = require("modules.play.visualizer")
 local autoplay = require("modules.play.autoplay")
 local logger = require("modules.play.logger")
+local musicDetail = require("modules.play.music_detail")
 
 local header = {
     type = 0,
@@ -34,7 +35,7 @@ local header = {
     close = 2000,
     fadeout = fade.getFadeoutTime(),
 
-    property = { -- 使用済み 10200まで
+    property = { -- 使用済み 10220まで
         {
             name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
         },
@@ -218,6 +219,21 @@ local header = {
         {
             name = "ビジュアライザー1の奥側の反射", item = {{name = "ON", op = 10060}, {name = "OFF", op = 10061}}, def = "ON"
         },
+        {
+            name = "楽曲詳細表示---------------------", item = {{name = "-", op = 19999}}
+        },
+        {
+            name = "楽曲詳細表示", item = {{name = "ON", op = 10205}, {name = "OFF", op = 10206}}, def = "ON"
+        },
+        {
+            name = "楽曲詳細のステージファイル位置", item = {{name = "右", op = 10210}, {name = "左", op = 10211}}, def = "左"
+        },
+        {
+            name = "楽曲詳細のノーツグラフ種類", item = {{name = "ノーツ数分布", op = 10220}, {name = "判定分布", op = 10221}, {name = "EARLY/LATE分布(棒グラフ)", op = 10222}, {name = "タイミング可視化グラフ", op = 10223}, {name = "無し", op = 10224}}, def = "ノーツ数分布"
+        },
+        {
+            name = "楽曲データベースの使用", item = {{name = "ON", op = 10215}, {name = "OFF", op = 10216}}, def = "ON"
+        },
     },
     filepath = {
         {name = "各種画像--------------", path = "../dummy/*"},
@@ -229,6 +245,10 @@ local header = {
         {name = "BGAフレーム(全画面)", path = "../play/parts/bga/frame/full/*.png", def = "blank"},
         {name = "黒帯部分BGAのマスク", path = "../play/parts/bga/mask/*.png", def = "default"},
         {name = "タイトル部分フレーム", path = "../play/parts/title/frame/*.png", def = "simple"},
+        {name = "楽曲詳細情報のステージファイルのnoimage画像", path = "../play/parts/detail/noimage/*.png", def = "default"},
+        {name = "楽曲詳細情報フレーム", path = "../play/parts/detail/frame/*.png", def = "blank"},
+        {name = "楽曲詳細情報ステージファイルフレーム", path = "../play/parts/detail/stagefileframe/*.png", def = "blank"},
+        {name = "楽曲詳細情報背景", path = "../play/parts/detail/bg/*.png", def = "blank"},
         {name = "レーン部分全般--------------", path = "../dummy/*"},
         {name = "ノート画像(通常形式)", path = "../play/parts/lane/notes/normal/*.png", def = "default"},
         {name = "ノート画像(独自形式)", path = "../play/parts/lane/notes/original/*.png", def = "default"},
@@ -265,6 +285,7 @@ local header = {
         {name = "グルーブゲージの通知エフェクトの大きさ差分(%)", y = 0},
         {name = "ゲージ100%時のキラキラの数(既定値20)", x = 0},
         {name = "レーンサイドの1ループのアニメーション時間(単位拍子 既定値8 -1でアニメーションなし)", x = 0},
+        {name = "楽曲詳細情報のステージファイルオフセット", x = 0, y = 0, w = 0, h = 0, id = 41},
 
         {name = "スコアログ周り------------------", x = 0},
         {name = "スコアレートのサンプルノーツ数(既定値50)", x = 0},
@@ -409,6 +430,10 @@ local function main()
         {id = 90, path = "../play/parts/lane/laneside/state/survival/*.png"},
         {id = 91, path = "../play/parts/lane/laneside/state/clear/*.png"},
         {id = 92, path = "../play/parts/lane/laneside/state/fail/*.png"},
+        {id = 100, path = "../play/parts/detail/noimage/*.png"},
+        {id = 101, path = "../play/parts/detail/frame/*.png"},
+        {id = 102, path = "../play/parts/detail/stagefileframe/*.png"},
+        {id = 103, path = "../play/parts/detail/bg/*.png"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 
@@ -444,6 +469,7 @@ local function main()
     if isDrawVisualizer1() then
         mergeSkin(skin, visualizer.load())
     end
+    mergeSkin(skin, musicDetail.load())
 
     skin.destination = {}
 
@@ -462,6 +488,7 @@ local function main()
     mergeSkin(skin, life.dst())
     mergeSkin(skin, scoreGraph.dst())
     mergeSkin(skin, judgeDetail.dst())
+    mergeSkin(skin, musicDetail.dst())
     mergeSkin(skin, autoplay.dst())
     mergeSkin(skin, loading.dst())
     mergeSkin(skin, finish.dst())

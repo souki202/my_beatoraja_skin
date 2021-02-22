@@ -52,6 +52,10 @@ title.functions.load = function ()
 end
 
 title.functions.dst = function ()
+    -- 詳細表示時はコレを表示しない
+    if getIsDrawMusicDetail() then
+        return {}
+    end
     local skin = {
         destination = {
             {

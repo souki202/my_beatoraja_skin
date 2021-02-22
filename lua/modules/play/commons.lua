@@ -375,4 +375,28 @@ function getSimpleLineColor()
 	return colors[dif][1], colors[dif][2], colors[dif][3]
 end
 
+function getIsDrawMusicDetail()
+	return getTableValue(skin_config.option, "楽曲詳細表示", 10205) == 10205
+end
+
+function getIsUseMusicDatabase()
+	return getTableValue(skin_config.option, "楽曲データベースの使用", 10215) == 10215
+end
+
+--[[
+	@return 1: ノーツ数分布, 2: 判定分布, 3: EARLY/LATE分布(棒グラフ), 4: タイミング可視化グラフ, 5: 無し
+]]
+function getMusicDetailNotesGraph()
+    return (getTableValue(skin_config.option, "楽曲詳細のノーツグラフ種類", 10220) % 5) + 1
+end
+
+--[[
+	楽曲詳細情報のステージファイル位置を取得
+
+	@return {int} 0で右, 1で左
+]]
+function getMusicDetailStafeFilePosition()
+	return getTableValue(skin_config.option, "楽曲詳細のステージファイル位置", 10211) == 10211
+end
+
 return commons

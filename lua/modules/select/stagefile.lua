@@ -1,7 +1,7 @@
 local commons = require("modules.select.commons")
 local main_state = require("main_state")
 local desktop = require("modules.commons.desktop")
-local musicDetail = require("modules.select.music_detail")
+local musicDetail = require("modules.commons.music_detail")
 
 local stagefile = {
     functions = {}

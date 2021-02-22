@@ -21,7 +21,7 @@ local menu = require("modules.select.menu")
 local clock = require("modules.select.clock")
 local ir = require("modules.select.ir")
 local musicInfo = require("modules.select.music_info")
-local musicDetail = require("modules.select.music_detail")
+local musicDetail = require("modules.commons.music_detail")
 
 local main_state = require("main_state")
 
@@ -534,7 +534,7 @@ local function main()
     table.insert(skin.customTimers, {id = statistics.getWindowTimerId(), timer = "statisticsTimer"}) -- 統計画面全体のタイマー
     table.insert(skin.customTimers, {id = volumes.getWindowTimerId(), timer = "volumesTimer"}) -- 音量設定画面全体のタイマー
     if isUseMusicDb() then
-        table.insert(skin.customTimers, {id = musicDetail.getHttpTimer(), timer = function () musicDetail.getMusicDetail() end})
+        table.insert(skin.customTimers, {id = musicDetail.getHttpTimer(), timer = function () musicDetail.fetchMusicDetail() end})
     end
     table.insert(skin.customTimers, {id = 13000, timer = "update"})
     -- 13100はmenu
@@ -837,7 +837,7 @@ local function main()
     mergeSkin(skin, ir.load())
     mergeSkin(skin, musicInfo.load())
     mergeSkin(skin, volumes.load())
-    mergeSkin(skin, musicDetail.load())
+    mergeSkin(skin, musicDetail.loadSelect())
 
     skin.destination = {}
 
