@@ -19,7 +19,7 @@ require("modules.commons.userdata")
 require("modules.commons.numbers")
 require("modules.commons.timer")
 
-DEBUG = false
+DEBUG = true
 
 function table.in_key(tbl, key)
     for k, v in pairs (tbl) do
