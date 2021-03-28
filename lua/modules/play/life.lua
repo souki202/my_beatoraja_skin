@@ -337,6 +337,10 @@ life.functions.updateNowLR2GaugeType = function ()
     end
 end
 
+life.functions.getIsEnableLR2Gauge = function ()
+    return isOutputLog() and getIsEnableLR2Gauge() and main_state.gauge_type() + 1 < LIFE.TYPE_IDX.CLASS
+end
+
 life.functions.load = function ()
     LIFE.GAUGE.LIGHT.THRESHOLD_INTERVAL = LIFE.GAUGE.LIGHT.THRESHOLD_INTERVALS[math.max(1, math.min(getLifeGaugeEffectThresholdIdx(), 5))]
     LIFE.GAUGE.LIGHT.MAX_H = LIFE.GAUGE.LIGHT.MAX_H * (100 + getLifeGaugeEffectSizeYOffset()) / 100
@@ -449,7 +453,7 @@ life.functions.load = function ()
     end
 
     -- カスタムゲージ. 段位ゲージ時は使用しない
-    if isOutputLog() and getIsEnableLR2Gauge() and main_state.gauge_type() + 1 < LIFE.TYPE_IDX.CLASS then
+    if life.functions.getIsEnableLR2Gauge() then
         life.functions.initCustomGauge()
 
         table.insert(skin.customTimers, {
@@ -505,7 +509,7 @@ life.functions.dstNormal = function ()
     local y = LIFE.GAUGE.Y(LIFE)
     local bodyH = h
     local orajaGaugeY = y
-    if getIsEnableLR2Gauge() then
+    if life.functions.getIsEnableLR2Gauge() then
         bodyH = h / 2
         orajaGaugeY = y + bodyH
     end
@@ -553,7 +557,7 @@ life.functions.dstNormal = function ()
         }
 
         -- lr2ゲージ実体
-        if getIsEnableLR2Gauge() then
+        if life.functions.getIsEnableLR2Gauge() then
             -- 背景
             -- 多い部分
             dst[#dst+1] = {

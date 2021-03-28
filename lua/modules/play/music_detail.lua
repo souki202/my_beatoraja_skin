@@ -127,7 +127,7 @@ detail.functions.dst = function ()
     local skin = {
         destination = {
             {
-                id = p .. "Bg", filter = 1, dst = {
+                id = p .. "Bg", dst = {
                     {x = DETAIL.AREA.X(), y = DETAIL.AREA.Y(), w = DETAIL.AREA.W, h = DETAIL.AREA.H},
                 }
             },
@@ -181,25 +181,25 @@ detail.functions.dst = function ()
             -- ステージファイル
             -- stagefile黒背景
             {
-                id = "black", op = {191}, dst = {
+                id = "black", op = {191}, offset = 42, dst = {
                     {x = DETAIL.STAGEFILE.IMAGE.X(DETAIL), y = DETAIL.STAGEFILE.IMAGE.Y(DETAIL), w = DETAIL.STAGEFILE.IMAGE.W, h = DETAIL.STAGEFILE.IMAGE.H, a = 255}
                 }
             },
             -- no stagefile
             {
-                id = p .. "NoImage", op = {190}, filter = 1, stretch = 1, dst = {
+                id = p .. "NoImage", op = {190}, filter = 1, stretch = 1, offset = 42, dst = {
                     {x = DETAIL.STAGEFILE.IMAGE.X(DETAIL), y = DETAIL.STAGEFILE.IMAGE.Y(DETAIL), w = DETAIL.STAGEFILE.IMAGE.W, h = DETAIL.STAGEFILE.IMAGE.H}
                 }
             },
             -- ステージファイル
             {
-                id = -100, filter = 1, stretch = 1, dst = {
+                id = -100, filter = 1, stretch = 1, offset = 42, dst = {
                     {x = DETAIL.STAGEFILE.IMAGE.X(DETAIL), y = DETAIL.STAGEFILE.IMAGE.Y(DETAIL), w = DETAIL.STAGEFILE.IMAGE.W, h = DETAIL.STAGEFILE.IMAGE.H}
                 }
             },
             -- frame
             {
-                id = p .. "StageFileFrame", filter = 1, dst = {
+                id = p .. "StageFileFrame", dst = {
                     {x = DETAIL.STAGEFILE.FRAME.X(DETAIL), y = DETAIL.STAGEFILE.FRAME.Y(DETAIL), w = DETAIL.STAGEFILE.FRAME.W, h = DETAIL.STAGEFILE.FRAME.H}
                 }
             },
