@@ -351,6 +351,11 @@ function getLR2GaugeAutoShiftType()
 	return getTableValue(skin_config.option, "カスタムゲージのゲージオートシフト", 10175) % 5 + 1
 end
 
+-- 1:上 2:下
+function getLR2GaugePosition()
+	return getTableValue(skin_config.option, "カスタムゲージの位置", 10226) % 5 + 1
+end
+
 function getDifficultyValueForColor()
 	local dif = 0
 	local op = getTableValue(skin_config.option, "難易度毎の色変化", 955)

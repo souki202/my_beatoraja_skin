@@ -509,9 +509,14 @@ life.functions.dstNormal = function ()
     local y = LIFE.GAUGE.Y(LIFE)
     local bodyH = h
     local orajaGaugeY = y
+    local customGaugeY = y
     if life.functions.getIsEnableLR2Gauge() then
         bodyH = h / 2
-        orajaGaugeY = y + bodyH
+        if getLR2GaugePosition() == 1 then
+            customGaugeY = y + bodyH -- カスタムが上
+        else
+            orajaGaugeY = y + bodyH -- orajaが上
+        end
     end
     for i = 1, #LIFE.TYPES do
         local border = LIFE.GAUGE.COLOR_BORDERS[i]
@@ -564,7 +569,7 @@ life.functions.dstNormal = function ()
                 id = "white",
                 draw = function () return getIsShowNow() and life.lr2Gauge.gaugeType == i end,
                 dst = {
-                    {x = LIFE.GAUGE.X(LIFE), y = y, w = LIFE.GAUGE.W, h = bodyH, r = bgHighColor[1], g = bgHighColor[2], b = bgHighColor[3]}
+                    {x = LIFE.GAUGE.X(LIFE), y = customGaugeY, w = LIFE.GAUGE.W, h = bodyH, r = bgHighColor[1], g = bgHighColor[2], b = bgHighColor[3]}
                 }
             }
             -- 少ない部分
@@ -572,7 +577,7 @@ life.functions.dstNormal = function ()
                 id = "white",
                 draw = function () return getIsShowNow() and life.lr2Gauge.gaugeType == i end,
                 dst = {
-                    {x = LIFE.GAUGE.X(LIFE), y = y, w = LIFE.GAUGE.W * border / 100, h = bodyH, r = bgLowColor[1], g = bgLowColor[2], b = bgLowColor[3]}
+                    {x = LIFE.GAUGE.X(LIFE), y = customGaugeY, w = LIFE.GAUGE.W * border / 100, h = bodyH, r = bgLowColor[1], g = bgLowColor[2], b = bgLowColor[3]}
                 }
             }
             -- ゲージ本体
@@ -581,7 +586,7 @@ life.functions.dstNormal = function ()
                 id = LIFE.GAUGE.ID_PREFIX .. LIFE.TYPES[i] .. "LR2High",
                 draw = function () return getIsShowNow() and life.lr2Gauge.values[i] > border and life.lr2Gauge.gaugeType == i end,
                 dst = {
-                    {x = LIFE.GAUGE.X(LIFE), y = y, w = LIFE.GAUGE.W, h = bodyH, r = highColor[1], g = highColor[2], b = highColor[3]}
+                    {x = LIFE.GAUGE.X(LIFE), y = customGaugeY, w = LIFE.GAUGE.W, h = bodyH, r = highColor[1], g = highColor[2], b = highColor[3]}
                 }
             }
             -- 少ない部分の色
@@ -589,7 +594,7 @@ life.functions.dstNormal = function ()
                 id = LIFE.GAUGE.ID_PREFIX .. LIFE.TYPES[i] .. "LR2Low",
                 draw = function () return getIsShowNow() and life.lr2Gauge.gaugeType == i end,
                 dst = {
-                    {x = LIFE.GAUGE.X(LIFE), y = y, w = LIFE.GAUGE.W * border / 100, h = bodyH, r = lowColor[1], g = lowColor[2], b = lowColor[3]}
+                    {x = LIFE.GAUGE.X(LIFE), y = customGaugeY, w = LIFE.GAUGE.W * border / 100, h = bodyH, r = lowColor[1], g = lowColor[2], b = lowColor[3]}
                 }
             }
         end

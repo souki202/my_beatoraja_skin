@@ -2,7 +2,7 @@ local categoryBase = require("modules.commons.category_base")
 
 local options = categoryBase.createInstance()
 
-options.property = { -- 使用済み 10220まで
+options.property = { -- 使用済み 10225まで
     {
         name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
     },
@@ -80,6 +80,9 @@ options.property = { -- 使用済み 10220まで
     },
     {
         name = "カスタムゲージの表示", item = {{name = "ON", op = 10170}, {name = "OFF", op = 10171}}, def = "OFF"
+    },
+    {
+        name = "カスタムゲージの位置", item = {{name = "上", op = 10225}, {name = "下", op = 10226}}, def = "下"
     },
     {
         name = "カスタムゲージのゲージオートシフト", item = {{name = "無し", op = 10175}, {name = "SURVIVAL TO GROOVE", op = 10176}, {name = "BEST CLEAR", op = 10177}, {name = "SELECT TO UNDER", op = 10178}}, def = "無し"
@@ -392,7 +395,7 @@ options.category = {
     },
     {
         name = "カスタムグルーヴゲージ",
-        myItems = {"カスタムゲージの表示", "カスタムゲージのゲージオートシフト"}
+        myItems = {"カスタムゲージの表示", "カスタムゲージの位置", "カスタムゲージのゲージオートシフト"}
     },
     {
         name = "カスタムグルーヴゲージ増減設定(9999か-9999で増減0)",
