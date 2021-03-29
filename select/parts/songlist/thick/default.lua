@@ -95,7 +95,13 @@ return {
             W = 168,
             H = 22,
         },
-
+        -- FAVORITEボタンの絶対座標とサイズ
+        FAVORITE = {
+            X = function (self) return self.ACTIVE_FRAME.FRAME.X + 669 end,
+            Y = function (self) return self.ACTIVE_FRAME.FRAME.Y + 98 end,
+            W = 26,
+            H = 25,
+        },
         -- BPM等の各種設定は未実装
     }
 }

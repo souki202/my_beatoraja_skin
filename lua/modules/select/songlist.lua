@@ -88,6 +88,12 @@ local SONG_LIST = {
             W = 168,
             H = 22,
         },
+        FAVORITE = {
+            X = function (self) return self.ACTIVE_FRAME.FRAME.X + 669 end,
+            Y = function (self) return self.ACTIVE_FRAME.FRAME.Y + 86 end,
+            W = 26,
+            H = 25,
+        },
     }
 }
 
@@ -173,6 +179,12 @@ local SONG_LIST_THIN = {
         ITEM_TEXT = {
             W = 168,
             H = 22,
+        },
+        FAVORITE = {
+            X = function (self) return self.ACTIVE_FRAME.FRAME.X + 669 end,
+            Y = function (self) return self.ACTIVE_FRAME.FRAME.Y + 86 end,
+            W = 26,
+            H = 25,
         },
     }
 }
@@ -280,6 +292,8 @@ songlist.functions.load = function ()
             {id = "barBomb"  , src = 10, x = 974, y = SONG_LIST.BAR.LABEL.H*2, w = SONG_LIST.BAR.LABEL.W, h = SONG_LIST.BAR.LABEL.H},
             {id = "barCn"    , src = 10, x = 974, y = SONG_LIST.BAR.LABEL.H*3, w = SONG_LIST.BAR.LABEL.W, h = SONG_LIST.BAR.LABEL.H},
             {id = "barHcn"   , src = 10, x = 974, y = SONG_LIST.BAR.LABEL.H*4, w = SONG_LIST.BAR.LABEL.W, h = SONG_LIST.BAR.LABEL.H},
+            -- favorite
+            {id = "favoriteButton", src = 10, x = 1024 - SONG_LIST.ACTIVE_FRAME.FAVORITE.W * 3, y = 273, w = SONG_LIST.ACTIVE_FRAME.FAVORITE.W * 3, h = SONG_LIST.ACTIVE_FRAME.FAVORITE.W, divx = 3, len = 3, ref = 90, act = 90},
         }})
 
         table.insert(skin.image,
@@ -307,6 +321,8 @@ songlist.functions.load = function ()
             {id = "barBomb"  , src = 11, x = 1024 - SONG_LIST_THIN.BAR.LABEL.W, y = SONG_LIST_THIN.BAR.LABEL.H*2, w = SONG_LIST_THIN.BAR.LABEL.W, h = SONG_LIST_THIN.BAR.LABEL.H},
             {id = "barCn"    , src = 11, x = 1024 - SONG_LIST_THIN.BAR.LABEL.W, y = SONG_LIST_THIN.BAR.LABEL.H*3, w = SONG_LIST_THIN.BAR.LABEL.W, h = SONG_LIST_THIN.BAR.LABEL.H},
             {id = "barHcn"   , src = 11, x = 1024 - SONG_LIST_THIN.BAR.LABEL.W, y = SONG_LIST_THIN.BAR.LABEL.H*4, w = SONG_LIST_THIN.BAR.LABEL.W, h = SONG_LIST_THIN.BAR.LABEL.H},
+            -- favorite
+            {id = "favoriteButton", src = 10, x = 1024 - SONG_LIST_THIN.ACTIVE_FRAME.FAVORITE.W * 3, y = 273, w = SONG_LIST_THIN.ACTIVE_FRAME.FAVORITE.W * 3, h = SONG_LIST_THIN.ACTIVE_FRAME.FAVORITE.W, divx = 3, len = 3, ref = 90, act = 90},
         }})
         table.insert(skin.image,
             {id = "barCenterFrame", src = 11, x = 0, y = 1024 - SONG_LIST_THIN.ACTIVE_FRAME.FRAME.H, w = SONG_LIST_THIN.ACTIVE_FRAME.FRAME.W, h = SONG_LIST_THIN.ACTIVE_FRAME.FRAME.H}
@@ -691,6 +707,13 @@ songlist.functions.dst = function ()
             {
                 id = "judgeVeryhard", op = {180}, dst = {
                     {x = 1335, y = 517, w = JUDGE_DIFFICULTY.W, h = JUDGE_DIFFICULTY.H, a = getCommonSongListAlpha()}
+                }
+            },
+
+            -- favorite
+            {
+                id = "favoriteButton", dst = {
+                    {x = params.ACTIVE_FRAME.FAVORITE.X(params), y = params.ACTIVE_FRAME.FAVORITE.Y(params), w = params.ACTIVE_FRAME.FAVORITE.W, h = params.ACTIVE_FRAME.FAVORITE.H}
                 }
             },
         }
