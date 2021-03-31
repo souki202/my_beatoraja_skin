@@ -75,4 +75,13 @@ function isUseMusicDb()
     return getTableValue(skin_config.option, "楽曲データベースの使用", 985) == 985
 end
 
+--[[
+	Favoriteボタンの挙動の種類設定
+
+	@return {int} 1:Song 2:Chart
+]]
+function getFavoriteButtonType()
+	return getTableValue(skin_config.option, "Favoriteボタンの種類", 990) % 5 + 1
+end
+
 return SELECT

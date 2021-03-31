@@ -121,7 +121,7 @@ local header = {
     fadeout = 500,
     scene = 3000,
     input = commons.INPUT_WAIT,
-    -- 使用済み 985まで
+    -- 使用済み 990まで
     property = {
         {
             name = "背景形式", item = {{name = "画像(png)", op = 915}, {name = "動画(mp4)", op = 916}}, def = "画像(png)"
@@ -137,6 +137,9 @@ local header = {
         },
         {
             name = "フォルダのランプグラフの色", item = {{name = "デフォルト", op = 927}, {name = "独自仕様", op = 928}}, def = "独自仕様"
+        },
+        {
+            name = "Favoriteボタンの種類", item = {{name = "Song", op = 990}, {name = "Chart", op = 991}}, def="Song",
         },
         {
             name = "ステージファイルの影", item = {{name = "ON", op = 945}, {name = "OFF", op = 946}}, def = "OFF"
