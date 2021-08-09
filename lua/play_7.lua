@@ -101,6 +101,7 @@ local function main()
         {id = 101, path = "../play/parts/detail/frame/*.png"},
         {id = 102, path = "../play/parts/detail/stagefileframe/*.png"},
         {id = 103, path = "../play/parts/detail/bg/*.png"},
+        {id = 104, path = "../sounds/key/*.wav"},
         {id = 999, path = "../commON/colors/colors.png"}
     }
 

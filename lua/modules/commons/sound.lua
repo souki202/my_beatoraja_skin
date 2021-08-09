@@ -4,7 +4,7 @@ local gdx = luajava.bindClass("com.badlogic.gdx.Gdx")
 local audio = nil
 
 -- できればdisposeできる場面で (さらに止めそこねると鳴り続けるのでループはさせない)
--- ゲームを起動してから終了するまでAudioDriverのインスタンスは維持されるぽいので, disposeしなくても一応リークしない(メモリのリソースが再利用されるだけ)
+-- ゲームを起動してから終了するまでAudioDriverのインスタンスは維持されるので, disposeしなくても一応リークしない(メモリのリソースが再利用されるだけ)
 -- ただdisposeしないとorajaを終了するまで, 本スキンから破棄できる形でリソースが残る
 Sound = {
     init = function()
@@ -13,8 +13,8 @@ Sound = {
 
     -- @param  string path 音源のファイルパス
     -- @param  float vol 音量 最大1.0
-    play = function(path, vol)
-        pcall(function() audio:play(path, vol) end)
+    play = function(path, vol, loop)
+        pcall(function() audio:play(path, vol, loop) end)
     end,
 
     -- playLoop = function(path)

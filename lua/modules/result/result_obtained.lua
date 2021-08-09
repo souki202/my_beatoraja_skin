@@ -217,7 +217,7 @@ end
 local function acquisitionExp(animVals)
     if resultObtained.didPlayExpSe == false then
         -- 経験値入手効果音
-        Sound.play(RANK.EXP_SE, 0.6)
+        Sound.play(RANK.EXP_SE, 0.6, true)
         resultObtained.didPlayExpSe = true
     end
     animVals.exp = animVals.exp + resultObtained.val.addExpPerMs * getDeltaTime() / 1000

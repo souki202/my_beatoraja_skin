@@ -2,7 +2,7 @@ local categoryBase = require("modules.commons.category_base")
 
 local options = categoryBase.createInstance()
 
-options.property = { -- 使用済み 10225まで
+options.property = { -- 使用済み 10230まで
     {
         name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
     },
@@ -139,6 +139,9 @@ options.property = { -- 使用済み 10225まで
         name = "後方キービーム", item = {{name = "ON", op = 935}, {name = "OFF", op = 936}}, def = "ON"
     },
     {
+        name = "キー押下時のSE", item = {{name = "ON", op = 10230}, {name = "OFF", op = 10231}}, def = "OFF",
+    },
+    {
         name = "ボム------------------------------", item = {{name = "-", op = 19999}}
     },
     {
@@ -249,6 +252,8 @@ options.filepath = {
     {name = "particle2", path = "../play/parts/bombs/particle2/*.png", def = "blank"},
     {name = "animation2", path = "../play/parts/bombs/animation2/*.png", def = "blank"},
     {name = "animation1(placeholder)", path = "../dummy/*"},
+    {name = "サウンド全般--------------", path = "../dummy/*"},
+    {name = "キー押下時の音源", path = "../sounds/key/*.wav", def = "default"},
 }
 
 options.offset = {
@@ -354,6 +359,9 @@ options.offset = {
     {name = "ビジュアライザー1の反射の透明度(既定値196 255で透明)", a = 0},
 
     {name = "ボムのanimation1のプリセット(placeholder)", x = 0},
+
+    {name = "サウンド関連-------------", x = 0},
+    {name = "キー押下時の音量オフセット(単位%)", x = 0},
 }
 
 options.category = {
@@ -508,6 +516,10 @@ options.category = {
     {
         name = "ノート(非推奨)",
         myItems = {"ノートの画像", "ノート画像(独自形式)"}
+    },
+    {
+        name = "サウンド",
+        myItems = {"キー押下時のSE", "キー押下時の音源", "キー押下時の音量オフセット(単位%)"}
     },
     {
         name = "その他全般",

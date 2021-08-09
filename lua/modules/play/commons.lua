@@ -11,6 +11,7 @@ CUSTOM_TIMERS = {
 	LIFE = 10010,
 	LIFE_LR2 = 10011,
 	JUDGE = 10101,
+	KEYBEAM_START = 10150,
 	VISUALIZER = 10200,
 	SCORE_VALUE = 11100,
 	SCORE_VALUE_INITIAL = 11101,
@@ -111,7 +112,7 @@ function iskeyFlashDelFromCenterAnimation()
 	return getTableValue(skin_config.option, "キービーム消失アニメーション", 980) == 982
 end
 
-function isDrwaBackKeyBeam()
+function isDrawBackKeyBeam()
 	return getTableValue(skin_config.option, "後方キービーム", 935) == 935
 end
 
@@ -402,6 +403,14 @@ end
 ]]
 function getMusicDetailStafeFilePosition()
 	return getTableValue(skin_config.option, "楽曲詳細のステージファイル位置", 10211) == 10211
+end
+
+function getIsPlayKeySE()
+	return getTableValue(skin_config.option, "キー押下時のSE", 10231) == 10230
+end
+
+function getKeySEVolume()
+	return (100 + getOffsetValueWithDefault("キー押下時の音量オフセット(単位%)", {x = 0}).x) / 100
 end
 
 return commons

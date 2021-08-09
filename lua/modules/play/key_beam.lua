@@ -1,9 +1,12 @@
 require("modules.commons.define")
+require("modules.commons.sound")
+local main_state = require("main_state")
 local commons = require("modules.play.commons")
 local lanes = require("modules.play.lanes")
 
 local keyBeam = {
-    functions = {}
+    functions = {},
+    timerValue = {0, 0, 0, 0, 0, 0, 0}
 }
 
 local KEY_BEAM = {
@@ -16,7 +19,8 @@ local KEY_BEAM = {
     WHITE_BRIGHTNESS = 1,
     BLUE_SATURATION = 0.6,
     BLUE_BRIGHTNESS = 1,
-    HUES = {0, 120, 240, 25, 0, 320}
+    HUES = {0, 120, 240, 25, 0, 320},
+    TIMER = {101, 102, 103, 104, 105, 106, 107, 100}
 }
 
 -- 皿もこれ
@@ -32,7 +36,26 @@ local function getBlueBeamColor()
 	return hsvToRgb(KEY_BEAM.HUES[dif], KEY_BEAM.BLUE_SATURATION, KEY_BEAM.BLUE_BRIGHTNESS)
 end
 
+keyBeam.functions.keyBeamStart = function()
+    local timer = KEY_BEAM.TIMER
+
+    for i = 1, commons.keys+1 do
+        local myTimer = timer[i]
+        local value = main_state.timer(myTimer)
+        if value > 0 and keyBeam.timerValue[i] < value then
+            keyBeam.timerValue[i] = value
+            Sound.play(KEY_BEAM.KEY_SE, KEY_BEAM.SE_VOLUME, false)
+        end
+    end
+end
+
 keyBeam.functions.load = function ()
+    Sound.init()
+    KEY_BEAM.KEY_SE = skin_config.get_path("../sounds/key/*.wav")
+    KEY_BEAM.SE_VOLUME = getKeySEVolume()
+    myPrint(KEY_BEAM.KEY_SE);
+    myPrint(KEY_BEAM.SE_VOLUME);
+    Sound.play(KEY_BEAM.KEY_SE, 0, false)
     KEY_BEAM.ALPHA = 255 - getKeyBeamTransparency()
     KEY_BEAM.WHITE_BRIGHTNESS = math.max(0, math.min(getKeyBeamWhiteBrightness(), 100)) / 100
     KEY_BEAM.WHITE_SATURATION = math.max(0, math.min(getKeyBeamWhiteSaturation(), 100)) / 100
@@ -42,6 +65,9 @@ keyBeam.functions.load = function ()
     return {
         image = {
             {id = "keyBeam", src = 0, x = 18, y = 30, w = 1, h = 80}
+        },
+        customTimers = {
+            {id = CUSTOM_TIMERS.KEYBEAM_START, timer = keyBeam.functions.keyBeamStart},
         }
     }
 end
@@ -55,7 +81,7 @@ keyBeam.functions.dst = function ()
     local dtime = KEY_BEAM.ANIMATION_TIMES[getKeyFlashDelAnimationTimeIndex()] / 2
     local wr, wg, wb = getWhiteBeamColor()
     local br, bg, bb = getBlueBeamColor()
-    local timer = {101, 102, 103, 104, 105, 106, 107, 100}
+    local timer = KEY_BEAM.TIMER
     for i = 1, commons.keys+1 do
         local r, g, b = wr, wg, wb
         local h2 = h
@@ -96,7 +122,7 @@ keyBeam.functions.dst = function ()
                             {time = atime, h = h2}
                         }
                     }
-                    if isDrwaBackKeyBeam() then
+                    if isDrawBackKeyBeam() then
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                             dst = {
@@ -113,7 +139,7 @@ keyBeam.functions.dst = function ()
                             {time = atime, x = x, w = w}
                         }
                     }
-                    if isDrwaBackKeyBeam() then
+                    if isDrawBackKeyBeam() then
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                             dst = {
@@ -131,7 +157,7 @@ keyBeam.functions.dst = function ()
                             {time = atime, w = math.ceil(w / 2)},
                         }
                     }
-                    if isDrwaBackKeyBeam() then
+                    if isDrawBackKeyBeam() then
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                             dst = {
@@ -148,7 +174,7 @@ keyBeam.functions.dst = function ()
                             {time = atime, w = -math.floor(w / 2)},
                         }
                     }
-                    if isDrwaBackKeyBeam() then
+                    if isDrawBackKeyBeam() then
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
                             dst = {
@@ -171,7 +197,7 @@ keyBeam.functions.dst = function ()
                             {time = dtime, h = 0}
                         }
                     }
-                    if isDrwaBackKeyBeam() then
+                    if isDrawBackKeyBeam() then
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                             dst = {
@@ -188,7 +214,7 @@ keyBeam.functions.dst = function ()
                             {time = dtime, x = x + w / 2, w = 0}
                         }
                     }
-                    if isDrwaBackKeyBeam() then
+                    if isDrawBackKeyBeam() then
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                             dst = {
@@ -206,7 +232,7 @@ keyBeam.functions.dst = function ()
                             {time = dtime, w = 0},
                         }
                     }
-                    if isDrwaBackKeyBeam() then
+                    if isDrawBackKeyBeam() then
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                             dst = {
@@ -223,7 +249,7 @@ keyBeam.functions.dst = function ()
                             {time = dtime, w = 0},
                         }
                     }
-                    if isDrwaBackKeyBeam() then
+                    if isDrawBackKeyBeam() then
                         dst[#dst+1] = {
                             id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
                             dst = {
