@@ -6,7 +6,8 @@ local lanes = require("modules.play.lanes")
 
 local keyBeam = {
     functions = {},
-    timerValue = {0, 0, 0, 0, 0, 0, 0}
+    timerValue = {0, 0, 0, 0, 0, 0, 0},
+    lastSeTimer = 0,
 }
 
 local KEY_BEAM = {
@@ -44,7 +45,16 @@ keyBeam.functions.keyBeamStart = function()
         local value = main_state.timer(myTimer)
         if value > 0 and keyBeam.timerValue[i] < value then
             keyBeam.timerValue[i] = value
-            Sound.play(KEY_BEAM.KEY_SE, KEY_BEAM.SE_VOLUME, false)
+            local vol = KEY_BEAM.SE_VOLUME
+
+            if keyBeam.lastSeTimer == value then
+                vol = vol / 5
+            elseif value - keyBeam.lastSeTimer < 1000 * 5 then -- ナノ秒
+                vol = vol / 3
+            end
+            keyBeam.lastSeTimer = value
+            
+            Sound.play(KEY_BEAM.KEY_SE, vol, false)
         end
     end
 end
