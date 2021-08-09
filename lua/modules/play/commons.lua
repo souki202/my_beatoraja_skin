@@ -272,6 +272,10 @@ function isEarlyLateJudgeImage()
 	return getTableValue(skin_config.option, "判定画像分類", 10090) == 10091
 end
 
+function getGrooveGaugeColorType()
+	return getTableValue(skin_config.option, "グルーヴゲージの色", 10235) - 10234
+end
+
 function isHiddenGrooveGauge()
 	return getTableValue(skin_config.option, "グルーヴゲージ隠し", 10096) == 10095
 end

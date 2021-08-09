@@ -95,12 +95,31 @@ BD, PR, MS判定で, ゲージの増加(減少)量を設定できます. 増加�
 
 luaプログラム: GPL-3.0 概要は, 著作表記を残した上で複製, 改変, 再配布等が可能です. これを組み込んだソフトウェア及びプログラムはGPL-3.0になります.
 
-### 画像
+### 画像等
 
 [表示 - 継承 3.0 非移植 (CC BY-SA 3.0)](https://creativecommons.org/licenses/by-sa/3.0/deed.ja) つまり元と同じライセンスかつ著作表記をした上で, 改変や再配布等が可能です.
-対象は, select/parts/\* (曲バー左下のアイコン除く, 統計ボタンアイコン), decide/parts/\* (largeshine以外), result/parts/\*\*, result2/parts/\*\*, play/parts/\*\* (notes以外) \*/noimage/\* です.
+
+#### 適用対象
+
+* select/parts/\* (曲バー左下のアイコン除く, 統計ボタンアイコン)
+* decide/parts/\* (largeshine以外)
+* result/parts/\*\*
+* result2/parts/\*\*
+* play/parts/\*\* (notes以外)
+* \*/noimage/\* です.
 
 その他のアセットは各素材配布元に従ってください.
+
+### 素材
+
+このスキンは, 一部にフリー素材を利用しています.
+
+* 背景画像(*/background/*.png): 花のイラストなら「百花繚乱」 – 無料で使えるフリー素材
+* フォント: Copyright © 2014, 2015 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name ‘Source’., 小塚ゴシック
+* 一部アイコン(曲バー左下のアイコン, 統計ボタンアイコン): ICOOON MONO
+* 一部画像(decide/parts/largeshine.png): 150 Light Effect Brushes — Photoshop Add-ons
+* 効果音: 無料効果音で遊ぼう！ , 魔王魂
+* 一部画像の素材: Marble Vectors by Vecteezy
 
 ### ソースコード
 

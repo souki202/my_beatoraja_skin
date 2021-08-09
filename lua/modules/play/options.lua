@@ -2,7 +2,7 @@ local categoryBase = require("modules.commons.category_base")
 
 local options = categoryBase.createInstance()
 
-options.property = { -- 使用済み 10230まで
+options.property = { -- 使用済み 10235まで
     {
         name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
     },
@@ -65,6 +65,9 @@ options.property = { -- 使用済み 10230まで
     },
     {
         name = "グルーヴゲージ-----------------------", item = {{name = "-", op = 19999}}
+    },
+    {
+        name = "グルーヴゲージの色", item = {{name = "Type1 (段位ハード赤色)", op = 10235}, {name = "Type2 (段位ハード黄色)", op = 10236}}, def = "Type1 (段位ハード赤色)"
     },
     {
         name = "グルーヴゲージ隠し", item = {{name = "ON", op = 10095}, {name = "OFF", op = 10096}}, def = "OFF"
