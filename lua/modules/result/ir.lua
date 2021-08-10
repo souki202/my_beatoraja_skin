@@ -43,6 +43,20 @@ local IR = {
         Y = function (self) return self.WND.Y + 9 end,
     },
 
+    BALL = {
+        X = function (self) return self.WND.X + 210 end,
+        Y = function (self) return self.WND.Y + 45 end,
+        W = 16,
+        H = 16,
+        ANIM = {
+            N = 5,
+            MOVE_X = 50,
+            TIME = 1500,
+            STOP_TIME = 500,
+            DURATION = 100,
+        }
+    },
+
     NUM = {
         DIGIT = 4,
         OLD = {
@@ -75,6 +89,7 @@ ir.functions.load = function ()
             {id = "irSuffix24px", src = 0, x = 18, y = 70, w = IR.SUFFIX_L_TEXT.W, h = IR.SUFFIX_L_TEXT.H},
             {id = "irSuffixNumOfPlayer", src = 0, x = 27, y = 49, w = IR.SUFFIX_PLAYER_TEXT.W, h = IR.SUFFIX_PLAYER_TEXT.H},
             {id = "irText", src = 0, x = VALUE_ITEM_TEXT.SRC_X, y = 352, w = IR.TEXT.W, h = IR.TEXT.H},
+            {id = "irConnectingBall", src = 0, x = 779, y = 204, w = IR.BALL.W, h = IR.BALL.H},
         },
         value = {
             {id = "irOldValue", src = NUM_18PX.SRC, x = NUM_18PX.SRC_X, y = NUM_18PX.SRC_Y, w = NUM_18PX.W * 11, h = NUM_18PX.H, divx = 11, digit = IR.NUM.DIGIT, ref = 182, align = 0},
@@ -86,6 +101,7 @@ end
 
 ir.functions.dst = function ()
     local skin = {destination = {}}
+    local dst = skin.destination
     destinationStaticBaseWindowResult(skin, IR.WND.X, IR.WND.Y, IR.WND.W, IR.WND.H)
     mergeSkin(skin, {
         destination = {
@@ -116,6 +132,57 @@ ir.functions.dst = function ()
             },
         }
     })
+
+    -- 接続中はそれを示すオブジェクトを動かす
+    local moveTime = IR.BALL.ANIM.TIME - IR.BALL.ANIM.STOP_TIME
+    local stopTime = IR.BALL.ANIM.STOP_TIME
+    local numBallTime = moveTime + stopTime + IR.BALL.ANIM.DURATION * (IR.BALL.ANIM.N - 1)
+    local isConnecting = function ()
+        return main_state.timer(173) <= 0 and main_state.timer(174) <= 0 
+    end
+    
+    for i = 1, IR.BALL.ANIM.N, 1 do
+        local d = IR.BALL.ANIM.DURATION * (i - 1)
+        dst[#dst+1] = {
+            id = "irConnectingBall", draw = isConnecting, loop = 0, dst = {
+                {time = 0, x = IR.BALL.X(IR), y = IR.BALL.Y(IR), w = IR.BALL.W, h = IR.BALL.H, a = 255, acc = 1},
+                {time = d},
+                {time = d + moveTime / 4, x = IR.BALL.X(IR) + IR.BALL.ANIM.MOVE_X / 2},
+                {time = d + moveTime / 4 + 1, a = 0},
+                {time = numBallTime},
+            }
+        }
+        dst[#dst+1] = {
+            id = "irConnectingBall", draw = isConnecting, loop = 0, dst = {
+                {time = 0, x = IR.BALL.X(IR) + IR.BALL.ANIM.MOVE_X / 2, y = IR.BALL.Y(IR), w = IR.BALL.W, h = IR.BALL.H, a = 0, acc = 2},
+                {time = d + moveTime / 4},
+                {time = d + moveTime / 4 + 1, a = 255},
+                {time = d + moveTime / 2, x = IR.BALL.X(IR) + IR.BALL.ANIM.MOVE_X},
+                {time = d + moveTime / 2 + 1 + stopTime, a = 0},
+                {time = numBallTime},
+            }
+        }
+        dst[#dst+1] = {
+            id = "irConnectingBall", draw = isConnecting, loop = 0, dst = {
+                {time = 0, x = IR.BALL.X(IR) + IR.BALL.ANIM.MOVE_X, y = IR.BALL.Y(IR), w = IR.BALL.W, h = IR.BALL.H, a = 0, acc = 1},
+                {time = d + moveTime / 2},
+                {time = d + moveTime / 2 + 1 + stopTime, a = 255},
+                {time = d + moveTime * 3 / 4 + stopTime, x = IR.BALL.X(IR) + IR.BALL.ANIM.MOVE_X / 2},
+                {time = d + moveTime * 3 / 4 + 1 + stopTime, a = 0},
+                {time = numBallTime},
+            }
+        }
+        dst[#dst+1] = {
+            id = "irConnectingBall", draw = isConnecting, loop = 0, dst = {
+                {time = 0, x = IR.BALL.X(IR) + IR.BALL.ANIM.MOVE_X / 2, y = IR.BALL.Y(IR), w = IR.BALL.W, h = IR.BALL.H, a = 0, acc = 2},
+                {time = d + moveTime * 3 / 4 + stopTime},
+                {time = d + moveTime * 3 / 4 + 1 + stopTime, a = 255},
+                {time = d + moveTime + stopTime, x = IR.BALL.X(IR)},
+                {time = numBallTime},
+            }
+        }
+    end
+
     dstNumberRightJustify(skin, "irOldValue", IR.NUM.OLD.X(IR), IR.NUM.OLD.Y(IR), NUM_18PX.W, NUM_18PX.H, IR.NUM.DIGIT)
     dstNumberRightJustify(skin, "irNowValue", IR.NUM.NOW.X(IR), IR.NUM.NOW.Y(IR), NUM_24PX.W, NUM_24PX.H, IR.NUM.DIGIT)
     dstNumberRightJustify(skin, "irNumOfPlayerValue", IR.NUM.PLAYER.X(IR), IR.NUM.PLAYER.Y(IR), NUM_18PX.W, NUM_18PX.H, IR.NUM.DIGIT)

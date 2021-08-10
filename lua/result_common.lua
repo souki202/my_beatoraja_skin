@@ -479,7 +479,7 @@ function makeHeader()
                 name = "背景の分類", item = {{name = "クリアかどうか", op = 910}, {name = "ランク毎", op = 911}, {name = "クリアランプ毎", op = 912}}, def = "クリアかどうか"
             },
             {
-                name = "レイアウト", item = {{name = "1", op = 915}, {name = "2", op = 916}}, def = "1"
+                name = "レイアウト", item = {{name = "1", op = 915}, {name = "2", op = 916}}, def = "2"
             },
             {
                 name = "スコア位置", item = {{name = "左", op = 920}, {name = "右", op = 921}}, def = "左"

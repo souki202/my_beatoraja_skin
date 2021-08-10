@@ -118,7 +118,7 @@ luaプログラム: GPL-3.0 概要は, 著作表記を残した上で複製, 改
 * フォント: Copyright © 2014, 2015 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name ‘Source’., 小塚ゴシック
 * 一部アイコン(曲バー左下のアイコン, 統計ボタンアイコン): ICOOON MONO
 * 一部画像(decide/parts/largeshine.png): 150 Light Effect Brushes — Photoshop Add-ons
-* 効果音: 無料効果音で遊ぼう！ , 魔王魂
+* 効果音: 無料効果音で遊ぼう！ , 魔王魂, フリー効果音素材 くらげ工匠
 * 一部画像の素材: Marble Vectors by Vecteezy
 
 ### ソースコード
