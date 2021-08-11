@@ -1,3 +1,5 @@
+local main_state = require("main_state")
+
 local exscores = {
     functions = {}
 }
@@ -43,15 +45,33 @@ local EXSCORES = {
             }
         }
     },
+    IR = {
+        LOADING = {
+            X = function (self, idx) return self.OTHER_NUM.IR.SLUSH.X(self, idx) + 15 end,
+            Y = function (self, idx) return self.OTHER_NUM.IR.SLUSH.Y(self, idx) end,
+            W = 50,
+            H = 50,
+            MIN_A = 128,
+            DIV_X = 12,
+            ANIM = {
+                TIME = 500,
+                DURATION = 100,
+            }
+        }
+    },
 }
 
 exscores.functions.load = function ()
-    local skin = {image = {}, value = {}}
+    local skin = {
+        image = {},
+        value = {},
+    }
     local imgs = skin.image
     local vals = skin.value
 
     local refs = {71, 75, 180}
     for i = 1, #EXSCORES.IDS do
+        -- 項目の背景
         imgs[#imgs+1] = {
             id = "largeValue" .. EXSCORES.IDS[i] .. "Bg", src = 160 + 3 * (i - 1), x = 0, y = 0, w = -1, h = -1
         }
@@ -59,6 +79,7 @@ exscores.functions.load = function ()
             id = "largeValue" .. EXSCORES.IDS[i] .. "Label", src = 161 + 3 * (i - 1), x = 0, y = 0, w = -1, h = -1
         }
 
+        -- 数値読み込み
         do
             local size = EXSCORES.OTHER_NUM
             if i == 1 then
@@ -81,12 +102,22 @@ exscores.functions.load = function ()
         id = "largeValueIrSlash", src = 168, x = 598, y = 0, w = EXSCORES.OTHER_NUM.W, h = EXSCORES.OTHER_NUM.H
     }
 
+    -- IR接続中アイコン
+    for i = 1, EXSCORES.IR.LOADING.DIV_X, 1 do
+        imgs[#imgs+1] = {
+            id = "irLoadingIcon" .. i, src = 169, x = EXSCORES.IR.LOADING.W * (i - 1), y = 0, w = EXSCORES.IR.LOADING.W, h = EXSCORES.IR.LOADING.H
+        }
+    end
+
     return skin
 end
 
 exscores.functions.dst = function ()
     local skin = {destination = {}}
     local dst = skin.destination
+    local isConnecting = function ()
+        return main_state.timer(173) <= 0 and main_state.timer(174) <= 0 
+    end
 
     for i = 1, #EXSCORES.IDS do
         dst[#dst+1] = {
@@ -121,6 +152,21 @@ exscores.functions.dst = function ()
                         {x = EXSCORES.OTHER_NUM.IR.RANK.X(EXSCORES, i), y = EXSCORES.OTHER_NUM.IR.RANK.Y(EXSCORES, i), w = numParam.W, h = numParam.H}
                     }
                 }
+
+                -- 接続中表示
+                local sumAnimTime = EXSCORES.IR.LOADING.ANIM.TIME + EXSCORES.IR.LOADING.ANIM.DURATION * (EXSCORES.IR.LOADING.DIV_X - 1)
+                for j = 1, EXSCORES.IR.LOADING.DIV_X, 1 do
+                    local dt = EXSCORES.IR.LOADING.ANIM.DURATION * (i - 1)
+                    dst[#dst+1] = {
+                        id = "irLoadingIcon" .. i, draw = isConnecting, loop = 0, dst = {
+                            {time = 0, x = EXSCORES.IR.LOADING.X(EXSCORES, i), y = EXSCORES.IR.LOADING.Y(EXSCORES, i), w = EXSCORES.IR.LOADING.W, h = EXSCORES.IR.LOADING.H, a = 255},
+                            {time = dt},
+                            {time = dt + EXSCORES.IR.LOADING.ANIM.TIME / 2, a = EXSCORES.IR.LOADING.MIN_A},
+                            {time = dt + EXSCORES.IR.LOADING.ANIM.TIME, a = 255},
+                            {time = sumAnimTime},
+                        }
+                    }
+                end
             end
         end
     end

@@ -96,6 +96,7 @@ local function makeHeader()
         filepath = {
             {name = "NoImage画像", path = "../result2/noimage/*.png", def = "default"},
             {name = "ランキングのヘッダー", path = "../result2/parts/ranking/header/*.png", def = "ranking"},
+            {name = "IR接続中のアイコン", path = "../result2/parts/ir/loading/*.png", def = "default"},
             {name = "判定---------------------------------------------", path="../dummy/*"},
             {name = "PERFECT背景", path = "../result2/parts/judge/background/perfect/*.png", def = "light blue purple"},
             {name = "GREAT背景"  , path = "../result2/parts/judge/background/great/*.png", def = "purple orange"},
@@ -325,6 +326,7 @@ local function main()
         {id = 166, path = "../result2/parts/ir/background/default.png"},
         {id = 167, path = "../result2/parts/ir/text/default.png"},
         {id = 168, path = "../result2/parts/ir/num/default.png"},
+        {id = 169, path = "../result2/parts/ir/loading/default.png"},
         -- 詳細画面用
         {id = 170, path = "../result2/parts/detail/judge/text/perfect/*.png"},
         {id = 171, path = "../result2/parts/detail/judge/text/great/*.png"},

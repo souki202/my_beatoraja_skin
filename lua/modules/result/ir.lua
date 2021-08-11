@@ -140,7 +140,7 @@ ir.functions.dst = function ()
     local isConnecting = function ()
         return main_state.timer(173) <= 0 and main_state.timer(174) <= 0 
     end
-    
+
     for i = 1, IR.BALL.ANIM.N, 1 do
         local d = IR.BALL.ANIM.DURATION * (i - 1)
         dst[#dst+1] = {
