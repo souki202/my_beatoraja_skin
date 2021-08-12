@@ -166,7 +166,7 @@ local DETAIL = {
         LABEL = {
             X = function (self) return self.GRAPH.X(self) + 1 end,
             Y = function (self, idx) return self.GRAPH.Y(self, idx) + self.GRAPH.H - 1 - self.GRAPH.LABEL.H end,
-            W = 128,
+            W = 196,
             H = 29,
         }
     },

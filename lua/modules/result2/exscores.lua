@@ -47,11 +47,11 @@ local EXSCORES = {
     },
     IR = {
         LOADING = {
-            X = function (self, idx) return self.OTHER_NUM.IR.SLUSH.X(self, idx) + 15 end,
-            Y = function (self, idx) return self.OTHER_NUM.IR.SLUSH.Y(self, idx) end,
+            X = function (self, idx) return self.OTHER_NUM.X(self, idx) + (self.OTHER_NUM.W + self.OTHER_NUM.SPACE) * 5 + 15 end,
+            Y = function (self, idx) return self.OTHER_NUM.IR.SLUSH.Y(self, idx) + 6 end,
             W = 50,
             H = 50,
-            MIN_A = 128,
+            MIN_A = 64,
             DIV_X = 12,
             ANIM = {
                 TIME = 500,
@@ -154,16 +154,16 @@ exscores.functions.dst = function ()
                 }
 
                 -- 接続中表示
-                local sumAnimTime = EXSCORES.IR.LOADING.ANIM.TIME + EXSCORES.IR.LOADING.ANIM.DURATION * (EXSCORES.IR.LOADING.DIV_X - 1)
+                local sumAnimTime = EXSCORES.IR.LOADING.ANIM.DURATION * EXSCORES.IR.LOADING.DIV_X
                 for j = 1, EXSCORES.IR.LOADING.DIV_X, 1 do
-                    local dt = EXSCORES.IR.LOADING.ANIM.DURATION * (i - 1)
+                    local dt = EXSCORES.IR.LOADING.ANIM.DURATION * (j - 1)
                     dst[#dst+1] = {
-                        id = "irLoadingIcon" .. i, draw = isConnecting, loop = 0, dst = {
+                        id = "irLoadingIcon" .. j, draw = isConnecting, loop = dt, dst = {
                             {time = 0, x = EXSCORES.IR.LOADING.X(EXSCORES, i), y = EXSCORES.IR.LOADING.Y(EXSCORES, i), w = EXSCORES.IR.LOADING.W, h = EXSCORES.IR.LOADING.H, a = 255},
                             {time = dt},
                             {time = dt + EXSCORES.IR.LOADING.ANIM.TIME / 2, a = EXSCORES.IR.LOADING.MIN_A},
                             {time = dt + EXSCORES.IR.LOADING.ANIM.TIME, a = 255},
-                            {time = sumAnimTime},
+                            {time = dt + sumAnimTime},
                         }
                     }
                 end
