@@ -43,7 +43,7 @@ keyBeam.functions.keyBeamStart = function()
     end
     local timer = KEY_BEAM.TIMER
 
-    for i = 1, commons.keys+1 do
+    for i = 1, commons.keys do
         local myTimer = timer[i]
         local value = main_state.timer(myTimer)
         if value > 0 and keyBeam.timerValue[i] < value then
