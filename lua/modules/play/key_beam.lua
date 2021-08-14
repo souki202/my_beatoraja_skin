@@ -38,6 +38,9 @@ local function getBlueBeamColor()
 end
 
 keyBeam.functions.keyBeamStart = function()
+    if not getIsPlayKeySE() then
+        return
+    end
     local timer = KEY_BEAM.TIMER
 
     for i = 1, commons.keys+1 do
@@ -47,13 +50,11 @@ keyBeam.functions.keyBeamStart = function()
             keyBeam.timerValue[i] = value
             local vol = KEY_BEAM.SE_VOLUME
 
-            if keyBeam.lastSeTimer == value then
-                vol = vol / 5
-            elseif value - keyBeam.lastSeTimer < 1000 * 5 then -- ナノ秒
+            if value - keyBeam.lastSeTimer < 1000 * 10 then -- ナノ秒
                 vol = vol / 3
             end
             keyBeam.lastSeTimer = value
-            
+
             Sound.play(KEY_BEAM.KEY_SE, vol, false)
         end
     end
@@ -70,7 +71,7 @@ keyBeam.functions.load = function ()
     KEY_BEAM.WHITE_BRIGHTNESS = math.max(0, math.min(getKeyBeamWhiteBrightness(), 100)) / 100
     KEY_BEAM.WHITE_SATURATION = math.max(0, math.min(getKeyBeamWhiteSaturation(), 100)) / 100
     KEY_BEAM.BLUE_BRIGHTNESS = math.max(0, math.min(getKeyBeamBlueBrightness(), 100)) / 100
-    KEY_BEAM.BLUE_SATURATION = math.max(0,math.min( getKeyBeamBlueSaturation(), 100)) / 100
+    KEY_BEAM.BLUE_SATURATION = math.max(0, math.min(getKeyBeamBlueSaturation(), 100)) / 100
 
     return {
         image = {
