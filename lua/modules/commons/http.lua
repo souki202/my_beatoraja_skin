@@ -36,6 +36,9 @@ end
 -- @return {boolean} 新しいバージョンがあるかの配列. それぞれのindexは上に対応しているか, nil 取得に失敗すれば空の配列
 function skinVersionCheck(nowVersions)
     local err, v = pcall(httpConnection, "https://tori-blog.net/wp-content/uploads/skin/version")
+    if err == false then
+        return { false }
+    end
     local isNews = {}
     if v then
         local n = math.min(#v, #nowVersions)
