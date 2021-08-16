@@ -14,6 +14,7 @@ local lamps = {
     rates = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     rateAfterDots = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     num = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    accNum = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     functions = {},
 }
 
@@ -93,6 +94,7 @@ local LAMPS = {
         }
     },
     ID_PREFIX = {"max", "perfect", "fullcombo", "exhard", "hard", "clear", "easy", "laeasy", "aeasy", "failed"},
+    IR_NUM_IDS = {224, 222, 218, 208, 216, 214, 212, 206, 204, 210}
 }
 
 lamps.functions.change2p = function ()
@@ -130,18 +132,20 @@ lamps.functions.load = function (isDrawFunction)
                         -- ランプの下から計算
                         local sum = 0
                         for i = #LAMPS.ID_PREFIX, 1, -1 do
-                            local r, a = main_state.number(rateIds[i]), main_state.number(afId[i])
+                            lamps.num[i] = main_state.number(LAMPS.IR_NUM_IDS[i])
                             -- 読み込まれていないなら終了
-                            if r < 0 or a < 0 then return end
-
-                            sum = sum + r + a / 10
-                            if math.abs(100 - sum) < 0.1 then
-                                sum = 100
+                            if lamps.num[i] < 0 then return end
+                            sum = sum + lamps.num[i]
+                            if i == #LAMPS.ID_PREFIX then
+                                lamps.accNum[i] = lamps.num[i]
+                            else
+                                lamps.accNum[i] = lamps.accNum[i + 1] + lamps.num[i]
                             end
-                            lamps.rates[i] = r
-                            lamps.rateAfterDots[i] = a
-                            lamps.barValues[i] = sum / 100
-                            lamps.num[i] = main_state.number(valueIds[i])
+                        end
+                        for i = #LAMPS.ID_PREFIX, 1, -1 do
+                            -- 読み込まれていないなら終了
+                            if lamps.num[i] < 0 then return end
+                            lamps.barValues[i] = lamps.accNum[i] / sum
                         end
                     end
                 end

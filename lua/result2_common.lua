@@ -131,8 +131,8 @@ local function makeHeader()
             {name = "ランクの額縁の装飾", path = "../result2/parts/rank/frame/decoration/*.png", def = "ivy"},
             {name = "ランクの額縁の背景", path = "../result2/parts/rank/frame/background/*.png", def = "oldpaper"},
             {name = "背景選択-----------------------------------------", path="../dummy/*"},
-            {name = "CLEAR背景", path = "../result2/background/isclear/clear/*.png", def = "bg"},
-            {name = "FAILED背景", path = "../result2/background/isclear/failed/*.png", def = "bg"},
+            {name = "CLEAR背景", path = "../result2/background/isclear/clear/*", def = "bg"},
+            {name = "FAILED背景", path = "../result2/background/isclear/failed/*", def = "bg"},
         },
         offset = {
             {name = "経験値等画面表示秒数 (決定キーの場合, 最小1秒)", x = 0},
@@ -155,30 +155,30 @@ local function makeHeader()
         filepathes[#filepathes+1] = {name = "背景選択2(クリアランク毎)-------------------------", path="../dummy/*"}
         for i, rankDir in ipairs(RANK_DIR_LIST) do
             filepathes[#filepathes+1] = {
-                name = string.upper(rankDir) .. "背景(ランク毎)", path = "../result2/background/ranks/" .. rankDir .. "/*.png"
+                name = string.upper(rankDir) .. "背景(ランク毎)", path = "../result2/background/ranks/" .. rankDir .. "/*", def = "default",
             }
         end
         filepathes[#filepathes+1] = {name = "背景選択3(クリアランプ毎)-------------------------", path="../dummy/*"}
         for i, lampDir in ipairs(LAMP_DIR_LIST) do
             filepathes[#filepathes+1] = {
-                name = LAMP_DIR_NAME_LIST[i] .. "背景(ランプ毎)", path = "../result2/background/lamps/" .. lampDir .. "/*.png"
+                name = LAMP_DIR_NAME_LIST[i] .. "背景(ランプ毎)", path = "../result2/background/lamps/" .. lampDir .. "/*", def = "default",
             }
         end
         -- ボケている方
         filepathes[#filepathes+1] = {name = "背景選択(ぼかし クリアランク毎)-------------------", path="../dummy/*"}
-        filepathes[#filepathes+1] = {name = "CLEARぼかし背景", path = "../result2/backgroundbokeh/isclear/clear/*.png", def = "bg"}
-        filepathes[#filepathes+1] = {name = "FAILEDぼかし背景", path = "../result2/backgroundbokeh/isclear/failed/*.png", def = "bg"}
+        filepathes[#filepathes+1] = {name = "CLEARぼかし背景", path = "../result2/backgroundbokeh/isclear/clear/*", def = "bg"}
+        filepathes[#filepathes+1] = {name = "FAILEDぼかし背景", path = "../result2/backgroundbokeh/isclear/failed/*", def = "bg"}
 
         filepathes[#filepathes+1] = {name = "背景選択2(ぼかし クリアランプ毎)------------------", path="../dummy/*"}
         for i, rankDir in ipairs(RANK_DIR_LIST) do
             filepathes[#filepathes+1] = {
-                name = string.upper(rankDir) .. "ぼかし背景(ランク毎)", path = "../result2/backgroundbokeh/ranks/" .. rankDir .. "/*.png"
+                name = string.upper(rankDir) .. "ぼかし背景(ランク毎)", path = "../result2/backgroundbokeh/ranks/" .. rankDir .. "/*", def = "default",
             }
         end
         filepathes[#filepathes+1] = {name = "背景選択3(ぼかし)---------------------------------", path="../dummy/*"}
         for i, lampDir in ipairs(LAMP_DIR_LIST) do
             filepathes[#filepathes+1] = {
-                name = LAMP_DIR_NAME_LIST[i] .. "ぼかし背景(ランプ毎)", path = "../result2/backgroundbokeh/lamps/" .. lampDir .. "/*.png"
+                name = LAMP_DIR_NAME_LIST[i] .. "ぼかし背景(ランプ毎)", path = "../result2/backgroundbokeh/lamps/" .. lampDir .. "/*", def = "default",
             }
         end
     end
@@ -353,22 +353,22 @@ local function main()
         local sources = skin.source
         for i, rankDir in ipairs(RANK_DIR_LIST) do
             sources[#sources+1] = {
-                id = 110 + (i - 1), path = "../result2/background/ranks/" .. rankDir .. "/*.png"
+                id = 110 + (i - 1), path = "../result2/background/ranks/" .. rankDir .. "/*", def = "default",
             }
         end
         for i, lampDir in ipairs(LAMP_DIR_LIST) do
             sources[#sources+1] = {
-                id = 120 + (i - 1), path = "../result2/background/lamps/" .. lampDir .. "/*.png"
+                id = 120 + (i - 1), path = "../result2/background/lamps/" .. lampDir .. "/*.png", def = "default",
             }
         end
         for i, rankDir in ipairs(RANK_DIR_LIST) do
             sources[#sources+1] = {
-                id = 210 + (i - 1), path = "../result2/backgroundbokeh/ranks/" .. rankDir .. "/*.png"
+                id = 210 + (i - 1), path = "../result2/backgroundbokeh/ranks/" .. rankDir .. "/*.png", def = "default",
             }
         end
         for i, lampDir in ipairs(LAMP_DIR_LIST) do
             sources[#sources+1] = {
-                id = 220 + (i - 1), path = "../result2/backgroundbokeh/lamps/" .. lampDir .. "/*.png"
+                id = 220 + (i - 1), path = "../result2/backgroundbokeh/lamps/" .. lampDir .. "/*.png", def = "default",
             }
         end
     end

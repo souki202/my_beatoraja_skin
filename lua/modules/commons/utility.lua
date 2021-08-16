@@ -10,7 +10,7 @@ local utils = {
     @return {max, perfect, ... , failed, noplay}
 ]]
 utils.functions.getIrPlayerLampRateIds = function ()
-    return {225, 223, 219, 209, 217, 215, 213, 205, 207, 211, 203}
+    return {225, 223, 219, 209, 217, 215, 213, 207, 205, 211, 203}
 end
 
 --[[
@@ -28,7 +28,7 @@ end
     @return {max, perfect, ... , failed, noplay}
 ]]
 utils.functions.getIrPlayerLampAmountIds = function ()
-    return {224, 222, 218, 208, 216, 214, 212, 204, 206, 210, 202}
+    return {224, 222, 218, 208, 216, 214, 212, 206, 204, 210, 202}
 end
 
 return utils.functions
