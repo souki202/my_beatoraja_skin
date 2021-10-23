@@ -13,7 +13,7 @@ local keyBeam = {
 local KEY_BEAM = {
     HEIGHTS = {0, 160, 350, 564, 720},
     BACK_H = {80, 60},
-    ANIMATION_TIMES = {0, 50, 100, 200, 350},
+    ANIMATION_TIMES = {1, 50, 100, 200, 350},
     ALPHA = 192, -- 後で初期化
 
     WHITE_SATURATION = 0.3,

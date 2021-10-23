@@ -342,8 +342,8 @@ local function main()
         {id = 185, path = "../result2/parts/detail/judge/num/epoor/*.png"},
 
         -- ぼかし背景は210~220
-        {id = 200, path = "../result2/backgroundbokeh/isclear/clear/*.png"},
-        {id = 201, path = "../result2/backgroundbokeh/isclear/failed/*.png"},
+        {id = 200, path = "../result2/backgroundbokeh/isclear/clear/*"},
+        {id = 201, path = "../result2/backgroundbokeh/isclear/failed/*"},
 
         -- シンプル数字は300番台
         {id = 330, path = "../result2/parts/simplenumbers/30px.png"},
@@ -358,17 +358,17 @@ local function main()
         end
         for i, lampDir in ipairs(LAMP_DIR_LIST) do
             sources[#sources+1] = {
-                id = 120 + (i - 1), path = "../result2/background/lamps/" .. lampDir .. "/*.png", def = "default",
+                id = 120 + (i - 1), path = "../result2/background/lamps/" .. lampDir .. "/*", def = "default",
             }
         end
         for i, rankDir in ipairs(RANK_DIR_LIST) do
             sources[#sources+1] = {
-                id = 210 + (i - 1), path = "../result2/backgroundbokeh/ranks/" .. rankDir .. "/*.png", def = "default",
+                id = 210 + (i - 1), path = "../result2/backgroundbokeh/ranks/" .. rankDir .. "/*", def = "default",
             }
         end
         for i, lampDir in ipairs(LAMP_DIR_LIST) do
             sources[#sources+1] = {
-                id = 220 + (i - 1), path = "../result2/backgroundbokeh/lamps/" .. lampDir .. "/*.png", def = "default",
+                id = 220 + (i - 1), path = "../result2/backgroundbokeh/lamps/" .. lampDir .. "/*", def = "default",
             }
         end
     end

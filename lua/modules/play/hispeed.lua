@@ -270,43 +270,43 @@ hispeed.functions.dst = function ()
         local nw = HISPEED.NUM.W
         local nh = HISPEED.NUM.H
         dst[#dst+1] = {
-            id = "laneCoverValue", op = {270, 271}, offset = 4, dst = {
+            id = "laneCoverValue", op = {80, {270}, {271}}, offset = 4, dst = {
                 {x = HISPEED.NUM.COVER.X_W(HISPEED), y = HISPEED.NUM.COVER.LANE.Y(), w = nw, h = nh}
             }
         }
         dst[#dst+1] = {
-            id = "largeGreenValueCoverOn", op = {270, 271}, offset = 4, dst = {
+            id = "largeGreenValueCoverOn", op = {80, {270}, {271}}, offset = 4, dst = {
                 {x = HISPEED.NUM.COVER.X_G(HISPEED), y = HISPEED.NUM.COVER.LANE.Y(), w = nw, h = nh}
             }
         }
         dst[#dst+1] = {
-            id = "largeBlueValueCoverOn", op = {270, 271}, offset = 4, dst = {
+            id = "largeBlueValueCoverOn", op = {80, {270}, {271}}, offset = 4, dst = {
                 {x = HISPEED.NUM.COVER.X_B(HISPEED), y = HISPEED.NUM.COVER.LANE.Y(), w = nw, h = nh}
             }
         }
         -- リフト部分
         dst[#dst+1] = {
-            id = "liftValue", op = {270, 272}, offset = 3, dst = {
+            id = "liftValue", op = {80, {270}, {272}}, offset = 3, dst = {
                 {x = HISPEED.NUM.COVER.X_W(HISPEED), y = HISPEED.NUM.COVER.LIFT.Y(), w = nw, h = nh}
             }
         }
         dst[#dst+1] = {
-            id = "largeGreenValueCoverOn", op = {270, 272, 271}, offset = 3, dst = {
+            id = "largeGreenValueCoverOn", op = {80, 271, {270}, {272}}, offset = 3, dst = {
                 {x = HISPEED.NUM.COVER.X_G(HISPEED), y = HISPEED.NUM.COVER.LIFT.Y(), w = nw, h = nh}
             }
         }
         dst[#dst+1] = {
-            id = "largeGreenValueCoverOff", op = {270, 272, -271}, offset = 3, dst = {
+            id = "largeGreenValueCoverOff", op = {80, -271, {270}, {272}}, offset = 3, dst = {
                 {x = HISPEED.NUM.COVER.X_G(HISPEED), y = HISPEED.NUM.COVER.LIFT.Y(), w = nw, h = nh}
             }
         }
         dst[#dst+1] = {
-            id = "largeBlueValueCoverOn", op = {270, 272, 271}, offset = 3, dst = {
+            id = "largeBlueValueCoverOn", op = {80, 271, {270}, {272}}, offset = 3, dst = {
                 {x = HISPEED.NUM.COVER.X_B(HISPEED), y = HISPEED.NUM.COVER.LIFT.Y(), w = nw, h = nh}
             }
         }
         dst[#dst+1] = {
-            id = "largeBlueValueCoverOff", op = {270, 272, -271}, offset = 3, dst = {
+            id = "largeBlueValueCoverOff", op = {80, -271, {270}, {272}}, offset = 3, dst = {
                 {x = HISPEED.NUM.COVER.X_B(HISPEED), y = HISPEED.NUM.COVER.LIFT.Y(), w = nw, h = nh}
             }
         }

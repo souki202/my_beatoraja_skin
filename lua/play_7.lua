@@ -90,8 +90,8 @@ local function main()
         {id = 82, path = "../play/parts/lane/notes/normal/*.png"},
         {id = 83, path = "../play/parts/lane/judgeline/layer1/*.png"},
         {id = 84, path = "../play/parts/lane/judgeline/layer2/*.png"},
-        {id = 86, path = "../play/parts/lane/lanecover/default.png"},
-        {id = 87, path = "../play/parts/lane/liftcover/default.png"},
+        {id = 86, path = "../play/parts/lane/lanecover/*.png"},
+        {id = 87, path = "../play/parts/lane/liftcover/*.png"},
         {id = 88, path = "../play/parts/lane/laneside/state/nogood/*.png"},
         {id = 89, path = "../play/parts/lane/laneside/state/nomiss/*.png"},
         {id = 90, path = "../play/parts/lane/laneside/state/survival/*.png"},
@@ -149,8 +149,8 @@ local function main()
     mergeSkin(skin, title.dst())
     mergeSkin(skin, progress.dst())
     mergeSkin(skin, sideInfo.dst())
-    mergeSkin(skin, hispeed.dst())
     mergeSkin(skin, lanes.dst()) -- キービーム, リフト, レーンカバー, グローはここの中でmergeSkin
+    mergeSkin(skin, hispeed.dst())
     mergeSkin(skin, bomb.dst())
     mergeSkin(skin, judges.dst())
     mergeSkin(skin, life.dst())
