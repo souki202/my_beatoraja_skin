@@ -4,6 +4,14 @@
 
 beatoraja/skin/にSocialSkinのディレクトリごと入れてください.
 
+## フォルダとスキンの対応
+
+result: SocialSkin
+
+result2: GlassStyle
+
+result3: SpaceShip
+
 ## サポートする本体バージョン
 
 beatoraja 0.8.3
