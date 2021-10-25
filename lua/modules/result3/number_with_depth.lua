@@ -126,7 +126,7 @@ return {
 
             oldVal = val
             -- 初期化
-            local actualDigit = getDigit(val)
+            local actualDigit = math.min(getDigit(val), maxDigit)
             local emptyValue = getIsFillZero(numType) and VAL_ARY_IDX.FILL_ZERO or VAL_ARY_IDX.NONE
 
             for i = 1, maxDigit do

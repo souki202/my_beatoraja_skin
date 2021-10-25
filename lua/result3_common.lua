@@ -212,6 +212,15 @@ local function main()
         {id = 52, path = "../result3/parts/nums/exscore_p.png"},
         {id = 53, path = "../result3/parts/nums/exscore_p_a.png"},
 
+        -- judges
+        {id = 58, path = "../result3/parts/nums/pf.png"},
+        {id = 59, path = "../result3/parts/nums/gr.png"},
+        {id = 60, path = "../result3/parts/nums/gd.png"},
+        {id = 61, path = "../result3/parts/nums/bd.png"},
+        {id = 62, path = "../result3/parts/nums/pf.png"},
+        {id = 63, path = "../result3/parts/nums/ms.png"},
+
+
         -- 背景群
         {id = 100, path = "../result2/background/isclear/clear/*.png"},
         {id = 101, path = "../result2/background/isclear/failed/*.png"},

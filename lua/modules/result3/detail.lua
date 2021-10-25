@@ -58,12 +58,11 @@ local detail = {
 
     exscoreValue = numberWithDepth.create(
         "exscoreValue",
-        51,
+        51, -- src id
         DETAIL.SCORE.EXSCORE.W, DETAIL.SCORE.EXSCORE.H,
-        11, 5,
-        71,
+        11, 5, 71, -- divx, maxdigit, ref
         {43, 84, 124, 162}, {-1, -2, -3, -4},
-        0, false
+        0, false -- align isfillzero
     ),
     exscorePercentIntegerValue = numberWithDepth.create(
         "exscorePercentIntegerValue",
