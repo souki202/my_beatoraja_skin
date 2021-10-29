@@ -206,19 +206,27 @@ local function main()
         -- score frame
         {id = 1, path = "../result3/parts/score_text.png"},
         {id = 2, path = "../result3/parts/judges_text.png"},
+        {id = 3, path = "../result3/parts/others.png"},
 
         -- exscore value
         {id = 51, path = "../result3/parts/nums/exscore.png"},
         {id = 52, path = "../result3/parts/nums/exscore_p.png"},
         {id = 53, path = "../result3/parts/nums/exscore_p_a.png"},
+        {id = 54, path = "../result3/parts/nums/best.png"},
+        {id = 55, path = "../result3/parts/nums/best_diff.png"},
+        {id = 56, path = "../result3/parts/nums/tgt.png"},
+        {id = 57, path = "../result3/parts/nums/tgt_diff.png"},
 
         -- judges
         {id = 58, path = "../result3/parts/nums/pf.png"},
         {id = 59, path = "../result3/parts/nums/gr.png"},
         {id = 60, path = "../result3/parts/nums/gd.png"},
         {id = 61, path = "../result3/parts/nums/bd.png"},
-        {id = 62, path = "../result3/parts/nums/pf.png"},
+        {id = 62, path = "../result3/parts/nums/pr.png"},
         {id = 63, path = "../result3/parts/nums/ms.png"},
+
+        {id = 70, path = "../result3/parts/nums/pf_f.png"},
+        {id = 71, path = "../result3/parts/nums/pf_s.png"},
 
 
         -- 背景群

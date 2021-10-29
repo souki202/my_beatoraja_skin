@@ -35,6 +35,7 @@ local MIN_VALUE = -2147483648
 
 -- 整数の桁数を計算 (符号は含まない)
 local function getDigit(val)
+    val = math.abs(val)
     if val == 0 then -- log(0, 10) == -inf のため分離
         return 1
     end
@@ -77,7 +78,7 @@ return {
         timerIdx = timerIdx + 1
 
         if divx ~= 10 and divx ~= 11 and divx ~= 12 then
-            myPrint("divxは10, 11, 24のいずれかです")
+            myPrint("divxは10, 11, 12のいずれかです")
         end
 
         if align == ALIGN.CENTER then
@@ -101,11 +102,11 @@ return {
         end
 
         if #dxs > maxDigit - 1 then
-            myPrint("x座標ずれの数と桁数が一致していません. digitZoom: " + #dxs + " maxDigit: " + maxDigit)
+            myPrint("x座標ずれの数と桁数が一致していません. digitZoom: " .. #dxs .. " maxDigit: " .. maxDigit)
         end
 
         if #dys > maxDigit - 1 then
-            myPrint("y座標ずれの数と桁数が一致していません. digitZoom: " + #dys + " maxDigit: " + maxDigit)
+            myPrint("y座標ずれの数と桁数が一致していません. digitZoom: " .. #dys .. " maxDigit: " .. maxDigit)
         end
 
         -- その数値に対応するimg idを取得
@@ -113,7 +114,7 @@ return {
         local function getId(value, digit, sign)
             local id = imgId .. "_" .. (value + 1) .. "_" .. digit
             if sign == -1 then
-                id = id + MINUS_SUFFIX
+                id = id .. MINUS_SUFFIX
             end
             return id
         end
@@ -167,7 +168,7 @@ return {
                 end
             elseif align == ALIGN.RIGHT then
                 if isViewSign then
-                    valAry[maxDigit - actualDigit - 1] = sign
+                    valAry[maxDigit - actualDigit] = sign
                 end
                 for i = 1, actualDigit do
                     local n = getNumOfSpecificDigit(val, i)
@@ -176,9 +177,9 @@ return {
                     valAry[vi] = n
                 end
             end
-            print("val: " .. val .. " ref:" .. ref .. " actualDigit: " .. actualDigit)
+            myPrint("val: " .. val .. " ref:" .. ref .. " actualDigit: " .. actualDigit .. " numType: " .. numType)
             for i = 1, maxDigit, 1 do
-                print(valAry[i] .. " ref:" .. ref)
+                myPrint(valAry[i] .. " ref:" .. ref)
             end
         end
         fillValueAry()
@@ -198,15 +199,14 @@ return {
                         }
                         -- 符号付きの場合は, 正の値の次の行にある
                         if getIsWithSign(numType) then
-                            y = y + h
                             imgs[#imgs+1] = {
                                 id = getId(j, i, -1), src = srcId,
-                                x = (j - 1) * w, y = y, w = w, h = h
+                                x = (j - 1) * w, y = y + h, w = w, h = h
                             }
                         end
                     end
                     -- 符号付きかどうかで移動量が変わるので, xと違ってここで加算する
-                    y = y + h
+                    y = y + (getIsWithSign(numType) and h * 2 or h)
                 end
 
                 return skin
@@ -277,7 +277,7 @@ return {
                 for i = 1, maxDigit do
                     for j = 1, divx do
                         dst[#dst+1] = {
-                            id = getId(j, i, 1), draw = function ()
+                            id = getId(j, i, 1), filter = 1, draw = function ()
                                 return getIsDraw(j, i, 1)
                             end, dst = {
                                 {x = nowX, y = nowY, w = w, h = h}
@@ -285,7 +285,7 @@ return {
                         }
                         if getIsWithSign(numType) then
                             dst[#dst+1] = {
-                                id = getId(j, i, -1), draw = function ()
+                                id = getId(j, i, -1), filter = 1, draw = function ()
                                     return getIsDraw(j, i, -1)
                                 end, dst = {
                                     {x = nowX, y = nowY, w = w, h = h}
