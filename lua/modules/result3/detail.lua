@@ -24,7 +24,7 @@ local DETAIL = {
                 },
                 DOT = {
                     X = 300,
-                    Y = 873,
+                    Y = 871,
                     W = 4,
                     H = 5,
                 },
@@ -90,46 +90,193 @@ local DETAIL = {
                 Y = 720,
                 W = 11,
                 H = 14,
-            }
+            },
+            SLUSH = {
+                X = 370,
+                Y = 719,
+                W = 6,
+                H = 15,
+            },
         },
         GR = {
             X = 192,
             Y = 655,
             W = 24,
             H = 28,
+            F = {
+                X = 324,
+                Y = 673,
+                W = 11,
+                H = 15,
+                DX = {12, 24, 35},
+                DY = {1, 3, 4},
+            },
+            S = {
+                X = 376,
+                Y = 681,
+                W = 11,
+                H = 15,
+                DX = {11, 22, 33},
+                DY = {1, 2, 4},
+            },
+            SLUSH = {
+                X = 370,
+                Y = 680,
+                W = 6,
+                H = 15,
+            },
         },
         GD = {
             X = 192,
             Y = 611,
             W = 24,
             H = 28,
+            F = {
+                X = 324,
+                Y = 633,
+                W = 11,
+                H = 16,
+                DX = {12, 24, 35},
+                DY = {1, 3, 5},
+            },
+            S = {
+                X = 376,
+                Y = 642,
+                W = 11,
+                H = 15,
+                DX = {11, 22, 33},
+                DY = {1, 3, 5},
+            },
+            SLUSH = {
+                X = 370,
+                Y = 640,
+                W = 6,
+                H = 15,
+            },
         },
         BD = {
             X = 192,
             Y = 567,
             W = 24,
             H = 29,
+            F = {
+                X = 324,
+                Y = 592,
+                W = 11,
+                H = 15,
+                DX = {12, 24, 35},
+                DY = {2, 4, 7},
+            },
+            S = {
+                X = 376,
+                Y = 603,
+                W = 11,
+                H = 15,
+                DX = {11, 22, 33},
+                DY = {2, 4, 6},
+            },
+            SLUSH = {
+                X = 370,
+                Y = 601,
+                W = 6,
+                H = 15,
+            },
         },
         PR = {
             X = 192,
             Y = 522,
             W = 24,
             H = 29,
+            F = {
+                X = 324,
+                Y = 552,
+                W = 11,
+                H = 16,
+                DX = {12, 24, 35},
+                DY = {2, 5, 7},
+            },
+            S = {
+                X = 376,
+                Y = 564,
+                W = 11,
+                H = 15,
+                DX = {11, 22, 33},
+                DY = {2, 5, 7},
+            },
+            SLUSH = {
+                X = 370,
+                Y = 562,
+                W = 6,
+                H = 15,
+            },
         },
         MS = {
             X = 192,
             Y = 478,
             W = 24,
             H = 29,
+            F = {
+                X = 324,
+                Y = 511,
+                W = 11,
+                H = 16,
+                DX = {12, 24, 35},
+                DY = {2, 5, 8},
+            },
+            S = {
+                X = 376,
+                Y = 525,
+                W = 11,
+                H = 15,
+                DX = {11, 22, 33},
+                DY = {3, 5, 8},
+            },
+            SLUSH = {
+                X = 370,
+                Y = 523,
+                W = 6,
+                H = 15,
+            },
         },
     },
+    COMBO = {
+        X = 191,
+        Y = 409,
+        W = 24,
+        H = 31,
+        DX = {26, 50, 73, 96},
+        DY = {7, 13, 19, 26},
+        DIFF = {
+            X = 321,
+            Y = 446,
+            W = 16,
+            H = 22,
+            DX = {17, 33, 49, 65},
+            DY = {5, 9, 13, 18},
+        },
+    },
+    BP = {
+        X = 191,
+        Y = 370,
+        W = 24,
+        H = 31,
+        DX = {26, 50, 73, 96},
+        DY = {8, 15, 22, 28},
+        DIFF = {
+            X = 321,
+            Y = 411,
+            W = 16,
+            H = 21,
+            DX = {17, 33, 49, 65},
+            DY = {5, 10, 15, 20},
+        },
+    }
 }
 
 local detail = {
     functions = {},
 
     exscoreValue = numberWithDepth.create(
-        "exscoreValue",
         51, -- src id
         DETAIL.SCORE.EXSCORE.W, DETAIL.SCORE.EXSCORE.H,
         11, 5, 71, -- divx, maxdigit, ref
@@ -137,7 +284,6 @@ local detail = {
         0, false -- align isfillzero
     ),
     exscorePercentIntegerValue = numberWithDepth.create(
-        "exscorePercentIntegerValue",
         52,
         DETAIL.SCORE.EXSCORE.PERCENT.INTEGER.W, DETAIL.SCORE.EXSCORE.PERCENT.INTEGER.H,
         11, 3, 102,
@@ -145,7 +291,6 @@ local detail = {
         0, false
     ),
     exscorePercentAfterDotValue = numberWithDepth.create(
-        "exscorePercentAfterDotValue",
         53,
         DETAIL.SCORE.EXSCORE.PERCENT.AFTER_DOT.W, DETAIL.SCORE.EXSCORE.PERCENT.AFTER_DOT.H,
         11, 2, 103,
@@ -153,7 +298,6 @@ local detail = {
         0, true
     ),
     bestScoreValue = numberWithDepth.create(
-        "bestScoreValue",
         54,
         DETAIL.SCORE.BEST.W, DETAIL.SCORE.BEST.H,
         11, 5, 150,
@@ -161,7 +305,6 @@ local detail = {
         0, false
     ),
     bestScoreDiffValue = numberWithDepth.create(
-        "bestScoreDiffValue",
         55,
         DETAIL.SCORE.BEST.DIFF.W, DETAIL.SCORE.BEST.DIFF.H,
         12, 6, 152,
@@ -169,7 +312,6 @@ local detail = {
         0, false
     ),
     targetScoreValue = numberWithDepth.create(
-        "targetScoreValue",
         56,
         DETAIL.SCORE.TARGET.W, DETAIL.SCORE.TARGET.H,
         11, 5, 151,
@@ -177,7 +319,6 @@ local detail = {
         0, false
     ),
     targetScoreDiffValue = numberWithDepth.create(
-        "targetScoreDiffValue",
         57,
         DETAIL.SCORE.TARGET.DIFF.W, DETAIL.SCORE.TARGET.DIFF.H,
         12, 6, 153,
@@ -185,7 +326,6 @@ local detail = {
         0, false
     ),
     judgePfValue = numberWithDepth.create(
-        "judgePfValue",
         58,
         DETAIL.JUDGES.PF.W, DETAIL.JUDGES.PF.H,
         11, 5, 110,
@@ -193,7 +333,6 @@ local detail = {
         0, false
     ),
     judgeGrValue = numberWithDepth.create(
-        "judgeGrValue",
         59,
         DETAIL.JUDGES.GR.W, DETAIL.JUDGES.GR.H,
         11, 5, 111,
@@ -201,7 +340,6 @@ local detail = {
         0, false
     ),
     judgeGdValue = numberWithDepth.create(
-        "judgeGdValue",
         60,
         DETAIL.JUDGES.GD.W, DETAIL.JUDGES.GD.H,
         11, 5, 112,
@@ -209,7 +347,6 @@ local detail = {
         0, false
     ),
     judgeBdValue = numberWithDepth.create(
-        "judgeBdValue",
         61,
         DETAIL.JUDGES.BD.W, DETAIL.JUDGES.BD.H,
         11, 5, 113,
@@ -217,7 +354,6 @@ local detail = {
         0, false
     ),
     judgePrValue = numberWithDepth.create(
-        "judgePrValue",
         62,
         DETAIL.JUDGES.PR.W, DETAIL.JUDGES.PR.H,
         11, 5, 114,
@@ -225,7 +361,6 @@ local detail = {
         0, false
     ),
     judgeMsValue = numberWithDepth.create(
-        "judgeMsValue",
         63,
         DETAIL.JUDGES.MS.W, DETAIL.JUDGES.MS.H,
         11, 5, 420,
@@ -233,7 +368,6 @@ local detail = {
         0, false
     ),
     judgePfFastValue = numberWithDepth.create(
-        "judgePfFastValue",
         70,
         DETAIL.JUDGES.PF.F.W, DETAIL.JUDGES.PF.F.H,
         11, 4, 410,
@@ -241,11 +375,108 @@ local detail = {
         0, false
     ),
     judgePfSlowValue = numberWithDepth.create(
-        "judgePfSlowValue",
         71,
         DETAIL.JUDGES.PF.S.W, DETAIL.JUDGES.PF.S.H,
         11, 4, 411,
         {11, 22, 32}, {1, 2, 3},
+        0, false
+    ),
+    judgeGrFastValue = numberWithDepth.create(
+        72,
+        DETAIL.JUDGES.GR.F.W, DETAIL.JUDGES.GR.F.H,
+        11, 4, 412,
+        DETAIL.JUDGES.GR.F.DX, DETAIL.JUDGES.GR.F.DY,
+        0, false
+    ),
+    judgeGrSlowValue = numberWithDepth.create(
+        73,
+        DETAIL.JUDGES.GR.S.W, DETAIL.JUDGES.GR.S.H,
+        11, 4, 413,
+        DETAIL.JUDGES.GR.S.DX, DETAIL.JUDGES.GR.S.DY,
+        0, false
+    ),
+    judgeGdFastValue = numberWithDepth.create(
+        74,
+        DETAIL.JUDGES.GD.F.W, DETAIL.JUDGES.GD.F.H,
+        11, 4, 414,
+        DETAIL.JUDGES.GD.F.DX, DETAIL.JUDGES.GD.F.DY,
+        0, false
+    ),
+    judgeGdSlowValue = numberWithDepth.create(
+        75,
+        DETAIL.JUDGES.GD.S.W, DETAIL.JUDGES.GD.S.H,
+        11, 4, 415,
+        DETAIL.JUDGES.GD.S.DX, DETAIL.JUDGES.GD.S.DY,
+        0, false
+    ),
+    judgeBdFastValue = numberWithDepth.create(
+        76,
+        DETAIL.JUDGES.BD.F.W, DETAIL.JUDGES.BD.F.H,
+        11, 4, 416,
+        DETAIL.JUDGES.BD.F.DX, DETAIL.JUDGES.BD.F.DY,
+        0, false
+    ),
+    judgeBdSlowValue = numberWithDepth.create(
+        77,
+        DETAIL.JUDGES.BD.S.W, DETAIL.JUDGES.BD.S.H,
+        11, 4, 417,
+        DETAIL.JUDGES.BD.S.DX, DETAIL.JUDGES.BD.S.DY,
+        0, false
+    ),
+    judgePrFastValue = numberWithDepth.create(
+        78,
+        DETAIL.JUDGES.PR.F.W, DETAIL.JUDGES.PR.F.H,
+        11, 4, 418,
+        DETAIL.JUDGES.PR.F.DX, DETAIL.JUDGES.PR.F.DY,
+        0, false
+    ),
+    judgePrSlowValue = numberWithDepth.create(
+        79,
+        DETAIL.JUDGES.PR.S.W, DETAIL.JUDGES.PR.S.H,
+        11, 4, 419,
+        DETAIL.JUDGES.PR.S.DX, DETAIL.JUDGES.PR.S.DY,
+        0, false
+    ),
+    judgeMsFastValue = numberWithDepth.create(
+        80,
+        DETAIL.JUDGES.MS.F.W, DETAIL.JUDGES.MS.F.H,
+        11, 4, 421,
+        DETAIL.JUDGES.MS.F.DX, DETAIL.JUDGES.MS.F.DY,
+        0, false
+    ),
+    judgeMsSlowValue = numberWithDepth.create(
+        81,
+        DETAIL.JUDGES.MS.S.W, DETAIL.JUDGES.MS.S.H,
+        11, 4, 422,
+        DETAIL.JUDGES.MS.S.DX, DETAIL.JUDGES.MS.S.DY,
+        0, false
+    ),
+    comboValue = numberWithDepth.create(
+        82,
+        DETAIL.COMBO.W, DETAIL.COMBO.H,
+        11, 5, 75,
+        DETAIL.COMBO.DX, DETAIL.COMBO.DY,
+        0, false
+    ),
+    comboDiffValue = numberWithDepth.create(
+        83,
+        DETAIL.COMBO.DIFF.W, DETAIL.COMBO.DIFF.H,
+        12, 5, 175,
+        DETAIL.COMBO.DIFF.DX, DETAIL.COMBO.DIFF.DY,
+        0, false
+    ),
+    bpValue = numberWithDepth.create(
+        84,
+        DETAIL.BP.W, DETAIL.BP.H,
+        11, 5, 76,
+        DETAIL.BP.DX, DETAIL.BP.DY,
+        0, false
+    ),
+    bpDiffValue = numberWithDepth.create(
+        85,
+        DETAIL.BP.DIFF.W, DETAIL.BP.DIFF.H,
+        12, 5, 178,
+        DETAIL.BP.DIFF.DX, DETAIL.BP.DIFF.DY,
         0, false
     ),
 }
@@ -257,6 +488,13 @@ detail.functions.load = function ()
             {id = "judgesFrame", src = 2, x = 0, y = 0, w = -1, h = -1},
             {id = "exscorePercentDot", src = 3, x = 0, y = 0, w = DETAIL.SCORE.EXSCORE.PERCENT.DOT.W, h = DETAIL.SCORE.EXSCORE.PERCENT.DOT.H},
             {id = "exscorePercentPercent", src = 3, x = 4, y = 0, w = DETAIL.SCORE.EXSCORE.PERCENT.PERCENT.W, h = DETAIL.SCORE.EXSCORE.PERCENT.PERCENT.H},
+
+            {id = "pfFsSlush", src = 3, x = 21, y = 0, w = DETAIL.JUDGES.PF.SLUSH.W, h = DETAIL.JUDGES.PF.SLUSH.H},
+            {id = "grFsSlush", src = 3, x = 21 + DETAIL.JUDGES.PF.SLUSH.W, y = 0, w = DETAIL.JUDGES.GR.SLUSH.W, h = DETAIL.JUDGES.GR.SLUSH.H},
+            {id = "gdFsSlush", src = 3, x = 21 + DETAIL.JUDGES.GR.SLUSH.W, y = 0, w = DETAIL.JUDGES.GD.SLUSH.W, h = DETAIL.JUDGES.GD.SLUSH.H},
+            {id = "bdFsSlush", src = 3, x = 21 + DETAIL.JUDGES.GD.SLUSH.W, y = 0, w = DETAIL.JUDGES.BD.SLUSH.W, h = DETAIL.JUDGES.BD.SLUSH.H},
+            {id = "prFsSlush", src = 3, x = 21 + DETAIL.JUDGES.BD.SLUSH.W, y = 0, w = DETAIL.JUDGES.PR.SLUSH.W, h = DETAIL.JUDGES.PR.SLUSH.H},
+            {id = "msFsSlush", src = 3, x = 21 + DETAIL.JUDGES.PR.SLUSH.W, y = 0, w = DETAIL.JUDGES.MS.SLUSH.W, h = DETAIL.JUDGES.MS.SLUSH.H},
         }
     }
 
@@ -277,6 +515,21 @@ detail.functions.load = function ()
 
     mergeSkin(skin, detail.judgePfFastValue.load())
     mergeSkin(skin, detail.judgePfSlowValue.load())
+    mergeSkin(skin, detail.judgeGrFastValue.load())
+    mergeSkin(skin, detail.judgeGrSlowValue.load())
+    mergeSkin(skin, detail.judgeGdFastValue.load())
+    mergeSkin(skin, detail.judgeGdSlowValue.load())
+    mergeSkin(skin, detail.judgeBdFastValue.load())
+    mergeSkin(skin, detail.judgeBdSlowValue.load())
+    mergeSkin(skin, detail.judgePrFastValue.load())
+    mergeSkin(skin, detail.judgePrSlowValue.load())
+    mergeSkin(skin, detail.judgeMsFastValue.load())
+    mergeSkin(skin, detail.judgeMsSlowValue.load())
+
+    mergeSkin(skin, detail.comboValue.load())
+    mergeSkin(skin, detail.comboDiffValue.load())
+    mergeSkin(skin, detail.bpValue.load())
+    mergeSkin(skin, detail.bpDiffValue.load())
     return skin
 end
 
@@ -303,6 +556,36 @@ detail.functions.dst = function ()
                     {x = DETAIL.SCORE.EXSCORE.PERCENT.PERCENT.X, y = DETAIL.SCORE.EXSCORE.PERCENT.PERCENT.Y, w = DETAIL.SCORE.EXSCORE.PERCENT.PERCENT.W, h = DETAIL.SCORE.EXSCORE.PERCENT.PERCENT.H}
                 }
             },
+            {
+                id = "pfFsSlush", dst = {
+                    {x = DETAIL.JUDGES.PF.SLUSH.X, y = DETAIL.JUDGES.PF.SLUSH.Y, w = DETAIL.JUDGES.PF.SLUSH.W, h = DETAIL.JUDGES.PF.SLUSH.H}
+                }
+            },
+            {
+                id = "grFsSlush", dst = {
+                    {x = DETAIL.JUDGES.GR.SLUSH.X, y = DETAIL.JUDGES.GR.SLUSH.Y, w = DETAIL.JUDGES.GR.SLUSH.W, h = DETAIL.JUDGES.GR.SLUSH.H}
+                }
+            },
+            {
+                id = "gdFsSlush", dst = {
+                    {x = DETAIL.JUDGES.GD.SLUSH.X, y = DETAIL.JUDGES.GD.SLUSH.Y, w = DETAIL.JUDGES.GD.SLUSH.W, h = DETAIL.JUDGES.GD.SLUSH.H}
+                }
+            },
+            {
+                id = "bdFsSlush", dst = {
+                    {x = DETAIL.JUDGES.BD.SLUSH.X, y = DETAIL.JUDGES.BD.SLUSH.Y, w = DETAIL.JUDGES.BD.SLUSH.W, h = DETAIL.JUDGES.BD.SLUSH.H}
+                }
+            },
+            {
+                id = "prFsSlush", dst = {
+                    {x = DETAIL.JUDGES.PR.SLUSH.X, y = DETAIL.JUDGES.PR.SLUSH.Y, w = DETAIL.JUDGES.PR.SLUSH.W, h = DETAIL.JUDGES.PR.SLUSH.H}
+                }
+            },
+            {
+                id = "msFsSlush", dst = {
+                    {x = DETAIL.JUDGES.MS.SLUSH.X, y = DETAIL.JUDGES.MS.SLUSH.Y, w = DETAIL.JUDGES.MS.SLUSH.W, h = DETAIL.JUDGES.MS.SLUSH.H}
+                }
+            }
         }
     }
 
@@ -325,6 +608,21 @@ detail.functions.dst = function ()
     mergeSkin(skin, detail.judgeMsValue.dst(DETAIL.JUDGES.MS.X, DETAIL.JUDGES.MS.Y))
     mergeSkin(skin, detail.judgePfFastValue.dst(DETAIL.JUDGES.PF.F.X, DETAIL.JUDGES.PF.F.Y))
     mergeSkin(skin, detail.judgePfSlowValue.dst(DETAIL.JUDGES.PF.S.X, DETAIL.JUDGES.PF.S.Y))
+    mergeSkin(skin, detail.judgeGrFastValue.dst(DETAIL.JUDGES.GR.F.X, DETAIL.JUDGES.GR.F.Y))
+    mergeSkin(skin, detail.judgeGrSlowValue.dst(DETAIL.JUDGES.GR.S.X, DETAIL.JUDGES.GR.S.Y))
+    mergeSkin(skin, detail.judgeGdFastValue.dst(DETAIL.JUDGES.GD.F.X, DETAIL.JUDGES.GD.F.Y))
+    mergeSkin(skin, detail.judgeGdSlowValue.dst(DETAIL.JUDGES.GD.S.X, DETAIL.JUDGES.GD.S.Y))
+    mergeSkin(skin, detail.judgeBdFastValue.dst(DETAIL.JUDGES.BD.F.X, DETAIL.JUDGES.BD.F.Y))
+    mergeSkin(skin, detail.judgeBdSlowValue.dst(DETAIL.JUDGES.BD.S.X, DETAIL.JUDGES.BD.S.Y))
+    mergeSkin(skin, detail.judgePrFastValue.dst(DETAIL.JUDGES.PR.F.X, DETAIL.JUDGES.PR.F.Y))
+    mergeSkin(skin, detail.judgePrSlowValue.dst(DETAIL.JUDGES.PR.S.X, DETAIL.JUDGES.PR.S.Y))
+    mergeSkin(skin, detail.judgeMsFastValue.dst(DETAIL.JUDGES.MS.F.X, DETAIL.JUDGES.MS.F.Y))
+    mergeSkin(skin, detail.judgeMsSlowValue.dst(DETAIL.JUDGES.MS.S.X, DETAIL.JUDGES.MS.S.Y))
+
+    mergeSkin(skin, detail.comboValue.dst(DETAIL.COMBO.X, DETAIL.COMBO.Y))
+    mergeSkin(skin, detail.comboDiffValue.dst(DETAIL.COMBO.DIFF.X, DETAIL.COMBO.DIFF.Y))
+    mergeSkin(skin, detail.bpValue.dst(DETAIL.BP.X, DETAIL.BP.Y))
+    mergeSkin(skin, detail.bpDiffValue.dst(DETAIL.BP.DIFF.X, DETAIL.BP.DIFF.Y))
 
     return skin
 end

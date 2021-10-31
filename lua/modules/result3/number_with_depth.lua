@@ -1,6 +1,7 @@
 require("modules.commons.my_print")
 require("modules.result3.commons")
 local main_state = require("main_state")
+local uuid = require("modules.commons.uuid")
 
 local NUM_TYPES = {
     NUMBER = 1,
@@ -68,7 +69,8 @@ return {
     -- @param {number[]} dxs 上位2桁目~maxDigit桁目までの, 1桁目に対するx座標のずれ
     -- @param {number[]} dys 上位2桁目~maxDigit桁目までの, 1桁目に対するy座標のずれ
     -- @param {number} isFillZero 0埋めするかどうか. divxが10の場合は必ずfalse扱い
-    create = function (imgId, srcId, w, h, divx, maxDigit, ref, dxs, dys, align, isFillZero)
+    create = function (srcId, w, h, divx, maxDigit, ref, dxs, dys, align, isFillZero)
+        local imgId = uuid()
         local numType = NUM_TYPES.NUMBER
         local thisTimer = timerIdx
         local oldVal = 0

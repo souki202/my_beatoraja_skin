@@ -227,6 +227,22 @@ local function main()
 
         {id = 70, path = "../result3/parts/nums/pf_f.png"},
         {id = 71, path = "../result3/parts/nums/pf_s.png"},
+        {id = 72, path = "../result3/parts/nums/gr_f.png"},
+        {id = 73, path = "../result3/parts/nums/gr_s.png"},
+        {id = 74, path = "../result3/parts/nums/gd_f.png"},
+        {id = 75, path = "../result3/parts/nums/gd_s.png"},
+        {id = 76, path = "../result3/parts/nums/bd_f.png"},
+        {id = 77, path = "../result3/parts/nums/bd_s.png"},
+        {id = 78, path = "../result3/parts/nums/pr_f.png"},
+        {id = 79, path = "../result3/parts/nums/pr_s.png"},
+        {id = 80, path = "../result3/parts/nums/ms_f.png"},
+        {id = 81, path = "../result3/parts/nums/ms_s.png"},
+
+        -- bp, combo
+        {id = 82, path = "../result3/parts/nums/combo.png"},
+        {id = 83, path = "../result3/parts/nums/combo_diff.png"},
+        {id = 84, path = "../result3/parts/nums/bp.png"},
+        {id = 85, path = "../result3/parts/nums/bp_diff.png"},
 
 
         -- 背景群
