@@ -8,6 +8,7 @@ local background = require("modules.result.background")
 local fade = require("modules.result.fade")
 
 local scoreDetail = require("modules.result3.detail")
+local scoreDetail2 = require("modules.result3.detail2")
 
 local resultObtained = require("modules.result.result_obtained")
 
@@ -208,6 +209,14 @@ local function main()
         {id = 2, path = "../result3/parts/judges_text.png"},
         {id = 3, path = "../result3/parts/others.png"},
 
+        {id = 10, path = "../result3/parts/lamp_from.png"},
+        {id = 11, path = "../result3/parts/lamp_to.png"},
+        {id = 12, path = "../result3/parts/ln.png"},
+        {id = 13, path = "../result3/parts/keys.png"},
+        {id = 14, path = "../result3/parts/random.png"},
+        {id = 15, path = "../result3/parts/tn.png"},
+        {id = 16, path = "../result3/parts/difficulty.png"},
+
         -- exscore value
         {id = 51, path = "../result3/parts/nums/exscore.png"},
         {id = 52, path = "../result3/parts/nums/exscore_p.png"},
@@ -243,6 +252,10 @@ local function main()
         {id = 83, path = "../result3/parts/nums/combo_diff.png"},
         {id = 84, path = "../result3/parts/nums/bp.png"},
         {id = 85, path = "../result3/parts/nums/bp_diff.png"},
+        {id = 86, path = "../result3/parts/nums/notes.png"},
+        {id = 87, path = "../result3/parts/nums/difficulty.png"},
+
+        {id = 90, path = "../result3/parts/fsgraph.png"},
 
 
         -- 背景群
@@ -286,11 +299,13 @@ local function main()
     mergeSkin(skin, background.load())
     mergeSkin(skin, fade.load())
     mergeSkin(skin, scoreDetail.load())
+    mergeSkin(skin, scoreDetail2.load())
 
     skin.destination = {}
 
     mergeSkin(skin, background.dst())
     mergeSkin(skin, scoreDetail.dst())
+    mergeSkin(skin, scoreDetail2.dst())
     mergeSkin(skin, fade.dst())
     return skin
 end

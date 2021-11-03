@@ -1,6 +1,6 @@
 require("modules.commons.define")
 local numberWithDepth = require("modules.result3.number_with_depth")
-
+local main_state = require("main_state")
 
 local DETAIL = {
     SCORE = {
@@ -74,6 +74,35 @@ local DETAIL = {
             W = 183,
             H = 280,
         },
+        GRAPH = {
+            W = 388,
+            H = 100,
+            SEPARATORS = {0, 50, 95, 139, 180, 219, 257, 293, 326, 359, 388}, -- 10%ごとの幅
+            PF = {
+                X = 31,
+                Y = 677
+            },
+            GR = {
+                X = 31,
+                Y = 677 - 49,
+            },
+            GD = {
+                X = 31,
+                Y = 677 - 49 * 2
+            },
+            BD = {
+                X = 31,
+                Y = 677 - 49 * 3
+            },
+            PR = {
+                X = 31,
+                Y = 677 - 49 * 4
+            },
+            MS = {
+                X = 31,
+                Y = 677 - 49 * 5
+            },
+        },
         PF = {
             X = 192,
             Y = 700,
@@ -87,7 +116,7 @@ local DETAIL = {
             },
             S = {
                 X = 376,
-                Y = 720,
+                Y = 719,
                 W = 11,
                 H = 14,
             },
@@ -113,7 +142,7 @@ local DETAIL = {
             },
             S = {
                 X = 376,
-                Y = 681,
+                Y = 680,
                 W = 11,
                 H = 15,
                 DX = {11, 22, 33},
@@ -329,7 +358,7 @@ local detail = {
         58,
         DETAIL.JUDGES.PF.W, DETAIL.JUDGES.PF.H,
         11, 5, 110,
-        {26, 50, 75, 97}, {2, 4, 6, 8},
+        {26, 50, 75, 98}, {2, 4, 6, 8},
         0, false
     ),
     judgeGrValue = numberWithDepth.create(
@@ -343,7 +372,7 @@ local detail = {
         60,
         DETAIL.JUDGES.GD.W, DETAIL.JUDGES.GD.H,
         11, 5, 112,
-        {26, 50, 75, 97}, {4, 8, 12, 15},
+        {26, 50, 75, 97}, {3, 7, 11, 14},
         0, false
     ),
     judgeBdValue = numberWithDepth.create(
@@ -479,6 +508,14 @@ local detail = {
         DETAIL.BP.DIFF.DX, DETAIL.BP.DIFF.DY,
         0, false
     ),
+    fsGraph = {
+        pf = {fastW = 0},
+        gr = {fastW = 0},
+        gd = {fastW = 0},
+        bd = {fastW = 0},
+        pr = {fastW = 0},
+        ms = {fastW = 0},
+    }
 }
 
 detail.functions.load = function ()
@@ -530,6 +567,45 @@ detail.functions.load = function ()
     mergeSkin(skin, detail.comboDiffValue.load())
     mergeSkin(skin, detail.bpValue.load())
     mergeSkin(skin, detail.bpDiffValue.load())
+
+    -- judgeのfsの棒の大きさ計算. 3次元から遠近法で計算するのはややこしいっぽいので10%ごとに線形で近似する
+    -- slowは無条件で幅100で良いので, fastだけ計算
+    local prefix = {"PF", "GR", "GD", "BD", "PR", "MS"}
+    local lowerIdPrefix = {"pf", "gr", "gd", "bd", "pr", "ms"}
+    local tref = {110, 111, 112, 113, 114, 420}
+    local fref = {410, 412, 414, 416, 418, 421}
+    -- local sref = {411, 413, 415, 417, 419, 422}
+    local imgs = skin.image
+    for i = 1, #prefix do
+        local fast = main_state.number(fref[i])
+        local total = main_state.number(tref[i])
+        local w = 0
+
+        -- fastの幅の計算
+        if (fast == total) then
+            w = DETAIL.JUDGES.GRAPH.W
+        else
+            local p = (100 * fast / total)
+            local separatorIdx = math.floor(p / 10) + 1
+            local remainder = p % 10
+            local l = DETAIL.JUDGES.GRAPH.SEPARATORS[separatorIdx]
+            local r = DETAIL.JUDGES.GRAPH.SEPARATORS[separatorIdx + 1]
+            w = l + (r - l) * remainder / 10
+        end
+
+        detail.fsGraph[lowerIdPrefix[i]].fastW = w
+
+        local y = DETAIL.JUDGES.GRAPH.H * (i - 1)
+        imgs[#imgs+1] = {
+            id = lowerIdPrefix[i] .. "FsGraphFast", src = 90, x = 0, y = y,
+            w = w, h = DETAIL.JUDGES.GRAPH.H
+        }
+        imgs[#imgs+1] = {
+            id = lowerIdPrefix[i] .. "FsGraphSlow", src = 90, x = DETAIL.JUDGES.GRAPH.W, y = y,
+            w = DETAIL.JUDGES.GRAPH.W, h = DETAIL.JUDGES.GRAPH.H
+        }
+    end
+
     return skin
 end
 
@@ -589,6 +665,8 @@ detail.functions.dst = function ()
         }
     }
 
+    local dst = skin.destination
+
     -- exscoreとパーセンテージ
     mergeSkin(skin, detail.exscoreValue.dst(DETAIL.SCORE.EXSCORE.X, DETAIL.SCORE.EXSCORE.Y))
     mergeSkin(skin, detail.exscorePercentIntegerValue.dst(DETAIL.SCORE.EXSCORE.PERCENT.INTEGER.X, DETAIL.SCORE.EXSCORE.PERCENT.INTEGER.Y))
@@ -618,6 +696,22 @@ detail.functions.dst = function ()
     mergeSkin(skin, detail.judgePrSlowValue.dst(DETAIL.JUDGES.PR.S.X, DETAIL.JUDGES.PR.S.Y))
     mergeSkin(skin, detail.judgeMsFastValue.dst(DETAIL.JUDGES.MS.F.X, DETAIL.JUDGES.MS.F.Y))
     mergeSkin(skin, detail.judgeMsSlowValue.dst(DETAIL.JUDGES.MS.S.X, DETAIL.JUDGES.MS.S.Y))
+
+    -- judgeのfsの棒
+    local prefix = {"PF", "GR", "GD", "BD", "PR", "MS"}
+    local lowerIdPrefix = {"pf", "gr", "gd", "bd", "pr", "ms"}
+    for i = 1, #prefix do
+        dst[#dst+1] = {
+            id = lowerIdPrefix[i] .. "FsGraphSlow", dst = {
+                {x = DETAIL.JUDGES.GRAPH[prefix[i]].X, y = DETAIL.JUDGES.GRAPH[prefix[i]].Y, w = DETAIL.JUDGES.GRAPH.W, h = DETAIL.JUDGES.GRAPH.H}
+            }
+        }
+        dst[#dst+1] = {
+            id = lowerIdPrefix[i] .. "FsGraphFast", dst = {
+                {x = DETAIL.JUDGES.GRAPH[prefix[i]].X, y = DETAIL.JUDGES.GRAPH[prefix[i]].Y, w = detail.fsGraph[lowerIdPrefix[i]].fastW, h = DETAIL.JUDGES.GRAPH.H}
+            }
+        }
+    end
 
     mergeSkin(skin, detail.comboValue.dst(DETAIL.COMBO.X, DETAIL.COMBO.Y))
     mergeSkin(skin, detail.comboDiffValue.dst(DETAIL.COMBO.DIFF.X, DETAIL.COMBO.DIFF.Y))
