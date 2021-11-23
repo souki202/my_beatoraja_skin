@@ -36,9 +36,6 @@ end
 -- @return {boolean} 新しいバージョンがあるかの配列. それぞれのindexは上に対応しているか, nil 取得に失敗すれば空の配列
 function skinVersionCheck(nowVersions)
     local err, v = pcall(httpConnection, "https://tori-blog.net/wp-content/uploads/skin/version")
-    if err == false then
-        return { false }
-    end
     local isNews = {}
     if v then
         local n = math.min(#v, #nowVersions)
@@ -163,4 +160,43 @@ function getMusicDataAsync(title)
             t:start()
         end,
     }
+end
+
+--[[
+    難易度推定表luaファイルを取得して配置する (同期実行)
+    必ずpcallに囲んで呼ぶこと
+]]
+function updateEstimateLua(savePath)
+    local url = "https://difficulty-estimates.s3.ap-northeast-1.amazonaws.com/estimates.lua"
+
+    print("難易度推定取得開始")
+    print("url: " .. url)
+    local url2 = luajava.newInstance("java.net.URL", url);
+    local urlConn = url2:openConnection()
+    urlConn:setRequestMethod("GET")
+    urlConn:setConnectTimeout(1000)
+    if pcall(function() urlConn:connect() end) then
+        local status = urlConn:getResponseCode()
+        if status == 200 then
+            print("難易度推定取得完了")
+            -- 全部読み込む
+            local reader = luajava.newInstance("java.io.BufferedReader", luajava.newInstance("java.io.InputStreamReader", urlConn:getInputStream(), "utf8"))
+            local str = ""
+            -- 1行ごとに配列へ
+            local hasLine = true
+            while hasLine do
+                local line = reader:readLine()
+                if line then
+                    str = str .. line
+                else
+                    hasLine = false
+                end
+            end
+            -- luaファイルに出力
+            local f = io.open(skin_config.get_path(savePath), "w")
+            io.write(str)
+            io.close()
+        end
+    end
+
 end

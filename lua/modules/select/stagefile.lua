@@ -2,8 +2,14 @@ local commons = require("modules.select.commons")
 local main_state = require("main_state")
 local desktop = require("modules.commons.desktop")
 local musicDetail = require("modules.commons.music_detail")
+local difficultyEstimates = require("modules.commons.difficulty_estimates")
 
 local stagefile = {
+    estimate = {
+        isDraw = false,
+        oldTitle = "", -- 値キャッシュ用
+        difficulties = nil -- cache
+    },
     functions = {}
 }
 
@@ -63,6 +69,22 @@ local STAGE_FILE = {
         Y = function (self) return self.Y + 2 end,
         W = 25,
         H = 25,
+    },
+    ESTIMATE = {
+        ALLOW = {Satellite = true, Stella = true},
+        FRAME = {
+            X = function (self) return self.X end,
+            Y = function (self) return self.Y + 46 end,
+            W = 100,
+            H = 128,
+        },
+        NUM = {
+            X = function (self) return self.ESTIMATE.FRAME.X(self) + 54 end,
+            X_DOT = function (self) return self.ESTIMATE.NUM.X(self) - 1 end,
+            X_AFTER_DOT = function (self) return self.ESTIMATE.NUM.X_DOT(self) + 27 end,
+            Y = function (self) return self.ESTIMATE.FRAME.Y(self) + 11 end,
+            Y_INTERVAL = 23,
+        }
     }
 }
 
@@ -91,6 +113,38 @@ stagefile.functions.load = function ()
         },
         text = {
             {id = "eventName", font = 0, size = STAGE_FILE.EVENT.TEXT.SIZE*1.5, align = 0, overflow = 1, value = function () return musicDetail.getEventData().name end}
+        },
+        customTimers = {
+            {id = 13200, timer = function()
+                -- ソングバーでなければ終了
+                if main_state.option(2) == false then
+                    stagefile.estimate.isDraw = false
+                    stagefile.estimate.difficulties = nil
+                    return
+                end
+                
+                -- 現在のフォルダ取得
+                local path = main_state.text(1000)
+                if path == "" then return end
+
+                -- 階層取得
+                local dirs = string.split(path, ">")
+                if #dirs < 3 then return end -- ディレクトリ階層が浅い
+                local tableName = string.trim(dirs[#dirs - 2])
+                local tableLevel = string.trim(dirs[#dirs - 1])
+                if not STAGE_FILE.ESTIMATE.ALLOW[tableName] then return end
+
+                -- フルタイトル取得
+                local title = main_state.text(12)
+                -- cache済みは終了
+                if title == stagefile.estimate.title then
+                    return
+                end
+
+                -- estimate取得
+                stagefile.estimate.difficulties = difficultyEstimates.getEstimateData(title, tableLevel)
+                print(stagefile.estimate.difficulties)
+            end}
         }
     }
     local imgs = skin.image

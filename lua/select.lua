@@ -23,6 +23,8 @@ local ir = require("modules.select.ir")
 local musicInfo = require("modules.select.music_info")
 local musicDetail = require("modules.commons.music_detail")
 
+local difficultyEstimates = require("modules.commons.difficulty_estimates")
+
 local main_state = require("main_state")
 
 local existNewVersion = false
@@ -504,7 +506,10 @@ local function main()
             existNewVersion = existNewVersion or isNews[i]
         end
         userData.updateNextVersionCheckDate()
+        -- 難易度推定更新
+        difficultyEstimates.updateEstimates()
     end
+    difficultyEstimates.loadCache()
 
     skin.source = {
         {id = 1, path = "../select/background/*.png"},
@@ -541,6 +546,7 @@ local function main()
     end
     table.insert(skin.customTimers, {id = 13000, timer = "update"})
     -- 13100はmenu
+    -- 13200はestimate
 
     skin.customEvents = {} -- 1000~未定はヘルプ
 

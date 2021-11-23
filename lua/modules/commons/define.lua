@@ -97,7 +97,17 @@ function string.split(str, ts)
       i = i + 1
     end
     return t
-  end
+end
+
+function string.trim(s)
+    return s:match'^()%s*$' and '' or s:match'^%s*(.*%S)'
+end
+
+function string.rfind(s, tgt)
+    local l, r = string.find(string.reverse(s), string.reverse(tgt))
+    if l == nil then return nil end
+    return #s - r + 1, #s - l + 1
+end
 
 function mergeSkin(skin, addSkin)
     if addSkin then
@@ -191,7 +201,7 @@ function gaussian(x, a, avg, v)
 end
 
 SKIN_INFO = {
-    SELECT_VRESION = "3.06",
+    SELECT_VRESION = "3.10",
     RESULT_VERSION = "3.11",
     DECIDE_VERSION = "1.10",
     PLAY_VERSION = "2.20",
@@ -270,4 +280,13 @@ function getOffsetValueWithDefault(name, defaultValue)
         end
     end
     return v
+end
+
+function escapeForLuaKey(str)
+    return string.gsub(tostring(str), '["\n]', function (c)
+        if c == '"' then return '\\"'
+        elseif c == "\n" then return "\\n"
+        else return c
+        end
+    end)
 end
