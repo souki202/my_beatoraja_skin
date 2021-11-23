@@ -122,7 +122,7 @@ stagefile.functions.load = function ()
                     stagefile.estimate.difficulties = nil
                     return
                 end
-                
+
                 -- 現在のフォルダ取得
                 local path = main_state.text(1000)
                 if path == "" then return end
