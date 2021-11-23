@@ -104,9 +104,23 @@ function string.trim(s)
 end
 
 function string.rfind(s, tgt)
-    local l, r = string.find(string.reverse(s), string.reverse(tgt))
+    local l, r = string.find(string.reverse(s), string.reverse(tgt), nil, true)
     if l == nil then return nil end
     return #s - r + 1, #s - l + 1
+end
+
+function string.rfind_start(s, tgt)
+    local l, r = string.rfind(s, tgt)
+    return l
+end
+
+function string.at(s, pos)
+    if pos < 1 then
+        pos = pos + #s
+    end
+    if pos > #s then return nil end
+    if pos < 1 then return nil end
+    return string.sub(s, pos, pos)
 end
 
 function mergeSkin(skin, addSkin)

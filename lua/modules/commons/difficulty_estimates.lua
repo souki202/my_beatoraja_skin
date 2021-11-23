@@ -44,13 +44,25 @@ end
         fc: float | "\"-"\",
     } | nil} テーブルにあれば難易度ごとの推定値が, なければnil
 ]]
-estimate.functions.getEstimateData = function(title, difficulty)
+estimate.functions.getEstimateData = function(title, difficulty, _retry)
     if not next(estimate.table) then return nil end
-    print(title .. " " .. difficulty)
     local d = estimate.table[title .. " " .. difficulty]
     -- 表記ゆれでのスペース有無差
-    if not d then
-        estimate.functions.getEstimateData(title)
+    if not d and not _retry then
+        local pos = math.max(string.rfind_start(title, "[") or 0, string.rfind_start(title, "(") or 0, string.rfind_start(title, "【") or 0, string.rfind_start(title, "-") or 0)
+        if pos < 2 then
+            return nil
+        end
+        -- スペースを付与
+        if string.at(title, pos - 1) ~= " " then
+            return estimate.functions.getEstimateData(string.sub(title, 0, pos - 1) .. " " .. string.sub(title, pos), difficulty, true)
+        end
+        -- スペースを削除
+        if pos > 2 and string.at(title, pos - 1) == " " then
+            return estimate.functions.getEstimateData(string.sub(title, 0, pos - 2) .. string.sub(title, pos), difficulty, true)
+        else
+            return nil
+        end
     end
     return estimate.table[title .. " " .. difficulty]
 end

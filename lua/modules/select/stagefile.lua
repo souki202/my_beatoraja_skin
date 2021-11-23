@@ -72,18 +72,21 @@ local STAGE_FILE = {
     },
     ESTIMATE = {
         ALLOW = {Satellite = true, Stella = true},
+        LAMPS = {"easy", "normal", "hard", "fc"},
         FRAME = {
-            X = function (self) return self.X end,
+            X = function (self) return self.X + 1 end,
             Y = function (self) return self.Y + 46 end,
             W = 100,
             H = 128,
         },
         NUM = {
-            X = function (self) return self.ESTIMATE.FRAME.X(self) + 54 end,
-            X_DOT = function (self) return self.ESTIMATE.NUM.X(self) - 1 end,
-            X_AFTER_DOT = function (self) return self.ESTIMATE.NUM.X_DOT(self) + 27 end,
+            X = function (self) return self.ESTIMATE.FRAME.X(self) + 32 end,
+            X_DOT = function (self) return self.ESTIMATE.NUM.X(self) + 21 end,
+            X_AFTER_DOT = function (self) return self.ESTIMATE.NUM.X_DOT(self) + 3 end,
             Y = function (self) return self.ESTIMATE.FRAME.Y(self) + 11 end,
             Y_INTERVAL = 23,
+            W = 11,
+            H = 14,
         }
     }
 }
@@ -109,11 +112,17 @@ stagefile.functions.load = function ()
                 id = "openEventSpecialPageIcon", src = 0, x = 1483, y = PARTS_TEXTURE_SIZE - STAGE_FILE.EVENT.LIST_ICON.H, w = STAGE_FILE.EVENT.LIST_ICON.W, h = STAGE_FILE.EVENT.LIST_ICON.H,
                 act = function () desktop.openUrlByBrowser(musicDetail.getEventData().url) end
             },
-            {id = "openReadmeIcon", src = 0, x = 1458, y = PARTS_TEXTURE_SIZE - STAGE_FILE.README_ICON.H, w = STAGE_FILE.README_ICON.W, h = STAGE_FILE.README_ICON.H, act = 17}
+            {id = "openReadmeIcon", src = 0, x = 1458, y = PARTS_TEXTURE_SIZE - STAGE_FILE.README_ICON.H, w = STAGE_FILE.README_ICON.W, h = STAGE_FILE.README_ICON.H, act = 17},
+            -- estimate
+            {id = "estimateFrame", src = 8, x = 792, y = 0, w = STAGE_FILE.ESTIMATE.FRAME.W, h = STAGE_FILE.ESTIMATE.FRAME.H},
+            {id = "estimateDot", src = 8, x = 1013, y = 28, w = STAGE_FILE.ESTIMATE.NUM.W, h = STAGE_FILE.ESTIMATE.NUM.H},
+            -- -0.xxのときにマイナスが出てこないので, それの描画用
+            {id = "estimateMinus", src = 8, x = 1013, y = 14, w = STAGE_FILE.ESTIMATE.NUM.W, h = STAGE_FILE.ESTIMATE.NUM.H},
         },
         text = {
             {id = "eventName", font = 0, size = STAGE_FILE.EVENT.TEXT.SIZE*1.5, align = 0, overflow = 1, value = function () return musicDetail.getEventData().name end}
         },
+        value = {},
         customTimers = {
             {id = 13200, timer = function()
                 -- ソングバーでなければ終了
@@ -140,17 +149,55 @@ stagefile.functions.load = function ()
                 if title == stagefile.estimate.title then
                     return
                 end
+                stagefile.estimate.title = title
 
                 -- estimate取得
                 stagefile.estimate.difficulties = difficultyEstimates.getEstimateData(title, tableLevel)
-                print(stagefile.estimate.difficulties)
+                print("title:" .. title)
+                if stagefile.estimate.difficulties then
+                    print("easy " .. stagefile.estimate.difficulties.easy)
+                    print("normal " .. stagefile.estimate.difficulties.normal)
+                    print("hard " .. stagefile.estimate.difficulties.hard)
+                    print("fc " .. stagefile.estimate.difficulties.fc)
+                end
             end}
         }
     }
     local imgs = skin.image
+    local vals = skin.value
     for i = 1, 6 do
         imgs[#imgs+1] = {
             id = "stageFileFrame" .. i, src = 4, x = 0, y = STAGE_FILE.FRAME.H * (i - 1), w = STAGE_FILE.FRAME.W, h = STAGE_FILE.FRAME.H
+        }
+    end
+    -- 難易度推定
+    for i, lamp in ipairs(STAGE_FILE.ESTIMATE.LAMPS) do
+        vals[#vals+1] = {
+            id = lamp .. "EstimateValue", src = 8, x = 892, y = 0, w = STAGE_FILE.ESTIMATE.NUM.W * 12, h = STAGE_FILE.ESTIMATE.NUM.H * 2, divx = 12, divy = 2, digit = 3, zeropadding = 0,
+            value = function ()
+                if not stagefile.estimate.difficulties then
+                    return MIN_VALUE
+                end
+                local v = stagefile.estimate.difficulties[lamp]
+                if v == "-" then
+                    return MIN_VALUE
+                end
+                return v
+            end
+        }
+        vals[#vals+1] = {
+            id = lamp .. "EstimateValueAfterDot", src = 8, x = 892, y = 0, w = STAGE_FILE.ESTIMATE.NUM.W * 11, h = STAGE_FILE.ESTIMATE.NUM.H, divx = 11, divy = 1, digit = 2, zeropadding = 2,
+            value = function ()
+                if not stagefile.estimate.difficulties then
+                    return MIN_VALUE
+                end
+                local v = stagefile.estimate.difficulties[lamp]
+                if v == "-" then
+                    return MIN_VALUE
+                end
+                v = math.abs(v)
+                return math.floor(v * 100) - (math.floor(v) * 100)
+            end
         }
     end
     return skin
@@ -254,6 +301,51 @@ stagefile.functions.dst = function ()
                 {x = STAGE_FILE.FRAME.X(STAGE_FILE), y = STAGE_FILE.FRAME.Y(STAGE_FILE), w = STAGE_FILE.FRAME.W, h = STAGE_FILE.FRAME.H}
             }
         }
+    end
+
+    -- 難易度推定
+    do
+        local isDrawEstimate = function() return stagefile.estimate.difficulties ~= nil end
+        dst[#dst+1] = {
+            id = "estimateFrame", draw = isDrawEstimate, dst = {
+                {x = STAGE_FILE.ESTIMATE.FRAME.X(STAGE_FILE), y = STAGE_FILE.ESTIMATE.FRAME.Y(STAGE_FILE), w = STAGE_FILE.ESTIMATE.FRAME.W, h = STAGE_FILE.ESTIMATE.FRAME.H}
+            }
+        }
+        for i, lamp in ipairs(STAGE_FILE.ESTIMATE.LAMPS) do
+            local y = STAGE_FILE.ESTIMATE.NUM.Y(STAGE_FILE) + STAGE_FILE.ESTIMATE.NUM.Y_INTERVAL * (i - 1)
+            dst[#dst+1] = {
+                id = lamp .. "EstimateValue", draw = isDrawEstimate, dst = {
+                    {x = STAGE_FILE.ESTIMATE.NUM.X(STAGE_FILE) - STAGE_FILE.ESTIMATE.NUM.W, y = y, w = STAGE_FILE.ESTIMATE.NUM.W, h = STAGE_FILE.ESTIMATE.NUM.H}
+                }
+            }
+            dst[#dst+1] = {
+                id = "estimateDot", draw = function() 
+                    if not isDrawEstimate() then return false end
+                    local lv = stagefile.estimate.difficulties[lamp]
+                    if lv == "-" then return false end
+                    return true
+                end, dst = {
+                    {x = STAGE_FILE.ESTIMATE.NUM.X_DOT(STAGE_FILE), y = y, w = STAGE_FILE.ESTIMATE.NUM.W, h = STAGE_FILE.ESTIMATE.NUM.H}
+                }
+            }
+            dst[#dst+1] = {
+                id = lamp .. "EstimateValueAfterDot", draw = isDrawEstimate, dst = {
+                    {x = STAGE_FILE.ESTIMATE.NUM.X_AFTER_DOT(STAGE_FILE), y = y, w = STAGE_FILE.ESTIMATE.NUM.W, h = STAGE_FILE.ESTIMATE.NUM.H}
+                }
+            }
+            -- -0.xxの場合にマイナスが出てこないので手動で
+            dst[#dst+1] = {
+                id = "estimateMinus", draw = function()
+                    if not isDrawEstimate() then return false end
+                    local lv = stagefile.estimate.difficulties[lamp]
+                    if lv == "-" then return false end
+                    return -1 < lv and lv < 0
+                end,
+                dst = {
+                    {x = STAGE_FILE.ESTIMATE.NUM.X(STAGE_FILE), y = y, w = STAGE_FILE.ESTIMATE.NUM.W, h = STAGE_FILE.ESTIMATE.NUM.H}
+                }
+            }
+        end
     end
     return skin
 end
