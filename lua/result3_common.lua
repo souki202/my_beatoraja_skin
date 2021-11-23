@@ -208,6 +208,7 @@ local function main()
         {id = 1, path = "../result3/parts/score_text.png"},
         {id = 2, path = "../result3/parts/judges_text.png"},
         {id = 3, path = "../result3/parts/others.png"},
+        {id = 4, path = "../result3/parts/ir_frame.png"},
 
         {id = 10, path = "../result3/parts/lamp_from.png"},
         {id = 11, path = "../result3/parts/lamp_to.png"},
@@ -256,6 +257,7 @@ local function main()
         {id = 87, path = "../result3/parts/nums/difficulty.png"},
 
         {id = 90, path = "../result3/parts/fsgraph.png"},
+        {id = 91, path = "../result3/parts/num/ir.png"},
 
 
         -- 背景群
