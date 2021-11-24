@@ -194,8 +194,8 @@ function updateEstimateLua(savePath)
             end
             -- luaファイルに出力
             local f = io.open(skin_config.get_path(savePath), "w")
-            io.write(str)
-            io.close()
+            f:write(str)
+            f:close()
         end
     end
 

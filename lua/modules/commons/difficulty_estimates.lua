@@ -32,6 +32,28 @@ estimate.functions.loadCache = function()
     pcall(cacheRequire)
 end
 
+local getEstimateData = function(title, difficulty)
+    if not next(estimate.table) then return nil end
+    local d = estimate.table[title .. " " .. difficulty]
+    -- 表記ゆれでのスペース有無差
+    if not d then
+       return nil
+    end
+    return estimate.table[title .. " " .. difficulty]
+
+end
+
+local function splitTypeAndDifficulty(s)
+    local type, difficulty = string.match(s, "(.*)(%d+)$")
+    if type == nil then return nil end
+    return type, difficulty
+end
+
+local function getEstimateData(title, difficulty)
+    if not next(estimate.table) then return nil end
+    return estimate.table[title .. " " .. difficulty]
+end
+
 --[[
     楽曲の難易度推定を取得
     @param {string} title 楽曲名
@@ -44,27 +66,28 @@ end
         fc: float | "\"-"\",
     } | nil} テーブルにあれば難易度ごとの推定値が, なければnil
 ]]
-estimate.functions.getEstimateData = function(title, difficulty, _retry)
+estimate.functions.getEstimateData = function(title, difficulty)
     if not next(estimate.table) then return nil end
-    local d = estimate.table[title .. " " .. difficulty]
-    -- 表記ゆれでのスペース有無差
-    if not d and not _retry then
+    local type, lv = splitTypeAndDifficulty(difficulty)
+
+    for i, v in ipairs({0, -1, 1}) do
+        local d = getEstimateData(title, type .. (lv + v))
+        if d then return d end
+
+        -- 表記ゆれでのスペース有無差
         local pos = math.max(string.rfind_start(title, "[") or 0, string.rfind_start(title, "(") or 0, string.rfind_start(title, "【") or 0, string.rfind_start(title, "-") or 0)
-        if pos < 2 then
-            return nil
-        end
         -- スペースを付与
-        if string.at(title, pos - 1) ~= " " then
-            return estimate.functions.getEstimateData(string.sub(title, 0, pos - 1) .. " " .. string.sub(title, pos), difficulty, true)
+        if pos >= 2 and string.at(title, pos - 1) ~= " " then
+            d = getEstimateData(string.sub(title, 0, pos - 1) .. " " .. string.sub(title, pos), difficulty)
+            if d then return d end
         end
         -- スペースを削除
         if pos > 2 and string.at(title, pos - 1) == " " then
-            return estimate.functions.getEstimateData(string.sub(title, 0, pos - 2) .. string.sub(title, pos), difficulty, true)
-        else
-            return nil
+            d = getEstimateData(string.sub(title, 0, pos - 2) .. string.sub(title, pos), difficulty)
+            if d then return d end
         end
     end
-    return estimate.table[title .. " " .. difficulty]
+    return nil
 end
 
 return estimate.functions
