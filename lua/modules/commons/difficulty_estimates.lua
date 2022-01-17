@@ -32,17 +32,6 @@ estimate.functions.loadCache = function()
     pcall(cacheRequire)
 end
 
-local getEstimateData = function(title, difficulty)
-    if not next(estimate.table) then return nil end
-    local d = estimate.table[title .. " " .. difficulty]
-    -- 表記ゆれでのスペース有無差
-    if not d then
-       return nil
-    end
-    return estimate.table[title .. " " .. difficulty]
-
-end
-
 local function splitTypeAndDifficulty(s)
     local type, difficulty = string.match(s, "(.*)(%d+)$")
     if type == nil then return nil end

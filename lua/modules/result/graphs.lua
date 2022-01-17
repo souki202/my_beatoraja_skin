@@ -79,11 +79,12 @@ local GRAPH = {
     },
 
     TAB = {
-        X = function (self) return WIDTH - self.TAB.W end,
+        X = function (self) return WIDTH - self.TAB.W + 12 end,
+        ACTIVE_X = function (self) return WIDTH - self.TAB.W end,
         START_Y = function (self) return self.WND_GAUGE.Y + self.WND_GAUGE.H - self.TAB.H - 1 end,
         Y = function (self, idx) return self.TAB.START_Y(self) - self.TAB.INTERVAL_Y * (idx - 1) end,
         INTERVAL_Y = 64,
-        W = 58,
+        W = 70,
         H = 74,
         TYPES = {
             GROOVE = 1,
@@ -185,6 +186,7 @@ notesGraph.functions.load = function ()
                         if notesGraph.activeTabIdx < 1 then
                             notesGraph.activeTabIdx = #GRAPH.TAB.PREFIX
                         end
+                        -- カスタムグルーヴゲージ非使用時は、表示をもう1個ずらす
                         if not getIsViewCostomGrooveGauge() and notesGraph.activeTabIdx == GRAPH.TAB.TYPES.CUSTOM_GROOVE then
                             notesGraph.activeTabIdx = GRAPH.TAB.TYPES.GROOVE
                         end
@@ -195,6 +197,7 @@ notesGraph.functions.load = function ()
                         if notesGraph.activeTabIdx > #GRAPH.TAB.PREFIX then
                             notesGraph.activeTabIdx = 1
                         end
+                        -- カスタムグルーヴゲージ非使用時は、表示をもう1個ずらす
                         if not getIsViewCostomGrooveGauge() and notesGraph.activeTabIdx == GRAPH.TAB.TYPES.CUSTOM_GROOVE then
                             notesGraph.activeTabIdx = GRAPH.TAB.TYPES.SCORE
                         end
@@ -372,8 +375,19 @@ notesGraph.functions.dstGrooveGaugeArea = function ()
             usable = false
         end
 
+        -- アクティブなタブ
         dst[#dst+1] = {
-            id = v .. "TabIcon", dst = {
+            id = v .. "TabIcon", draw = function() return notesGraph.activeTabIdx == i end, dst = {
+                {
+                    x = GRAPH.TAB.ACTIVE_X(GRAPH), y = GRAPH.TAB.Y(GRAPH, i), w = GRAPH.TAB.W, h = GRAPH.TAB.H,
+                    a = usable and 255 or 128
+                }
+            }
+        }
+
+        -- 非アクティブなタブ
+        dst[#dst+1] = {
+            id = v .. "TabIcon", draw = function() return notesGraph.activeTabIdx ~= i end, dst = {
                 {
                     x = GRAPH.TAB.X(GRAPH), y = GRAPH.TAB.Y(GRAPH, i), w = GRAPH.TAB.W, h = GRAPH.TAB.H,
                     a = usable and 255 or 128

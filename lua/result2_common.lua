@@ -292,13 +292,14 @@ local function main()
         {id = 27, path = "../result2/parts/ranking/num.png"},
         {id = 28, path = "../result2/parts/ranking/arrow.png"},
         {id = 29, path = "../result2/parts/ranking/graph_area_shadow.png"},
-        {id = 30, path = "../result2/parts/ranking/order.png"},
+        -- {id = 30, path = "../result2/parts/ranking/order.png"},
         {id = 31, path = "../result2/parts/ranking/gauge.png"},
         {id = 32, path = "../result2/parts/ranking/lamps/default.png"},
+        {id = 33, path = "../result2/parts/ranking/ranking_index_num.png"},
 
         -- 背景群
-        {id = 100, path = "../result2/background/isclear/clear/*.png"},
-        {id = 101, path = "../result2/background/isclear/failed/*.png"},
+        {id = 100, path = "../result2/background/isclear/clear/*"},
+        {id = 101, path = "../result2/background/isclear/failed/*"},
         -- 110~120は下のfor
         -- 判定の背景
         {id = 130, path = "../result2/parts/judge/background/perfect/*.png"},

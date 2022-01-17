@@ -17,6 +17,7 @@ local ranking = {
     timeForWindow = 9999999,
     openTime = 0,
     isDrawRankCache = {},
+    isScrolled = false,
     functions = {}
 }
 
@@ -88,15 +89,15 @@ local RANKING = {
         LINE = {
             Y = function (self, idx) return self.GRAPH.AREA.Y(self) + 800 - self.GRAPH.LINE.INTERVAL_Y * (idx - 1) end,
             ORDER = {
-                X = function (self) return self.AREA.X + 18 end,
+                X = function (self) return self.AREA.X + 16 end,
                 Y = function (self, idx) return self.GRAPH.LINE.Y(self, idx) + 35 end,
-                W = 34,
-                H = 34,
+                W = 15,
+                H = 21,
             },
             NAME = {
-                X = function (self) return self.AREA.X + 70 end,
+                X = function (self) return self.AREA.X + 110 end,
                 Y = function (self, idx) return self.GRAPH.LINE.Y(self, idx) + 26 end,
-                W = 272,
+                W = 207,
                 FONT_SIZE = 36,
             },
             SCORE = {
@@ -161,18 +162,17 @@ local LAMPS = {
 LAMPS.GRAPH.LINE.VALUE.X = function (self) return self.GRAPH.AREA.X(self) + 9 end
 LAMPS.GRAPH.LINE.PERCENTAGE.X = function (self) return self.GRAPH.AREA.X(self) + 92 end
 
-
-ranking.functions.isSelfRank = function (targetRank)
+ranking.functions.isSelfRank = function (targetRank, playerName, index)
     local selfRank = main_state.number(179)
     if selfRank == nil then return false end
     -- 11番目は, 自分が11位より下なら自分として表示
-    if targetRank == 11 and selfRank > 11 then
+    if index == 11 then
         return true
     end
-    return selfRank == targetRank
+    return selfRank == targetRank and playerName == "YOU"
 end
 
-ranking.functions.getIsDrawTheRank = function (rank)
+ranking.functions.getIsDrawRank = function (rank)
     return ranking.viewType == VIEW_TYPES.RANKING and ranking.isDrawRankCache[rank]
 end
 
@@ -182,12 +182,10 @@ end
 
 ranking.functions.getIsDrawTheRankForCache = function (rank)
     local selfRank = main_state.number(179)
-    -- 自分が10位以内なら11位は描画しない
-    if rank == 11 and (selfRank == nil or selfRank <= 10) then
+    -- 自分が10位以内かつスクロールしていないなら11位は描画しない
+    if rank == 11 and ranking.isScrolled == false and (selfRank == nil or selfRank <= 10) then
         return false
-    end
-    -- 11位以下なら自分のスコアで判定(必ずtrue?)
-    if rank == 11 and selfRank >= 11 then
+    elseif rank == 11 then
         return RANKING.MY_BEST_SCORE >= 0
     end
     return main_state.number(380 + (rank - 1)) >= 0
@@ -195,10 +193,10 @@ end
 
 ranking.functions.getScoreRate = function (rank)
     -- 11番目描画するなら, 自己ベのみ
-    if rank == 11 and ranking.functions.getIsDrawTheRank(rank) then
+    if rank == 11 and ranking.functions.getIsDrawRank(rank) then
         return RANKING.MY_BEST_SCORE / RANKING.THEORETICAL
     end
-    if ranking.functions.getIsDrawTheRank(rank) then
+    if ranking.functions.getIsDrawRank(rank) then
         return main_state.number(380 + (rank - 1)) / RANKING.THEORETICAL
     else
         return 0
@@ -206,10 +204,10 @@ ranking.functions.getScoreRate = function (rank)
 end
 
 ranking.functions.getDiffScore = function (rank)
-    if rank == 11 and ranking.functions.getIsDrawTheRank(rank) then
+    if rank == 11 and ranking.functions.getIsDrawRank(rank) then
         return 0
     end
-    if ranking.functions.getIsDrawTheRank(rank) then
+    if ranking.functions.getIsDrawRank(rank) then
         return RANKING.MY_BEST_SCORE - main_state.number(380 + (rank - 1))
     else
         return MIN_VALUE
@@ -282,7 +280,7 @@ ranking.functions.updateScoreGraph = function (rank)
     local t = main_state.time()
     local timeSceneOpening = t - ranking.openTime
     -- 非表示状態か, その順位は表示しない場合
-    if not ranking.isOpened or ranking.viewType ~= VIEW_TYPES.RANKING or not ranking.functions.getIsDrawTheRank(rank) or timeSceneOpening < RANKING.ANIMATION.GAUGE_APPEAR_WAIT * 1000 then
+    if not ranking.isOpened or ranking.viewType ~= VIEW_TYPES.RANKING or not ranking.functions.getIsDrawRank(rank) or timeSceneOpening < RANKING.ANIMATION.GAUGE_APPEAR_WAIT * 1000 then
         return t
     end
 
@@ -358,6 +356,15 @@ ranking.functions.load = function ()
         customTimers = {
             {id = CUSTOM_TIMERS_RESULT2.SWITCH_RANKING, timer = ranking.functions.switchOpenStateTimer},
             {id = CUSTOM_TIMERS_RESULT2.RANKING_WND_TIMER, timer = ranking.functions.windowAnimationTimer},
+            {
+                id = CUSTOM_TIMERS_RESULT2.RANKING_TICK, timer = function ()
+                    -- スクロールしているか調べる
+                    ranking.isScrolled = false
+                    for i = 1, 10 do
+                        ranking.isScrolled = ranking.isScrolled or (main_state.number(389 + i) > i)
+                    end
+                end
+            }
         }
     }
     local imgs = skin.image
@@ -382,14 +389,16 @@ ranking.functions.load = function ()
             vals[#vals+1] = scoreDetail.loadGray30Number("rank" .. i .. "Score", 5, 0, 0, nil, function () return RANKING.MY_BEST_SCORE end)
             imagesets[#imagesets+1] = {id = "rank" .. i .. "ScoreGraph", ref = 370, images = lamps}
         else
-            imgs[#imgs+1] = {
-                id = "rank" .. i .. "OrderLabel", src = 30, x = 0, y = RANKING.GRAPH.LINE.ORDER.H * (i - 1), w = RANKING.GRAPH.LINE.ORDER.W, h = RANKING.GRAPH.LINE.ORDER.H
-            }
             texts[#texts+1] = {
                 id = "rank" .. i .. "Name", font = 0, size = RANKING.GRAPH.LINE.NAME.FONT_SIZE, ref = 120 + (i - 1), overflow = 1
             }
             vals[#vals+1] = scoreDetail.loadGray30Number("rank" .. i .. "Score", 5, 0, 0, 380 + (i - 1), nil)
             imagesets[#imagesets+1] = {id = "rank" .. i .. "ScoreGraph", ref = 390 + (i - 1), images = lamps}
+        end
+        if i <= 10 then
+            vals[#vals+1] = {
+                id = "rank" .. i .. "Index", src = 33, x = 0, y = 0, w = RANKING.GRAPH.LINE.ORDER.W * 11, h = RANKING.GRAPH.LINE.ORDER.H, divx = 11, divy = 1, digit = 5, ref = 390 + i - 1
+            }
         end
         vals[#vals+1] = scoreDetail.loadGray30NumberWithSign("rank" .. i .. "DiffScore", 5, 0, 0, nil, function () return ranking.functions.getDiffScore(i) end)
         timers[#timers+1] = {id = CUSTOM_TIMERS_RESULT2.RANKING_SCORE_GRAPH1_TIMER + (i - 1), timer = function () return ranking.functions.updateScoreGraph(i) end}
@@ -459,9 +468,6 @@ end
 ranking.functions.dst = function ()
     local smallNum = judges.getSmallNumSize()
     local largeNum = judges.getLargeNumSize()
-    local isDrawRank = ranking.functions.getIsDrawTheRank
-    local isDrawSelfRank = function (targetRank) return isDrawRank(targetRank) and ranking.functions.isSelfRank(targetRank) end
-    local isDrawOtherRank = function (targetRank) return isDrawRank(targetRank) and not ranking.functions.isSelfRank(targetRank) end
 
     local skin = {
         destination = {
@@ -533,29 +539,40 @@ ranking.functions.dst = function ()
     end
     -- ランクの出力
     for i = 1, 11 do
+        local isDrawRank = ranking.functions.getIsDrawRank
+        local isDrawSelfRank = function ()
+            if not isDrawRank(i) then return false end
+            if i == 11 then return true end
+            return ranking.functions.isSelfRank(main_state.number(390 + i - 1), main_state.text(120 + i - 1), i)
+        end
+        local isDrawOtherRank = function ()
+            if i > 10 then return false end
+            return isDrawRank(i) and not ranking.functions.isSelfRank(main_state.number(390 + i - 1), main_state.text(120 + i - 1), i)
+        end
+
         -- order
         dst[#dst+1] = {
-            id = "rank" .. i .. "OrderLabel", draw = function () return isDrawRank(i) end, dst = {
+            id = "rank" .. i .. "Index", draw = function () return isDrawRank(i) end, dst = {
                 {x = RANKING.GRAPH.LINE.ORDER.X(RANKING), y = RANKING.GRAPH.LINE.ORDER.Y(RANKING, i), w = RANKING.GRAPH.LINE.ORDER.W, h = RANKING.GRAPH.LINE.ORDER.H}
             }
         }
         -- name
         -- 自分以外の名前
         dst[#dst+1] = {
-            id = "rank" .. i .. "Name", draw = function () return isDrawOtherRank(i) end, filter = 1, dst = {
+            id = "rank" .. i .. "Name", draw = function () return isDrawOtherRank() end, filter = 1, dst = {
                 {x = RANKING.GRAPH.LINE.NAME.X(RANKING), y = RANKING.GRAPH.LINE.NAME.Y(RANKING, i), w = RANKING.GRAPH.LINE.NAME.W, h = RANKING.GRAPH.LINE.NAME.FONT_SIZE}
             }
         }
         -- 自分の名前
         if RANKING.IS_SHOW_PLAYER_NAME then
             dst[#dst+1] = {
-                id = "rank" .. i .. "PlayerName", draw = function () return isDrawSelfRank(i) end, filter = 1, dst = {
+                id = "rank" .. i .. "PlayerName", draw = function () return isDrawSelfRank() end, filter = 1, dst = {
                     {x = RANKING.GRAPH.LINE.NAME.X(RANKING), y = RANKING.GRAPH.LINE.NAME.Y(RANKING, i), w = RANKING.GRAPH.LINE.NAME.W, h = RANKING.GRAPH.LINE.NAME.FONT_SIZE}
                 }
             }
         else
             dst[#dst+1] = {
-                id = "rank" .. i .. "Name", draw = function () return isDrawSelfRank(i) end, filter = 1, dst = {
+                id = "rank" .. i .. "Name", draw = function () return isDrawSelfRank() end, filter = 1, dst = {
                     {x = RANKING.GRAPH.LINE.NAME.X(RANKING), y = RANKING.GRAPH.LINE.NAME.Y(RANKING, i), w = RANKING.GRAPH.LINE.NAME.W, h = RANKING.GRAPH.LINE.NAME.FONT_SIZE}
                 }
             }
