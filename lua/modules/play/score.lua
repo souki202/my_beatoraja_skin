@@ -162,19 +162,19 @@ score.functions.load = function ()
                 id = CUSTOM_TIMERS.SCORE_VALUE_INITIAL, timer = function ()
                     if score.isInited ~= true and getFrame() > 100 then
                         score.whole.theoretical = SCORE.TOTAL_NOTES * 2
-                        score.whole.target = main_state.exscore_rival()
                         score.whole.best = main_state.exscore_best()
-                        score.whole.targetDiffByBest = score.whole.target - score.whole.best
-
-                        score.wholeRates.target = main_state.rate_rival()
                         score.wholeRates.best = score.whole.best / score.whole.theoretical -- best_rate()では取れないらしい
-                        score.wholeRates.targetDiffByBest = score.whole.targetDiffByBest / score.whole.theoretical
+                        
                         myPrint("スコア周りデバッグ出力----------------------")
                         myPrint("スコア理論値: " .. score.whole.theoretical)
                         myPrint("目標スコア: " .. score.whole.target, main_state.float_number(115))
                         myPrint("自己べと目標スコアのレート差: " .. score.wholeRates.targetDiffByBest)
                         score.isInited = true
                     end
+                    score.whole.target = main_state.exscore_rival()
+                    score.wholeRates.target = main_state.rate_rival()
+                    score.whole.targetDiffByBest = score.whole.target - score.whole.best
+                    score.wholeRates.targetDiffByBest = score.whole.targetDiffByBest / score.whole.theoretical
                     return 0
                 end
             }

@@ -79,10 +79,6 @@ local _BGA = {
     }
 }
 
-local BG = {
-
-}
-
 bga.functions.load = function ()
     if isFullScreenBga() then
         BGA = _BGA.FULL
@@ -115,11 +111,18 @@ bga.functions.load = function ()
         end
     end
 
+    -- オフセット分だけ小さく+ずらす
+    do
+        local offset = math.min(getBgaWidthOffset(), 0);
+        BGA.PLAY_AREA.X = BGA.PLAY_AREA.X - offset / 2;
+        BGA.PLAY_AREA.W = BGA.PLAY_AREA.W + offset;
+    end
+
     local frameSrc = 61
     if isBgaOnLeft() then frameSrc = 62
     elseif isFullScreenBga() then frameSrc = 63
     end
-    
+
     return {
         image = {
             {id = "bgaMask", src = 60, x = 0, y = 0, w = -1, h = -1},

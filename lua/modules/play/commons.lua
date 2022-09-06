@@ -417,4 +417,8 @@ function getKeySEVolume()
 	return (100 + getOffsetValueWithDefault("キー押下時の音量オフセット(単位%)", {x = 0}).x) / 100
 end
 
+function getBgaWidthOffset()
+	return getOffsetValueWithDefault("BGAの横幅オフセット(マイナスのみ)", {w = 0}).w
+end
+
 return commons

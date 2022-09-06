@@ -598,8 +598,6 @@ notes.functions.dst = function ()
         end
     end
 
-    mergeSkin(skin, keyBeam.dst())
-
     -- レーンの区切り線
     if isDrawSeparator() then
         for i = 1, commons.keys+1 do
@@ -613,8 +611,10 @@ notes.functions.dst = function ()
         end
     end
 
+    mergeSkin(skin, cover.dstOtherCover())
+    mergeSkin(skin, keyBeam.dst())
     dst[#dst+1] = {id = "notes"}
-    mergeSkin(skin, cover.dst())
+    mergeSkin(skin, cover.dstLaneCover())
     mergeSkin(skin, grow.dst())
 
     -- 判定線

@@ -28,11 +28,18 @@ cover.functions.load = function ()
     }
 end
 
-cover.functions.dst = function ()
+cover.functions.dstOtherCover = function ()
     return {
         destination = {
             {id = "hiddenCover", dst = {{x = lanes.getAreaX(), y = lanes.getAreaNormalY() - COVER.H(), w = COVER.W(), h = COVER.H()}}},
             {id = "liftCover", dst = {{x = lanes.getAreaX(), y = lanes.getAreaNormalY() - COVER.H(), w = COVER.W(), h = COVER.H()}}},
+        }
+    }
+end
+
+cover.functions.dstLaneCover = function ()
+    return {
+        destination = {
             {id = "laneCover", dst = {{x = lanes.getAreaX(), y = HEIGHT, w = COVER.W(), h = COVER.H()}}},
         }
     }
