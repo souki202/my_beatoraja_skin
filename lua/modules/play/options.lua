@@ -52,7 +52,7 @@ options.property = { -- 使用済み 10235まで
         name = "黒帯部分のBGA表示のぼかし", item = {{name = "ON", op = 10105}, {name = "OFF", op = 10106}}, def = "OFF"
     },
     {
-        name = "ターゲットスコアのレート変動(ログ出力有効時)", item = {{name = "一定", op = 10110}, {name = "自己べ連動", op = 10111}, {name = "CPU風", op = 10112}}, def = "一定"
+        name = "ターゲットスコアのレート変動(ログ出力有効時)", item = {{name = "一定", op = 10110}, {name = "自己べ連動", op = 10111}}, def = "一定"
     },
     {
         name = "サイド部分のグラフ", item = {{name = "無し", op = 10000}, {name = "判定分布", op = 10001}, {name = "EARLY, LATE分布", op = 10002}}, def = "判定分布"

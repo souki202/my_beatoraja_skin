@@ -2,6 +2,7 @@ require("modules.commons.define")
 local main_state = require("main_state")
 local playLog = require("modules.commons.playlog")
 local playCommons = require("modules.play.commons")
+require("modules.commons.my_print")
 
 local score = {
     isInited = false,
@@ -51,9 +52,47 @@ local SCORE = {
 --[[
     引数に入れたターゲットスコアの情報から, 自己べに連動させたときのスコアの情報を計算して取得する
 
+    @param table latestData 最新のデータ
+    @param table twoBeforeData 2個前のデータ
+    @param float wholeTargetScore 通しでの目標スコア
+    @param float nowTargetScore
+    @param float targetScoreRateDiff target-bestscoreのレート差
+    @param float nowTTargetScore
+    @param float diffNotes
+    @param float remaindNotes
     @return float, float, float 計算後のターゲットスコア, 計算後のスコアレート, 計算後の譜面全体でのスコアレート, レート100%無視時のスコア
+
+    latestData, twoBeforeDataは以下のような構造のテーブル
+    judges:
+    sumJudges: 8
+    late:
+        1: 0
+        2: 0
+        3: 0
+        4: 0
+        5: 8
+        6: 0
+    early:
+        1: 0
+        2: 0
+        3: 0
+        4: 0
+        5: 0
+        6: 0
+    notes: 8
+    time: 4154959
+    combo: 0
+    exscore:
+        target: 16
+        best: 12
+        you: 0
+    rangeExScore:
+        target: 1
+        theoretical: 16
+        best: 0.75
+        you: 0
 ]]
-score.functions.calcTargetScoreByBestScore = function (latestData, twoBeforeData, wholeTargetScore, nowTargetScore, targetScoreRateDiff, nowTTargetScore, diffNotes, remaindNotes)
+score.functions.calcTargetScoreByBestScore = function (latestData, twoBeforeData, wholeTargetScore, nowTargetScore, targetScoreRateDiff, nowTTargetScore, diffNotes, remaindNotes, wholeBestRate)
     local resultTargetScore, resultTargetScoreRate, resultTargetOverallRate = 0, 0, 0
     local minTargetScoreDiff = wholeTargetScore - remaindNotes * 2 - nowTargetScore -- これ以降レート100%なら目標スコアに届く
     local maxTargetScoreDiff = wholeTargetScore - nowTargetScore -- これ以降0%なら目標スコアに届く
@@ -61,11 +100,19 @@ score.functions.calcTargetScoreByBestScore = function (latestData, twoBeforeData
     local best = latestData.exscore.best
     local bestDiff = best - twoBeforeData.exscore.best
 
-    -- 100%を超えて計算したときのtarget
-    nowTTargetScore = best + score.now.theoretical * targetScoreRateDiff
-    local baseAddScore = bestDiff + diffNotes * 2 * targetScoreRateDiff
-    local adjustedAddScore = baseAddScore + (nowTTargetScore - (nowTargetScore + baseAddScore)) / math.min(2, math.max(1, (remaindNotes / 2)))
+    local adjustedAddScore = 0
 
+    if targetScoreRateDiff > 0 and wholeBestRate ~= 1 then
+        -- 2つの区画の自己べのレート計算
+        local sectionBestRate = (latestData.exscore.best - twoBeforeData.exscore.best) / (diffNotes * 2)
+
+        adjustedAddScore = 2 * diffNotes * (sectionBestRate + targetScoreRateDiff * (1 - sectionBestRate) / (1 - wholeBestRate))
+    else
+        -- 100%を超えて計算したときのtarget
+        nowTTargetScore = best + score.now.theoretical * targetScoreRateDiff
+        local baseAddScore = bestDiff + diffNotes * 2 * targetScoreRateDiff
+        adjustedAddScore = baseAddScore + (nowTTargetScore - (nowTargetScore + baseAddScore)) / math.min(2, math.max(1, (remaindNotes / 2)))
+    end
     -- 最終的にtargetスコアにたどり着ける範囲に収めて更新
     adjustedAddScore = math.max(0, math.min(diffNotes * 2, adjustedAddScore)) -- 100%を超えないよう調整
     adjustedAddScore = math.max(minTargetScoreDiff, math.min(adjustedAddScore, maxTargetScoreDiff)) -- 目標スコアに届くように調整
@@ -93,7 +140,7 @@ score.functions.updateScoreByBestScore = function ()
     score.now.best = latestData.exscore.best
     score.now.theoretical = processedNotes * 2
     local resultTargetScore, resultTargetScoreRate, resultTargetOverallRate, resultTTarget
-        = score.functions.calcTargetScoreByBestScore(latestData, twoBeforeData, score.whole.target, score.now.target, score.wholeRates.targetDiffByBest, score.now.ttarget, processedDiffNotes, remaindNotes)
+        = score.functions.calcTargetScoreByBestScore(latestData, twoBeforeData, score.whole.target, score.now.target, score.wholeRates.targetDiffByBest, score.now.ttarget, processedDiffNotes, remaindNotes, score.wholeRates.best)
     score.now.target = resultTargetScore
     score.nowRate.target = resultTargetScoreRate
     score.nowOverallRate.target = resultTargetOverallRate

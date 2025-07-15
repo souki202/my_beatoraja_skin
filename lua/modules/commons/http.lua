@@ -35,12 +35,18 @@ end
 -- @param  {array} versions 現在のバージョンの文字列の配列 手前から, セレクト, リザルト, decide, プレイ, リザルト2
 -- @return {boolean} 新しいバージョンがあるかの配列. それぞれのindexは上に対応しているか, nil 取得に失敗すれば空の配列
 function skinVersionCheck(nowVersions)
-    local err, v = pcall(httpConnection, "https://tori-blog.net/wp-content/uploads/skin/version")
+    local err, v = pcall(httpConnection, "https://media.tori-blog.net/uploads/skin/version")
     local isNews = {}
-    if v then
+    if v and #v > 0 then
         local n = math.min(#v, #nowVersions)
         for i = 1, n do
-            isNews[i] = tonumber(nowVersions[i]) < tonumber(v[i])
+            -- nilの場合は新しいバージョンが無いとする
+            if v[i] == nil then
+                isNews[i] = false
+                break
+            else
+                isNews[i] = tonumber(nowVersions[i]) < tonumber(v[i])
+            end
         end
     else
         print("スキンのバージョンチェックに失敗しました")

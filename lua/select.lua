@@ -64,6 +64,8 @@ local OPTION_INFO = {
     ACTIVE_FRAME_H = 40,
     ITEM_W = 360,
     ITEM_H = 44,
+    TEXT_H = 24,
+    TEXT_SMALL_H = 20,
     BUTTON_W = 130,
     BUTTON_H = 52,
     NUMBER_BUTTON_SIZE = 56,
@@ -309,6 +311,46 @@ local function insertOptionAnimationTable(skin, id, op, x, y, width, height, ang
     })
 end
 
+local function insertOptionAnimationTextTable(skin, id, op, x, y, width, height, angle, r, g, b)
+    if r == nil then
+        r = 255
+    end
+    if g == nil then
+        g = 255
+    end
+    if b == nil then
+        b = 255
+    end
+
+    -- 消えるとき 上の出現中が消えると同時に表示され, 消失までアニメーション
+    table.insert(skin.destination, {
+        id = id, op = {-op}, timer = op + 10, loop = OPTION_INFO.ANIMATION_TIME,
+        dst = {
+            {time = 0, x = x, y = y, w = width, h = height, angle = angle, r = r, g = g, b = b},
+            {time = OPTION_INFO.ANIMATION_TIME - 1, x = BASE_WIDTH / 2, y = BASE_HEIGHT / 2, a = 0},
+            {time = OPTION_INFO.ANIMATION_TIME}
+        }
+    })
+    -- 出現時
+    table.insert(skin.destination, {
+        id = id, op = {op}, timer = op, loop = OPTION_INFO.ANIMATION_TIME,
+        dst = {
+            {time = 0, x = BASE_WIDTH / 2, y = BASE_HEIGHT / 2, w = width, h = height, angle = angle, r = r, g = g, b = b, a = 0},
+            {time = OPTION_INFO.ANIMATION_TIME - 1, x = x, y = y, a = 255},
+            {time = OPTION_INFO.ANIMATION_TIME, x = 0, y = 0, a = 0},
+        }
+    })
+    -- 出現中
+    table.insert(skin.destination, {
+        id = id, op = {op}, timer = op, loop = OPTION_INFO.ANIMATION_TIME,
+        dst = {
+            {time = 0, x = x, y = y, w = width, h = height, angle = angle, a = 0, r = r, g = g, b = b},
+            {time = OPTION_INFO.ANIMATION_TIME - 1, a = 0},
+            {time = OPTION_INFO.ANIMATION_TIME, a = 255},
+        }
+    })
+end
+
 local function loadOptionImgs(skin, optionTexts, optionIdPrefix, ref, x, y)
     local optionActiveTextSuffix = optionIdPrefix .. "OptionImgActive"
     local optionNonactiveTextSuffix = optionIdPrefix .. "OptionImgNonactive"
@@ -393,10 +435,21 @@ local function destinationPlayOption(skin, baseX, baseY, titleTextId, optionIdPr
     insertOptionAnimationTable(skin, "optionSelectBg", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY, OPTION_INFO.ITEM_W, OPTION_INFO.BG_H, 0)
 
     -- オプション出力
-    insertOptionAnimationTable(skin, optionIdPrefix .. "Nonactive", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY                             , OPTION_INFO.ITEM_W        , OPTION_INFO.ITEM_H * viewRange, 0)
-    insertOptionAnimationTable(skin, "activeOptionFrame"          , op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY + OPTION_INFO.ITEM_H * 2 + 2, OPTION_INFO.ACTIVE_FRAME_W, OPTION_INFO.ACTIVE_FRAME_H, 0)
-    insertOptionAnimationTable(skin, optionIdPrefix .. "Active"   , op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY + OPTION_INFO.ITEM_H * 2    , OPTION_INFO.ITEM_W        , OPTION_INFO.ITEM_H, 0)
-
+    if optionIdPrefix == "paceMaker" then
+        local centerX = baseX + optionBoxOffsetX + OPTION_INFO.ITEM_W / 2;
+        local textOffsetY = 7
+        local intervalY = OPTION_INFO.TEXT_H + 5
+        for i = 1, 3, 1 do
+            insertOptionAnimationTextTable(skin, "f_rival" .. i, op, centerX, baseY + optionItemOffsetY + textOffsetY + OPTION_INFO.ITEM_H * 2 + 6 + intervalY * (i), OPTION_INFO.ITEM_W, OPTION_INFO.TEXT_SMALL_H, 0, 0, 0, 0)
+            insertOptionAnimationTextTable(skin, "b_rival" .. i, op, centerX, baseY + optionItemOffsetY + textOffsetY + intervalY * (3 - i), OPTION_INFO.ITEM_W, OPTION_INFO.TEXT_SMALL_H, 0, 0, 0, 0)
+        end
+        insertOptionAnimationTable(skin, "activeOptionFrame", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY + OPTION_INFO.ITEM_H * 2 + 2, OPTION_INFO.ACTIVE_FRAME_W, OPTION_INFO.ACTIVE_FRAME_H, 0)
+        insertOptionAnimationTextTable(skin, "s_rival", op, centerX, baseY + optionItemOffsetY + textOffsetY + OPTION_INFO.ITEM_H * 2, OPTION_INFO.ITEM_W, OPTION_INFO.TEXT_H, 0, 255, 255, 255)
+    else
+        insertOptionAnimationTable(skin, optionIdPrefix .. "Nonactive", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY                             , OPTION_INFO.ITEM_W        , OPTION_INFO.ITEM_H * viewRange, 0)
+        insertOptionAnimationTable(skin, "activeOptionFrame"          , op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY + OPTION_INFO.ITEM_H * 2 + 2, OPTION_INFO.ACTIVE_FRAME_W, OPTION_INFO.ACTIVE_FRAME_H, 0)
+        insertOptionAnimationTable(skin, optionIdPrefix .. "Active"   , op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY + OPTION_INFO.ITEM_H * 2    , OPTION_INFO.ITEM_W        , OPTION_INFO.ITEM_H, 0)
+    end
 
     -- ボタン出力
     insertOptionAnimationTable(skin, optionIdPrefix .. "UpButton", op, baseX + optionButtonOffsetX, baseY + 282, OPTION_INFO.BUTTON_W, OPTION_INFO.BUTTON_H, 0)
@@ -663,6 +716,18 @@ local function main()
         {id = "pink", src = 999, x = 5, y = 0, w = 1, h = 1},
     }
 
+    skin.font = {
+		{id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
+		-- {id = 0, path = "../common/fonts/font_1_kokumr_1.00_rls.ttf"},
+	}
+
+    skin.text = {
+        {id = "newVersion" , font = 0, size = 24, align = 0, overflow = 1, constantText = "スキンに更新があります"},
+        {id = "helpText", font = 0, size = 30, align = 0, constantText = "ヘルプ    ※マウスで操作し, スクロールはドラッグで操作してください."},
+        {id = "24:", font = 0, size = 24, align = 0, constantText = ":"},
+        {id = "countText", font = 0, size = 24, align = 2, constantText = "回"},
+    }
+
     -- オプション画面等のポップアップウィンドウ共通パーツ読み込み
     -- オプションはrefactorしたいけどtimerの都合上リファクタリングはしんどい
     loadBaseSelect(skin)
@@ -707,11 +772,18 @@ local function main()
         "off", "startBpm", "maxBpm", "mainBpm", "minBpm"
     }
     loadOptionImgs(skin, optionTexts, "hiSpeedType", 55, 0, OPTION_INFO.ITEM_H * 14)
-    -- PeaceMaker
+    -- PaceMaker 旧仕様
     optionTexts = {
         "next", "max", "aaa+", "aaa", "aaa-", "aa+", "aa", "aa-", "a+", "a", "a-"
     }
     loadOptionImgs(skin, optionTexts, "paceMaker", 77, 2048, 0)
+    -- PaceMaker文字
+    -- ライバル枠
+    table.insert(skin.text, {id = "s_rival", font = 0, size = OPTION_INFO.TEXT_H, ref = 3, align = 1})
+    for i = 1, 10, 1 do
+        table.insert(skin.text, {id = "f_rival" .. i, font = 0, size = OPTION_INFO.TEXT_SMALL_H, ref = 210 - i, align = 1})
+        table.insert(skin.text, {id = "b_rival" .. i, font = 0, size = OPTION_INFO.TEXT_SMALL_H, ref = 209 + i, align = 1})
+    end
 
     -- GAS
     optionTexts = {
@@ -809,18 +881,6 @@ local function main()
             })
         end
     end
-
-    skin.font = {
-		{id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
-		-- {id = 0, path = "../common/fonts/font_1_kokumr_1.00_rls.ttf"},
-	}
-
-    skin.text = {
-        {id = "newVersion" , font = 0, size = 24, align = 0, overflow = 1, constantText = "スキンに更新があります"},
-        {id = "helpText", font = 0, size = 30, align = 0, constantText = "ヘルプ    ※マウスで操作し, スクロールはドラッグで操作してください."},
-        {id = "24:", font = 0, size = 24, align = 0, constantText = ":"},
-        {id = "countText", font = 0, size = 24, align = 2, constantText = "回"},
-    }
 
     -- オープニングの読み込み
     opening.load(skin)
