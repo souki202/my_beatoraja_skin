@@ -440,11 +440,11 @@ local function destinationPlayOption(skin, baseX, baseY, titleTextId, optionIdPr
         local textOffsetY = 7
         local intervalY = OPTION_INFO.TEXT_H + 5
         for i = 1, 3, 1 do
-            insertOptionAnimationTextTable(skin, "f_rival" .. i, op, centerX, baseY + optionItemOffsetY + textOffsetY + OPTION_INFO.ITEM_H * 2 + 6 + intervalY * (i), OPTION_INFO.ITEM_W, OPTION_INFO.TEXT_SMALL_H, 0, 0, 0, 0)
-            insertOptionAnimationTextTable(skin, "b_rival" .. i, op, centerX, baseY + optionItemOffsetY + textOffsetY + intervalY * (3 - i), OPTION_INFO.ITEM_W, OPTION_INFO.TEXT_SMALL_H, 0, 0, 0, 0)
+            insertOptionAnimationTextTable(skin, "forwardRival" .. i, op, centerX, baseY + optionItemOffsetY + textOffsetY + OPTION_INFO.ITEM_H * 2 + 6 + intervalY * (i), OPTION_INFO.ITEM_W, OPTION_INFO.TEXT_SMALL_H, 0, 0, 0, 0)
+            insertOptionAnimationTextTable(skin, "backwardRival" .. i, op, centerX, baseY + optionItemOffsetY + textOffsetY + intervalY * (3 - i), OPTION_INFO.ITEM_W, OPTION_INFO.TEXT_SMALL_H, 0, 0, 0, 0)
         end
         insertOptionAnimationTable(skin, "activeOptionFrame", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY + OPTION_INFO.ITEM_H * 2 + 2, OPTION_INFO.ACTIVE_FRAME_W, OPTION_INFO.ACTIVE_FRAME_H, 0)
-        insertOptionAnimationTextTable(skin, "s_rival", op, centerX, baseY + optionItemOffsetY + textOffsetY + OPTION_INFO.ITEM_H * 2, OPTION_INFO.ITEM_W, OPTION_INFO.TEXT_H, 0, 255, 255, 255)
+        insertOptionAnimationTextTable(skin, "activeRival", op, centerX, baseY + optionItemOffsetY + textOffsetY + OPTION_INFO.ITEM_H * 2, OPTION_INFO.ITEM_W, OPTION_INFO.TEXT_H, 0, 255, 255, 255)
     else
         insertOptionAnimationTable(skin, optionIdPrefix .. "Nonactive", op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY                             , OPTION_INFO.ITEM_W        , OPTION_INFO.ITEM_H * viewRange, 0)
         insertOptionAnimationTable(skin, "activeOptionFrame"          , op, baseX + optionBoxOffsetX, baseY + optionItemOffsetY + OPTION_INFO.ITEM_H * 2 + 2, OPTION_INFO.ACTIVE_FRAME_W, OPTION_INFO.ACTIVE_FRAME_H, 0)
@@ -779,10 +779,10 @@ local function main()
     loadOptionImgs(skin, optionTexts, "paceMaker", 77, 2048, 0)
     -- PaceMaker文字
     -- ライバル枠
-    table.insert(skin.text, {id = "s_rival", font = 0, size = OPTION_INFO.TEXT_H, ref = 3, align = 1})
+    table.insert(skin.text, {id = "activeRival", font = 0, size = OPTION_INFO.TEXT_H, ref = 3, align = 1})
     for i = 1, 10, 1 do
-        table.insert(skin.text, {id = "f_rival" .. i, font = 0, size = OPTION_INFO.TEXT_SMALL_H, ref = 210 - i, align = 1})
-        table.insert(skin.text, {id = "b_rival" .. i, font = 0, size = OPTION_INFO.TEXT_SMALL_H, ref = 209 + i, align = 1})
+        table.insert(skin.text, {id = "forwardRival" .. i, font = 0, size = OPTION_INFO.TEXT_SMALL_H, ref = 210 - i, align = 1})
+        table.insert(skin.text, {id = "backwardRival" .. i, font = 0, size = OPTION_INFO.TEXT_SMALL_H, ref = 209 + i, align = 1})
     end
 
     -- GAS
