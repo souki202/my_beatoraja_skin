@@ -145,31 +145,10 @@ options.property = { -- 使用済み 10235まで
         name = "ボム------------------------------", item = {{name = "-", op = 19999}}
     },
     {
-        name = "ボムのパーティクル", item = {{name = "ON", op = 10005}, {name = "OFF", op = 10006}}, def = "ON"
-    },
-    {
         name = "ボムのanimation1のプリセット", item = {{name = "無し", op = 10160}, {name = "SocialSkinボム", op = 10161}, {name = "OADXボム", op = 10162}}, def = "SocialSkinボム"
     },
     {
         name = "ボムのanimation2のプリセット", item = {{name = "無し", op = 10165}, {name = "SocialSkinボム", op = 10166}, {name = "OADXボム", op = 10167}}, def = "SocialSkinボム"
-    },
-    {
-        name = "ボムのparticle1のアニメーション", item = {{name = "フロー", op = 10010}, {name = "拡散", op = 10011}, {name = "静止", op = 10012}}, def = "フロー"
-    },
-    {
-        name = "ボムのparticle2のアニメーション", item = {{name = "フロー", op = 10015}, {name = "拡散", op = 10016}, {name = "静止", op = 10017}}, def = "フロー"
-    },
-    {
-        name = "ボムのparticle1のアルファ変化", item = {{name = "ease in", op = 10140}, {name = "linear", op = 10141}, {name = "ease out", op = 10142}}, def = "ease in"
-    },
-    {
-        name = "ボムのparticle2のアルファ変化", item = {{name = "ease in", op = 10145}, {name = "linear", op = 10146}, {name = "ease out", op = 10147}}, def = "ease in"
-    },
-    {
-        name = "ボムのparticle1の座標変化", item = {{name = "ease in", op = 10150}, {name = "linear", op = 10151}, {name = "ease out", op = 10152}}, def = "ease out"
-    },
-    {
-        name = "ボムのparticle2の座標変化", item = {{name = "ease in", op = 10155}, {name = "linear", op = 10156}, {name = "ease out", op = 10157}}, def = "ease out"
     },
     {
         name = "ボムのanimation1と2の黒背景透過", item = {{name = "ON", op = 10020}, {name = "OFF", op = 10021}}, def = "ON"
@@ -243,11 +222,7 @@ options.filepath = {
     {name = "グルーヴゲージのインディケーター", path = "../play/parts/groove/indicators/*.png", def = "default"},
     {name = "EXSCOREの文字", path = "../play/parts/exscore/label/*.png", def = "default"},
     {name = "ボム関連画像---------", path = "../dummy/*"},
-    {name = "wave1", path = "../play/parts/bombs/wave1/*.png", def = "blank"},
-    {name = "particle1", path = "../play/parts/bombs/particle1/*.png", def = "blank"},
     {name = "animation1", path = "../play/parts/bombs/animation1/*.png", def = "default"},
-    {name = "wave2", path = "../play/parts/bombs/wave2/*.png", def = "blank"},
-    {name = "particle2", path = "../play/parts/bombs/particle2/*.png", def = "blank"},
     {name = "animation2", path = "../play/parts/bombs/animation2/*.png", def = "blank"},
     {name = "animation1(placeholder)", path = "../dummy/*"},
     {name = "サウンド全般--------------", path = "../dummy/*"},
@@ -320,27 +295,8 @@ options.offset = {
     -- 段位ゲージは次の曲に継承する機能を用意していないので未実装
 
     {name = "ボム関連------------------------", x = 0},
-    {name = "100%の描画縦横はwave 500px, anim 300px, particle 16px", x = 0},
+    {name = "100%の描画縦横はanim 300px", x = 0},
     {name = "倍率差分は, -100で0%相当, 100で200%相当", x = 0},
-
-    {name = "ボムのwave1の大きさ倍率(単位%)", w = 0, h = 0},
-    {name = "ボムのwave1の描画時間(単位100ms 既定値3)", x = 0},
-    {name = "ボムのwave2の大きさ倍率(単位%)", w = 0, h = 0},
-    {name = "ボムのwave2の描画時間(単位100ms 既定値3)", x = 0},
-
-    {name = "ボムのparticle1の大きさ倍率(単位%)", w = 0, h = 0},
-    {name = "ボムのparticle1の描画数(既定値7)", x = 0},
-    {name = "ボムのparticle1の描画時間(単位100ms 既定値3)", x = 0},
-    {name = "ボムのparticle1のフローの高さ倍率差分(単位%)", h = 0},
-    {name = "ボムのparticle1の拡散の広さ倍率差分(単位%)", w = 0, h = 0},
-    {name = "ボムのparticle1の出現範囲倍率差分(単位%)", w = 0, h = 0},
-
-    {name = "ボムのparticle2の大きさ倍率(単位%)", w = 0, h = 0},
-    {name = "ボムのparticle2の描画数(既定値7)", x = 0},
-    {name = "ボムのparticle2の描画時間(単位100ms 既定値3)", x = 0},
-    {name = "ボムのparticle2のフローの高さ倍率差分(単位%)", h = 0},
-    {name = "ボムのparticle2の拡散の広さ倍率差分(単位%)", w = 0, h = 0},
-    {name = "ボムのparticle2の出現範囲倍率差分(単位%)", w = 0, h = 0},
 
     {name = "ボムアニメーション関連(プリセット設定時は無視)-------------", x = 0},
     {name = "ボムのanimation1の大きさ倍率(単位%)", w = 0, h = 0},
@@ -483,15 +439,10 @@ options.category = {
     {
         name = "ボム(その他詳細設定 倍率は100%からの差分)",
         myItems = {
-            "ボムのパーティクル",
             "ボムのanimation1と2の黒背景透過",
-            "100%の描画縦横はwave 500px, anim 300px, particle 16px", "倍率差分は, -100で0%相当, 100で200%相当",
+            "100%の描画縦横はanim 300px", "倍率差分は, -100で0%相当, 100で200%相当",
             "ボムのanimation1のプリセット(placeholder)", "animation1(placeholder)", "ボムのanimation1の大きさ倍率(単位%)", "ボムのanimation1の画像分割数", "ボムのanimation1の描画時間(単位100ms 既定値3)", "ボムのanimation1の描画座標差分",
             "ボムのanimation2のプリセット", "animation2", "ボムのanimation2の大きさ倍率(単位%)", "ボムのanimation2の画像分割数", "ボムのanimation2の描画時間(単位100ms 既定値3)", "ボムのanimation2の描画座標差分",
-            "ボムのparticle1のアニメーション", "particle1", "ボムのparticle1のアルファ変化", "ボムのparticle1の座標変化", "ボムのparticle1の大きさ倍率(単位%)", "ボムのparticle1の描画数(既定値7)", "ボムのparticle1の描画時間(単位100ms 既定値3)", "ボムのparticle1のフローの高さ倍率差分(単位%)", "ボムのparticle1の拡散の広さ倍率差分(単位%)", "ボムのparticle1の出現範囲倍率差分(単位%)",
-            "ボムのparticle2のアニメーション", "particle2", "ボムのparticle2のアルファ変化", "ボムのparticle2の座標変化", "ボムのparticle2の大きさ倍率(単位%)", "ボムのparticle2の描画数(既定値7)", "ボムのparticle2の描画時間(単位100ms 既定値3)", "ボムのparticle2のフローの高さ倍率差分(単位%)", "ボムのparticle2の拡散の広さ倍率差分(単位%)", "ボムのparticle2の出現範囲倍率差分(単位%)",
-            "wave1", "ボムのwave1の大きさ倍率(単位%)", "ボムのwave1の描画時間(単位100ms 既定値3)",
-            "wave2", "ボムのwave2の大きさ倍率(単位%)", "ボムのwave2の描画時間(単位100ms 既定値3)",
         }
     },
     {

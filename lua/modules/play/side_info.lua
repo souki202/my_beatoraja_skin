@@ -19,9 +19,22 @@ local REF = {
     BPM_MAX = 90,
     TOTAL_NOTES = 74,
     MAX_COMBO = 105,
+    PLAY_OPTION = 42,
 }
 
 local OPTION_LANECOVER1_ON = 271
+local PLAY_OPTION_NAMES = {
+    [0] = "NORMAL",
+    [1] = "MIRROR",
+    [2] = "RANDOM",
+    [3] = "R-RAN",
+    [4] = "S-RAN",
+    [5] = "SPIRAL",
+    [6] = "H-RAN",
+    [7] = "ALLSCR",
+    [8] = "RAN+",
+    [9] = "S-RAN+",
+}
 
 local function numberValue(ref)
     return main_state.number(ref) or 0
@@ -43,12 +56,17 @@ local function bpmRangeText()
     return numberText(REF.BPM_MIN) .. "~" .. numberText(REF.BPM_MAX)
 end
 
+local function playOptionText()
+    return PLAY_OPTION_NAMES[main_state.event_index(REF.PLAY_OPTION)] or "NORMAL"
+end
+
 local INFO = {
     TEXT = {
         X = function (self) return self.AREA.X() + 10 end,
         W = 54,
         SIZE = 18,
         SMALL_SIZE = 14,
+        OPTION_SIZE = 12,
     },
     AREA = {
         X = function () return is1P() and 2 or WIDTH - 73 end,
@@ -72,6 +90,7 @@ info.functions.load = function ()
             {id = "bpmNow", font = 1, size = INFO.TEXT.SIZE, overflow = 1, value = function () return numberText(REF.BPM_NOW) end},
             {id = "bpmRange", font = 1, size = INFO.TEXT.SMALL_SIZE, overflow = 1, value = bpmRangeText},
             {id = "maxComboValue", font = 1, size = INFO.TEXT.SIZE, overflow = 1, value = function () return numberText(REF.MAX_COMBO) end},
+            {id = "playOptionValue", font = 1, size = INFO.TEXT.OPTION_SIZE, overflow = 1, value = playOptionText},
             {id = "colon18px", font = 0, size = 18, constantText = ":"}
         }
     }
@@ -114,6 +133,11 @@ info.functions.dst = function ()
     dst[#dst+1] = {
         id = "blueNumberValue", dst = {
             {x = INFO.TEXT.X(INFO), y = y + 162, w = INFO.TEXT.W, h = INFO.TEXT.SMALL_SIZE, r = 105, g = 151, b = 244}
+        }
+    }
+    dst[#dst+1] = {
+        id = "playOptionValue", dst = {
+            {x = INFO.TEXT.X(INFO), y = y + 9, w = INFO.TEXT.W, h = INFO.TEXT.OPTION_SIZE, r = 250, g = 249, b = 250}
         }
     }
 

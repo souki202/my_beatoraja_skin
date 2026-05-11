@@ -160,18 +160,6 @@ function drawSideEarlyLateGraph()
 	return getTableValue(skin_config.option, "サイド部分のグラフ", 10001) == 10002
 end
 
-function isDrawBombParticle()
-	return getTableValue(skin_config.option, "ボムのパーティクル", 10005) == 10005
-end
-
-function getParticle1AnimationType()
-	return getTableValue(skin_config.option, "ボムのparticle1のアニメーション", 10010) - 10010
-end
-
-function getParticle2AnimationType()
-	return getTableValue(skin_config.option, "ボムのparticle2のアニメーション", 10015) - 10015
-end
-
 function isTransparentBombAnimationBlackBg()
 	return getTableValue(skin_config.option, "ボムのanimation1と2の黒背景透過", 10020) == 10020
 end
@@ -218,14 +206,6 @@ end
 
 -- function getLifeGaugeEffectSizeYOffset()
 -- 	return getOffsetValueWithDefault("グルーブゲージの通知エフェクトの大きさ差分(%)", {y = 0}).y
--- end
-
--- function isDrawGauge100Particle()
--- 	return getTableValue(skin_config.option, "ゲージ100%時のキラキラ", 10070) == 10070
--- end
-
--- function getNumOfGauge100Particles()
--- 	return getOffsetValueWithDefault("ゲージ100%時のキラキラの数(既定値20)", {x = 20}).x
 -- end
 
 function isBaseBpmTypeStartBpm()
@@ -318,22 +298,6 @@ end
 
 function getIsDrawGrow()
 	return getTableValue(skin_config.option, "グロー表示", 10135) == 10135
-end
-
-function getBombParticle1AlphaEasingType()
-	return getTableValue(skin_config.option, "ボムのparticle1のアルファ変化", 10142) % 5 + 1
-end
-
-function getBombParticle2AlphaEasingType()
-	return getTableValue(skin_config.option, "ボムのparticle2のアルファ変化", 10147) % 5 + 1
-end
-
-function getBombParticle1MoveEasingType()
-	return getTableValue(skin_config.option, "ボムのparticle1の座標変化", 10150) % 5 + 1
-end
-
-function getBombParticle2MoveEasingType()
-	return getTableValue(skin_config.option, "ボムのparticle2の座標変化", 10155) % 5 + 1
 end
 
 function getBombAnimation1Preset()
