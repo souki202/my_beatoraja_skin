@@ -7,74 +7,71 @@ local info = {
     functions = {}
 }
 
+local REF = {
+    HISPEED = 310,
+    HISPEED_AFTERDOT = 311,
+    GREEN_NUMBER = 313,
+    BLUE_NUMBER = 312,
+    GREEN_NUMBER_LANECOVER_ON = 1312,
+    BLUE_NUMBER_LANECOVER_ON = 1313,
+    BPM_NOW = 160,
+    BPM_MIN = 91,
+    BPM_MAX = 90,
+    TOTAL_NOTES = 74,
+    MAX_COMBO = 105,
+}
+
+local OPTION_LANECOVER1_ON = 271
+
+local function numberValue(ref)
+    return main_state.number(ref) or 0
+end
+
+local function numberText(ref)
+    return tostring(numberValue(ref))
+end
+
+local function coverNumberText(coverOnRef, coverOffRef)
+    return numberText(main_state.option(OPTION_LANECOVER1_ON) and coverOnRef or coverOffRef)
+end
+
+local function hiSpeedText()
+    return string.format("%d.%02d", numberValue(REF.HISPEED), numberValue(REF.HISPEED_AFTERDOT))
+end
+
+local function bpmRangeText()
+    return numberText(REF.BPM_MIN) .. "~" .. numberText(REF.BPM_MAX)
+end
+
 local INFO = {
-    LABEL = {
-        X = function (self) return self.AREA.COMMON.X() + (self.AREA.COMMON.W() - self.LABEL.W) / 2 end,
-        BPM_Y = function (areaY) return areaY + 42 end,
-        OTHER_Y = function (areaY) return areaY + 28 end,
-        W = 65,
-        H = 18,
-    },
-    NUM = {
-        DIGIT = 5,
-        CENTER_X = function (self) return self.AREA.COMMON.X() + self.AREA.COMMON.W() / 2 - NUMBERS_18PX.W * self.NUM.DIGIT / 2 end,
+    TEXT = {
         X = function (self) return self.AREA.X() + 10 end,
+        W = 54,
+        SIZE = 18,
+        SMALL_SIZE = 14,
     },
     AREA = {
-        COMMON = {
-            X = function () return is1P() and 2 or WIDTH - 73 end,
-            W = function () return 73 end,
-            H = 50,
-        },
-        BPM = {
-            H = 64,
-            Y = 191,
-        },
-        TN = {
-            Y = 137
-        },
-        COMBO = {
-            Y = 83,
-        },
-        TIME = {
-            Y = 29,
-        }
+        X = function () return is1P() and 2 or WIDTH - 73 end,
+        Y = 118,
+        W = 71,
+        H = 239,
     }
 }
 
-local LN = {
-    X = nil,
-    X_1 = function () return 0 end,
-    X_2 = function () return WIDTH - lanes.getSideSpace() end,
-    Y = function () return 0 end,
-    W = function () return lanes.getSideSpace() - 2 end,
-    H = 25,
-}
-
 info.functions.load = function ()
-    INFO.AREA.COMMON.X = is1P() and INFO.AREA.COMMON.X_1 or INFO.AREA.COMMON.X_2
-    LN.X = is1P() and LN.X_1 or LN.X_2
-
     return {
         image = {
-            {id = "bpmLabel"   , src = 0, x = 52, y = 90 + INFO.LABEL.H*0, w = INFO.LABEL.W, h = INFO.LABEL.H},
-            {id = "tnLabel"    , src = 0, x = 52, y = 90 + INFO.LABEL.H*1, w = INFO.LABEL.W, h = INFO.LABEL.H},
-            {id = "comboLabel" , src = 0, x = 52, y = 90 + INFO.LABEL.H*2, w = INFO.LABEL.W, h = INFO.LABEL.H},
-            {id = "timeLabel"  , src = 0, x = 52, y = 90 + INFO.LABEL.H*3, w = INFO.LABEL.W, h = INFO.LABEL.H},
-            {id = "tilda14px", src = 0, x = 1931, y = 94, w = NUMBERS_14PX.W, h = NUMBERS_14PX.H},
-            {id = "lnMode", src = 0, x = 509, y = 0, w = LN.W(), h = LN.H * 3, divy = 3, len = 3, ref = 308},
-            {id = "lnModeGrow", src = 0, x = 509 + LN.W(), y = 0, w = LN.W(), h = LN.H * 3, divy = 3, len = 3, ref = 308},
+            {id = "infoBg", src = 0, x = 422, y = 1593, w = INFO.AREA.W, h = INFO.AREA.H},
         },
         value = {
-            {id = "bpmNow", src = 0, x = NUMBERS_18PX.SRC_X, y = NUMBERS_18PX.SRC_Y, w = NUMBERS_18PX.W*10, h = NUMBERS_18PX.H, divx = 10, digit = INFO.NUM.DIGIT, align = 2, ref = 160},
-            {id = "bpmMin", src = 0, x = NUMBERS_14PX.SRC_X, y = NUMBERS_14PX.SRC_Y, w = NUMBERS_14PX.W*10, h = NUMBERS_14PX.H, divx = 10, digit = INFO.NUM.DIGIT, align = 0, ref = 91},
-            {id = "bpmMax", src = 0, x = NUMBERS_14PX.SRC_X, y = NUMBERS_14PX.SRC_Y, w = NUMBERS_14PX.W*10, h = NUMBERS_14PX.H, divx = 10, digit = INFO.NUM.DIGIT, align = 1, ref = 90},
-            {id = "tnValue", src = 0, x = NUMBERS_18PX.SRC_X, y = NUMBERS_18PX.SRC_Y, w = NUMBERS_18PX.W*10, h = NUMBERS_18PX.H, divx = 10, digit = INFO.NUM.DIGIT, align = 2, ref = 74},
-            {id = "maxComboValue", src = 0, x = NUMBERS_18PX.SRC_X, y = NUMBERS_18PX.SRC_Y, w = NUMBERS_18PX.W*10, h = NUMBERS_18PX.H, divx = 10, digit = INFO.NUM.DIGIT, align = 2, ref = 105},
-            {id = "minuteValue", src = 0, x = NUMBERS_18PX.SRC_X, y = NUMBERS_18PX.SRC_Y, w = NUMBERS_18PX.W*10, h = NUMBERS_18PX.H, divx = 10, digit = INFO.NUM.TIME.DIGIT, align = 0, ref = 163, zeropadding = 1, padding = 1},
-            {id = "secondValue", src = 0, x = NUMBERS_18PX.SRC_X, y = NUMBERS_18PX.SRC_Y, w = NUMBERS_18PX.W*10, h = NUMBERS_18PX.H, divx = 10, digit = INFO.NUM.TIME.DIGIT, align = 1, ref = 164, zeropadding = 1, padding = 1},
         },
         text = {
+            {id = "hiSpeedValue", font = 1, size = INFO.TEXT.SIZE, overflow = 1, value = hiSpeedText},
+            {id = "greenNumberValue", font = 1, size = INFO.TEXT.SMALL_SIZE, overflow = 1, value = function () return coverNumberText(REF.GREEN_NUMBER_LANECOVER_ON, REF.GREEN_NUMBER) end},
+            {id = "blueNumberValue", font = 1, size = INFO.TEXT.SMALL_SIZE, overflow = 1, value = function () return coverNumberText(REF.BLUE_NUMBER_LANECOVER_ON, REF.BLUE_NUMBER) end},
+            {id = "bpmNow", font = 1, size = INFO.TEXT.SIZE, overflow = 1, value = function () return numberText(REF.BPM_NOW) end},
+            {id = "bpmRange", font = 1, size = INFO.TEXT.SMALL_SIZE, overflow = 1, value = bpmRangeText},
+            {id = "maxComboValue", font = 1, size = INFO.TEXT.SIZE, overflow = 1, value = function () return numberText(REF.MAX_COMBO) end},
             {id = "colon18px", font = 0, size = 18, constantText = ":"}
         }
     }
@@ -83,13 +80,47 @@ end
 info.functions.dst = function ()
     local skin = {destination = {}}
     local dst = skin.destination
+    local y = INFO.AREA.Y
 
-    -- BPM
-    local bpmY = INFO.AREA.BPM.Y
     -- 背景
     dst[#dst+1] = {
-        id = "white", dst = {
-            {x = INFO.AREA.COMMON.X(), y = bpmY, w = INFO.AREA.COMMON.W(), h = INFO.AREA.BPM.H}
+        id = "infoBg", dst = {
+            {x = INFO.AREA.X(), y = y, w = INFO.AREA.W, h = INFO.AREA.H}
+        }
+    }
+
+    dst[#dst+1] = {
+        id = "bpmNow", dst = {
+            {x = INFO.TEXT.X(INFO), y = y + 117, w = INFO.TEXT.W, h = INFO.TEXT.SIZE, r = 250, g = 249, b = 250}
+        }
+    }
+    dst[#dst+1] = {
+        id = "bpmRange", dst = {
+            {x = INFO.TEXT.X(INFO), y = y + 99, w = INFO.TEXT.W, h = INFO.TEXT.SMALL_SIZE, r = 250, g = 249, b = 250}
+        }
+    }
+
+    -- HiSpeed / green number / blue number
+    dst[#dst+1] = {
+        id = "hiSpeedValue", dst = {
+            {x = INFO.TEXT.X(INFO), y = y + 196, w = INFO.TEXT.W, h = INFO.TEXT.SIZE, r = 250, g = 249, b = 250}
+        }
+    }
+    dst[#dst+1] = {
+        id = "greenNumberValue", dst = {
+            {x = INFO.TEXT.X(INFO), y = y + 179, w = INFO.TEXT.W, h = INFO.TEXT.SMALL_SIZE, r = 109, g = 244, b = 105}
+        }
+    }
+    dst[#dst+1] = {
+        id = "blueNumberValue", dst = {
+            {x = INFO.TEXT.X(INFO), y = y + 162, w = INFO.TEXT.W, h = INFO.TEXT.SMALL_SIZE, r = 105, g = 151, b = 244}
+        }
+    }
+
+    -- max combo
+    dst[#dst+1] = {
+        id = "maxComboValue", dst = {
+            {x = INFO.TEXT.X(INFO), y = y + 50, w = INFO.TEXT.W, h = INFO.TEXT.SIZE, r = 250, g = 249, b = 250}
         }
     }
 

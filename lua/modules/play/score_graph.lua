@@ -54,9 +54,9 @@ local SCORE = {
     },
 
     DIFF = {
-        X = function (self) return self.AREA.X() + 430 - self.DIFF.DIGIT * self.DIFF.W end,
-        BEST_Y = function (self) return self.AREA.Y() + 33 end,
-        TARGET_Y = function (self) return self.AREA.Y() + 13 end,
+        X = function (self) return self.AREA.X() + 420 - self.DIFF.DIGIT * self.DIFF.W end,
+        BEST_Y = function (self) return self.AREA.Y() + 56 end,
+        TARGET_Y = function (self) return self.AREA.Y() + 30 end,
         W = 9,
         H = 11,
         DIGIT = 5,
@@ -77,7 +77,7 @@ scoreGraph.functions.load = function ()
             {id = "scoreFrame", src = 0, x = 0, y = 1390, w = 419, h = 85},
             {id = "scoreOverlay", src = 0, x = 0, y = 1308, w = 415, h = 81},
             {id = "scorePercentageDot", src = 0, x = 2039, y = 295, w = SCORE.P_NUM.W, h = SCORE.P_NUM.H},
-            {id = "scorePercent", src = 0, x = 1939, y = 94, w = SCORE.P_NUM.P_W, h = SCORE.P_NUM.P_H},
+            {id = "scorePercent", src = 0, x = 1928, y = 295, w = SCORE.P_NUM.P_W, h = SCORE.P_NUM.P_H},
         },
         graph = {
             {id = SCORE.GRAPH.ID_PREFIX .. "Now", src = 999, x = 2, y = 0, w = 1, h = 1, angle = 0, type = 110},
@@ -167,17 +167,17 @@ scoreGraph.functions.dst = function ()
     -- パーセンテージ
     dst[#dst+1] = {
         id = "scorePercentage", dst = {
-            {x = SCORE.P_NUM.X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = NUMBERS_14PX.W, h = NUMBERS_14PX.H}
+            {x = SCORE.P_NUM.X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = SCORE.P_NUM.W, h = SCORE.P_NUM.H}
         }
     }
     dst[#dst+1] = {
         id = "scorePercentageDot", dst = {
-            {x = SCORE.P_NUM.DOT_X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = NUMBERS_14PX.W, h = NUMBERS_14PX.H}
+            {x = SCORE.P_NUM.DOT_X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = SCORE.P_NUM.W, h = SCORE.P_NUM.H}
         }
     }
     dst[#dst+1] = {
         id = "scorePercentageAfterDot", dst = {
-            {x = SCORE.P_NUM.A_X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = NUMBERS_14PX.W, h = NUMBERS_14PX.H}
+            {x = SCORE.P_NUM.A_X(SCORE), y = SCORE.P_NUM.Y(SCORE), w = SCORE.P_NUM.W, h = SCORE.P_NUM.H}
         }
     }
     dst[#dst+1] = {

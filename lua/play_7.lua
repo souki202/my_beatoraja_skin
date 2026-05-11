@@ -151,8 +151,8 @@ local function main()
     end
     mergeSkin(skin, title.dst())
     mergeSkin(skin, progress.dst())
-    mergeSkin(skin, sideInfo.dst())
     mergeSkin(skin, lanes.dst()) -- キービーム, リフト, レーンカバー, グローはここの中でmergeSkin
+    mergeSkin(skin, sideInfo.dst())
     mergeSkin(skin, hispeed.dst())
     mergeSkin(skin, bomb.dst())
     mergeSkin(skin, judges.dst())

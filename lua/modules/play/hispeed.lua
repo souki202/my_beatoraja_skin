@@ -224,46 +224,6 @@ hispeed.functions.dst = function ()
         }
     }
 
-    -- 小さい緑数字
-    dst[#dst+1] = {
-        id = "white", dst = {
-            {x = GREEN.AREA.X(), y = GREEN.AREA.Y(), w = GREEN.AREA.W(), h = GREEN.AREA.H, a = 192}
-        }
-    }
-    for i = 1, 3 do
-        dst[#dst+1] = {
-            id = HISPEED.IDS.TYPE[i] .. HISPEED.IDS.COLOR[2] .. HISPEED.IDS.COVER[1], op = {271},
-            dst = {
-                {x = GREEN.NUM.X[i](GREEN), y = GREEN.NUM.Y[i](GREEN), w = GREEN.NUM.W, h = GREEN.NUM.H}
-            }
-        }
-        dst[#dst+1] = {
-            id = HISPEED.IDS.TYPE[i] .. HISPEED.IDS.COLOR[2] .. HISPEED.IDS.COVER[2], op = {-271},
-            dst = {
-                {x = GREEN.NUM.X[i](GREEN), y = GREEN.NUM.Y[i](GREEN), w = GREEN.NUM.W, h = GREEN.NUM.H}
-            }
-        }
-    end
-    -- 小さい青数字
-    dst[#dst+1] = {
-        id = "white", dst = {
-            {x = BLUE.AREA.X(), y = BLUE.AREA.Y(), w = BLUE.AREA.W(), h = BLUE.AREA.H, a = 192}
-        }
-    }
-    for i = 1, 3 do
-        dst[#dst+1] = {
-            id = HISPEED.IDS.TYPE[i] .. HISPEED.IDS.COLOR[1] .. HISPEED.IDS.COVER[1], op = {271},
-            dst = {
-                {x = BLUE.NUM.X[i](BLUE), y = BLUE.NUM.Y[i](BLUE), w = BLUE.NUM.W, h = BLUE.NUM.H}
-            }
-        }
-        dst[#dst+1] = {
-            id = HISPEED.IDS.TYPE[i] .. HISPEED.IDS.COLOR[1] .. HISPEED.IDS.COVER[2], op = {-271},
-            dst = {
-                {x = BLUE.NUM.X[i](BLUE), y = BLUE.NUM.Y[i](BLUE), w = BLUE.NUM.W, h = BLUE.NUM.H}
-            }
-        }
-    end
 
     do
         -- レーンカバー部分

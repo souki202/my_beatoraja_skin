@@ -232,6 +232,7 @@ notes.functions.load = function ()
         end
     end
 
+
     if getNoteType() == 1 then
         -- 独自形式
         local skin2 = {
@@ -586,6 +587,13 @@ notes.functions.dst = function ()
             end
         end
     end
+
+    -- はみ出し部分用マスク
+    dst[#dst+1] = {
+        id = "black", dst = {
+            {x = 0, y = 0, w = WIDTH, h = 357},
+        }
+    }
 
     -- 青レーンの背景
     if isDrawBlueLaneBg() then

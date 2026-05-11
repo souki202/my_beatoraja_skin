@@ -216,13 +216,13 @@ function getVisualizerReflectionTransparencyValue()
 	return getOffsetValueWithDefault("ビジュアライザー1の反射の透明度(既定値196 255で透明)", {a = 195}).a
 end
 
-function getLifeGaugeEffectThresholdIdx()
-	return getTableValue(skin_config.option, "グルーヴゲージの通知エフェクトの基準", 10066) - 10064
-end
+-- function getLifeGaugeEffectThresholdIdx()
+-- 	return getTableValue(skin_config.option, "グルーヴゲージの通知エフェクトの基準", 10066) - 10064
+-- end
 
-function getLifeGaugeEffectSizeYOffset()
-	return getOffsetValueWithDefault("グルーブゲージの通知エフェクトの大きさ差分(%)", {y = 0}).y
-end
+-- function getLifeGaugeEffectSizeYOffset()
+-- 	return getOffsetValueWithDefault("グルーブゲージの通知エフェクトの大きさ差分(%)", {y = 0}).y
+-- end
 
 -- function isDrawGauge100Particle()
 -- 	return getTableValue(skin_config.option, "ゲージ100%時のキラキラ", 10070) == 10070
