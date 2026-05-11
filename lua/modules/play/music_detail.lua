@@ -17,44 +17,33 @@ local DETAIL = {
     },
     TEXT = {
         FONT = {
-            LARGE = 32,
+            LARGE = 30,
             NORMAL = 24,
         },
-        FRAME = {
-            X = function (self) return self.AREA.X() + (getMusicDetailStafeFilePosition() and 441 or 0) end,
-            Y = function (self) return self.AREA.Y() end,
-            W = 976,
-            H = 351,
-        },
         VALUE = {
-            X1 = function (self) return self.TEXT.FRAME.X(self) + 47 end,
-            X2 = function (self) return self.TEXT.FRAME.X(self) + 532 end,
-            X_TIME = function (self) return self.TEXT.FRAME.X(self) + 887 end,
-            Y = function (self, i) return self.TEXT.FRAME.Y(self) + 186 - self.TEXT.VALUE.INTERVAL_Y * (i - 1) end,
-            Y_TITLE = function (self) return self.TEXT.FRAME.Y(self) + 255 end,
-            INTERVAL_Y = 68,
-            W_TITLE = 876,
-            W_ITEM = 391,
+            X1 = function (self) return self.AREA.X() + 447 end,
+            X2 = function (self) return self.AREA.X() + 903 end,
+            X_TIME = function (self) return self.AREA.X() + 1280 end,
+            Y_TIME = function (self) return self.AREA.Y() + 13 end,
+            Y = function (self, i) return self.AREA.Y() + 170 - self.TEXT.VALUE.INTERVAL_Y * (i - 1) end,
+            Y_TITLE = function (self) return self.AREA.Y() + 242 end,
+            INTERVAL_Y = 72,
+            W_TITLE = 880,
+            W_ITEM = 412,
         },
     },
     GRAPH = {
-        X = function (self) return self.AREA.X.X() + 903 end,
-        Y = function (self) return self.TEXT.FRAME.Y(self) + 83 end,
+        X = function (self) return self.AREA.X() + 903 end,
+        Y = function (self) return self.AREA.Y() + 52 end,
         W = 440,
         H = 82,
     },
     STAGEFILE = {
-        FRAME = {
-            X = function (self) return self.AREA.X() + (getMusicDetailStafeFilePosition() and 0 or 949) end,
-            Y = function (self) return self.AREA.Y() end,
-            W = 462,
-            H = 357,
-        },
         IMAGE = {
-            X = function (self) return self.STAGEFILE.FRAME.X(self) + 21 end,
-            Y = function (self) return self.STAGEFILE.FRAME.Y(self) + 21 end,
-            W = 420,
-            H = 315,
+            X = function (self) return self.AREA.X() + 18 end,
+            Y = function (self) return self.AREA.Y() + 18 end,
+            W = 388,
+            H = 291,
         },
     }
 }
@@ -70,9 +59,7 @@ detail.functions.load = function ()
     local p = "musicDetail"
     local skin = {
         image = {
-            {id = p .. "Bg", src = 103, x = 0, y = 0, w = -1, h = -1},
             {id = p .. "Frame", src = 101, x = 0, y = 0, w = -1, h = -1},
-            {id = p .. "StageFileFrame", src = 102, x = 0, y = 0, w = -1, h = -1},
             {id = p .. "NoImage", src = 100, x = 0, y = 0, w = -1, h = -1},
         },
         text = {
@@ -127,13 +114,8 @@ detail.functions.dst = function ()
     local skin = {
         destination = {
             {
-                id = p .. "Bg", dst = {
-                    {x = DETAIL.AREA.X(), y = DETAIL.AREA.Y(), w = DETAIL.AREA.W, h = DETAIL.AREA.H},
-                }
-            },
-            {
                 id = p .. "Frame", dst = {
-                    {x = DETAIL.TEXT.FRAME.X(DETAIL), y = DETAIL.TEXT.FRAME.Y(DETAIL), w = DETAIL.TEXT.FRAME.W, h = DETAIL.TEXT.FRAME.H},
+                    {x = DETAIL.AREA.X(), y = DETAIL.AREA.Y(), w = DETAIL.AREA.W, h = DETAIL.AREA.H},
                 },
             },
             -- 楽曲詳細
@@ -164,7 +146,7 @@ detail.functions.dst = function ()
             },
             {
                 id = p .. "Time", dst = {
-                    {x = DETAIL.TEXT.VALUE.X_TIME(DETAIL), y = DETAIL.TEXT.VALUE.Y(DETAIL, 3), w = DETAIL.TEXT.VALUE.W_ITEM, h = DETAIL.TEXT.FONT.NORMAL}
+                    {x = DETAIL.TEXT.VALUE.X_TIME(DETAIL), y = DETAIL.TEXT.VALUE.Y_TIME(DETAIL), w = DETAIL.TEXT.VALUE.W_ITEM, h = DETAIL.TEXT.FONT.NORMAL}
                 }
             },
             {
@@ -179,12 +161,6 @@ detail.functions.dst = function ()
             },
 
             -- ステージファイル
-            -- stagefile黒背景
-            {
-                id = "black", op = {191}, offset = 42, dst = {
-                    {x = DETAIL.STAGEFILE.IMAGE.X(DETAIL), y = DETAIL.STAGEFILE.IMAGE.Y(DETAIL), w = DETAIL.STAGEFILE.IMAGE.W, h = DETAIL.STAGEFILE.IMAGE.H, a = 255}
-                }
-            },
             -- no stagefile
             {
                 id = p .. "NoImage", op = {190}, filter = 1, stretch = 1, offset = 42, dst = {
@@ -195,12 +171,6 @@ detail.functions.dst = function ()
             {
                 id = -100, filter = 1, stretch = 1, offset = 42, dst = {
                     {x = DETAIL.STAGEFILE.IMAGE.X(DETAIL), y = DETAIL.STAGEFILE.IMAGE.Y(DETAIL), w = DETAIL.STAGEFILE.IMAGE.W, h = DETAIL.STAGEFILE.IMAGE.H}
-                }
-            },
-            -- frame
-            {
-                id = p .. "StageFileFrame", dst = {
-                    {x = DETAIL.STAGEFILE.FRAME.X(DETAIL), y = DETAIL.STAGEFILE.FRAME.Y(DETAIL), w = DETAIL.STAGEFILE.FRAME.W, h = DETAIL.STAGEFILE.FRAME.H}
                 }
             },
         }

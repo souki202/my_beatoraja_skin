@@ -234,14 +234,6 @@ bga.functions.dst = function ()
         }
     }
 
-    -- BGAの区切り線
-    local r, g, b = getSimpleLineColor()
-    dst[#dst+1] = {
-        id = "white", dst = {
-            {x = bgaX, y = BGA.Y - 2, w = BGA.W, h = 2, r = r, g = g, b = b}
-        }
-    }
-
     return skin
 end
 

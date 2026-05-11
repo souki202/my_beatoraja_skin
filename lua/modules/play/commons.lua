@@ -396,15 +396,6 @@ function getMusicDetailNotesGraph()
     return (getTableValue(skin_config.option, "楽曲詳細のノーツグラフ種類", 10220) % 5) + 1
 end
 
---[[
-	楽曲詳細情報のステージファイル位置を取得
-
-	@return {int} 0で右, 1で左
-]]
-function getMusicDetailStafeFilePosition()
-	return getTableValue(skin_config.option, "楽曲詳細のステージファイル位置", 10211) == 10211
-end
-
 function getIsPlayKeySE()
 	return getTableValue(skin_config.option, "キー押下時のSE", 10231) == 10230
 end

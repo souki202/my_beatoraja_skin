@@ -24,7 +24,7 @@ local life = {
 
 local LIFE = {
     AREA = {
-        X = function() return lanes.getAreaX() end,
+        X = function() return lanes.getAreaX() - (is1P() and 0 or 5) end,
         Y = function() return 118 end,
         W = 437,
         H = 239,

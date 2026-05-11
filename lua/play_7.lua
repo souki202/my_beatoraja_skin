@@ -101,8 +101,6 @@ local function main()
         {id = 92, path = "../play/parts/lane/laneside/state/fail/*.png"},
         {id = 100, path = "../play/parts/detail/noimage/*.png"},
         {id = 101, path = "../play/parts/detail/frame/*.png"},
-        {id = 102, path = "../play/parts/detail/stagefileframe/*.png"},
-        {id = 103, path = "../play/parts/detail/bg/*.png"},
         {id = 104, path = "../sounds/key/*.wav"},
         {id = 999, path = "../common/colors/colors.png"}
     }
