@@ -12,7 +12,6 @@ local keyBeam = {
 
 local KEY_BEAM = {
     HEIGHTS = {0, 160, 350, 564, 720},
-    BACK_H = {80, 60},
     ANIMATION_TIMES = {1, 50, 100, 200, 350},
     ALPHA = 192, -- 後で初期化
 
@@ -96,15 +95,12 @@ keyBeam.functions.dst = function ()
     for i = 1, commons.keys+1 do
         local r, g, b = wr, wg, wb
         local h2 = h
-        local bh = KEY_BEAM.BACK_H[1]
-        local by = lanes.getInnerAreaY()
         local myTimer = timer[i]
 
         if h ~= 0 then -- キービームがあるときだけセット
             if i ~= commons.keys and i % 2 == 0 then
                 r, g, b = br, bg, bb
                 h2 = h2 * 0.9
-                bh = KEY_BEAM.BACK_H[2]
             elseif i == commons.keys then
                 h2 = h2 * 1.1
             end
@@ -118,12 +114,6 @@ keyBeam.functions.dst = function ()
                     id = "keyBeam", offst = 3, timer = myTimer,
                     dst = {{x = x, y = y, w = w, h = h, r = r, g = g, b = b, a = KEY_BEAM.ALPHA}}
                 }
-                dst[#dst+1] = {
-                    id = "keyBeam", offset = 3, timer = myTimer,
-                    dst = {
-                        {time = 0, x = x, y = by, w = w, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
-                    }
-                }
             else
                 if iskeyFlashAppearNormalAnimation() then
                     dst[#dst+1] = {
@@ -133,15 +123,6 @@ keyBeam.functions.dst = function ()
                             {time = atime, h = h2}
                         }
                     }
-                    if isDrawBackKeyBeam() then
-                        dst[#dst+1] = {
-                            id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
-                            dst = {
-                                {time = 0, x = x, y = by, w = w, h = 0, r = r, g = g, b = b, a = KEY_BEAM.ALPHA, acc = 2},
-                                {time = atime, h = -bh}
-                            }
-                        }
-                    end
                 elseif iskeyFlashAppearFromCenterAnimation() then
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
@@ -150,15 +131,6 @@ keyBeam.functions.dst = function ()
                             {time = atime, x = x, w = w}
                         }
                     }
-                    if isDrawBackKeyBeam() then
-                        dst[#dst+1] = {
-                            id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
-                            dst = {
-                                {time = 0, x = x + w / 2, y = by, w = 0, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA, acc = 2},
-                                {time = atime, x = x, w = w}
-                            }
-                        }
-                    end
                 elseif iskeyFlashAppearFromEdgeAnimation() then
                     -- 左
                     dst[#dst+1] = {
@@ -168,15 +140,6 @@ keyBeam.functions.dst = function ()
                             {time = atime, w = math.ceil(w / 2)},
                         }
                     }
-                    if isDrawBackKeyBeam() then
-                        dst[#dst+1] = {
-                            id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
-                            dst = {
-                                {time = 0, x = x, y = by, w = 0, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
-                                {time = atime, w = math.ceil(w / 2)},
-                            }
-                        }
-                    end
                     -- 右
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
@@ -185,15 +148,6 @@ keyBeam.functions.dst = function ()
                             {time = atime, w = -math.floor(w / 2)},
                         }
                     }
-                    if isDrawBackKeyBeam() then
-                        dst[#dst+1] = {
-                            id = "keyBeam", offset = 3, timer = myTimer, loop = atime,
-                            dst = {
-                                {time = 0, x = x + w, y = by, w = 0, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
-                                {time = atime, w = -math.floor(w / 2)},
-                            }
-                        }
-                    end
                 end
             end
 
@@ -208,15 +162,6 @@ keyBeam.functions.dst = function ()
                             {time = dtime, h = 0}
                         }
                     }
-                    if isDrawBackKeyBeam() then
-                        dst[#dst+1] = {
-                            id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
-                            dst = {
-                                {time = 0, x = x, y = by, w = w, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
-                                {time = dtime, h = 0}
-                            }
-                        }
-                    end
                 elseif iskeyFlashDelFromEdgeAnimation() then
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
@@ -225,15 +170,6 @@ keyBeam.functions.dst = function ()
                             {time = dtime, x = x + w / 2, w = 0}
                         }
                     }
-                    if isDrawBackKeyBeam() then
-                        dst[#dst+1] = {
-                            id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
-                            dst = {
-                                {time = 0, x = x, y = by, w = w, h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
-                                {time = dtime, x = x + w / 2, w = 0}
-                            }
-                        }
-                    end
                 elseif iskeyFlashDelFromCenterAnimation() then
                     -- 左
                     dst[#dst+1] = {
@@ -243,15 +179,6 @@ keyBeam.functions.dst = function ()
                             {time = dtime, w = 0},
                         }
                     }
-                    if isDrawBackKeyBeam() then
-                        dst[#dst+1] = {
-                            id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
-                            dst = {
-                                {time = 0, x = x, y = by, w = math.ceil(w / 2), h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
-                                {time = dtime, w = 0},
-                            }
-                        }
-                    end
                     -- 右
                     dst[#dst+1] = {
                         id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
@@ -260,15 +187,6 @@ keyBeam.functions.dst = function ()
                             {time = dtime, w = 0},
                         }
                     }
-                    if isDrawBackKeyBeam() then
-                        dst[#dst+1] = {
-                            id = "keyBeam", offset = 3, timer = myTimer, loop = -1,
-                            dst = {
-                                {time = 0, x = x + w, y = by, w = -math.floor(w / 2), h = -bh, r = r, g = g, b = b, a = KEY_BEAM.ALPHA},
-                                {time = dtime, w = 0},
-                            }
-                        }
-                    end
                 end
             end
         end

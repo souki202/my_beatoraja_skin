@@ -10,10 +10,10 @@ local detail = {
 
 local DETAIL = {
     AREA = {
-        X = function () return is1P() and lanes.getAreaX() + lanes.getAreaW() + 2 or 0 end,
-        Y = function () return 0 end,
-        W = 1411,
-        H = 357
+        X = function () return is1P() and lanes.getAreaX() + lanes.getAreaW() + 23 or 21 end,
+        Y = function () return 16 end,
+        W = 1373,
+        H = 328
     },
     TEXT = {
         FONT = {
@@ -38,9 +38,9 @@ local DETAIL = {
         },
     },
     GRAPH = {
-        X = function (self) return self.TEXT.FRAME.X(self) + 506 end,
+        X = function (self) return self.AREA.X.X() + 903 end,
         Y = function (self) return self.TEXT.FRAME.Y(self) + 83 end,
-        W = 443,
+        W = 440,
         H = 82,
     },
     STAGEFILE = {

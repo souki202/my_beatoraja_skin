@@ -112,10 +112,6 @@ function iskeyFlashDelFromCenterAnimation()
 	return getTableValue(skin_config.option, "キービーム消失アニメーション", 980) == 982
 end
 
-function isDrawBackKeyBeam()
-	return getTableValue(skin_config.option, "後方キービーム", 935) == 935
-end
-
 function isDrawLargeBga()
 	return getTableValue(skin_config.option, "黒帯部分のBGA表示", 945) == 945
 end
