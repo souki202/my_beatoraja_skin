@@ -1,6 +1,7 @@
 {
   "Lua.diagnostics.globals": [
     "abc",
-    "skinVersionCheck"
+    "skinVersionCheck",
+    "skin_config"
   ]
 }

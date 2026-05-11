@@ -42,9 +42,9 @@ options.property = { -- 使用済み 10235まで
     {
         name = "汎用BGA形式", item = {{name = "png", op = 10025}, {name = "mp4", op = 10026}}, def = "mp4"
     },
-    {
-        name = "BGA枠", item = {{name = "横上部", op = 940}, {name = "横全体", op = 941}, {name = "画面全体", op = 942}}, def = "横上部"
-    },
+    -- {
+    --     name = "BGA枠", item = {{name = "横上部", op = 940}, {name = "横全体", op = 941}, {name = "画面全体", op = 942}}, def = "横上部"
+    -- },
     {
         name = "黒帯部分のBGA表示", item = {{name = "ON", op = 945}, {name = "OFF", op = 946}}, def = "ON"
     },
@@ -217,9 +217,10 @@ options.filepath = {
     {name = "背景画像", path = "../play/parts/background/*.png", def = "default"},
     {name = "汎用画像(png)", path = "../play/parts/versatilitybga/*.png", def = "default"},
     {name = "汎用画像(mp4)", path = "../play/parts/versatilitybga/*.mp4", def = "default"},
+    {name = "BGA背景", path = "../play/parts/bga/frame/bga_bg/*.png", def = "default"},
     {name = "BGAフレーム(横上部)", path = "../play/parts/bga/frame/normal/*.png", def = "default"},
-    {name = "BGAフレーム(横全体)", path = "../play/parts/bga/frame/large/*.png", def = "blank"},
-    {name = "BGAフレーム(全画面)", path = "../play/parts/bga/frame/full/*.png", def = "blank"},
+    -- {name = "BGAフレーム(横全体)", path = "../play/parts/bga/frame/large/*.png", def = "blank"},
+    -- {name = "BGAフレーム(全画面)", path = "../play/parts/bga/frame/full/*.png", def = "blank"},
     {name = "黒帯部分BGAのマスク", path = "../play/parts/bga/mask/*.png", def = "default"},
     {name = "タイトル部分フレーム", path = "../play/parts/title/frame/*.png", def = "simple"},
     {name = "楽曲詳細情報のステージファイルのnoimage画像", path = "../play/parts/detail/noimage/*.png", def = "default"},
@@ -375,7 +376,7 @@ options.category = {
     },
     {
         name = "BGA",
-        myItems = {"汎用BGA形式", "汎用画像(png)", "汎用画像(mp4)", "BGAの横幅オフセット(マイナスのみ)", "BGA枠", "BGAフレーム(横上部)", "BGAフレーム(横全体)", "BGAフレーム(全画面)", "黒帯部分のBGA表示", "黒帯部分BGAのマスク", "黒帯部分のBGA表示のぼかし"}
+        myItems = {"汎用BGA形式", "汎用画像(png)", "汎用画像(mp4)", "BGAの横幅オフセット(マイナスのみ)", "BGA背景", "BGAフレーム(横上部)", "黒帯部分BGAのマスク", "黒帯部分のBGA表示のぼかし"}
     },
     {
         name = "判定表示",

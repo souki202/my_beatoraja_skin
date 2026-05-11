@@ -30,9 +30,6 @@ title.functions.load = function ()
     if is1P() then
         TITLE.WND.X = lanes.getAreaX() + lanes.getAreaW() + 2
     end
-    if isBgaOnLeft() or isFullScreenBga() then
-        TITLE.WND.Y = -10
-    end
 
     local artistText = main_state.text(14)
     if main_state.text(15) ~= "" then

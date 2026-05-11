@@ -120,17 +120,17 @@ function isDrawLargeBga()
 	return getTableValue(skin_config.option, "黒帯部分のBGA表示", 945) == 945
 end
 
-function isBgaOnLeftUpper()
-	return getTableValue(skin_config.option, "BGA枠", 940) == 940
-end
+-- function isBgaOnLeftUpper()
+-- 	return getTableValue(skin_config.option, "BGA枠", 940) == 940
+-- end
 
-function isBgaOnLeft()
-	return getTableValue(skin_config.option, "BGA枠", 940) == 941
-end
+-- function isBgaOnLeft()
+-- 	return getTableValue(skin_config.option, "BGA枠", 940) == 941
+-- end
 
-function isFullScreenBga()
-	return getTableValue(skin_config.option, "BGA枠", 940) == 942
-end
+-- function isFullScreenBga()
+-- 	return getTableValue(skin_config.option, "BGA枠", 940) == 942
+-- end
 
 function drawDiffBestScore()
 	return getTableValue(skin_config.option, "スコア差表示", 991) == 992

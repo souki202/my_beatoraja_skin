@@ -155,16 +155,10 @@ local header = {
             name = "バナー表示", item = {{name = "ON", op = 955}, {name = "OFF", op = 956}}, def = "ON"
         },
         {
-            name = "曲情報表示形式", item = {{name = "難易度リスト", op = 935}, {name = "密度", op = 936}}, def = "密度"
-        },
-        {
             name = "選曲バーの太さ", item = {{name = "太い", op = 965}, {name = "細い", op = 966}}, def = "細い"
         },
         {
             name = "EXSCORE下の表示種類", item = {{name = "次のランク", op = 980}, {name = "スコアレート", op = 981}}, def = "スコアレート"
-        },
-        {
-            name = "密度の標準桁数", item = {{name = "1桁", op = 938}, {name = "2桁", op = 939}}, def = "1桁"
         },
         {
             name = "オプションのスコア目標表示", item = {{name = "非表示", op = 940}, {name = "表示", op = 941}}, def = "非表示"
