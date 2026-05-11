@@ -156,7 +156,7 @@ end
 bomb.functions.dst = function ()
     local skin = {destination = {}}
     local dst = skin.destination
-
+    local animBlend = isTransparentBombAnimationBlackBg() and 2 or 1
     -- ピクッとするので先に出力
     do
         local ids = {"Animation1", "Animation2"}
