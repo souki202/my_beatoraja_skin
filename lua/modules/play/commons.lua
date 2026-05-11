@@ -224,13 +224,13 @@ function getLifeGaugeEffectSizeYOffset()
 	return getOffsetValueWithDefault("グルーブゲージの通知エフェクトの大きさ差分(%)", {y = 0}).y
 end
 
-function isDrawGauge100Particle()
-	return getTableValue(skin_config.option, "ゲージ100%時のキラキラ", 10070) == 10070
-end
+-- function isDrawGauge100Particle()
+-- 	return getTableValue(skin_config.option, "ゲージ100%時のキラキラ", 10070) == 10070
+-- end
 
-function getNumOfGauge100Particles()
-	return getOffsetValueWithDefault("ゲージ100%時のキラキラの数(既定値20)", {x = 20}).x
-end
+-- function getNumOfGauge100Particles()
+-- 	return getOffsetValueWithDefault("ゲージ100%時のキラキラの数(既定値20)", {x = 20}).x
+-- end
 
 function isBaseBpmTypeStartBpm()
 	return getTableValue(skin_config.option, "BPM変化の判定基準", 10081) == 10080

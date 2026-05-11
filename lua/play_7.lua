@@ -75,8 +75,8 @@ local function main()
         {id = 23, path = "../play/parts/versatilitybga/*.mp4"},
         {id = 25, path = "../play/parts/visualizer/bar.png"},
         {id = 26, path = "../play/parts/visualizer/reflection.png"},
-        {id = 40, path = "../play/parts/groove/indicators/*.png"},
-        {id = 41, path = "../play/parts/groove/gauge100/default.png"},
+        -- {id = 40, path = "../play/parts/groove/indicators/*.png"},
+        -- {id = 41, path = "../play/parts/groove/gauge100/default.png"},
         {id = 42, path = "../play/parts/groove/types/*.png"},
         {id = 43, path = "../play/parts/groove/frame/*.png"},
         {id = 50, path = "../play/parts/exscore/label/*.png"},
@@ -115,6 +115,7 @@ local function main()
 
     skin.font = {
 		{id = 0, path = "../common/fonts/SourceHanSans-Regular.otf"},
+        {id = 1, path = "../common/fonts/SourceHanSans-Medium.otf"},
     }
 
     -- 各種読み込み
