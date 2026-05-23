@@ -93,7 +93,7 @@ bga.functions.dst = function ()
 
     dst[#dst+1] = {
         id = "bgaBg", op = {171}, dst = {
-            {x = bgaX + BGA.PLAY_AREA.X, y = BGA.Y + BGA.PLAY_AREA.Y, w = BGA.PLAY_AREA.W, h = BGA.PLAY_AREA.H}
+            {x = bgaX + 2, y = BGA.Y + 2, w = BGA.PLAY_AREA.W, h = BGA.PLAY_AREA.H}
         }
     }
 

@@ -22,7 +22,7 @@ local DETAIL = {
         },
         VALUE = {
             X1 = function (self) return self.AREA.X() + 447 end,
-            X2 = function (self) return self.AREA.X() + 903 end,
+            X2 = function (self) return self.AREA.X() + 917 end,
             X_TIME = function (self) return self.AREA.X() + 1280 end,
             Y_TIME = function (self) return self.AREA.Y() + 13 end,
             Y = function (self, i) return self.AREA.Y() + 170 - self.TEXT.VALUE.INTERVAL_Y * (i - 1) end,

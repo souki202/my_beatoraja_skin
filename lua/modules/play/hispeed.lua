@@ -64,6 +64,10 @@ local HISPEED = {
         DIGIT = 4,
         W = 17,
         H = 22,
+    },
+    HYPHEN = {
+        W = 6,
+        H = 12,
     }
 }
 
@@ -90,6 +94,11 @@ local GREEN = {
         DIGIT = 4,
         W = 10,
         H = 12,
+
+        SMALL = {
+            W = 10,
+            H = 12,
+        },
     }
 }
 
@@ -116,14 +125,21 @@ local BLUE = {
         DIGIT = 4,
         W = 10,
         H = 12,
-    }
+    },
+
+    SMALL = {
+        W = 10,
+        H = 12,
+    },
 }
 
 hispeed.functions.load = function ()
     local skin = {
         image = {
             {id = "hispeedLabel", src = 0, x = 52, y = 162, w = HISPEED.OPERATION.LABEL.W, h = HISPEED.OPERATION.LABEL.H},
-            {id = "hispeedDot", src = 0, x = 2034, y = 76, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H}
+            {id = "hispeedDot", src = 0, x = 2034, y = 76, w = NUMBERS_24PX.W, h = NUMBERS_24PX.H},
+            {id = "greenHyphen", src = 0, x = 2042, y = 34, w = HISPEED.HYPHEN.W, h = HISPEED.HYPHEN.H},
+            {id = "blueHyphen", src = 0, x = 2042, y = 22, w = HISPEED.HYPHEN.W, h = HISPEED.HYPHEN.H},
         },
         value = {
             {id = "lr2Hispeed", src = 0, x = 1880, y = 76, w = NUMBERS_24PX.W * 10, h = NUMBERS_24PX.H, divx = 10, digit = HISPEED.NUM.DIGIT, ref = 10, align = 2},
