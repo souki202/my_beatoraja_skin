@@ -22,10 +22,10 @@ options.property = { -- 使用済み 10244まで
         name = "判定画像分類", item = {{name = "通常", op = 10090}, {name = "EARLY/LATE分割", op = 10091}}, def = "通常"
     },
     {
-        name = "EARLY, LATE表示", item = {{name = "OFF", op = 905}, {name = "EARLY/LATE", op = 906}, {name = "+-ms", op = 907}, {name = "+-ms(PG時非表示)", op = 908}}, def = "EARLY/LATE"
+        name = "EARLY, LATE表示", item = {{name = "OFF", op = 905}, {name = "EARLY/LATE", op = 906}, {name = "+-ms", op = 907}, {name = "+-ms(PG時非表示)", op = 908}}, def = "+-ms(PG時非表示)"
     },
     {
-        name = "低速時のEARLY, LATE位置変更基準", item = {{name = "OFF", op = 10075}, {name = "4/5", op = 10076}, {name = "3/4", op = 10077}, {name = "2/3", op = 10078}, {name = "1/2", op = 10079}}, def = "3/4"
+        name = "低速時のEARLY, LATE位置変更基準", item = {{name = "OFF", op = 10075}, {name = "4/5", op = 10076}, {name = "3/4", op = 10077}, {name = "2/3", op = 10078}, {name = "1/2", op = 10079}}, def = "OFF"
     },
     {
         name = "BPM変化の判定基準", item = {{name = "開始時BPM", op = 10080}, {name = "MAIN BPM", op = 10081}}, def = "MAIN BPM"
@@ -67,7 +67,7 @@ options.property = { -- 使用済み 10244まで
         name = "グルーヴゲージ-----------------------", item = {{name = "-", op = 19999}}
     },
     {
-        name = "グルーヴゲージの色", item = {{name = "Type1 (段位ハード赤色)", op = 10235}, {name = "Type2 (段位ハード黄色)", op = 10236}}, def = "Type1 (段位ハード赤色)"
+        name = "グルーヴゲージの色", item = {{name = "Type1 (段位ハード赤色)", op = 10235}, {name = "Type2 (段位ハード黄色)", op = 10236}}, def = "Type2 (段位ハード黄色)"
     },
     {
         name = "グルーヴゲージ隠し", item = {{name = "ON", op = 10095}, {name = "OFF", op = 10096}}, def = "OFF"
@@ -85,13 +85,13 @@ options.property = { -- 使用済み 10244まで
         name = "カスタムゲージの表示", item = {{name = "ON", op = 10170}, {name = "OFF", op = 10171}}, def = "OFF"
     },
     {
-        name = "カスタムゲージの位置", item = {{name = "上", op = 10225}, {name = "下", op = 10226}}, def = "下"
+        name = "カスタムゲージの位置", item = {{name = "上", op = 10225}, {name = "下", op = 10226}}, def = "上"
     },
     {
         name = "カスタムゲージのゲージオートシフト", item = {{name = "無し", op = 10175}, {name = "SURVIVAL TO GROOVE", op = 10176}, {name = "BEST CLEAR", op = 10177}, {name = "SELECT TO UNDER", op = 10178}}, def = "無し"
     },
     {
-        name = "カスタムゲージのゲージオートシフト最低ゲージ", item = {{name = "ASSIST EASY", op = 10240}, {name = "EASY", op = 10241}, {name = "NORMAL", op = 10242}, {name = "HARD", op = 10243}, {name = "EXHARD", op = 10244}}, def = "ASSIST EASY"
+        name = "カスタムゲージのゲージオートシフト最低ゲージ", item = {{name = "ASSIST EASY", op = 10240}, {name = "EASY", op = 10241}, {name = "NORMAL", op = 10242}, {name = "HARD", op = 10243}, {name = "EXHARD", op = 10244}}, def = "EASY"
     },
     {
         name = "レーン------------------------------", item = {{name = "-", op = 19999}}
