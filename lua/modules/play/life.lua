@@ -12,6 +12,7 @@ local life = {
     value = 0,
     lr2Gauge = {
         gasType = 1,
+        minGaugeType = 1,
         gaugeType = 1,
         initGaugeType = 1,
         values = {20, 20, 20, 100, 100, 100, 100, 100, 100}, -- LIFE.TYPESと同じ順
@@ -200,6 +201,7 @@ life.functions.initCustomGauge = function ()
     life.lr2Gauge.a = life.lr2Gauge.total / life.lr2Gauge.notes
     print("1ノーツあたりの増加量: " .. life.lr2Gauge.a)
     life.lr2Gauge.gasType = getLR2GaugeAutoShiftType()
+    life.lr2Gauge.minGaugeType = getLR2GaugeAutoShiftMinType()
 
     life_image.load()
 end
@@ -248,6 +250,7 @@ end
 
 life.functions.updateNowLR2GaugeType = function ()
     local t = life.lr2Gauge.gasType
+    local minGaugeType = math.min(life.lr2Gauge.minGaugeType or LIFE.TYPE_IDX.AEASY, LIFE.TYPE_IDX.EXHARD)
     if life.lr2Gauge.initGaugeType >= LIFE.TYPE_IDX.CLASS then
         if t == 1 then
             return
@@ -284,12 +287,13 @@ life.functions.updateNowLR2GaugeType = function ()
                 return
             end
             if life.lr2Gauge.values[LIFE.TYPE_IDX.HARD] <= 0 then
-                life.lr2Gauge.gaugeType = 3
+                life.lr2Gauge.gaugeType = math.max(LIFE.TYPE_IDX.NORMAL, minGaugeType)
             end
         elseif t == 3 then -- best clear
             -- 各ゲージでクリアしているか見る
             if life.lr2Gauge.gaugeType < LIFE.TYPE_IDX.CLASS then
-                for i = 1, LIFE.TYPE_IDX.HAZARD do
+                life.lr2Gauge.gaugeType = minGaugeType
+                for i = minGaugeType, LIFE.TYPE_IDX.HAZARD do
                     local val = life.lr2Gauge.values[i]
                     if i <= LIFE.TYPE_IDX.NORMAL then
                         -- ノーマル以下は一定以上
@@ -307,7 +311,8 @@ life.functions.updateNowLR2GaugeType = function ()
             end
         elseif t == 4 then -- select to under
             if life.lr2Gauge.gaugeType < LIFE.TYPE_IDX.CLASS then
-                for i = 1, life.lr2Gauge.initGaugeType do
+                life.lr2Gauge.gaugeType = minGaugeType
+                for i = minGaugeType, life.lr2Gauge.initGaugeType do
                     local val = life.lr2Gauge.values[i]
                     if i <= LIFE.TYPE_IDX.NORMAL then
                         -- ノーマル以下は一定以上
@@ -323,6 +328,9 @@ life.functions.updateNowLR2GaugeType = function ()
             else
                 -- 段位ゲージ 未実装
             end
+        end
+        if life.lr2Gauge.gaugeType < minGaugeType then
+            life.lr2Gauge.gaugeType = minGaugeType
         end
     end
 end

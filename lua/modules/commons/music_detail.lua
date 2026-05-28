@@ -19,6 +19,7 @@ local MUSIC_DETAIL = {
     GET_WAIT_TIME = 1000,
     CACHE_PATH = "cache/music_data.lua",
     VAR_NAME = "MUSIC_DATA_CACHE",
+    SONG_HASH_MD5_TEXT_ID = 1030,
 }
 
 local musicDetail = {
@@ -38,6 +39,13 @@ local musicDetail = {
 
 musicDetail.functions.getHttpTimer = function ()
     return 10700
+end
+
+musicDetail.functions.createCacheKey = function (title, md5)
+    if md5 ~= nil and md5 ~= "" then
+        return title .. "::md5=" .. md5
+    end
+    return title
 end
 
 musicDetail.functions.clearViewData = function ()
@@ -269,7 +277,7 @@ musicDetail.functions.guessEvent = function (url)
     return nil
 end
 
-musicDetail.functions.updateMusicDetailData = function (data, title)
+musicDetail.functions.updateMusicDetailData = function (data, title, cacheKey)
     musicDetail.musicData = data
     musicDetail.tablesString = ""
     if musicDetail.musicData.tables ~= nil then
@@ -328,7 +336,7 @@ musicDetail.functions.updateMusicDetailData = function (data, title)
         end
     end
     musicDetail.wasDrawed = true
-    musicDetail.lastGetDataTitle = title
+    musicDetail.lastGetDataTitle = cacheKey or title
 end
 
 --[[
@@ -354,11 +362,13 @@ musicDetail.functions._fetchMusicDetail = function (waitTime, time)
 
     -- cacheがヒットしたらそれをとって終了
     local title = main_state.text(12)
-    if MUSIC_DATA_CACHE[title] ~= nil then
-        if musicDetail.lastGetDataTitle ~= title then
-            print("キャッシュがヒット: " .. title)
+    local md5 = main_state.text(MUSIC_DETAIL.SONG_HASH_MD5_TEXT_ID)
+    local cacheKey = musicDetail.functions.createCacheKey(title, md5)
+    if MUSIC_DATA_CACHE[cacheKey] ~= nil then
+        if musicDetail.lastGetDataTitle ~= cacheKey then
+            print("キャッシュがヒット: " .. cacheKey)
             musicDetail.functions.clearViewData()
-            musicDetail.functions.updateMusicDetailData(MUSIC_DATA_CACHE[title], title)
+            musicDetail.functions.updateMusicDetailData(MUSIC_DATA_CACHE[cacheKey], title, cacheKey)
         end
         return
     end
@@ -373,7 +383,7 @@ musicDetail.functions._fetchMusicDetail = function (waitTime, time)
 
     if musicDetail.getMusicDataObj == nil and nowTime >= waitTime then
         -- 取得用オブジェクトが無ければ取得する
-        musicDetail.getMusicDataObj = getMusicDataAsync(title)
+        musicDetail.getMusicDataObj = getMusicDataAsync(title, md5)
         musicDetail.getMusicDataObj:runHttpRequest(function (isSuccess, data)
             -- callback関数
             if not isSuccess then
@@ -381,8 +391,8 @@ musicDetail.functions._fetchMusicDetail = function (waitTime, time)
             end
 
             myPrint("テーブル情報更新")
-            musicDetail.functions.updateMusicDetailData(data, title)
-            musicDetail.functions.addCache(data, title)
+            musicDetail.functions.updateMusicDetailData(data, title, cacheKey)
+            musicDetail.functions.addCache(data, cacheKey)
         end)
     end
 end

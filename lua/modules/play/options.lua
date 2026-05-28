@@ -2,7 +2,7 @@ local categoryBase = require("modules.commons.category_base")
 
 local options = categoryBase.createInstance()
 
-options.property = { -- 使用済み 10235まで
+options.property = { -- 使用済み 10244まで
     {
         name = "orajaの起動時のスキンタブから変更推奨", item = {{name = "-", op = 19999}}
     },
@@ -89,6 +89,9 @@ options.property = { -- 使用済み 10235まで
     },
     {
         name = "カスタムゲージのゲージオートシフト", item = {{name = "無し", op = 10175}, {name = "SURVIVAL TO GROOVE", op = 10176}, {name = "BEST CLEAR", op = 10177}, {name = "SELECT TO UNDER", op = 10178}}, def = "無し"
+    },
+    {
+        name = "カスタムゲージのゲージオートシフト最低ゲージ", item = {{name = "ASSIST EASY", op = 10240}, {name = "EASY", op = 10241}, {name = "NORMAL", op = 10242}, {name = "HARD", op = 10243}, {name = "EXHARD", op = 10244}}, def = "ASSIST EASY"
     },
     {
         name = "レーン------------------------------", item = {{name = "-", op = 19999}}
@@ -214,8 +217,8 @@ options.filepath = {
     {name = "レーンカバー", path = "../play/parts/lane/lanecover/*.png", def = "default"},
     {name = "リフトカバー", path = "../play/parts/lane/liftcover/*.png", def = "default"},
     {name = "判定画像", path = "../play/parts/judges/*.png", def = "default"},
-    {name = "判定画像(EARLY)", path = "../play/parts/judges/early/*.png", def = "text"},
-    {name = "判定画像(LATE)", path = "../play/parts/judges/late/*.png", def = "text"},
+    {name = "判定画像(EARLY)", path = "../play/parts/judges/early/*.png", def = "color"},
+    {name = "判定画像(LATE)", path = "../play/parts/judges/late/*.png", def = "color"},
     {name = "コンボ画像", path = "../play/parts/combo/*.png", def = "default"},
     {name = "グルーヴゲージのフレーム", path = "../play/parts/groove/frame/*.png", def = "default"},
     {name = "グルーヴゲージの種類の文字", path = "../play/parts/groove/types/*.png", def = "default"},
@@ -358,7 +361,7 @@ options.category = {
     },
     {
         name = "カスタムグルーヴゲージ",
-        myItems = {"カスタムゲージの表示", "カスタムゲージの位置", "カスタムゲージのゲージオートシフト"}
+        myItems = {"カスタムゲージの表示", "カスタムゲージの位置", "カスタムゲージのゲージオートシフト", "カスタムゲージのゲージオートシフト最低ゲージ"}
     },
     {
         name = "カスタムグルーヴゲージ増減設定(9999か-9999で増減0)",

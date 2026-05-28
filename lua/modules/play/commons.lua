@@ -316,6 +316,10 @@ function getLR2GaugeAutoShiftType()
 	return getTableValue(skin_config.option, "カスタムゲージのゲージオートシフト", 10175) % 5 + 1
 end
 
+function getLR2GaugeAutoShiftMinType()
+	return getTableValue(skin_config.option, "カスタムゲージのゲージオートシフト最低ゲージ", 10240) - 10239
+end
+
 -- 1:上 2:下
 function getLR2GaugePosition()
 	return getTableValue(skin_config.option, "カスタムゲージの位置", 10226) % 5 + 1

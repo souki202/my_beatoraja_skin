@@ -4,8 +4,6 @@ local commons = require("modules.play.commons")
 local image = require("modules.commons.image")
 local playlog = require("modules.commons.playlog")
 local luajava = require("luajava")
-local Color = luajava.bindClass("java.awt.Color")
-local RenderingHints = luajava.bindClass("java.awt.RenderingHints")
 
 local LIFE_IMAGE = {
     WIDTH = 630,
@@ -30,6 +28,57 @@ local life = {
 life.functions.load = function ()
     life.image = image:newInstance()
     life.image:createBufferedImage(LIFE_IMAGE.WIDTH, LIFE_IMAGE.HEIGHT)
+end
+
+local function clamp(v, minValue, maxValue)
+    return math.max(minValue, math.min(maxValue, v))
+end
+
+local function createArgb(color)
+    local a = color[4] or 1
+    if a <= 1 then a = a * 255 end
+
+    local argb =
+        math.floor(clamp(a, 0, 255) + 0.5) * 16777216 +
+        math.floor(clamp(color[1], 0, 255) + 0.5) * 65536 +
+        math.floor(clamp(color[2], 0, 255) + 0.5) * 256 +
+        math.floor(clamp(color[3], 0, 255) + 0.5)
+
+    if argb >= 2147483648 then
+        argb = argb - 4294967296
+    end
+    return argb
+end
+
+local function setPixel(img, x, y, argb)
+    x = math.floor(x + 0.5)
+    y = math.floor(y + 0.5)
+    if x < 0 or x >= LIFE_IMAGE.WIDTH or y < 0 or y >= LIFE_IMAGE.HEIGHT then
+        return
+    end
+    img:setRGB(x, y, argb)
+end
+
+local function drawPoint(img, x, y, argb)
+    local startY = -math.floor(LIFE_IMAGE.LINE_HEIGHT / 2)
+    for dy = 0, LIFE_IMAGE.LINE_HEIGHT - 1 do
+        setPixel(img, x, y + startY + dy, argb)
+    end
+end
+
+local function drawLine(img, x1, y1, x2, y2, argb)
+    local dx = x2 - x1
+    local dy = y2 - y1
+    local steps = math.ceil(math.max(math.abs(dx), math.abs(dy)))
+    if steps <= 0 then
+        drawPoint(img, x1, y1, argb)
+        return
+    end
+
+    for step = 0, steps do
+        local p = step / steps
+        drawPoint(img, x1 + dx * p, y1 + dy * p, argb)
+    end
 end
 
 life.functions.output = function ()
@@ -70,13 +119,7 @@ end
 life.functions._output = function (id)
     print("カスタムゲージの出力開始")
     local status, r = pcall(function ()
-        local g = life.image.img:getGraphics()
-        -- アンチエイリアス有効化
-        g:setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        -- 描画するグラフの太さを設定
-        local stroke = luajava.newInstance("java.awt.BasicStroke", LIFE_IMAGE.LINE_HEIGHT)
         -- そのままだと上下端で線が細くなるので領域を調整
-        local bottom = LIFE_IMAGE.HEIGHT - math.ceil(LIFE_IMAGE.LINE_HEIGHT / 2)
         local top = math.floor(LIFE_IMAGE.LINE_HEIGHT / 2)
         local range = LIFE_IMAGE.HEIGHT - LIFE_IMAGE.LINE_HEIGHT
 
@@ -86,12 +129,11 @@ life.functions._output = function (id)
         local isCompleted = playlog.getLastTimeData().notes == main_state.number(74) -- 全ノーツを判定したかどうか
         print("num of notes: " .. playlog.getLastTimeData().notes)
         print("total notes: " .. main_state.number(74))
-        g:setStroke(stroke)
         -- ゲージの種類ごとにPolyLineを引く (aeasy ~ exhardまで)
         for i = 1, 5 do
-            local x = {}
-            local y = {}
-            g:setColor(luajava.newInstance("java.awt.Color", LIFE_IMAGE.COLORS[i][1] / 255, LIFE_IMAGE.COLORS[i][2] / 255, LIFE_IMAGE.COLORS[i][3] / 255, LIFE_IMAGE.COLORS[i][4]))
+            local argb = createArgb(LIFE_IMAGE.COLORS[i])
+            local prevX = nil
+            local prevY = nil
             for j = 1, playlog.numOfOutputLogs() do
                 local v = 0
                 if num_of_data < j then -- 描画しようとしている場所のdataがないとき
@@ -99,10 +141,16 @@ life.functions._output = function (id)
                 else -- あるとき
                     v = data[j][i]
                 end
-                x[j] = j - 1
-                y[j] = top + range * (100 - v) / 100
+                local x = j - 1
+                local y = top + range * (100 - v) / 100
+                if prevX then
+                    drawLine(life.image.img, prevX, prevY, x, y, argb)
+                else
+                    drawPoint(life.image.img, x, y, argb)
+                end
+                prevX = x
+                prevY = y
             end
-            g:drawPolyline(x, y, #x)
         end
 
         life.image:outputImage(skin_config.get_path("../generated/custom_groove/groove_" .. id .. ".png"))

@@ -108,10 +108,14 @@ end
     楽曲情報をHTTPで取得する
 
     @param {string} title 楽曲名
+    @param {string} md5 譜面のMD5
     @param {function(bool, array)} callback 取得完了時のcallback関数 成功時は第一引数にtrueが入る. 第二引数は取得したデータ
 ]]
-function getMusicDataAsync(title)
+function getMusicDataAsync(title, md5)
     local url = "https://bmsapi.tori-blog.net/?title=" .. URLEncoder.encode(title) .. "&format=lua&v=2"
+    if md5 ~= nil and md5 ~= "" then
+        url = url .. "&md5=" .. URLEncoder.encode(md5)
+    end
     return {
         isConnecting = false,
         wasSuccess = false,

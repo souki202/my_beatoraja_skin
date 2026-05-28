@@ -12,7 +12,6 @@ image.newInstance = function ()
         createBufferedImage = function (self, width, height)
             local status, _ = pcall(function ()
                 self.img = luajava.newInstance("java.awt.image.BufferedImage", width, height, 6) -- 6はTYPE_4BYTE_ABGR
-                self.g = self.img:getGraphics()
             end)
             if not status then
                 print("BufferedImageの作成に失敗しました.")
