@@ -11,7 +11,7 @@ local songInfo = {
 }
 
 local SONG_INFO = {
-    DIR_PATH = "../userdata/song/"
+    DIR_PATH = "userdata/song/"
 }
 
 songInfo.functions.loadChartInfo = function (fullTitle, totalNotes)

@@ -258,9 +258,10 @@ function globalInitialize(skin)
     userData.escapedName = string.gsub(userData.name, "([\\/:*?\"<>|])", "_")
     myPrint("プレイヤー名: " .. userData.name)
     myPrint("使用不能文字置換後: " .. userData.escapedName)
-    userData.filePath = skin_config.get_path("../userdata/data") .. "_" .. userData.escapedName
-    userData.backupPath = skin_config.get_path("../userdata/backup/data") .. "_" .. userData.escapedName .. string.format("%10d", os.time())
-    PLAY_LOG_PATH = skin_config.get_path("../userdata/playlog.log")
+    -- beatoraja 0.8.9以降はLuaから読み書きできるのがluaディレクトリ配下のみなので, lua/userdataに保存する
+    userData.filePath = skin_config.get_path("userdata/data") .. "_" .. userData.escapedName
+    userData.backupPath = skin_config.get_path("userdata/backup/data") .. "_" .. userData.escapedName .. string.format("%10d", os.time())
+    PLAY_LOG_PATH = skin_config.get_path("userdata/playlog.log")
     print("使用ファイルパス: " .. userData.filePath)
     -- 読み込み
     pcall(userData.load)

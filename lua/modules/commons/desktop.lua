@@ -1,23 +1,17 @@
-local luajava = require("luajava")
-
-local Desktop = luajava.bindClass("java.awt.Desktop")
-
 local desktop = {
     functions = {}
 }
+
+-- beatoraja 0.8.9以降はluajava(java.awt.Desktop)が使えず, スキンから任意のURLをブラウザで開く手段が無い
+desktop.functions.canOpenUrl = function ()
+    return false
+end
 
 desktop.functions.openUrlByBrowser = function (url)
     if url == nil or url == "" then
         return
     end
-
-    local isSuccess, _ = pcall(function ()
-        local uri = luajava.newInstance("java.net.URI", url);
-        Desktop:getDesktop():browse(uri)
-    end)
-    if not isSuccess then
-        print("urlのオープンに失敗しました: " .. url)
-    end
+    print("このバージョンのbeatorajaではスキンからURLを開けません: " .. url)
 end
 
 return desktop.functions

@@ -84,9 +84,9 @@ local volumes = {
 
 volumes.functions.getWindowTimerId = function() return 10600 end
 
-function openVolumes()
+function openVolumes(arg)
     myPrint("Volumeウィンドウ open")
-    if isRightClicking() then
+    if isRightClickArg(arg) then
         switchMenu()
         return
     end
@@ -105,8 +105,8 @@ function closeVolumes()
     volumes.closeTime = VOLUMES.ANIMATION_TIME * 1000
 end
 
-function closeVolumesRightClickEvent()
-    if isRightClicking() == true then
+function closeVolumesRightClickEvent(arg)
+    if isRightClickArg(arg) then
         closeVolumes()
     end
 end
@@ -136,9 +136,9 @@ volumes.functions.load = function()
 
     local skin = {
         customEvents = {
-            {id = 1020, action = "openVolumes()"},
+            {id = 1020, action = "openVolumes(...)"},
             {id = 1021, action = "closeVolumes()"},
-            {id = 1022, action = "closeVolumesRightClickEvent()"},
+            {id = 1022, action = "closeVolumesRightClickEvent(...)"},
         },
         image = {
             {id = "blackVolumesClose", src = 999, x = 1, y = 0, w = 1, h = 1, act = 1021},

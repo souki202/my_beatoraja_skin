@@ -1,4 +1,5 @@
-math.randomseed(os.time())
+-- スキン設定画面(サンドボックス)ではosが無いので確認する
+if os then math.randomseed(os.time()) end
 local random = math.random
 
 local function generate()

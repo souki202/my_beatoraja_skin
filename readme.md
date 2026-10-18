@@ -14,7 +14,32 @@ result3: SpaceShip
 
 ## サポートする本体バージョン
 
-beatoraja 0.8.8
+beatoraja 0.8.9
+
+## beatoraja 0.8.9 への対応について
+
+beatoraja 0.8.9 では Lua スキンから Java の機能を直接呼ぶこと(luajava)ができなくなり, Lua から読み書きできるファイルも `.luaskin` のあるフォルダ(本スキンでは `SocialSkin/lua`)の中だけに制限されました. そのため, 以下のフォルダを `lua` フォルダの中へ移動しています.
+
+| 旧 | 新 |
+| --- | --- |
+| SocialSkin/userdata | SocialSkin/lua/userdata |
+| SocialSkin/generated | SocialSkin/lua/generated |
+| SocialSkin/sounds | SocialSkin/lua/sounds |
+| SocialSkin/select/background/slideshow | SocialSkin/lua/slideshow |
+
+以前のバージョンから更新する場合は, 次の作業を行ってください.
+
+* ランク等のユーザデータを引き継ぐ場合, 旧 `SocialSkin/userdata` の中身を `SocialSkin/lua/userdata` へ移動してください.
+* スライドショーの画像は `SocialSkin/lua/slideshow` へ移動してください.
+* 旧 `SocialSkin/generated`, `SocialSkin/sounds`, `SocialSkin/select/background/slideshow` は削除して構いません.
+
+また, beatoraja 側の制限により以下の機能が変わっています.
+
+* 選曲画面の楽曲情報の外部リンク(楽曲リンク・イベントページ等)はブラウザで開けなくなりました. (アイコンは無効表示になります)
+* 難易度推定表の自動更新はできなくなりました. 利用する場合は https://difficulty-estimates.s3.ap-northeast-1.amazonaws.com/estimates.lua を `SocialSkin/lua/cache/estimates.lua` として手動で配置してください.
+* 楽曲DBの通信が同期処理になったため, 楽曲情報の取得時に一瞬画面が止まることがあります. 気になる場合は楽曲DB機能をオフにしてください.
+* ヘルプの項目一覧はドラッグでスクロールし, クリックしてから少し経ってから項目が開くようになりました. また一覧上での右クリックは閉じる操作になりません. (一覧の外側を右クリックしてください)
+* カスタムグルーヴゲージの画像は `lua/generated/custom_groove` の60個のファイル(合計約12MB)を使い回すようになりました.
 
 なお, スキン自体のサポートは最新バージョンのみとなります. スキンのバージョンは, 本スキン選曲画面右下のメニュー->ヘルプで確認できます.
 
@@ -76,7 +101,7 @@ BD, PR, MS判定で, ゲージの増加(減少)量を設定できます. 増加�
 
 ### ランクが初期化されている
 
-ユーザデータの読み込みに失敗した可能性があります. beatorajaの再起動, またはPCを再起動してみてください. もしユーザデータが初期化状態で上書きされてしまった場合, SocialSkin/userdata/backupから復元してください. 名前順で並べた場合は最も下のデータが新しいデータになります.
+ユーザデータの読み込みに失敗した可能性があります. beatorajaの再起動, またはPCを再起動してみてください. もしユーザデータが初期化状態で上書きされてしまった場合, SocialSkin/lua/userdata/backupから復元してください. 名前順で並べた場合は最も下のデータが新しいデータになります.
 
 ### ユーザデータが保存されない
 

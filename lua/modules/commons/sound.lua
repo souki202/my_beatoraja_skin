@@ -1,38 +1,32 @@
-local luajava = require("luajava")
+local main_state = require("main_state")
 
-local gdx = luajava.bindClass("com.badlogic.gdx.Gdx")
-local audio = nil
-
+-- beatoraja 0.8.9以降はluajavaが使えないため, main_stateのaudio_*関数を使用する
+-- パスはスキンのluaディレクトリ配下のみ再生可能
 -- できればdisposeできる場面で (さらに止めそこねると鳴り続けるのでループはさせない)
--- ゲームを起動してから終了するまでAudioDriverのインスタンスは維持されるので, disposeしなくても一応リークしない(メモリのリソースが再利用されるだけ)
--- ただdisposeしないとorajaを終了するまで, 本スキンから破棄できる形でリソースが残る
 Sound = {
     init = function()
-        pcall(function() audio = gdx.app:getApplicationListener():getAudioProcessor() end)
     end,
 
     -- @param  string path 音源のファイルパス
-    -- @param  float vol 音量 最大1.0
+    -- @param  float vol 音量 最大1.0 (システム音量に乗算される)
     play = function(path, vol, loop)
-        pcall(function() audio:play(path, vol, loop) end)
+        if loop then
+            pcall(main_state.audio_loop, path, vol)
+        else
+            pcall(main_state.audio_play, path, vol)
+        end
     end,
 
-    -- playLoop = function(path)
-    --     if Sound.isPlaying(path) then
-    --         audio:stop(path)
-    --     end
-    --     audio:play(path, 1,0, true)
-    -- end,
-
-    isPlaying = function(path)
-        return pcall(function() return audio:isPlaying(path) end)
+    -- 0.8.9では再生中かどうかは取得できない
+    isPlaying = function(_)
+        return false
     end,
 
     stop = function(path)
-        pcall(function() audio:stop(path) end)
+        pcall(main_state.audio_stop, path)
     end,
 
     dispose = function(path)
-        pcall(function() audio:dispose(path) end)
+        pcall(main_state.audio_dispose, path)
     end
 }

@@ -1,9 +1,5 @@
 require("modules.commons.define")
 require("modules.result.commons")
-local luajava = require("luajava")
-local Color = luajava.bindClass("java.awt.Color")
-local RenderingHints = luajava.bindClass("java.awt.RenderingHints")
-local image = require("modules.commons.image")
 local main_state = require("main_state")
 local utils = require("modules.commons.utility")
 

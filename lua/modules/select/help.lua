@@ -481,30 +481,62 @@ local help = {
     functions = {},
 }
 
+-- beatoraja 0.8.9以降はLuaからマウスの状態を取得できないため, 操作領域に透明なスライダーを置き,
+-- そのスライダーの値(クリック/ドラッグ時のY座標)から操作を判定する.
+-- ボタンを離したことは分からないので, 一定時間ドラッグが無ければ操作終了とみなす
 local operationState = {
     isClicking = false,
-    isScrollStop = false,
-    clickTime = 0,
+    startY = 0,
+    lastY = 0,
+    lastTime = 0,
     dy = 0,
     numAbsMove = 0,
     totalY = 0
+}
+
+local OPERATION = {
+    END_WAIT_TIME = 200, -- ms
+    CLICK_MOVE_THRESHOLD = 20,
 }
 
 local function getIsInRect(x, y, tx, ty, w, h)
     return tx <= x and x <= tx + w and ty <= y and y <= ty + h
 end
 
-function itemListOperation()
-    if isLeftClicking() == true then
-        myPrint("ヘルプ操作領域クリック")
-        operationState.isClicking = true
-    elseif isRightClicking() == true then
+-- 操作領域の背景ボタン (スライダーの外側の判定用)
+function itemListOperation(arg)
+    if isRightClickArg(arg) then
         if help.isOpenDescription then
-            help.functions.closeDetail()
+            help.functions.closeDescription()
         else
             closeHelpList()
         end
     end
+end
+
+function helpOperationSliderValue()
+    return 0
+end
+
+-- @param value number 操作領域の下端を0, 上端を1とした位置
+function helpOperationSliderEvent(value)
+    if not help.hasOpened or help.isOpenDescription then
+        return
+    end
+    local y = help.WND.Y + help.ITEM.AREA.Y + value * help.ITEM.AREA.H
+    if not operationState.isClicking then
+        myPrint("ヘルプ操作領域クリック")
+        operationState.isClicking = true
+        operationState.startY = y
+        operationState.numAbsMove = 0
+        operationState.dy = 0
+    else
+        local dy = y - operationState.lastY
+        operationState.numAbsMove = operationState.numAbsMove + math.abs(dy)
+        operationState.dy = operationState.dy + dy
+    end
+    operationState.lastY = y
+    operationState.lastTime = main_state.time()
 end
 
 -- yは操作領域最上部項目の座標からの相対座標
@@ -513,11 +545,11 @@ local function yToTime(y)
 end
 
 -- @return number, number HEADERのインデックス, 項目のインデックス (非選択なら0)
-help.functions.selectItem = function()
-    local x, y = getMousePos()
+-- @param y number クリックしたスキン上のY座標 (X座標は操作領域内として扱う)
+help.functions.selectItem = function(y)
+    local x = 0
     -- 操作領域右上になるようになおす
-    x = x - (help.WND.X + help.ITEM.AREA.X)
-    y = HEIGHT - y - (help.WND.Y + help.ITEM.AREA.START_Y)
+    y = y - (help.WND.Y + help.ITEM.AREA.START_Y)
     myPrint(x, y)
 
     for i, item in pairs(help.TEXTS) do
@@ -547,11 +579,19 @@ end
 
 help.functions.updateOperationArea = function()
     if operationState.isClicking then
-        if isLeftClicking() == false then
+        -- スクロール (マウスを下に動かすと項目も下に動く)
+        if operationState.dy ~= 0 then
+            if operationState.totalY > help.ITEM.AREA.H then
+                help.scrollY = help.scrollY - operationState.dy
+            end
+            operationState.dy = 0
+        end
+
+        if main_state.time() - operationState.lastTime > OPERATION.END_WAIT_TIME * 1000 then
             operationState.isClicking = false
-            if operationState.numAbsMove <= 20 then
+            if operationState.numAbsMove <= OPERATION.CLICK_MOVE_THRESHOLD then
                 -- メニューを選択する(あれば)
-                local h, i = help.functions.selectItem()
+                local h, i = help.functions.selectItem(operationState.startY)
                 myPrint("選択情報", "header: " .. h, "item: " .. i)
 
                 -- openする
@@ -565,15 +605,6 @@ help.functions.updateOperationArea = function()
             end
 
             operationState.numAbsMove = 0
-        else
-            operationState.dy = getDeltaY()
-            operationState.numAbsMove = operationState.numAbsMove + math.abs(operationState.dy + getDeltaX())
-            -- スクロールする高さがなければ終わり
-            if operationState.totalY <= help.ITEM.AREA.H then
-                operationState.dy = 0
-                return
-            end
-            help.scrollY = help.scrollY + operationState.dy
         end
     end
     help.scrollY = math.min(math.max(math.min(help.ITEM.AREA.H - operationState.totalY, 0), help.scrollY), 0)
@@ -685,8 +716,8 @@ function helpTimer()
 end
 
 
-function openHelpList()
-    if isRightClicking() then
+function openHelpList(arg)
+    if isRightClickArg(arg) then
         switchMenu()
         return
     end
@@ -733,8 +764,8 @@ help.functions.setTimeDescription = function(time)
     end
 end
 
-function closeDescriptionRightClickEvent()
-    if isRightClicking() == true then
+function closeDescriptionRightClickEvent(arg)
+    if isRightClickArg(arg) then
         help.functions.closeDescription()
     end
 end
@@ -772,10 +803,11 @@ help.functions.loadHelpItem = function(skin)
     loadPopupWindowSelect(skin)
 
     -- ボタン
-    table.insert(skin.customEvents, {id = 1000, action = "openHelpList()"})
+    -- 引数はクリックしたボタン (左:1, 右:-1)
+    table.insert(skin.customEvents, {id = 1000, action = "openHelpList(...)"})
     table.insert(skin.customEvents, {id = 1001, action = "closeHelpList()"})
-    table.insert(skin.customEvents, {id = 1002, action = "itemListOperation()"})
-    table.insert(skin.customEvents, {id = 1003, action = "closeDescriptionRightClickEvent()"})
+    table.insert(skin.customEvents, {id = 1002, action = "itemListOperation(...)"})
+    table.insert(skin.customEvents, {id = 1003, action = "closeDescriptionRightClickEvent(...)"})
     table.insert(skin.customEvents, {id = 1004, action = "closeDescriptionClickEvent()"})
 
     loadCloseButtonSelect(skin, "helpCloseButton", 1001)
@@ -788,6 +820,14 @@ help.functions.loadHelpItem = function(skin)
     -- メニュー開閉移動用のダミー
     table.insert(skin.image, {
         id = "blankHelpOperation", src = 999, x = 1, y = 0, w = 1, h = 1, act = 1002
+    })
+    -- クリック位置取得用の透明なスライダー
+    if skin.slider == nil then
+        skin.slider = {}
+    end
+    table.insert(skin.slider, {
+        id = "helpOperationSlider", src = 999, x = 1, y = 0, w = 1, h = 1,
+        angle = 0, range = help.ITEM.AREA.H, value = helpOperationSliderValue, event = helpOperationSliderEvent
     })
 
     -- 各項目の背景
@@ -874,6 +914,14 @@ help.functions.setWindowDestination = function(skin)
             {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0, a = 0},
             {time = help.ANIMATION_TIME - 1},
             {time = help.ANIMATION_TIME, x = help.WND.X + help.ITEM.AREA.X, y = help.WND.Y + help.ITEM.AREA.Y, w = help.ITEM.AREA.W, h = help.ITEM.AREA.H}
+        }
+    })
+    -- スライダーはyからrangeの範囲でクリックを受け付ける
+    table.insert(skin.destination, {
+        id = "helpOperationSlider", timer = help.WINDOW_TIMER, loop = help.ANIMATION_TIME, dst = {
+            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0, a = 0},
+            {time = help.ANIMATION_TIME - 1},
+            {time = help.ANIMATION_TIME, x = help.WND.X + help.ITEM.AREA.X, y = help.WND.Y + help.ITEM.AREA.Y, w = help.ITEM.AREA.W, h = 1}
         }
     })
 end

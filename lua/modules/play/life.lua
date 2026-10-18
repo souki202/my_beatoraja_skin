@@ -335,8 +335,24 @@ life.functions.updateNowLR2GaugeType = function ()
     end
 end
 
+-- beatoraja 0.8.9ではスキン読み込み時点でゲージが生成されておらず, main_state.gauge_type()が例外になる.
+-- その場合は選択中のゲージオプションとコースかどうかから推定する (GrooveGauge.createと同じ変換)
+-- @return number, boolean ゲージタイプ(0始まり), 実際のゲージから取得できたか
+local function getGaugeType()
+    local ok, t = pcall(main_state.gauge_type)
+    if ok and type(t) == "number" then
+        return t, true
+    end
+    local okIdx, idx = pcall(main_state.event_index, 40) -- ゲージオプション
+    t = (okIdx and type(idx) == "number") and idx or 2
+    if main_state.option(290) then -- コース
+        if t <= 2 then t = 6 elseif t == 3 then t = 7 else t = 8 end
+    end
+    return t, false
+end
+
 life.functions.getIsEnableLR2Gauge = function ()
-    return isOutputLog() and getIsEnableLR2Gauge() and main_state.gauge_type() + 1 < LIFE.TYPE_IDX.CLASS
+    return isOutputLog() and getIsEnableLR2Gauge() and getGaugeType() + 1 < LIFE.TYPE_IDX.CLASS
 end
 
 life.functions.load = function ()
@@ -360,8 +376,19 @@ life.functions.load = function ()
         customTimers = {
             {
                 id = 10010, timer = function()
-                    life.gaugeType = main_state.gauge_type()
-                    life.value = main_state.gauge()
+                    local gaugeType, isActual = getGaugeType()
+                    life.gaugeType = gaugeType
+                    -- 読み込み時は推定値なので, 実際のゲージが取れたら初期ゲージタイプを確定する
+                    if isActual and not life.lr2Gauge.isGaugeTypeConfirmed then
+                        life.lr2Gauge.isGaugeTypeConfirmed = true
+                        if life.lr2Gauge.initGaugeType ~= gaugeType + 1 then
+                            life.lr2Gauge.initGaugeType = gaugeType + 1
+                            life.lr2Gauge.gaugeType = life.lr2Gauge.initGaugeType
+                            print("初期ゲージタイプ(確定): " .. life.lr2Gauge.initGaugeType)
+                        end
+                    end
+                    local ok, value = pcall(main_state.gauge)
+                    life.value = ok and value or 0
                     return 0
                 end
             },
@@ -439,7 +466,7 @@ life.functions.load = function ()
             end
         })
     end
-    life.lr2Gauge.initGaugeType = main_state.gauge_type() + 1
+    life.lr2Gauge.initGaugeType = getGaugeType() + 1
     life.lr2Gauge.gaugeType = life.lr2Gauge.initGaugeType
     print("初期ゲージタイプ: " .. life.lr2Gauge.initGaugeType)
     return skin

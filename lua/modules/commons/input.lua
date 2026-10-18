@@ -1,52 +1,66 @@
-local luajava = require("luajava")
+local main_state = require("main_state")
 
-local Gdx = luajava.bindClass("com.badlogic.gdx.Gdx")
-local Input = luajava.bindClass("com.badlogic.gdx.Input")
+-- beatoraja 0.8.9以降はluajava(Gdx.input)が使えないため, main_state.key_pressedで代替する
+-- マウスの状態はLuaから取得できなくなったため, クリック判定はイベントの引数(左:1, 右:-1)を使うこと
 
-function getInput()
-    return Input
+-- com.badlogic.gdx.Input.Keys のキーコード
+KEY_CODE = {
+    UP = 19,
+    DOWN = 20,
+    LEFT = 21,
+    RIGHT = 22,
+    ENTER = 66,
+}
+
+-- クリックイベントの引数 (SkinObject.mousePressed参照)
+CLICK_ARG = {
+    LEFT = 1,
+    RIGHT = -1,
+}
+
+-- 押した瞬間の判定用. 同一フレームで何度呼ばれても同じ結果を返すようにフレーム時刻でキャッシュする
+local keyStates = {}
+
+local function isKeyJustPressed(keyCode)
+    local now = main_state.time()
+    local state = keyStates[keyCode]
+    if state == nil then
+        state = {time = nil, now = false, prev = false}
+        keyStates[keyCode] = state
+    end
+    if state.time ~= now then
+        state.time = now
+        state.prev = state.now
+        state.now = main_state.key_pressed(keyCode)
+    end
+    return state.now and not state.prev
 end
 
 function isKeyPressed(keyCode)
-    return Gdx.input:isKeyPressed(keyCode)
+    return main_state.key_pressed(keyCode)
 end
 
 function isPressedEnter()
-    return Gdx.input:isKeyPressed(Input.Keys.Enter)
+    return main_state.key_pressed(KEY_CODE.ENTER)
 end
 
-function isLeftClicking()
-    return Gdx.input:isButtonPressed(Input.Buttons.LEFT)
-end
-
-function isRightClicking()
-    return Gdx.input:isButtonPressed(Input.Buttons.RIGHT)
+-- @param arg クリックイベントの引数
+function isRightClickArg(arg)
+    return arg ~= nil and tonumber(arg) == CLICK_ARG.RIGHT
 end
 
 function isPressedUp()
-    return Gdx.input:isKeyJustPressed(Input.Keys.UP)
+    return isKeyJustPressed(KEY_CODE.UP)
 end
 
 function isPressedDown()
-    return Gdx.input:isKeyJustPressed(Input.Keys.DOWN)
+    return isKeyJustPressed(KEY_CODE.DOWN)
 end
 
 function isPressedLeft()
-    return Gdx.input:isKeyJustPressed(Input.Keys.LEFT)
+    return isKeyJustPressed(KEY_CODE.LEFT)
 end
 
 function isPressedRight()
-    return Gdx.input:isKeyJustPressed(Input.Keys.RIGHT)
-end
-
-function getDeltaY()
-    return Gdx.input:getDeltaY()
-end
-
-function getDeltaX()
-    return Gdx.input:getDeltaX()
-end
-
-function getMousePos()
-    return Gdx.input:getX(), Gdx.input:getY()
+    return isKeyJustPressed(KEY_CODE.RIGHT)
 end

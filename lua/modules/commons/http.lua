@@ -1,41 +1,31 @@
-local luajava = require("luajava")
+local main_state = require("main_state")
 require("modules.commons.url_encoder")
 
-local function httpConnection(url)
-    local lines = {}
-    local url2 = luajava.newInstance("java.net.URL", url);
-    local urlConn = url2:openConnection()
-    urlConn:setRequestMethod("GET")
-    urlConn:setConnectTimeout(200) -- バージョンチェックは失敗しても良いので, タイムアウトが早くても問題ない
-    if pcall(function() urlConn:connect() end) then
-        local status = urlConn:getResponseCode()
-        if status == 200 then
-            local reader = luajava.newInstance("java.io.BufferedReader", luajava.newInstance("java.io.InputStreamReader", urlConn:getInputStream(), "utf8"))
-            -- 1行ごとに配列へ
-            local hasLine = true
-            while hasLine do
-                local line = reader:readLine()
-                if line then
-                    table.insert(lines, line)
-                else
-                    hasLine = false
-                end
-            end
-        else
-            print("HTTPステータスが正常ではありません: " .. status)
-        end
-    else
-        print("connectに失敗しました")
-        return
+-- beatoraja 0.8.9以降はluajavaが使えないため, main_state.http_get_linesを使用する
+-- 制約: GETのみ, タイムアウト最大5000ms, 最大1024行・65536文字, 同期実行(スレッド不可)
+local function httpGetLines(url, timeout)
+    local ok, lines, err = pcall(main_state.http_get_lines, url, timeout)
+    if not ok then
+        print("HTTP通信に失敗しました: " .. tostring(lines))
+        return nil
+    end
+    if lines == nil then
+        print("HTTP通信に失敗しました: " .. tostring(err))
+        return nil
     end
     return lines
+end
+
+local function httpConnection(url)
+    -- バージョンチェックは失敗しても良いので, タイムアウトが早くても問題ない
+    return httpGetLines(url, 200)
 end
 
 -- 各スキンのバージョンを確認する
 -- @param  {array} versions 現在のバージョンの文字列の配列 手前から, セレクト, リザルト, decide, プレイ, リザルト2
 -- @return {boolean} 新しいバージョンがあるかの配列. それぞれのindexは上に対応しているか, nil 取得に失敗すれば空の配列
 function skinVersionCheck(nowVersions)
-    local err, v = pcall(httpConnection, "https://tori-blog.net/uploads/skin/version")
+    local err, v = pcall(httpConnection, "https://tori-blog.net/skin/version")
     local isNews = {}
     if v and #v > 0 then
         local n = math.min(#v, #nowVersions)
@@ -45,7 +35,8 @@ function skinVersionCheck(nowVersions)
                 isNews[i] = false
                 break
             else
-                isNews[i] = tonumber(nowVersions[i]) < tonumber(v[i])
+                local now, latest = tonumber(nowVersions[i]), tonumber(v[i])
+                isNews[i] = now ~= nil and latest ~= nil and now < latest
             end
         end
     else
@@ -121,53 +112,25 @@ function getMusicDataAsync(title, md5)
         wasSuccess = false,
         data = {},
 
+        -- 0.8.9以降はスレッドを作れないため同期実行となる (タイムアウトまで描画が止まる)
         runHttpRequest = function (self, callback)
             -- 前回の接続が終わっていなければ終了
             if self.isConnecting == true then
                 return
             end
             self.isConnecting = true
-            local runnable = {
-                run = function ()
-                    print("楽曲情報取得開始: " .. title)
-                    print("url: " .. url)
-                    self.wasSuccess = false
-                    local url2 = luajava.newInstance("java.net.URL", url);
-                    local urlConn = url2:openConnection()
-                    urlConn:setRequestMethod("GET")
-                    urlConn:setConnectTimeout(1000)
-                    if pcall(function() urlConn:connect() end) then
-                        local status = urlConn:getResponseCode()
-                        if status == 200 then
-                            print("楽曲情報接続完了: " .. title)
-                            local reader = luajava.newInstance("java.io.BufferedReader", luajava.newInstance("java.io.InputStreamReader", urlConn:getInputStream(), "utf8"))
-                            local lines = {}
-                            -- 1行ごとに配列へ
-                            local hasLine = true
-                            while hasLine do
-                                local line = reader:readLine()
-                                if line then
-                                    lines[#lines+1] = line
-                                else
-                                    hasLine = false
-                                end
-                            end
-                            -- parseする
-                            self.wasSuccess, self.data = pcall(parseMusicData, lines)
-                            print("楽曲情報取得完了")
-                        else
-                            print("HTTPステータスが正常ではありません: " .. status)
-                        end
-                    else
-                        print("connectに失敗しました")
-                    end
-                    self.isConnecting = false
-                    callback(self.wasSuccess, self.data)
-                end
-            }
-            local runnableProxy = luajava.createProxy("java.lang.Runnable", runnable)
-            local t = luajava.newInstance("java.lang.Thread", runnableProxy)
-            t:start()
+            print("楽曲情報取得開始: " .. title)
+            print("url: " .. url)
+            self.wasSuccess = false
+            local lines = httpGetLines(url, 1000)
+            if lines then
+                print("楽曲情報接続完了: " .. title)
+                -- parseする
+                self.wasSuccess, self.data = pcall(parseMusicData, lines)
+                print("楽曲情報取得完了")
+            end
+            self.isConnecting = false
+            callback(self.wasSuccess, self.data)
         end,
     }
 end
@@ -177,36 +140,9 @@ end
     必ずpcallに囲んで呼ぶこと
 ]]
 function updateEstimateLua(savePath)
-    local url = "https://difficulty-estimates.s3.ap-northeast-1.amazonaws.com/estimates.lua"
-
-    print("難易度推定取得開始")
-    print("url: " .. url)
-    local url2 = luajava.newInstance("java.net.URL", url);
-    local urlConn = url2:openConnection()
-    urlConn:setRequestMethod("GET")
-    urlConn:setConnectTimeout(1000)
-    if pcall(function() urlConn:connect() end) then
-        local status = urlConn:getResponseCode()
-        if status == 200 then
-            print("難易度推定取得完了")
-            -- 全部読み込む
-            local reader = luajava.newInstance("java.io.BufferedReader", luajava.newInstance("java.io.InputStreamReader", urlConn:getInputStream(), "utf8"))
-            local str = ""
-            -- 1行ごとに配列へ
-            local hasLine = true
-            while hasLine do
-                local line = reader:readLine()
-                if line then
-                    str = str .. line
-                else
-                    hasLine = false
-                end
-            end
-            -- luaファイルに出力
-            local f = io.open(skin_config.get_path(savePath), "w")
-            f:write(str)
-            f:close()
-        end
-    end
-
+    -- beatoraja 0.8.9のHTTP API(main_state.http_get_lines)は最大1024行・65536文字までしか取得できず,
+    -- 推定表(約500KB)は取得できないため自動更新は行わない.
+    -- 手動で https://difficulty-estimates.s3.ap-northeast-1.amazonaws.com/estimates.lua を
+    -- lua/cache/estimates.lua に配置すれば利用できる
+    error("難易度推定表の自動更新はbeatoraja 0.8.9以降では利用できません: " .. tostring(savePath))
 end

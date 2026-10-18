@@ -5,6 +5,7 @@ local main_state = require("main_state")
 local ranking = require("modules.result.ranking")
 local lamps = require("modules.result.lamps")
 local scoreGraph = require("modules.result.score_graph")
+local customGroove = require("modules.commons.custom_groove")
 
 
 local notesGraph = {
@@ -225,30 +226,15 @@ notesGraph.functions.load = function ()
         imgs[#imgs+1] = {id = v .. "TabButton", src = 999, x = 0, y = 0, w = 1, h = 1, act = function () notesGraph.functions.switchTab(i) end}
     end
 
-    -- カスタムグルーヴゲージ読み込み+画像削除
+    -- カスタムグルーヴゲージ読み込み
     if getIsViewCostomGrooveGauge() then
-        local f = io.open(skin_config.get_path("../generated/custom_groove/id.txt"), "r")
-        local id = ""
-        if f then
-            for line in f:lines() do
-                id = line
-            end
+        -- 0.8.9以降は画像を削除できないため, 読み込んだらIDを消去して次回以降に古い画像を表示しないようにする
+        local id = customGroove.takeImageId()
+        if id then
             print("カスタムグルーヴゲージ 画像ID: " .. id)
             skin.source = {
-                {id = 8, path = "../generated/custom_groove/groove_" .. id .. ".png"}
+                {id = 8, path = customGroove.getImagePath(id)}
             }
-
-            -- そのままだと画像が増殖していくのでカスタムグルーヴゲージの結果を削除
-            local isDeleted = false
-            table.insert(skin.customTimers, {
-                id = 10103,
-                timer = function ()
-                    if main_state.timer(2) > 0 and not isDeleted then
-                        isDeleted = true
-                        os.remove(skin_config.get_path("../generated/custom_groove/groove_" .. id .. ".png"))
-                    end
-                end
-            })
         end
     end
 

@@ -237,33 +237,33 @@ stagefile.functions.dst = function ()
             },
             -- イベントブラウザで開くアイコン
             {
-                id = "openEventIcon", draw = function () return musicDetail.getEventData().musicList ~= "" and main_state.option(2) end, dst = {
+                id = "openEventIcon", draw = function () return desktop.canOpenUrl() and musicDetail.getEventData().musicList ~= "" and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.EVENT.OPEN_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.OPEN_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H}
                 }
             },
             {
-                id = "openEventIcon", draw = function () return musicDetail.getEventData().musicList == "" and main_state.option(2) end, dst = {
+                id = "openEventIcon", draw = function () return (not desktop.canOpenUrl() or musicDetail.getEventData().musicList == "") and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.EVENT.OPEN_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.OPEN_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H, a = 96}
                 }
             },
             {
-                id = "openEventSpecialPageIcon", draw = function () return musicDetail.getEventData().url ~= "" and main_state.option(2) end, dst = {
+                id = "openEventSpecialPageIcon", draw = function () return desktop.canOpenUrl() and musicDetail.getEventData().url ~= "" and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.EVENT.LIST_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.LIST_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.LIST_ICON.W, h = STAGE_FILE.EVENT.LIST_ICON.H}
                 }
             },
             {
-                id = "openEventSpecialPageIcon", draw = function () return musicDetail.getEventData().url == "" and main_state.option(2) end, dst = {
+                id = "openEventSpecialPageIcon", draw = function () return (not desktop.canOpenUrl() or musicDetail.getEventData().url == "") and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.EVENT.LIST_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.LIST_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.LIST_ICON.W, h = STAGE_FILE.EVENT.LIST_ICON.H, a = 96}
                 }
             },
             -- 楽曲ブラウザで開くアイコン
             {
-                id = "openMusicLinkIcon", draw = function () return musicDetail.getMusicLink() ~= "" and main_state.option(2) end, dst = {
+                id = "openMusicLinkIcon", draw = function () return desktop.canOpenUrl() and musicDetail.getMusicLink() ~= "" and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.MUSIC_ICON.X(STAGE_FILE), y = STAGE_FILE.MUSIC_ICON.Y(STAGE_FILE), w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H}
                 }
             },
             {
-                id = "openMusicLinkIcon", draw = function () return musicDetail.getMusicLink() == "" and main_state.option(2) end, dst = {
+                id = "openMusicLinkIcon", draw = function () return (not desktop.canOpenUrl() or musicDetail.getMusicLink() == "") and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.MUSIC_ICON.X(STAGE_FILE), y = STAGE_FILE.MUSIC_ICON.Y(STAGE_FILE), w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H, a = 96}
                 }
             },

@@ -1,10 +1,11 @@
 /select/parts/コメント*
-/userdata/*
-/userdata/playlog.log
-/userdata/backup/data_*
-/select/background/slideshow/*
-/userdata/data_souki
-/userdata/data_test user
+/lua/userdata/*
+/lua/userdata/playlog.log
+/lua/userdata/backup/data_*
+/lua/slideshow/*
+!/lua/slideshow/pngとmp4を配置できます.txt
+/lua/userdata/data_souki
+/lua/userdata/data_test user
 /result/background/lamps/aeasy/三村かな子+[ドルチェ・クラシカ].png
 /result/background/lamps/easy/氏家むつみ[心躍るアドベンチャー].png
 /result/background/lamps/exhard/緒方智絵里＋[マイ・フェアリーテイル].png
@@ -22,5 +23,6 @@
 /result/background/ranks/e/美竹蘭+[ここにいる証].png
 /result/background/ranks/f/今井リサ+[努力の跡].png
 /lua/cache/music_data.lua
-/generated/custom_groove/groove_*
-/generated/custom_groove/id.txt
+/lua/generated/custom_groove/groove_*
+/lua/generated/custom_groove/id.txt
+/lua/generated/custom_groove/counter.txt

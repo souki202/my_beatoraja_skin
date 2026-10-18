@@ -3,6 +3,7 @@ require("modules.result2.commons")
 local main_state = require("main_state")
 local stagefile = require("modules.result2.stagefile")
 local scoreGraph = require("modules.result.score_graph")
+local customGroove = require("modules.commons.custom_groove")
 
 local groove = {
     didLoadPlayData = false,
@@ -204,29 +205,12 @@ groove.functions.load = function ()
 
     -- カスタムグルーヴゲージの読み込み
     if getIsViewCostomGrooveGauge() then
-        local f = io.open(skin_config.get_path("../generated/custom_groove/id.txt"), "r")
-        local id = ""
-        if f then
-            for line in f:lines() do
-                id = line
-            end
+        -- 0.8.9以降は画像を削除できないため, 読み込んだらIDを消去して次回以降に古い画像を表示しないようにする
+        local id = customGroove.takeImageId()
+        if id then
             print("カスタムグルーヴゲージ 画像ID: " .. id)
             skin.source = {
-                {id = 24, path = "../generated/custom_groove/groove_" .. id .. ".png"}
-            }
-
-            -- そのままだと画像が増殖していくのでカスタムグルーヴゲージの結果を削除
-            local isDeleted = false
-            skin.customTimers = {
-                {
-                    id = CUSTOM_TIMERS_RESULT2.DELETE_CUSTOM_GROOVE_GRAPH,
-                    timer = function ()
-                        if main_state.timer(2) > 0 and not isDeleted then
-                            isDeleted = true
-                            os.remove(skin_config.get_path("../generated/custom_groove/groove_" .. id .. ".png"))
-                        end
-                    end
-                }
+                {id = 24, path = customGroove.getImagePath(id)}
             }
         end
     end

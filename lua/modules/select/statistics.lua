@@ -1,5 +1,6 @@
 require("modules.commons.my_window")
 require("modules.commons.numbers")
+require("modules.commons.input")
 
 local commons = require("modules.select.commons")
 local main_state = require("main_state")
@@ -71,8 +72,8 @@ local statistics = {
     functions = {}
 }
 
-function openStatistics()
-    if isRightClicking() then
+function openStatistics(arg)
+    if isRightClickArg(arg) then
         switchMenu()
         return
     end
@@ -90,8 +91,8 @@ function closeStatistics()
     statistics.closeTime = statistics.ANIMATION_TIME * 1000
 end
 
-function closeStatisticsRightClickEvent()
-    if isRightClicking() == true then
+function closeStatisticsRightClickEvent(arg)
+    if isRightClickArg(arg) then
         closeStatistics()
     end
 end
@@ -117,9 +118,9 @@ end
 
 -- カスタムタイマ, カスタムアクション, textの後に配置すること
 statistics.functions.load = function(skin)
-    table.insert(skin.customEvents, {id = 1010, action = "openStatistics()"})
+    table.insert(skin.customEvents, {id = 1010, action = "openStatistics(...)"})
     table.insert(skin.customEvents, {id = 1011, action = "closeStatistics()"})
-    table.insert(skin.customEvents, {id = 1012, action = "closeStatisticsRightClickEvent()"})
+    table.insert(skin.customEvents, {id = 1012, action = "closeStatisticsRightClickEvent(...)"})
 
     -- 背景は閉じるボタン
     table.insert(skin.image, {

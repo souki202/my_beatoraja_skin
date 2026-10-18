@@ -61,7 +61,7 @@ end
 
 keyBeam.functions.load = function ()
     Sound.init()
-    KEY_BEAM.KEY_SE = skin_config.get_path("../sounds/key/*.wav")
+    KEY_BEAM.KEY_SE = skin_config.get_path("sounds/key/*.wav")
     KEY_BEAM.SE_VOLUME = getKeySEVolume()
     myPrint(KEY_BEAM.KEY_SE);
     myPrint(KEY_BEAM.SE_VOLUME);

@@ -213,18 +213,24 @@ songlist.functions.load = function ()
     -- 設定を上書き
     do
         -- 太い
-        local thickPath = skin_config.get_path("../select/parts/songlist/thick/*.png")
-        local luaPath = string.sub(thickPath, 1, string.len(thickPath) - 3) .. "lua"
-        local fp = io.open(luaPath, "r")
-        if fp ~= nil then
-            table.merge(SONG_LIST, dofile(luaPath))
+        -- beatoraja 0.8.9以降はio.openでluaディレクトリ外を開けないため, 存在確認せずdofileを試す
+        local function loadOverride(pngPath)
+            local luaPath = string.sub(pngPath, 1, string.len(pngPath) - 3) .. "lua"
+            local ok, result = pcall(dofile, luaPath)
+            if ok and type(result) == "table" then
+                return result
+            end
+            return nil
         end
 
-        local thinPath = skin_config.get_path("../select/parts/songlist/thin/*.png")
-        luaPath = string.sub(thinPath, 1, string.len(thinPath) - 3) .. "lua"
-        fp = io.open(luaPath, "r")
-        if fp ~= nil then
-            table.merge(SONG_LIST_THIN, dofile(luaPath))
+        local thickOverride = loadOverride(skin_config.get_path("../select/parts/songlist/thick/*.png"))
+        if thickOverride then
+            table.merge(SONG_LIST, thickOverride)
+        end
+
+        local thinOverride = loadOverride(skin_config.get_path("../select/parts/songlist/thin/*.png"))
+        if thinOverride then
+            table.merge(SONG_LIST_THIN, thinOverride)
         end
     end
 

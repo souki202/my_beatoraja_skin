@@ -3,8 +3,6 @@ require("modules.commons.input")
 require("modules.commons.sound")
 require("modules.commons.my_window")
 local main_state = require("main_state")
-local luajava = require("luajava")
-local input = luajava.bindClass("com.badlogic.gdx.Input")
 
 local NUM_36PX = {
     SRC = 0,
@@ -243,8 +241,8 @@ function obtainedTimer()
     -- 起動するアクション周り
     if resultObtained.activateTime == main_state.timer_off_value then
         if getElapsedTime() > 2000*1000
-            and (isTransitionByRight() and isKeyPressed(input.Keys.RIGHT)
-            or isTransitionByLeft() and isKeyPressed(input.Keys.LEFT)
+            and (isTransitionByRight() and isKeyPressed(KEY_CODE.RIGHT)
+            or isTransitionByLeft() and isKeyPressed(KEY_CODE.LEFT)
             or isTransitionByDecide() and main_state.timer(2) >= 0 and canGetDrops()) then
 
             resultObtained.activateTime = main_state.time()
@@ -301,8 +299,8 @@ resultObtained.functions.init = function()
 
     resultObtained.activateTime = main_state.timer_off_value
 
-    RANK.EXP_SE = skin_config.get_path("../sounds/expget.wav")
-    RANK.RANKUP_SE = skin_config.get_path("../sounds/rankup.wav")
+    RANK.EXP_SE = skin_config.get_path("sounds/expget.wav")
+    RANK.RANKUP_SE = skin_config.get_path("sounds/rankup.wav")
 end
 
 -- userdata更新後, image, value, text後に呼び出す

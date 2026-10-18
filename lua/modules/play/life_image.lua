@@ -1,9 +1,8 @@
 local main_state = require("main_state")
-local uuid = require("modules.commons.uuid")
 local commons = require("modules.play.commons")
 local image = require("modules.commons.image")
 local playlog = require("modules.commons.playlog")
-local luajava = require("luajava")
+local customGroove = require("modules.commons.custom_groove")
 
 local LIFE_IMAGE = {
     WIDTH = 630,
@@ -34,50 +33,40 @@ local function clamp(v, minValue, maxValue)
     return math.max(minValue, math.min(maxValue, v))
 end
 
-local function createArgb(color)
+local function getColorIndex(img, color)
     local a = color[4] or 1
     if a <= 1 then a = a * 255 end
-
-    local argb =
-        math.floor(clamp(a, 0, 255) + 0.5) * 16777216 +
-        math.floor(clamp(color[1], 0, 255) + 0.5) * 65536 +
-        math.floor(clamp(color[2], 0, 255) + 0.5) * 256 +
-        math.floor(clamp(color[3], 0, 255) + 0.5)
-
-    if argb >= 2147483648 then
-        argb = argb - 4294967296
-    end
-    return argb
+    return img:getColorIndex(
+        math.floor(clamp(color[1], 0, 255) + 0.5),
+        math.floor(clamp(color[2], 0, 255) + 0.5),
+        math.floor(clamp(color[3], 0, 255) + 0.5),
+        math.floor(clamp(a, 0, 255) + 0.5)
+    )
 end
 
-local function setPixel(img, x, y, argb)
-    x = math.floor(x + 0.5)
-    y = math.floor(y + 0.5)
-    if x < 0 or x >= LIFE_IMAGE.WIDTH or y < 0 or y >= LIFE_IMAGE.HEIGHT then
-        return
-    end
-    img:setRGB(x, y, argb)
+local function setPixel(img, x, y, colorIndex)
+    img:setPixel(math.floor(x + 0.5), math.floor(y + 0.5), colorIndex)
 end
 
-local function drawPoint(img, x, y, argb)
+local function drawPoint(img, x, y, colorIndex)
     local startY = -math.floor(LIFE_IMAGE.LINE_HEIGHT / 2)
     for dy = 0, LIFE_IMAGE.LINE_HEIGHT - 1 do
-        setPixel(img, x, y + startY + dy, argb)
+        setPixel(img, x, y + startY + dy, colorIndex)
     end
 end
 
-local function drawLine(img, x1, y1, x2, y2, argb)
+local function drawLine(img, x1, y1, x2, y2, colorIndex)
     local dx = x2 - x1
     local dy = y2 - y1
     local steps = math.ceil(math.max(math.abs(dx), math.abs(dy)))
     if steps <= 0 then
-        drawPoint(img, x1, y1, argb)
+        drawPoint(img, x1, y1, colorIndex)
         return
     end
 
     for step = 0, steps do
         local p = step / steps
-        drawPoint(img, x1 + dx * p, y1 + dy * p, argb)
+        drawPoint(img, x1 + dx * p, y1 + dy * p, colorIndex)
     end
 end
 
@@ -95,25 +84,12 @@ life.functions.output = function ()
         return
     end
 
-    -- 非同期で画像出力
-    local id = uuid()
-    local runnable = {
-        run = function ()
-            life.functions._output(id)
-        end
-    }
-    local runnableProxy = luajava.createProxy("java.lang.Runnable", runnable)
-    local t = luajava.newInstance("java.lang.Thread", runnableProxy)
-    t:start()
-
-    -- idを出力
-    local f = io.open(skin_config.get_path("../generated/custom_groove/id.txt"), "w")
-    if not f then
-        print("カスタムゲージの画像IDの出力に失敗しました")
-        return
+    -- 0.8.9以降はスレッドが使えないため同期で画像出力 (数百ms程度かかる)
+    local id = customGroove.nextImageId()
+    if life.functions._output(id) then
+        -- idを出力
+        customGroove.writeImageId(id)
     end
-    f:write(id)
-    f:close()
 end
 
 life.functions._output = function (id)
@@ -131,7 +107,7 @@ life.functions._output = function (id)
         print("total notes: " .. main_state.number(74))
         -- ゲージの種類ごとにPolyLineを引く (aeasy ~ exhardまで)
         for i = 1, 5 do
-            local argb = createArgb(LIFE_IMAGE.COLORS[i])
+            local colorIndex = getColorIndex(life.image, LIFE_IMAGE.COLORS[i])
             local prevX = nil
             local prevY = nil
             for j = 1, playlog.numOfOutputLogs() do
@@ -144,22 +120,25 @@ life.functions._output = function (id)
                 local x = j - 1
                 local y = top + range * (100 - v) / 100
                 if prevX then
-                    drawLine(life.image.img, prevX, prevY, x, y, argb)
+                    drawLine(life.image, prevX, prevY, x, y, colorIndex)
                 else
-                    drawPoint(life.image.img, x, y, argb)
+                    drawPoint(life.image, x, y, colorIndex)
                 end
                 prevX = x
                 prevY = y
             end
         end
 
-        life.image:outputImage(skin_config.get_path("../generated/custom_groove/groove_" .. id .. ".png"))
+        if not life.image:outputImage(skin_config.get_path(customGroove.getImagePath(id))) then
+            error("画像の書き込みに失敗しました")
+        end
         print("カスタムゲージの出力が完了しました")
     end)
     if not status then
         print("カスタムゲージの出力に失敗しました")
         print(r)
     end
+    return status
 end
 
 return life.functions

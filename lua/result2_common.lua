@@ -285,7 +285,7 @@ local function main()
         {id = 21, path = "../result2/parts/grooveside/labels.png"},
         {id = 22, path = "../result2/parts/grooveside/num.png"},
         {id = 23, path = "../result2/parts/groove/custom_gauge_bg.png"},
-        -- {id = 24, path = "../generated/custom_groove/groove.png"}, -- すこし処理があるのでgroove.luaで
+        -- {id = 24, path = "generated/custom_groove/groove_x.png"}, -- すこし処理があるのでgroove.luaで
 
         {id = 25, path = "../result2/parts/ranking/header/*.png"},
         {id = 26, path = "../result2/parts/ranking/shadow.png"},

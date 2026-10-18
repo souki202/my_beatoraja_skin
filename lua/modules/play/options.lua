@@ -229,7 +229,7 @@ options.filepath = {
     {name = "animation2", path = "../play/parts/bombs/animation2/*.png", def = "blank"},
     {name = "animation1(placeholder)", path = "../dummy/*"},
     {name = "サウンド全般--------------", path = "../dummy/*"},
-    {name = "キー押下時の音源", path = "../sounds/key/*.wav", def = "default"},
+    {name = "キー押下時の音源", path = "sounds/key/*.wav", def = "default"},
 }
 
 options.offset = {

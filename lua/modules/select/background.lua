@@ -1,6 +1,4 @@
-local luajava = require("luajava")
-local File = luajava.bindClass("java.io.File")
-
+local main_state = require("main_state")
 local commons = require("modules.select.commons")
 local bokeh = require("modules.commons.bokeh")
 
@@ -16,6 +14,7 @@ local background = {
 }
 
 local BACKGROUND = {
+    DIR_PATH = "slideshow/",
     SRC_START_ID = 200,
     INTERVAL = 15000,
     FADE_TIME = 500,
@@ -40,36 +39,48 @@ background.functions.load = function ()
     }
 
     if background.functions.isEnableSlideshow() then
-        local dir = luajava.new(File, skin_config.get_path("../select/background/slideshow/"))
-        local filelists = dir:listFiles()
+        -- beatoraja 0.8.9以降はLuaから参照できるのがluaディレクトリ配下のみなので, lua/slideshowに置いた画像を使う
+        local fileListText = ""
+        local ok, result = pcall(main_state.file_list, skin_config.get_path(BACKGROUND.DIR_PATH))
+        if ok and result then
+            fileListText = result
+        else
+            print("スライドショーのファイル一覧の取得に失敗しました: " .. tostring(result))
+        end
+        local filenames = {}
+        for filepath in string.gmatch(fileListText, "[^\n]+") do
+            local filename = string.match(filepath, "([^/]+)$")
+            if filename then
+                table.insert(filenames, filename)
+            end
+        end
+        table.sort(filenames)
         local allowExtList = {"png", "jpg", "gif", "cim", "tga", "bmp", "mp4", "mov"}
 
-        for i = 1, #filelists do
+        for i = 1, #filenames do
             -- 対象ファイル一覧を取得してsrcに入れる
-            if filelists[i]:isFile() then
-                local filename = filelists[i]:getName()
-                -- 末尾3文字を拡張子とする
-                local ext = string.sub(filename, string.len(filename) - 2)
+            local filename = filenames[i]
+            -- 末尾3文字を拡張子とする
+            local ext = string.lower(string.sub(filename, string.len(filename) - 2))
 
-                -- 対応拡張子ならスライドショーに登録
-                if table.has_value(allowExtList, ext) then
-                    local path = "../select/background/slideshow/" .. filename
-                    local srcId = BACKGROUND.SRC_START_ID + background.numOfFiles
-                    local imageId = background.createId(srcId)
-                    myPrint(imageId, srcId, path)
-                    table.insert(background.filelist, path)
-                    table.insert(background.imageIdList, imageId)
-                    table.insert(skin.source, {
-                        id = srcId,
-                        path = path
-                    })
-                    table.insert(skin.image, {
-                        id = imageId, src = srcId, x = 0, y = 0, w = -1, h = -1
-                    })
+            -- 対応拡張子ならスライドショーに登録
+            if table.has_value(allowExtList, ext) then
+                local path = BACKGROUND.DIR_PATH .. filename
+                local srcId = BACKGROUND.SRC_START_ID + background.numOfFiles
+                local imageId = background.createId(srcId)
+                myPrint(imageId, srcId, path)
+                table.insert(background.filelist, path)
+                table.insert(background.imageIdList, imageId)
+                table.insert(skin.source, {
+                    id = srcId,
+                    path = path
+                })
+                table.insert(skin.image, {
+                    id = imageId, src = srcId, x = 0, y = 0, w = -1, h = -1
+                })
 
-                    background.numOfFiles = background.numOfFiles + 1
-                    myPrint("add slide: " .. path)
-                end
+                background.numOfFiles = background.numOfFiles + 1
+                myPrint("add slide: " .. path)
             end
         end
 
