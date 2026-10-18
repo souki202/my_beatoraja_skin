@@ -2,6 +2,7 @@ require("modules.commons.define")
 require("modules.commons.deepcopy")
 local commons = require("modules.play.commons")
 local main_state = require("main_state")
+local compat = require("modules.commons.compat")
 
 local empty_data = {
     time = 0, -- micro sec
@@ -56,7 +57,8 @@ logger.functions.saveLog = function ()
     logger.didSave = true
     myPrint("プレイログ保存開始: " .. PLAY_LOG_PATH)
     local data = logger.outputData
-    local fp = io.open(PLAY_LOG_PATH, "w")
+    local fp = compat.openFile(PLAY_LOG_PATH, "w")
+    if not fp then print("プレイログを保存できません: " .. PLAY_LOG_PATH) return 0 end
     -- local str = "time, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, sumJudges, combo, notes, exscore, best, target, rangeTheoretical, rangeYou, rangeBest, rangeTarget\n"
     local str = "time, sumJudges, combo, notes, exscore, best, target, rangeTheoretical, rangeYou, rangeBest, rangeTarget\n"
     str = str .. logger.songLengthSec
@@ -90,7 +92,7 @@ logger.functions.saveLog = function ()
 end
 
 logger.functions.loadLog = function ()
-    local fp = io.open(PLAY_LOG_PATH, "r")
+    local fp = compat.openFile(PLAY_LOG_PATH, "r")
     myPrint("プレイデータ読み込み開始: " .. PLAY_LOG_PATH)
     if not fp then
         print("プレイデータの読み込みに失敗しました. " .. PLAY_LOG_PATH)
@@ -132,9 +134,8 @@ logger.functions.loadLog = function ()
     myPrint("プレイデータ読み込み完了")
 
     -- プレイスキンを変更したあとにグラフが出続けるのを防止
-    local fp2 = io.open(PLAY_LOG_PATH, "w")
-    fp2:write("")
-    fp2:close()
+    local fp2 = compat.openFile(PLAY_LOG_PATH, "w")
+    if fp2 then fp2:write("") fp2:close() end
     return dataArray
 end
 

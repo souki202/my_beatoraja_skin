@@ -481,9 +481,7 @@ local help = {
     functions = {},
 }
 
--- beatoraja 0.8.9以降はLuaからマウスの状態を取得できないため, 操作領域に透明なスライダーを置き,
--- そのスライダーの値(クリック/ドラッグ時のY座標)から操作を判定する.
--- ボタンを離したことは分からないので, 一定時間ドラッグが無ければ操作終了とみなす
+-- マウスAPIがある環境は実際の押下・解放を使う。ない環境のみスライダーで代替する。
 local operationState = {
     isClicking = false,
     startY = 0,
@@ -511,6 +509,14 @@ function itemListOperation(arg)
         else
             closeHelpList()
         end
+    elseif hasMouseInput() and help.hasOpened and not help.isOpenDescription then
+        local x, y = getMousePos()
+        operationState.isClicking = true
+        operationState.startY = HEIGHT - y
+        operationState.lastY = HEIGHT - y
+        operationState.lastX = x
+        operationState.numAbsMove = 0
+        operationState.dy = 0
     end
 end
 
@@ -579,6 +585,16 @@ end
 
 help.functions.updateOperationArea = function()
     if operationState.isClicking then
+        local mouseInput = hasMouseInput()
+        if mouseInput and isLeftClicking() then
+            local x, y = getMousePos()
+            y = HEIGHT - y
+            local dy = y - operationState.lastY
+            operationState.dy = operationState.dy + dy
+            operationState.numAbsMove = operationState.numAbsMove + math.abs(dy) + math.abs(x - operationState.lastX)
+            operationState.lastY = y
+            operationState.lastX = x
+        end
         -- スクロール (マウスを下に動かすと項目も下に動く)
         if operationState.dy ~= 0 then
             if operationState.totalY > help.ITEM.AREA.H then
@@ -587,7 +603,8 @@ help.functions.updateOperationArea = function()
             operationState.dy = 0
         end
 
-        if main_state.time() - operationState.lastTime > OPERATION.END_WAIT_TIME * 1000 then
+        if (mouseInput and not isLeftClicking()) or
+            (not mouseInput and main_state.time() - operationState.lastTime > OPERATION.END_WAIT_TIME * 1000) then
             operationState.isClicking = false
             if operationState.numAbsMove <= OPERATION.CLICK_MOVE_THRESHOLD then
                 -- メニューを選択する(あれば)
@@ -732,6 +749,8 @@ function openHelpList(arg)
 end
 
 function closeHelpList()
+    operationState.isClicking = false
+    operationState.dy = 0
     if help.isClosing == false and help.hasAllClosed == false and help.hasOpened == true then
         -- myPrint("ヘルプを閉じる")
         help.isOpening = false
@@ -825,10 +844,12 @@ help.functions.loadHelpItem = function(skin)
     if skin.slider == nil then
         skin.slider = {}
     end
-    table.insert(skin.slider, {
-        id = "helpOperationSlider", src = 999, x = 1, y = 0, w = 1, h = 1,
-        angle = 0, range = help.ITEM.AREA.H, value = helpOperationSliderValue, event = helpOperationSliderEvent
-    })
+    if not hasMouseInput() then
+        table.insert(skin.slider, {
+            id = "helpOperationSlider", src = 999, x = 1, y = 0, w = 1, h = 1,
+            angle = 0, range = help.ITEM.AREA.H, value = helpOperationSliderValue, event = helpOperationSliderEvent
+        })
+    end
 
     -- 各項目の背景
     table.insert(skin.image, {
@@ -917,13 +938,15 @@ help.functions.setWindowDestination = function(skin)
         }
     })
     -- スライダーはyからrangeの範囲でクリックを受け付ける
-    table.insert(skin.destination, {
-        id = "helpOperationSlider", timer = help.WINDOW_TIMER, loop = help.ANIMATION_TIME, dst = {
-            {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0, a = 0},
-            {time = help.ANIMATION_TIME - 1},
-            {time = help.ANIMATION_TIME, x = help.WND.X + help.ITEM.AREA.X, y = help.WND.Y + help.ITEM.AREA.Y, w = help.ITEM.AREA.W, h = 1}
-        }
-    })
+    if not hasMouseInput() then
+        table.insert(skin.destination, {
+            id = "helpOperationSlider", timer = help.WINDOW_TIMER, loop = help.ANIMATION_TIME, dst = {
+                {time = 0, x = WIDTH / 2, y = HEIGHT / 2, w = 0, h = 0, a = 0},
+                {time = help.ANIMATION_TIME - 1},
+                {time = help.ANIMATION_TIME, x = help.WND.X + help.ITEM.AREA.X, y = help.WND.Y + help.ITEM.AREA.Y, w = help.ITEM.AREA.W, h = 1}
+            }
+        })
+    end
 end
 
 -- 項目の上に乗せる出力

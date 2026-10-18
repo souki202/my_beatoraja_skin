@@ -589,7 +589,7 @@ local function main()
     table.insert(skin.customTimers, {id = statistics.getWindowTimerId(), timer = "statisticsTimer"}) -- 統計画面全体のタイマー
     table.insert(skin.customTimers, {id = volumes.getWindowTimerId(), timer = "volumesTimer"}) -- 音量設定画面全体のタイマー
     if isUseMusicDb() then
-        table.insert(skin.customTimers, {id = musicDetail.getHttpTimer(), timer = function () musicDetail.fetchMusicDetail() end})
+        table.insert(skin.customTimers, {id = musicDetail.getHttpTimer(), timer = function () return musicDetail.fetchMusicDetail() or 0 end})
     end
     table.insert(skin.customTimers, {id = 13000, timer = "update"})
     -- 13100はmenu

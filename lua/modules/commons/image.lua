@@ -8,6 +8,7 @@
 
 local band, bor, bxor, rshift = bit32.band, bit32.bor, bit32.bxor, bit32.rshift
 local unpack = table.unpack or unpack
+local compat = require("modules.commons.compat")
 
 local CRC_TABLE = {}
 for i = 0, 255 do
@@ -160,7 +161,7 @@ image.newInstance = function ()
                     .. chunk("IDAT", idat)
                     .. chunk("IEND", "")
 
-                local f = io.open(fileName, "wb")
+                local f = compat.openFile(fileName, "wb")
                 if f == nil then
                     error("ファイルを開けません")
                 end

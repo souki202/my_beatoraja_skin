@@ -1,4 +1,5 @@
 local main_state = require("main_state")
+local compat = require("modules.commons.compat")
 local commons = require("modules.select.commons")
 local bokeh = require("modules.commons.bokeh")
 
@@ -33,6 +34,9 @@ background.functions.isMovie = function ()
 end
 
 background.functions.load = function ()
+    background.numOfFiles = 0
+    background.filelist = {}
+    background.imageIdList = {}
     local skin = {
         source = {},
         image = {}
@@ -40,21 +44,13 @@ background.functions.load = function ()
 
     if background.functions.isEnableSlideshow() then
         -- beatoraja 0.8.9以降はLuaから参照できるのがluaディレクトリ配下のみなので, lua/slideshowに置いた画像を使う
-        local fileListText = ""
-        local ok, result = pcall(main_state.file_list, skin_config.get_path(BACKGROUND.DIR_PATH))
-        if ok and result then
-            fileListText = result
-        else
-            print("スライドショーのファイル一覧の取得に失敗しました: " .. tostring(result))
-        end
         local filenames = {}
-        for filepath in string.gmatch(fileListText, "[^\n]+") do
+        for _, filepath in ipairs(compat.listFiles(skin_config.get_path(BACKGROUND.DIR_PATH))) do
             local filename = string.match(filepath, "([^/]+)$")
             if filename then
                 table.insert(filenames, filename)
             end
         end
-        table.sort(filenames)
         local allowExtList = {"png", "jpg", "gif", "cim", "tga", "bmp", "mp4", "mov"}
 
         for i = 1, #filenames do

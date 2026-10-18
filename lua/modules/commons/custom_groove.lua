@@ -1,7 +1,7 @@
 --[[
     カスタムグルーヴゲージ画像のファイル管理
 
-    beatoraja 0.8.9以降はLuaからファイルを削除できず(os.remove不可), 書き込みもluaディレクトリ配下に限られるため,
+    削除APIがない初期0.8.9でも容量が増え続けないよう、全バージョン共通で
     lua/generated/custom_groove/ 以下の決まった数のファイル名を順番に上書きして使う.
     スキン画像はパスでキャッシュされるので, 同じファイル名を再び使うまでにキャッシュが破棄されるだけの数をローテーションする.
 
@@ -11,6 +11,7 @@
 ]]
 
 local customGroove = {}
+local compat = require("modules.commons.compat")
 
 local DIR_PATH = "generated/custom_groove/"
 local ID_PATH = DIR_PATH .. "id.txt"
@@ -18,7 +19,7 @@ local COUNTER_PATH = DIR_PATH .. "counter.txt"
 local NUM_OF_SLOTS = 60
 
 local function readFirstLine(path)
-    local f = io.open(skin_config.get_path(path), "r")
+    local f = compat.openFile(skin_config.get_path(path), "r")
     if f == nil then
         return nil
     end
@@ -28,7 +29,7 @@ local function readFirstLine(path)
 end
 
 local function writeText(path, text)
-    local f = io.open(skin_config.get_path(path), "w")
+    local f = compat.openFile(skin_config.get_path(path), "w")
     if f == nil then
         print("ファイルの書き込みに失敗しました: " .. path)
         return false
@@ -62,7 +63,7 @@ customGroove.takeImageId = function ()
     if id == nil or id == "" then
         return nil
     end
-    writeText(ID_PATH, "")
+    if not compat.deleteFile(skin_config.get_path(ID_PATH)) then writeText(ID_PATH, "") end
     return id
 end
 

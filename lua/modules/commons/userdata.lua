@@ -1,4 +1,5 @@
 local main_state = require("main_state")
+local compat = require("modules.commons.compat")
 
 -- expでのランクアップの境界は, exp >= tbl[rank]で比較すること
 userData = {
@@ -69,7 +70,7 @@ end
 
 -- ユーザデータIO周り
 userData.initData = function()
-    local f = io.open(userData.filePath, "w")
+    local f = compat.openFile(userData.filePath, "w")
     if f == nil then
         print("ユーザデータの新規作成に失敗しました: " .. userData.filePath)
         userData.isSuccessedInitial = false
@@ -87,12 +88,13 @@ userData.load = function()
     userData.tokens.dia = main_state.number(30)
     myPrint("コイン: " .. userData.tokens.coin, "ダイヤ: " .. userData.tokens.dia)
 
-    local f = io.open(userData.filePath, "r")
+    compat.copyLegacyFile(userData.filePath, skin_config.get_path("../userdata/data") .. "_" .. userData.escapedName)
+    local f = compat.openFile(userData.filePath, "r")
 
     -- ファイルがなければ新規作成
     if f == nil then
         userData.initData()
-        f = io.open(userData.filePath, "r")
+        f = compat.openFile(userData.filePath, "r")
     end
 
     if userData.isSuccessedInitial == false or f == nil then
@@ -122,6 +124,7 @@ userData.load = function()
         end
         cnt = cnt + 1
     end
+    f:close()
 
     userData.wasLoaded = true
 
@@ -170,12 +173,12 @@ userData.save = function()
         return
     end
 
-    local f = io.open(userData.filePath, "w")
-    userData.writeUserData(f)
-    f:close()
-    f = io.open(userData.backupPath, "w")
-    userData.writeUserData(f)
-    f:close()
+    local f = compat.openFile(userData.filePath, "w")
+    if f then userData.writeUserData(f) f:close()
+    else print("ユーザデータの保存に失敗しました: " .. userData.filePath) end
+    f = compat.openFile(userData.backupPath, "w")
+    if f then userData.writeUserData(f) f:close()
+    else print("ユーザデータのバックアップに失敗しました: " .. userData.backupPath) end
 
     print("統計情報保存処理終了")
 end

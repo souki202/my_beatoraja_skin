@@ -77,6 +77,10 @@ detail.functions.load = function ()
         },
         value = {
         },
+        customTimers = getIsUseMusicDatabase() and {{
+            id = musicDetail.getHttpTimer(),
+            timer = function () return musicDetail.fetchMusicDetailOnPlay() or 0 end,
+        }} or {},
         judgegraph = {
             {id = p .. "NotesGraph", noGap = 1, orderReverse = 0, type = 0, backTexOff = 1},
             {id = p .. "JudgesGraph", noGap = 1, orderReverse = 1, type = 1, backTexOff = 1},

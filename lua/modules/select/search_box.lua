@@ -27,7 +27,7 @@ searchBox.functions.load = function ()
             {id = "searchBox", src = 0, x = 773, y = PARTS_TEXTURE_SIZE - SEARCH_BOX.WND.H, w = SEARCH_BOX.WND.W, h = SEARCH_BOX.WND.H},
         },
         text = {
-            {id = "searchText", font = 0, size = SEARCH_BOX.TEXT.FONT_SIZE, ref = 30},
+            {id = "searchText", font = 0, size = SEARCH_BOX.TEXT.FONT_SIZE, ref = 30, editable = true},
         },
     }
 end

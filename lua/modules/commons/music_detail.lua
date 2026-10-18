@@ -1,5 +1,6 @@
 require("modules.commons.http")
 local main_state = require("main_state")
+local compat = require("modules.commons.compat")
 require("modules.select.commons")
 
 -- キャッシュファイル読み込みエラー対策でpcallできるようにする
@@ -49,11 +50,13 @@ musicDetail.functions.createCacheKey = function (title, md5)
 end
 
 musicDetail.functions.clearViewData = function ()
+    if musicDetail.getMusicDataObj then musicDetail.getMusicDataObj:cancel() end
     musicDetail.musicData = nil
     musicDetail.getMusicDataObj = nil
     musicDetail.tablesString = ""
     musicDetail.wasDrawed = false
     musicDetail.lastGetDataTitle = ""
+    musicDetail.requestKey = nil
     musicDetail.musicLink = ""
     musicDetail.event = {
         name = "",
@@ -364,10 +367,17 @@ musicDetail.functions._fetchMusicDetail = function (waitTime, time)
     local title = main_state.text(12)
     local md5 = main_state.text(MUSIC_DETAIL.SONG_HASH_MD5_TEXT_ID)
     local cacheKey = musicDetail.functions.createCacheKey(title, md5)
+    if musicDetail.requestKey ~= cacheKey then
+        musicDetail.functions.clearViewData()
+        musicDetail.requestKey = cacheKey
+    end
     if MUSIC_DATA_CACHE[cacheKey] ~= nil then
         if musicDetail.lastGetDataTitle ~= cacheKey then
             print("キャッシュがヒット: " .. cacheKey)
-            musicDetail.functions.clearViewData()
+            if musicDetail.getMusicDataObj then
+                musicDetail.getMusicDataObj:cancel()
+                musicDetail.getMusicDataObj = nil
+            end
             musicDetail.functions.updateMusicDetailData(MUSIC_DATA_CACHE[cacheKey], title, cacheKey)
         end
         return
@@ -386,7 +396,8 @@ musicDetail.functions._fetchMusicDetail = function (waitTime, time)
         musicDetail.getMusicDataObj = getMusicDataAsync(title, md5)
         musicDetail.getMusicDataObj:runHttpRequest(function (isSuccess, data)
             -- callback関数
-            if not isSuccess then
+            local currentKey = musicDetail.functions.createCacheKey(main_state.text(12), main_state.text(MUSIC_DETAIL.SONG_HASH_MD5_TEXT_ID))
+            if not isSuccess or musicDetail.requestKey ~= cacheKey or currentKey ~= cacheKey then
                 return
             end
 
@@ -395,16 +406,22 @@ musicDetail.functions._fetchMusicDetail = function (waitTime, time)
             musicDetail.functions.addCache(data, cacheKey)
         end)
     end
+    if musicDetail.getMusicDataObj then musicDetail.getMusicDataObj:update() end
+    return 0
 end
 
 musicDetail.functions.clearCache = function ()
     print("キャッシュクリア実行")
-    local f = io.open(skin_config.get_path(MUSIC_DETAIL.CACHE_PATH), "w")
+    local f = compat.openFile(skin_config.get_path(MUSIC_DETAIL.CACHE_PATH), "w")
     if f == nil then
         print("キャッシュファイルクリアでのファイルオープンに失敗しました")
+        MUSIC_DATA_CACHE = {}
+        return false
     end
     f:write("MUSIC_DATA_CACHE = {}\n")
     f:close()
+    MUSIC_DATA_CACHE = {}
+    return true
 end
 
 musicDetail.functions.createCacheString = function (data, parentKey)
@@ -432,9 +449,12 @@ musicDetail.functions.createCacheString = function (data, parentKey)
 end
 
 musicDetail.functions.escapeForLuaValue = function (str)
-    return string.gsub(tostring(str), '["\n]', function (c)
+    local escaped = string.gsub(tostring(str), "\\", "\\\\")
+    return string.gsub(escaped, '["\r\n\t]', function (c)
         if c == '"' then return '\\"'
         elseif c == "\n" then return "\\n"
+        elseif c == "\r" then return "\\r"
+        elseif c == "\t" then return "\\t"
         else return c
         end
     end)
@@ -442,16 +462,17 @@ end
 
 musicDetail.functions.addCache = function (data, localTitle)
     print()
-    local f = io.open(skin_config.get_path(MUSIC_DETAIL.CACHE_PATH), "a")
+    MUSIC_DATA_CACHE[localTitle] = data
+    local f = compat.openFile(skin_config.get_path(MUSIC_DETAIL.CACHE_PATH), "a")
     if f == nil then
         print("キャッシュファイルのオープンに失敗しました")
+        return false
     end
-    io.output(f)
     local cache = musicDetail.functions.createCacheString(data, "")
-    io.write(MUSIC_DETAIL.VAR_NAME .. '["' .. musicDetail.functions.escapeForLuaValue(localTitle) .. '"]=' .. cache .. "\n")
+    f:write(MUSIC_DETAIL.VAR_NAME .. '["' .. musicDetail.functions.escapeForLuaValue(localTitle) .. '"]=' .. cache .. "\n")
     print("add cache: " .. cache)
-    io.close(f)
-    MUSIC_DATA_CACHE[localTitle] = data
+    f:close()
+    return true
 end
 
 musicDetail.functions.loadPlay = function ()
@@ -459,7 +480,6 @@ musicDetail.functions.loadPlay = function ()
     if not wasSuccessLoadCache or MUSIC_DATA_CACHE == nil then
         print("キャッシュ読み込み失敗 キャッシュクリア実行")
         musicDetail.functions.clearCache()
-        cacheRequire()
     end
     musicDetail.functions.initManbowEvent()
     return {}
@@ -470,7 +490,6 @@ musicDetail.functions.loadSelect = function ()
     if not wasSuccessLoadCache or MUSIC_DATA_CACHE == nil then
         print("キャッシュ読み込み失敗 キャッシュクリア実行")
         musicDetail.functions.clearCache()
-        cacheRequire()
     end
     musicDetail.functions.initManbowEvent()
     return {}
