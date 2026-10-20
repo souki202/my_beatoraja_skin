@@ -4,6 +4,7 @@ local desktop = {}
 local legacyDesktop
 
 local function getLegacyDesktop()
+    if main_state.file_mkdir then return nil end -- 制限付きAPIの環境でJavaへ迂回しない
     if legacyDesktop == nil then
         local Desktop = compat.javaClass("java.awt.Desktop")
         local ok, value = pcall(function ()

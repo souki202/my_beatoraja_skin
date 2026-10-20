@@ -11,6 +11,8 @@ local function cacheRequire()
     estimate.table = require("cache.estimates")
 end
 
+local updateJob
+
 local ESTIMATE = {
     GET_WAIT_TIME = 1000,
     CACHE_PATH = "cache/estimates.lua",
@@ -21,9 +23,19 @@ local ESTIMATE = {
     難易度推定一覧を取得する. 通常, 起動時に1回だけ実行する
 ]]
 estimate.functions.updateEstimates = function()
-    local success, _ = pcall(function() updateEstimateLua(ESTIMATE.CACHE_PATH) end)
-    if not success then
-        print("難易度推定テーブルの更新に失敗しました")
+    if updateJob then updateJob:cancel() end
+    updateJob = updateEstimateLuaAsync(ESTIMATE.CACHE_PATH, function (success)
+        if success then
+            package.loaded["cache.estimates"] = nil
+            estimate.functions.loadCache()
+        end
+    end)
+end
+
+estimate.functions.pollUpdate = function()
+    if updateJob then
+        updateJob:update()
+        if not updateJob.isConnecting then updateJob = nil end
     end
 end
 

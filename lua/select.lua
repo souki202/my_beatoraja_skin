@@ -28,6 +28,8 @@ local difficultyEstimates = require("modules.commons.difficulty_estimates")
 local main_state = require("main_state")
 
 local existNewVersion = false
+local versionRequest
+local versionNoticeTime
 
 local PARTS_TEXTURE_SIZE = 2048
 
@@ -545,18 +547,21 @@ local function main()
     globalInitialize(skin)
     opening.init()
 
-    -- バージョンチェック
+    -- 起動時はキャッシュを表示し、HTTPは通常更新から完了を受け取る。
+    if versionRequest then versionRequest:cancel() end
+    versionRequest = nil
+    existNewVersion = false
+    versionNoticeTime = nil
+    difficultyEstimates.loadCache()
     if isCheckNewVersion() then
-        local isNews = skinVersionCheck({SKIN_INFO.SELECT_VRESION, SKIN_INFO.RESULT_VERSION, SKIN_INFO.DECIDE_VERSION, SKIN_INFO.PLAY_VERSION, SKIN_INFO.RESULT2_VERSION})
-        existNewVersion = false
-        for i = 1, #isNews do
-            existNewVersion = existNewVersion or isNews[i]
-        end
-        userData.updateNextVersionCheckDate()
-        -- 難易度推定更新
+        versionRequest = skinVersionCheckAsync({SKIN_INFO.SELECT_VRESION, SKIN_INFO.RESULT_VERSION, SKIN_INFO.DECIDE_VERSION, SKIN_INFO.PLAY_VERSION, SKIN_INFO.RESULT2_VERSION}, function (success, isNews)
+            if success then
+                for _, isNew in ipairs(isNews) do existNewVersion = existNewVersion or isNew end
+                userData.updateNextVersionCheckDate()
+            end
+        end)
         difficultyEstimates.updateEstimates()
     end
-    difficultyEstimates.loadCache()
 
     skin.source = {
         {id = 1, path = "../select/background/*.png"},
@@ -580,7 +585,16 @@ local function main()
     -- 10000, 10001はタイマ周り
     table.insert(skin.customTimers, {id = 10003, timer = "updateStamina"})
     table.insert(skin.customTimers, {id = 10006, timer = "updateStaminaGauge"}) -- スタミナゲージ表示用タイマー
-    table.insert(skin.customTimers, {id = 10008, timer = "newVersionAnimation"}) -- 新バージョンがある時の文字表示用
+    table.insert(skin.customTimers, {id = 10008, timer = function ()
+        if versionRequest then
+            versionRequest:update()
+            if not versionRequest.isConnecting then versionRequest = nil end
+        end
+        difficultyEstimates.pollUpdate()
+        if not existNewVersion then return main_state.timer_off_value end
+        if not versionNoticeTime then versionNoticeTime = main_state.time() end
+        return versionNoticeTime
+    end}) -- 非同期更新と新バージョン通知
     table.insert(skin.customTimers, {id = 10009, timer = "helpTimer"}) -- ヘルプ画面全体のタイマー
     table.insert(skin.customTimers, {id = 12000, timer = "keyInput"})
     for i = 1, 490 do
@@ -1214,8 +1228,7 @@ local function main()
     end
 
     -- 新バージョン通知
-    if existNewVersion then
-    -- if true then
+    do -- 通信完了後にタイマーをONにできるよう、通知の描画先は先に作る
         local dst = {
             {time = 0, x = NEW_VERSION_MSG.WND.START_X, y = NEW_VERSION_MSG.WND.Y, w = NEW_VERSION_MSG.WND.W, h = NEW_VERSION_MSG.WND.H, acc = 2},
             {time = 2000},

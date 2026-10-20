@@ -51,7 +51,7 @@ local STAGE_FILE = {
             W = 25,
             H = 25,
         },
-        LIST_ICON = {
+        BMS_SEARCH_ICON = {
             X = function (self) return self.X + (4 + 29) end,
             Y = function (self) return self.Y + 2 end,
             W = 25,
@@ -91,6 +91,16 @@ local STAGE_FILE = {
     }
 }
 
+-- 選択中の譜面から取得し、楽曲情報DBのキャッシュには依存しない。
+local function getBmsSearchUrl()
+    if not main_state.option(2) then return "" end
+    local sha256 = main_state.text(1031)
+    if type(sha256) ~= "string" or #sha256 ~= 64 or not sha256:match("^%x+$") then
+        return ""
+    end
+    return "https://bmssearch.net/patterns/" .. sha256:lower()
+end
+
 stagefile.functions.load = function ()
     STAGE_FILE.MASK.FADEOUT_START = getStageFileMaskFadeOutStartTime()
     STAGE_FILE.MASK.FADEOUT_END = math.max(STAGE_FILE.MASK.FADEOUT_START, getStageFileMaskFadeOutEndTime())
@@ -102,15 +112,15 @@ stagefile.functions.load = function ()
             {id = "stageFileMask", src = 20, x = 0, y = 0, w = -1, h = -1},
             {
                 id = "openEventIcon", src = 0, x = 1408, y = PARTS_TEXTURE_SIZE - STAGE_FILE.EVENT.OPEN_ICON.H, w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H,
-                act = function () desktop.openUrlByBrowser(musicDetail.getEventData().musicList) end
+                act = function () desktop.openUrlByBrowser(musicDetail.getEventData().url) end
             },
             {
                 id = "openMusicLinkIcon", src = 0, x = 1433, y = PARTS_TEXTURE_SIZE - STAGE_FILE.MUSIC_ICON.H, w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H,
                 act = function () desktop.openUrlByBrowser(musicDetail.getMusicLink()) end
             },
             {
-                id = "openEventSpecialPageIcon", src = 0, x = 1483, y = PARTS_TEXTURE_SIZE - STAGE_FILE.EVENT.LIST_ICON.H, w = STAGE_FILE.EVENT.LIST_ICON.W, h = STAGE_FILE.EVENT.LIST_ICON.H,
-                act = function () desktop.openUrlByBrowser(musicDetail.getEventData().url) end
+                id = "openBmsSearchIcon", src = 0, x = 1483, y = PARTS_TEXTURE_SIZE - STAGE_FILE.EVENT.BMS_SEARCH_ICON.H, w = STAGE_FILE.EVENT.BMS_SEARCH_ICON.W, h = STAGE_FILE.EVENT.BMS_SEARCH_ICON.H,
+                act = function () desktop.openUrlByBrowser(getBmsSearchUrl()) end
             },
             {id = "openReadmeIcon", src = 0, x = 1458, y = PARTS_TEXTURE_SIZE - STAGE_FILE.README_ICON.H, w = STAGE_FILE.README_ICON.W, h = STAGE_FILE.README_ICON.H, act = 17},
             -- estimate
@@ -237,23 +247,23 @@ stagefile.functions.dst = function ()
             },
             -- イベントブラウザで開くアイコン
             {
-                id = "openEventIcon", draw = function () return desktop.canOpenUrl() and musicDetail.getEventData().musicList ~= "" and main_state.option(2) end, dst = {
+                id = "openEventIcon", draw = function () return desktop.canOpenUrl() and musicDetail.getEventData().url ~= "" and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.EVENT.OPEN_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.OPEN_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H}
                 }
             },
             {
-                id = "openEventIcon", draw = function () return (not desktop.canOpenUrl() or musicDetail.getEventData().musicList == "") and main_state.option(2) end, dst = {
+                id = "openEventIcon", draw = function () return (not desktop.canOpenUrl() or musicDetail.getEventData().url == "") and main_state.option(2) end, dst = {
                     {x = STAGE_FILE.EVENT.OPEN_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.OPEN_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.OPEN_ICON.W, h = STAGE_FILE.EVENT.OPEN_ICON.H, a = 96}
                 }
             },
             {
-                id = "openEventSpecialPageIcon", draw = function () return desktop.canOpenUrl() and musicDetail.getEventData().url ~= "" and main_state.option(2) end, dst = {
-                    {x = STAGE_FILE.EVENT.LIST_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.LIST_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.LIST_ICON.W, h = STAGE_FILE.EVENT.LIST_ICON.H}
+                id = "openBmsSearchIcon", draw = function () return desktop.canOpenUrl() and getBmsSearchUrl() ~= "" and main_state.option(2) end, dst = {
+                    {x = STAGE_FILE.EVENT.BMS_SEARCH_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.BMS_SEARCH_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.BMS_SEARCH_ICON.W, h = STAGE_FILE.EVENT.BMS_SEARCH_ICON.H}
                 }
             },
             {
-                id = "openEventSpecialPageIcon", draw = function () return (not desktop.canOpenUrl() or musicDetail.getEventData().url == "") and main_state.option(2) end, dst = {
-                    {x = STAGE_FILE.EVENT.LIST_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.LIST_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.LIST_ICON.W, h = STAGE_FILE.EVENT.LIST_ICON.H, a = 96}
+                id = "openBmsSearchIcon", draw = function () return (not desktop.canOpenUrl() or getBmsSearchUrl() == "") and main_state.option(2) end, dst = {
+                    {x = STAGE_FILE.EVENT.BMS_SEARCH_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.BMS_SEARCH_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.BMS_SEARCH_ICON.W, h = STAGE_FILE.EVENT.BMS_SEARCH_ICON.H, a = 96}
                 }
             },
             -- 楽曲ブラウザで開くアイコン
