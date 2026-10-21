@@ -52,14 +52,14 @@ local STAGE_FILE = {
             H = 25,
         },
         BMS_SEARCH_ICON = {
-            X = function (self) return self.X + (4 + 29) end,
+            X = function (self) return self.X + (self.W - 29) end,
             Y = function (self) return self.Y + 2 end,
             W = 25,
             H = 25,
         }
     },
     MUSIC_ICON = {
-        X = function (self) return self.X + (self.W - 29) end,
+        X = function (self) return self.X + (4 + 29) end,
         Y = function (self) return self.Y + 2 end,
         W = 25,
         H = 25,
@@ -116,7 +116,7 @@ stagefile.functions.load = function ()
             },
             {
                 id = "openMusicLinkIcon", src = 0, x = 1433, y = PARTS_TEXTURE_SIZE - STAGE_FILE.MUSIC_ICON.H, w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H,
-                act = function () desktop.openUrlByBrowser(musicDetail.getMusicLink()) end
+                act = 213 -- 本体の楽曲URL・差分URLを開く（URL未登録なら何もしない）
             },
             {
                 id = "openBmsSearchIcon", src = 0, x = 1483, y = PARTS_TEXTURE_SIZE - STAGE_FILE.EVENT.BMS_SEARCH_ICON.H, w = STAGE_FILE.EVENT.BMS_SEARCH_ICON.W, h = STAGE_FILE.EVENT.BMS_SEARCH_ICON.H,
@@ -266,15 +266,10 @@ stagefile.functions.dst = function ()
                     {x = STAGE_FILE.EVENT.BMS_SEARCH_ICON.X(STAGE_FILE), y = STAGE_FILE.EVENT.BMS_SEARCH_ICON.Y(STAGE_FILE), w = STAGE_FILE.EVENT.BMS_SEARCH_ICON.W, h = STAGE_FILE.EVENT.BMS_SEARCH_ICON.H, a = 96}
                 }
             },
-            -- 楽曲ブラウザで開くアイコン
+            -- 楽曲URLは本体イベント213で開く。URLの有無はLuaに公開されていない。
             {
-                id = "openMusicLinkIcon", draw = function () return desktop.canOpenUrl() and musicDetail.getMusicLink() ~= "" and main_state.option(2) end, dst = {
+                id = "openMusicLinkIcon", op = {2}, dst = {
                     {x = STAGE_FILE.MUSIC_ICON.X(STAGE_FILE), y = STAGE_FILE.MUSIC_ICON.Y(STAGE_FILE), w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H}
-                }
-            },
-            {
-                id = "openMusicLinkIcon", draw = function () return (not desktop.canOpenUrl() or musicDetail.getMusicLink() == "") and main_state.option(2) end, dst = {
-                    {x = STAGE_FILE.MUSIC_ICON.X(STAGE_FILE), y = STAGE_FILE.MUSIC_ICON.Y(STAGE_FILE), w = STAGE_FILE.MUSIC_ICON.W, h = STAGE_FILE.MUSIC_ICON.H, a = 96}
                 }
             },
             -- readtext

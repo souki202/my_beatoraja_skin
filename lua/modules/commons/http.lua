@@ -1,6 +1,5 @@
 local http = require("modules.commons.http_request")
 local compat = require("modules.commons.compat")
-require("modules.commons.url_encoder")
 
 -- バージョン確認も通常更新から完了を受け取る。
 function skinVersionCheckAsync(nowVersions, callback)
@@ -19,76 +18,6 @@ function skinVersionCheckAsync(nowVersions, callback)
         if not success then print("スキンのバージョンチェックに失敗しました: " .. tostring(err)) end
         callback(success, isNews)
     end)
-    return request
-end
-
-local function parseMusicData(musicDataLines)
-    if DEBUG == true then
-        for key, value in ipairs(musicDataLines) do
-            print(value)
-        end
-    end
-    local result = {}
-
-    local getInsertTargetTable = function (keyArray)
-        local nowDict = result
-        for i, key in ipairs(keyArray) do
-            if i >= #keyArray then
-                return nowDict
-            end
-            if isNumber(key) then
-                key = tonumber(key)
-            end
-            -- 該当のキーがなければ作る
-            if not table.in_key(nowDict, key) then
-                nowDict[key] = {}
-            end
-            nowDict = nowDict[key]
-        end
-        return nowDict
-    end
-
-    for _, line in ipairs(musicDataLines) do
-        local separatePos = string.find(line, " ")
-        local key = string.sub(line, 1, separatePos - 1)
-        local value = string.sub(line, separatePos + 1)
-        local keyArray = string.split(key, ".")
-        local t = getInsertTargetTable(keyArray)
-
-        local k = keyArray[#keyArray]
-        if isNumber(k) then k = tonumber(k) end
-        t[k] = string.gsub(value, "(\\n)", "\n")
-    end
-
-    -- デバッグ出力
-    if DEBUG == true then
-        print(result)
-        for key, value in pairs(result) do
-            print(key, value)
-        end
-        -- print ("難易度表数: " .. #result.tables)
-    end
-    return result
-end
-
-
--- 楽曲の解析とcallbackはJavaワーカーではなく通常更新中に行う。
-function getMusicDataAsync(title, md5)
-    local url = "https://bmsapi.tori-blog.net/?title=" .. URLEncoder.encode(title) .. "&format=lua&v=2"
-    if md5 ~= nil and md5 ~= "" then url = url .. "&md5=" .. URLEncoder.encode(md5) end
-    local request = http.get(url, 1000, 4 * 1024 * 1024)
-    local run = request.runHttpRequest
-    function request:runHttpRequest(callback)
-        run(self, function (success, lines, err)
-            if success then
-                local ok, data = pcall(parseMusicData, lines)
-                self.wasSuccess = ok
-                self.data = ok and data or {}
-                if ok then self.error = nil else self.error = data end
-            end
-            if callback then callback(self.wasSuccess, self.data, self.error) end
-        end)
-    end
     return request
 end
 

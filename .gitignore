@@ -26,3 +26,6 @@
 /lua/generated/custom_groove/groove_*
 /lua/generated/custom_groove/id.txt
 /lua/generated/custom_groove/counter.txt
+
+/lua/cache/bmssearch/
+/_sources/*
